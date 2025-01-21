@@ -8,6 +8,7 @@ in
   pkgs.mkShell {
     nativeBuildInputs = with pkgs; [
       viddy # fancy watch
+            redis
     ];
     shellHook = ''
     '';
