@@ -1,3 +1,5 @@
+# keygen
+ssh-keygen -t ed25519 -C "email"
 
 # REDIS SETUP https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-linux/
 sudo apt-get install -y lsb-release curl gpg
@@ -32,6 +34,7 @@ snap install gitea
 # Open port 3000 to YOUR IP ONLY
 #
 # config gitea
+# add ssh key to user acct
 vim /var/snap/gitea/common/conf/app.ini
 # START_SSH_SERVER = true
 # SSH_PORT = 2222
