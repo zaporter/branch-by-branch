@@ -1,5 +1,5 @@
 default:
 	@just --list
 
-test:
-	@echo "test"
+fmt:
+    gofmt -s -w .

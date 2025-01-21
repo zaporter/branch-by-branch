@@ -2,8 +2,6 @@ package main
 
 type Goal string
 
-const ()
-
 type Action string
 
 const (
@@ -32,8 +30,8 @@ type (
 
 	Node struct {
 		ID string
-        // Branches are read-only after creation
-        // So read-only nodes can share a branch
+		// Branches are read-only after creation
+		// So read-only nodes can share a branch
 		GitBranch string
 	}
 	PerformedAction struct {
