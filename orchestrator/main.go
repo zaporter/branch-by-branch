@@ -21,7 +21,7 @@ func main() {
 		Usage: "orchestrator for branch-by-branch",
 		Commands: []*cli.Command{
 			createPlaygroundCli(),
-			createInferenceCli(),
+			createRouterCli(),
 		},
 	}
 	if err := cmd.Run(ctx, os.Args); err != nil {
