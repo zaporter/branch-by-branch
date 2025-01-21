@@ -3,6 +3,7 @@ module github.com/zaporter/branch-by-branch
 go 1.23.3
 
 require (
+	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/rs/zerolog v1.33.0
 	github.com/urfave/cli/v3 v3.0.0-beta1
