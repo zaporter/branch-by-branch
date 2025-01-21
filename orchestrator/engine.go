@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// Engine is a safe task-execution tool for distributing tasks through redis.
+// Engine is a safe task-execution tool for distributing work through redis.
 // It uses 3 queues:
 // - {job}:tasks - tasks to be picked up by workers
 //   - Writer: orchestrator
@@ -57,7 +57,7 @@ type QueuedTask struct {
 }
 
 type Engine struct {
-	job string
+	job EngineJobName
 
 	rdb    *redis.Client
 	logger *zerolog.Logger
@@ -80,6 +80,13 @@ type Engine struct {
 	statsMu sync.Mutex
 	stats   []EngineStatEvent
 }
+type EngineJobName string
+
+const (
+	EngineJobNameTest        EngineJobName = "test-engine"
+	EngineJobNameInference   EngineJobName = "inference-engine"
+	EngineJobNameCompilation EngineJobName = "compilation-engine"
+)
 
 type SchedulingParams struct {
 	MinTaskQueueSize int
@@ -89,16 +96,20 @@ type SchedulingParams struct {
 
 	// try to keep all of these an order of magnitude
 	// or so less than it takes to process a task.
-	camShaftInterval   time.Duration
-	crankShaftInterval time.Duration
-	timingBeltInterval time.Duration
-	odbInterval        time.Duration
+	CamShaftInterval   time.Duration
+	CrankShaftInterval time.Duration
+	TimingBeltInterval time.Duration
+	ODBInterval        time.Duration
+
+	InputChanSize int
+	// Even for large numbers, this will still block reading from the input if the consumer is not reading fast enough.
+	OutputChanSize int
 }
 
-func NewEngine(ctx context.Context, job string, rdb *redis.Client, schedulingParams SchedulingParams) *Engine {
+func NewEngine(ctx context.Context, job EngineJobName, rdb *redis.Client, schedulingParams SchedulingParams) *Engine {
 	logger := zerolog.Ctx(ctx)
 	logger.UpdateContext(func(c zerolog.Context) zerolog.Context {
-		return c.Str("job", job)
+		return c.Str("job", string(job))
 	})
 
 	return &Engine{
@@ -107,8 +118,8 @@ func NewEngine(ctx context.Context, job string, rdb *redis.Client, schedulingPar
 		logger:           logger,
 		wg:               &sync.WaitGroup{},
 		shouldStopChan:   make(chan bool),
-		taskInput:        make(chan EngineTaskMsg),
-		taskOutput:       make(chan EngineTaskResultMsg),
+		taskInput:        make(chan EngineTaskMsg, schedulingParams.InputChanSize),
+		taskOutput:       make(chan EngineTaskResultMsg, schedulingParams.OutputChanSize),
 		queuedTasksMu:    sync.Mutex{},
 		queuedTasks:      make(map[EngineTaskID]QueuedTask),
 		schedulingParams: schedulingParams,
@@ -182,7 +193,7 @@ func (e *Engine) setupLoggerAndCtxForComponent(component string) (context.Contex
 // the camshaft handles the tasks chan -> tasks queue.
 func (e *Engine) createCamshaft() {
 	defer e.wg.Done()
-	ticker := time.NewTicker(e.schedulingParams.camShaftInterval)
+	ticker := time.NewTicker(e.schedulingParams.CamShaftInterval)
 	ctx, cancel, logger := e.setupLoggerAndCtxForComponent("camshaft")
 	defer cancel()
 	for {
@@ -296,7 +307,7 @@ func (e *Engine) createCamshaft() {
 // the crank shaft handles the results queue -> results chan.
 func (e *Engine) createCrankshaft() {
 	defer e.wg.Done()
-	ticker := time.NewTicker(e.schedulingParams.crankShaftInterval)
+	ticker := time.NewTicker(e.schedulingParams.CrankShaftInterval)
 	ctx, cancel, logger := e.setupLoggerAndCtxForComponent("crankshaft")
 	defer cancel()
 	for {
@@ -352,9 +363,9 @@ func (e *Engine) createCrankshaft() {
 					})
 				} else {
 					logger.Warn().Msgf("Found result for task that has no processing start time: %+v. This likely means the timing belt is not running fast enough", result)
-					logger.Warn().Msgf("Timing belt interval: %s. This will mess with the stats.", e.schedulingParams.timingBeltInterval)
+					logger.Warn().Msgf("Timing belt interval: %s. This will mess with the stats.", e.schedulingParams.TimingBeltInterval)
 					e.recordStatEvent(EngineStatEvent{
-						taskFinishedInTime: e.schedulingParams.timingBeltInterval,
+						taskFinishedInTime: e.schedulingParams.TimingBeltInterval,
 					})
 				}
 				delete(e.queuedTasks, result.ID)
@@ -378,11 +389,11 @@ func (e *Engine) createCrankshaft() {
 }
 
 // the timing belt runs the processing queue -> updating queuedTasks goroutine
-// these jobs are then requeued in the crank shaft.
+// these jobs are then requeued in the cam shaft.
 // (the engine analogy doesn't work very well with this one... open to advice).
 func (e *Engine) createTimingBelt() {
 	defer e.wg.Done()
-	ticker := time.NewTicker(e.schedulingParams.timingBeltInterval)
+	ticker := time.NewTicker(e.schedulingParams.TimingBeltInterval)
 	ctx, cancel, logger := e.setupLoggerAndCtxForComponent("timing belt")
 	defer cancel()
 	for {
@@ -452,7 +463,7 @@ func (e *Engine) createTimingBelt() {
 // the odb emits stats to the logger.
 func (e *Engine) createOBD() {
 	defer e.wg.Done()
-	ticker := time.NewTicker(e.schedulingParams.odbInterval)
+	ticker := time.NewTicker(e.schedulingParams.ODBInterval)
 	_, cancel, logger := e.setupLoggerAndCtxForComponent("odb")
 	defer cancel()
 	for {

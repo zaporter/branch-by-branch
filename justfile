@@ -3,3 +3,5 @@ default:
 
 fmt:
     gofmt -s -w .
+
+push-code:

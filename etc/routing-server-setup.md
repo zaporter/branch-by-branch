@@ -39,3 +39,12 @@ vim /var/snap/gitea/common/conf/app.ini
 # START_SSH_SERVER = true
 # SSH_PORT = 2222
 #
+
+
+# TODO: right now, these are on the SSD. 
+# consider moving them to shared storage.
+#
+# dirs for model sharing
+mkdir -p /share/models
+mkdir -p /share/adapters
+mkdir -p /share/repo

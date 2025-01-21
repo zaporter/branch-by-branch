@@ -26,6 +26,10 @@ var AllRouterKeys = []RedisKey{
 	RedisInferenceAdapterDir,
 }
 
+func setRouterParam(ctx context.Context, rdb *redis.Client, key RedisKey, val string) error {
+	return rdb.Set(ctx, string(key), val, 0).Err()
+}
+
 func createRouterParamsCli() *cli.Command {
 	set := false
 	read := false
