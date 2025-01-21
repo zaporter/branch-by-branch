@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -eu
+
+redis-cli -h $REDIS_ADDRESS -p $REDIS_PORT -a $REDIS_PASSWORD
