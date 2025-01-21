@@ -5,9 +5,10 @@ set -euxo pipefail
 
 source ./secrets/router-params.sh
 
-rsync -zv \
+rsync -zrv \
     --info=progress2 \
     -e "ssh -i $ROUTER_SSH_KEY" \
+    --delete \
     --exclude=.git \
     --exclude=.direnv \
     . \
