@@ -41,10 +41,10 @@ vim /var/snap/gitea/common/conf/app.ini
 #
 
 
-# TODO: right now, these are on the SSD. 
-# consider moving them to shared storage.
-#
 # dirs for model sharing
+# setup link to volume (you almost certainly want to host this on a resizable volume instead of the ssd)
+ln -s /mnt/HC_Volume_* /share
 mkdir -p /share/models
 mkdir -p /share/adapters
 mkdir -p /share/repo
+
