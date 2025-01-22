@@ -4,4 +4,6 @@ default:
 fmt:
     gofmt -s -w .
 
-push-code:
+dl-model model:
+    mkdir -p ./models/{{model}}
+    huggingface-cli download {{model}} --local-dir ./models/{{model}}

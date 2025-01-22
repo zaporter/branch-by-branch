@@ -8,7 +8,8 @@ in
   pkgs.mkShell {
     nativeBuildInputs = with pkgs; [
       viddy # fancy watch
-            redis
+      redis
+      python310Packages.huggingface-hub
     ];
     shellHook = ''
     '';
