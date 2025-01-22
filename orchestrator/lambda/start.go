@@ -11,6 +11,10 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// TODO:
+// local: ./scripts/router/push-to-lambda.sh {ip}
+//
+//	./scripts/lambda-link-cache.sh && ./inference/run_inference.sh
 func startInferenceOnLambda(instance string, numTries int, version string) error {
 	t := time.NewTicker(8 * time.Second)
 	for i := range numTries {

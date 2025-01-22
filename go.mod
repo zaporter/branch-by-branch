@@ -3,6 +3,7 @@ module github.com/zaporter/branch-by-branch
 go 1.23.3
 
 require (
+	github.com/go-xmlfmt/xmlfmt v1.1.3
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/melbahja/goph v1.4.0
 	github.com/redis/go-redis/v9 v9.7.0

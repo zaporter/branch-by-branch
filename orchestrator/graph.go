@@ -2,14 +2,11 @@ package main
 
 type Goal string
 
-type Action string
-
-const (
-	ActionHelp          Action = "help"
-	ActionGitPush       Action = "git push"
-	ActionRewriteFile   Action = "rewrite"
-	ActionCommitAndPush Action = "git commit+push"
-)
+// IDEA:
+// I suggest that instead of having one large graph (like sudoku),
+// that I should lean into smaller graphs (the odds of state-equivalence are much lower)
+// This means that the graph can more clearly branch off from some commit.
+// Then we generate a tree from there
 
 type (
 	TaskList struct {
