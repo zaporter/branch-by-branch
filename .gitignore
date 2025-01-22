@@ -2,3 +2,4 @@ secrets
 .env
 .direnv
 models
+inference/env
