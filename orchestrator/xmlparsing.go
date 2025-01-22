@@ -7,14 +7,19 @@ import (
 	"github.com/go-xmlfmt/xmlfmt"
 )
 
+type XMLThought struct {
+	XMLName xml.Name `xml:"think"`
+	Text    string   `xml:",innerxml"`
+}
+
 // Action is an interface that all actions must implement
 type XMLAction interface {
 	GetType() string
 }
 
 type XMLActions struct {
-	XMLName xml.Name    `xml:"acti"`
-	Items   []XMLAction `xml:"-"`
+	// XMLName is set in UnmarshalXML
+	Items []XMLAction `xml:"-"`
 }
 
 // --- actions ---
@@ -38,7 +43,7 @@ func (a XMLActionCat) GetType() string {
 
 type XMLActionEd struct {
 	XMLName xml.Name `xml:"ed"`
-	Script  string   `xml:",chardata"`
+	Script  string   `xml:",innerxml"`
 }
 
 func (a XMLActionEd) GetType() string {
@@ -78,8 +83,6 @@ func (a *XMLActions) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 				if err := d.DecodeElement(&ed, &start); err != nil {
 					return err
 				}
-				// trim whitespace so the script is easier to read
-				ed.Script = strings.TrimSpace(ed.Script)
 				a.Items = append(a.Items, ed)
 			}
 		}
@@ -113,19 +116,39 @@ func (a XMLActions) ToXML() (string, error) {
 	// https://github.com/golang/go/issues/21399
 	asString := strings.ReplaceAll(string(xml), "<help></help>", "<help/>")
 	// hackery to ensure Marshal(Unmarshal(input)) == input (mostly)
-	asString = strings.ReplaceAll(asString, "&#xA;", "\n")
-	asString = strings.ReplaceAll(asString, "<ed>", "<ed>\n")
-	asString = strings.ReplaceAll(asString, "</ed>", "\n\t</ed>")
+	// (got around this by using ,innerxml, however, this may not always work)
+	/*
+		asString = strings.ReplaceAll(asString, "&#xA;", "\n")
+		asString = strings.ReplaceAll(asString, "<ed>", "<ed>\n")
+		asString = strings.ReplaceAll(asString, "</ed>", "\n\t</ed>")
+	*/
 	formatted := xmlfmt.FormatXML(asString, "", "\t")
 	// xmlfmt is inserting a leading \n for some reason
 	formatted = strings.TrimSpace(formatted)
 	return formatted, nil
 }
-func FromXML(input string) (XMLActions, error) {
+func ActionsFromXML(input string) (XMLActions, error) {
 	actions := XMLActions{}
 	err := xml.Unmarshal([]byte(input), &actions)
 	if err != nil {
 		return XMLActions{}, err
 	}
 	return actions, nil
+}
+
+func ThoughtFromXML(input string) (XMLThought, error) {
+	thought := XMLThought{}
+	err := xml.Unmarshal([]byte(input), &thought)
+	if err != nil {
+		return XMLThought{}, err
+	}
+	return thought, nil
+}
+
+func (t XMLThought) ToXML() (string, error) {
+	xml, err := xml.Marshal(t)
+	if err != nil {
+		return "", err
+	}
+	return string(xml), nil
 }

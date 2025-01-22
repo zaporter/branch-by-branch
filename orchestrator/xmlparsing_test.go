@@ -38,7 +38,7 @@ func TestUnmarshal(t *testing.T) {
 		<help/>
 	</actions>`
 
-	actions, err := FromXML(input)
+	actions, err := ActionsFromXML(input)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,7 @@ w test.txt
 	</ed>
 </actions>`
 
-	actions, err := FromXML(input)
+	actions, err := ActionsFromXML(input)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,10 +84,35 @@ w test.txt
 		t.Errorf("Expected 1 action, got %d", len(actions.Items))
 	}
 
-	if actions.Items[0].(XMLActionEd).Script != "1a\nhi\n.\nw test.txt" {
-		t.Errorf("Expected '1a\nhi\n.\nw test.txt', got '%s'", actions.Items[0].(XMLActionEd).Script)
+	expected := "\n1a\nhi\n.\nw test.txt\n\t"
+	if actions.Items[0].(XMLActionEd).Script != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, actions.Items[0].(XMLActionEd).Script)
 	}
 	remarshalled, err := actions.ToXML()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if remarshalled != input {
+		t.Errorf("Expected %s, got %s", input, remarshalled)
+	}
+}
+
+func TestThoughtUnmarshal(t *testing.T) {
+	input := `<think>
+Hello, world!
+	Life is good!
+	</think>`
+
+	thoughts, err := ThoughtFromXML(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := "\nHello, world!\n\tLife is good!\n\t"
+	if thoughts.Text != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, thoughts.Text)
+	}
+	remarshalled, err := thoughts.ToXML()
 	if err != nil {
 		t.Fatal(err)
 	}
