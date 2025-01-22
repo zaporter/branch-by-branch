@@ -3,6 +3,8 @@ package main
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMarshal(t *testing.T) {
@@ -16,9 +18,7 @@ func TestMarshal(t *testing.T) {
 	}
 
 	res, err := acts.ToXML()
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
 	// Verify the marshalled XML
 	expected := `<actions>
@@ -26,9 +26,7 @@ func TestMarshal(t *testing.T) {
 	<cat>./test.txt</cat>
 	<help/>
 </actions>`
-	if res != expected {
-		t.Errorf("Expected %s, got %s", expected, res)
-	}
+	assert.Equal(t, expected, res)
 }
 
 func TestUnmarshal(t *testing.T) {
@@ -39,14 +37,10 @@ func TestUnmarshal(t *testing.T) {
 	</actions>`
 
 	actions, err := ActionsFromXML(input)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
 	// Verify the counts
-	if len(actions.Items) != 3 {
-		t.Errorf("Expected 3 actions, got %d", len(actions.Items))
-	}
+	assert.Len(t, actions.Items, 3)
 
 	// Verify the order
 	expectedTypes := []string{"help", "cat", "help"}
@@ -60,9 +54,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	// Verify cat content
-	if actions.Items[1].(XMLActionCat).Filename != "./test.txt" {
-		t.Errorf("Expected './test.txt', got '%s'", actions.Items[1].(XMLActionCat).Filename)
-	}
+	assert.Equal(t, "./test.txt", actions.Items[1].(XMLActionCat).Filename)
 }
 
 func TestEdUnmarshal(t *testing.T) {
@@ -76,25 +68,17 @@ w test.txt
 </actions>`
 
 	actions, err := ActionsFromXML(input)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
-	if len(actions.Items) != 1 {
-		t.Errorf("Expected 1 action, got %d", len(actions.Items))
-	}
+	assert.Len(t, actions.Items, 1)
 
 	expected := "\n1a\nhi\n.\nw test.txt\n\t"
-	if actions.Items[0].(XMLActionEd).Script != expected {
-		t.Errorf("Expected '%s', got '%s'", expected, actions.Items[0].(XMLActionEd).Script)
-	}
+	assert.Equal(t, expected, actions.Items[0].(XMLActionEd).Script)
+
 	remarshalled, err := actions.ToXML()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if remarshalled != input {
-		t.Errorf("Expected %s, got %s", input, remarshalled)
-	}
+	assert.NoError(t, err)
+
+	assert.Equal(t, input, remarshalled)
 }
 
 func TestThoughtUnmarshal(t *testing.T) {
@@ -104,19 +88,13 @@ Hello, world!
 	</think>`
 
 	thoughts, err := ThoughtFromXML(input)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
 	expected := "\nHello, world!\n\tLife is good!\n\t"
-	if thoughts.Text != expected {
-		t.Errorf("Expected '%s', got '%s'", expected, thoughts.Text)
-	}
+	assert.Equal(t, expected, thoughts.Text)
+
 	remarshalled, err := thoughts.ToXML()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if remarshalled != input {
-		t.Errorf("Expected %s, got %s", input, remarshalled)
-	}
+	assert.NoError(t, err)
+
+	assert.Equal(t, input, remarshalled)
 }
