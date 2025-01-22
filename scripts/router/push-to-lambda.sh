@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 
-# Push code locally to the router
 set -euxo pipefail
 
-source ./secrets/router-params.sh
+source ./.env
+
+IP="$1"
 
 rsync -zrv \
     --info=progress2 \
-    -e "ssh -i $ROUTER_SSH_KEY" \
+    -e "ssh -i $LAMBDA_KEY_PATH" \
     --delete \
     --exclude=.git \
     --exclude=inference/env \
     --exclude=.direnv \
     --exclude=models \
     . \
-    $ROUTER_USER@$ROUTER_IP:/share/repo/branch-by-branch
+    ubuntu@$IP:/home/ubuntu/branch-by-branch
