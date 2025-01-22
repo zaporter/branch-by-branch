@@ -11,5 +11,6 @@ rsync -zrv \
     --delete \
     --exclude=.git \
     --exclude=.direnv \
+    --exclude=models \
     . \
     $ROUTER_USER@$ROUTER_IP:/share/repo/branch-by-branch
