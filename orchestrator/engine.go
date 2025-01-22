@@ -243,7 +243,7 @@ func (e *Engine) createCamshaft() {
 			logger.Error().Err(err).Msg("Error getting tasks queue size")
 			continue
 		}
-		if tasksQueueSize < int64(e.schedulingParams.MinTaskQueueSize) {
+		if tasksQueueSize > int64(e.schedulingParams.MinTaskQueueSize) {
 			// Don't do anything if we have enough tasks.
 			continue
 		}

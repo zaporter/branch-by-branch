@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
 )
 
@@ -80,12 +81,24 @@ func createLaunchCli() *cli.Command {
 	instanceRegion := ""
 	instanceQuantity := int64(1)
 	startInference := ""
-	action := func(_ context.Context, _ *cli.Command) error {
+	action := func(ctx context.Context, _ *cli.Command) error {
+		logger := zerolog.Ctx(ctx)
+		filesystemNames := []string{}
+		if instanceRegion == "us-west-2" {
+			filesystemNames = []string{"cache-w2"}
+		} else if instanceRegion == "us-west-1" {
+			filesystemNames = []string{"cache-w1"}
+		} else if instanceRegion == "us-east-1" {
+			filesystemNames = []string{"cache-e1"}
+		}
+		if len(filesystemNames) == 0 {
+			logger.Warn().Msgf("WARN: no filesystem names provided for region %s", instanceRegion)
+		}
 		launchRequest := LaunchRequest{
 			RegionName:       instanceRegion,
 			InstanceTypeName: instanceType,
-			SSHKeyNames:      []string{"temp"},
-			FileSystemNames:  []string{"proof-gen"},
+			SSHKeyNames:      []string{"lambda-ssh"},
+			FileSystemNames:  filesystemNames,
 			Quantity:         int(instanceQuantity),
 		}
 

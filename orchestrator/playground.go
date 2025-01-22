@@ -31,7 +31,7 @@ func createTestDeferCli() *cli.Command {
 	}
 }
 
-func playgroundEngineStartupTest() *cli.Command {
+func playgroundEngineStartupTestCli() *cli.Command {
 	action := func(c context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(c)
 		logger.Info().Msg("simple engine test")
@@ -70,7 +70,7 @@ func playgroundEngineStartupTest() *cli.Command {
 	}
 }
 
-func playgroundEngineSimpleInferenceTest() *cli.Command {
+func playgroundEngineSimpleInferenceTestCli() *cli.Command {
 	action := func(c context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(c)
 		logger.Info().Msg("simple inference engine test")
@@ -81,7 +81,7 @@ func playgroundEngineSimpleInferenceTest() *cli.Command {
 		if err := setRouterParam(c, rdb, RedisInferenceEnabled, "true"); err != nil {
 			return err
 		}
-		if err := setRouterParam(c, rdb, RedisInferenceModelDir, "/share/models/models"); err != nil {
+		if err := setRouterParam(c, rdb, RedisInferenceModelDir, "meta-llama/Llama-3.1-8B-Instruct"); err != nil {
 			return err
 		}
 		if err := setRouterParam(c, rdb, RedisInferenceAdapterDir, ""); err != nil {
@@ -90,10 +90,10 @@ func playgroundEngineSimpleInferenceTest() *cli.Command {
 		schedulingParams := SchedulingParams{
 			MinTaskQueueSize:      10,
 			MaxTaskQueueSize:      100,
-			TaskProcessingTimeout: 10 * time.Second,
+			TaskProcessingTimeout: 1 * time.Minute,
 			CamShaftInterval:      10 * time.Second,
 			CrankShaftInterval:    10 * time.Second,
-			TimingBeltInterval:    10 * time.Second,
+			TimingBeltInterval:    2 * time.Second,
 			ODBInterval:           10 * time.Second,
 			InputChanSize:         100,
 			OutputChanSize:        100,
@@ -135,8 +135,8 @@ func playgroundEngineSimpleInferenceTest() *cli.Command {
 		return nil
 	}
 	return &cli.Command{
-		Name:   "engine-startup-test",
-		Usage:  "engine startup test",
+		Name:   "engine-simple-inference-test",
+		Usage:  "engine simple inference test",
 		Action: action,
 	}
 }
@@ -147,7 +147,8 @@ func createPlaygroundCli() *cli.Command {
 		Usage: "playground",
 		Commands: []*cli.Command{
 			createTestDeferCli(),
-			playgroundEngineStartupTest(),
+			playgroundEngineStartupTestCli(),
+			playgroundEngineSimpleInferenceTestCli(),
 		},
 	}
 }
