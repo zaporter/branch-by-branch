@@ -66,9 +66,9 @@ type Engine struct {
 	shouldStopChan chan bool
 
 	// only read from camshaft
-	taskInput <-chan EngineTaskMsg
+	taskInput chan EngineTaskMsg
 	// only write from crankshaft
-	taskOutput chan<- EngineTaskResultMsg
+	taskOutput chan EngineTaskResultMsg
 
 	queuedTasksMu sync.Mutex
 	queuedTasks   map[EngineTaskID]QueuedTask
@@ -176,10 +176,10 @@ func (e *Engine) ProcessingQueueName() string {
 func (e *Engine) ResultsQueueName() string {
 	return fmt.Sprintf("%s:results", e.job)
 }
-func (e *Engine) GetInput() <-chan EngineTaskMsg {
+func (e *Engine) GetInput() chan<- EngineTaskMsg {
 	return e.taskInput
 }
-func (e *Engine) GetOutput() chan<- EngineTaskResultMsg {
+func (e *Engine) GetOutput() <-chan EngineTaskResultMsg {
 	return e.taskOutput
 }
 
@@ -266,6 +266,9 @@ func (e *Engine) createCamshaft() {
 			case task, ok := <-e.taskInput:
 				if !ok {
 					logger.Fatal().Msg("Engine input channel should never be closed")
+				}
+				if task.ID == "" {
+					task.ID = NewEngineTaskID()
 				}
 				tasks = append(tasks, task)
 			default:

@@ -107,7 +107,26 @@ func playgroundEngineSimpleInferenceTest() *cli.Command {
 			engine.TriggerStop()
 		}()
 		engine.Start(c)
+		dieChan := make(chan bool, 1)
+		input := engine.GetInput()
+		input <- EngineTaskMsg{
+			Task: "The main thing I hate about rsync default options is",
+		}
+		output := engine.GetOutput()
+		go func() {
+			for {
+				select {
+				case <-dieChan:
+					fmt.Println("die")
+					return
+				case val := <-output:
+					fmt.Println("output", val)
+				}
+			}
+		}()
+
 		engine.WaitForStop()
+		close(dieChan)
 
 		return nil
 	}
