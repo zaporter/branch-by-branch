@@ -3,6 +3,10 @@
 # Push models to the router
 set -euxo pipefail
 
+script_dir="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+# repo root
+cd "$script_dir/../.."
+
 source ./secrets/router-params.sh
 
 # --delete not used because local models may not be synced with all trained models

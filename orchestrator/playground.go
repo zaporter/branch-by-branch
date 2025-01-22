@@ -110,7 +110,9 @@ func playgroundEngineSimpleInferenceTest() *cli.Command {
 		dieChan := make(chan bool, 1)
 		input := engine.GetInput()
 		input <- EngineTaskMsg{
-			Task: "The main thing I hate about rsync default options is",
+			Task: InferenceTask{
+				Prompt: "The main thing I hate about rsync default options is",
+			}.ToJSON(),
 		}
 		output := engine.GetOutput()
 		go func() {
@@ -121,6 +123,8 @@ func playgroundEngineSimpleInferenceTest() *cli.Command {
 					return
 				case val := <-output:
 					fmt.Println("output", val)
+					task := InferenceTaskResponseFromJSON(val.Result)
+					fmt.Printf("task: %+v\n", task)
 				}
 			}
 		}()

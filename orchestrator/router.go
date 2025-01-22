@@ -15,15 +15,27 @@ import (
 type RedisKey string
 
 const (
-	RedisInferenceEnabled    RedisKey = "inference:enabled"
-	RedisInferenceModelDir   RedisKey = "inference:model_dir"
-	RedisInferenceAdapterDir RedisKey = "inference:adapter_dir"
+	RedisInferenceEnabled              RedisKey = "inference:enabled"
+	RedisInferenceModelDir             RedisKey = "inference:model_dir"
+	RedisInferenceAdapterDir           RedisKey = "inference:adapter_dir"
+	RedisInferenceBatchSize            RedisKey = "inference:batch_size"
+	RedisInferenceMaxModelLen          RedisKey = "inference:max_model_len"
+	RedisInferenceGpuMemoryUtilization RedisKey = "inference:gpu_memory_utilization"
+	RedisInferenceMaxNewTokens         RedisKey = "inference:max_new_tokens"
+	RedisInferenceNumReturnSequences   RedisKey = "inference:num_return_sequences"
+	RedisInferenceNumBeams             RedisKey = "inference:num_beams"
 )
 
 var AllRouterKeys = []RedisKey{
 	RedisInferenceEnabled,
 	RedisInferenceModelDir,
 	RedisInferenceAdapterDir,
+	RedisInferenceBatchSize,
+	RedisInferenceMaxModelLen,
+	RedisInferenceGpuMemoryUtilization,
+	RedisInferenceMaxNewTokens,
+	RedisInferenceNumReturnSequences,
+	RedisInferenceNumBeams,
 }
 
 func setRouterParam(ctx context.Context, rdb *redis.Client, key RedisKey, val string) error {
@@ -130,9 +142,15 @@ func createInitializeRouterParamsCli() *cli.Command {
 			return err
 		}
 		valsMap := map[RedisKey]string{
-			RedisInferenceEnabled:    "true",
-			RedisInferenceModelDir:   "/models",
-			RedisInferenceAdapterDir: "/adapters",
+			RedisInferenceEnabled:              "true",
+			RedisInferenceModelDir:             "/models",
+			RedisInferenceAdapterDir:           "/adapters",
+			RedisInferenceBatchSize:            "32",
+			RedisInferenceMaxModelLen:          "512",
+			RedisInferenceGpuMemoryUtilization: "0.85",
+			RedisInferenceMaxNewTokens:         "128",
+			RedisInferenceNumReturnSequences:   "3",
+			RedisInferenceNumBeams:             "3",
 		}
 		for key, val := range valsMap {
 			statusCmd := rdb.Set(ctx, string(key), val, 0)

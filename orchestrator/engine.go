@@ -38,15 +38,15 @@ import (
 //
 // The workers MUST use brpoplpush to receive tasks and they MUST push exactly one result per task they process (even if that result is an error).
 type EngineTaskMsg struct {
-	ID   EngineTaskID `json:"id"`
+	ID   EngineTaskID `json:"task_id"`
 	Task string       `json:"task"`
 }
 type EngineTaskProcessingMsg struct {
-	ID   EngineTaskID `json:"id"`
+	ID   EngineTaskID `json:"task_id"`
 	Task string       `json:"task"`
 }
 type EngineTaskResultMsg struct {
-	ID     EngineTaskID `json:"id"`
+	ID     EngineTaskID `json:"task_id"`
 	Result string       `json:"result"`
 }
 
