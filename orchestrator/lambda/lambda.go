@@ -88,9 +88,12 @@ func createLaunchCli() *cli.Command {
 			filesystemNames = []string{"cache-w2"}
 		} else if instanceRegion == "us-west-1" {
 			filesystemNames = []string{"cache-w1"}
+		} else if instanceRegion == "us-west-3" {
+			filesystemNames = []string{"cache-w3"}
 		} else if instanceRegion == "us-east-1" {
 			filesystemNames = []string{"cache-e1"}
 		}
+
 		if len(filesystemNames) == 0 {
 			logger.Warn().Msgf("WARN: no filesystem names provided for region %s", instanceRegion)
 		}

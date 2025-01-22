@@ -14,6 +14,8 @@ if [ -d "$HOME/cache-w2" ]; then
     CACHE_DIR="$HOME/cache-w2"
 elif [ -d "$HOME/cache-w1" ]; then
     CACHE_DIR="$HOME/cache-w1"
+elif [ -d "$HOME/cache-w3" ]; then
+    CACHE_DIR="$HOME/cache-w3"
 elif [ -d "$HOME/cache-e1" ]; then
     CACHE_DIR="$HOME/cache-e1"
 else
