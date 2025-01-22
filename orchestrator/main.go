@@ -23,7 +23,7 @@ func main() {
 		Commands: []*cli.Command{
 			createPlaygroundCli(),
 			createRouterCli(),
-            lambda.CreateLambdaCli(),
+			lambda.CreateLambdaCli(),
 		},
 	}
 	if err := cmd.Run(ctx, os.Args); err != nil {

@@ -362,12 +362,14 @@ func (e *Engine) createCrankshaft() {
 				}
 				if queuedTask.ProcessingStartTime != nil {
 					e.recordStatEvent(EngineStatEvent{
+						tasksFinished:      1,
 						taskFinishedInTime: time.Since(*queuedTask.ProcessingStartTime),
 					})
 				} else {
 					logger.Warn().Msgf("Found result for task that has no processing start time: %+v. This likely means the timing belt is not running fast enough", result)
 					logger.Warn().Msgf("Timing belt interval: %s. This will mess with the stats.", e.schedulingParams.TimingBeltInterval)
 					e.recordStatEvent(EngineStatEvent{
+						tasksFinished:      1,
 						taskFinishedInTime: e.schedulingParams.TimingBeltInterval,
 					})
 				}
@@ -485,23 +487,29 @@ func (e *Engine) createOBD() {
 		statsLines = append(statsLines, "Emitting stats")
 		mergedStats := e.mergeStatsInInterval(nil)
 		statsLines = append(statsLines, fmt.Sprintf("\tNum stat events: %d", mergedStats.NumEvents))
-		statsLines = append(statsLines, fmt.Sprintf("\tTask finished in time: %s", mergedStats.taskFinishedInTime))
+		statsLines = append(statsLines, fmt.Sprintf("\tTasks finished: %d", mergedStats.tasksFinished))
+		statsLines = append(statsLines, fmt.Sprintf("\tAvg processing time per task: %s", mergedStats.AvgProcessingTimePerTask))
+		statsLines = append(statsLines, "")
 		statsLines = append(statsLines, fmt.Sprintf("\tTasks requeued: %d", mergedStats.tasksRequeued))
-		statsLines = append(statsLines, fmt.Sprintf("\tTask time spent in queue: %s", mergedStats.taskTimeSpentInQueue))
+		statsLines = append(statsLines, fmt.Sprintf("\tAvg task time spent in queue: %s", mergedStats.AvgTaskTimeSpentInQueue))
+		statsLines = append(statsLines, "")
 		statsLines = append(statsLines, fmt.Sprintf("\tCamshaft blocked from backpressure: %d", mergedStats.camshaftBlockedFromBackpressure))
 		statsLines = append(statsLines, fmt.Sprintf("\tCamshaft started: %d", mergedStats.camshaftStarted))
 		statsLines = append(statsLines, fmt.Sprintf("\tCamshaft executed: %d", mergedStats.camshaftExecuted))
 		statsLines = append(statsLines, fmt.Sprintf("\tCamshaft execution time: %s", mergedStats.camshaftExecutionTime))
+		statsLines = append(statsLines, "")
 		statsLines = append(statsLines, fmt.Sprintf("\tCrankshaft started: %d", mergedStats.crankshaftStarted))
 		statsLines = append(statsLines, fmt.Sprintf("\tCrankshaft executed: %d", mergedStats.crankshaftExecuted))
 		statsLines = append(statsLines, fmt.Sprintf("\tCrankshaft execution time: %s", mergedStats.crankshaftExecutionTime))
+		statsLines = append(statsLines, "")
 		statsLines = append(statsLines, fmt.Sprintf("\tTiming belt started: %d", mergedStats.timingBeltStarted))
 		statsLines = append(statsLines, fmt.Sprintf("\tTiming belt executed: %d", mergedStats.timingBeltExecuted))
 		statsLines = append(statsLines, fmt.Sprintf("\tTiming belt execution time: %s", mergedStats.timingBeltExecutionTime))
+		statsLines = append(statsLines, "")
 		statsLines = append(statsLines, fmt.Sprintf("\tOBD started: %d", mergedStats.odbStarted))
 		statsLines = append(statsLines, fmt.Sprintf("\tOBD executed: %d", mergedStats.odbExecuted))
 		statsLines = append(statsLines, fmt.Sprintf("\tOBD execution time: %s", mergedStats.odbExecutionTime))
-
+		statsLines = append(statsLines, "")
 		logger.Debug().Msg(strings.Join(statsLines, "\n"))
 
 		e.recordStatEvent(EngineStatEvent{
@@ -516,6 +524,7 @@ func (e *Engine) createOBD() {
 // 🚩 If you add a new stat, make sure to add it to the mergedStatsInInterval function & the OBD.
 type EngineStatEvent struct {
 	timestamp                       time.Time
+	tasksFinished                   int
 	taskFinishedInTime              time.Duration
 	tasksRequeued                   int
 	taskTimeSpentInQueue            time.Duration
@@ -538,7 +547,9 @@ type EngineStatEvent struct {
 
 type MergedStats struct {
 	EngineStatEvent
-	NumEvents int
+	NumEvents                int
+	AvgProcessingTimePerTask time.Duration
+	AvgTaskTimeSpentInQueue  time.Duration
 }
 
 func (e *Engine) mergeStatsInInterval(interval *time.Duration) MergedStats {
@@ -556,6 +567,7 @@ func (e *Engine) mergeStatsInInterval(interval *time.Duration) MergedStats {
 	for i := startIndex; i < len(e.stats); i++ {
 		mergedStats.NumEvents++
 		event := e.stats[i]
+		mergedEvent.tasksFinished += event.tasksFinished
 		mergedEvent.taskFinishedInTime += event.taskFinishedInTime
 		mergedEvent.tasksRequeued += event.tasksRequeued
 		mergedEvent.taskTimeSpentInQueue += event.taskTimeSpentInQueue
@@ -574,6 +586,10 @@ func (e *Engine) mergeStatsInInterval(interval *time.Duration) MergedStats {
 		mergedEvent.odbExecutionTime += event.odbExecutionTime
 	}
 	mergedStats.EngineStatEvent = mergedEvent
+	if mergedEvent.tasksFinished > 0 {
+		mergedStats.AvgProcessingTimePerTask = mergedEvent.taskFinishedInTime / time.Duration(mergedEvent.tasksFinished)
+		mergedStats.AvgTaskTimeSpentInQueue = mergedEvent.taskTimeSpentInQueue / time.Duration(mergedEvent.tasksFinished)
+	}
 	return mergedStats
 }
 

@@ -28,15 +28,9 @@ def update_params():
         "num_beams": int(r.get("inference:num_beams")),
     }
 
-def download_model(name:str):
-    res = os.system(f"bash ../scripts/router/download-model.sh {name}")
-    if res != 0:
-        print("failed to download model")
-        exit(1)
-    print(f"model {name} downloaded")
 
 def local_model_dir(name:str):
-    return f"{os.getenv('HOME')}/models/{name}"
+    return f"{os.getenv('HOME')}/cache/models/{name}"
 
 def process_batch(model, batch_prompts, batch_task_ids):
     global params
@@ -80,10 +74,8 @@ def main():
 
     if not os.path.exists(local_model_dir(params["model_dir"])):
         print("model dir does not exist")
-        download_model(params["model_dir"])
-        if not os.path.exists(local_model_dir(params["model_dir"])):
-            print("model dir does not exist after download")
-            exit(1)
+        print("you must manually cache it.")
+        exit(1)
 
     print("params", params)
     # https://github.com/vllm-project/vllm/blob/bc96d5c330e079fa501eee05e97bf15009c9a094/vllm/entrypoints/llm.py#L24

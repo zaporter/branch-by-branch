@@ -71,6 +71,7 @@ func playgroundEngineStartupTestCli() *cli.Command {
 }
 
 func playgroundEngineSimpleInferenceTestCli() *cli.Command {
+	var numTasks int64
 	action := func(c context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(c)
 		logger.Info().Msg("simple inference engine test")
@@ -95,8 +96,8 @@ func playgroundEngineSimpleInferenceTestCli() *cli.Command {
 			CrankShaftInterval:    10 * time.Second,
 			TimingBeltInterval:    2 * time.Second,
 			ODBInterval:           10 * time.Second,
-			InputChanSize:         100,
-			OutputChanSize:        100,
+			InputChanSize:         10,
+			OutputChanSize:        10,
 		}
 		engine := NewEngine(c, EngineJobNameInference, rdb, schedulingParams)
 		sigChan := make(chan os.Signal, 1)
@@ -109,11 +110,21 @@ func playgroundEngineSimpleInferenceTestCli() *cli.Command {
 		engine.Start(c)
 		dieChan := make(chan bool, 1)
 		input := engine.GetInput()
-		input <- EngineTaskMsg{
-			Task: InferenceTask{
-				Prompt: "The main thing I hate about rsync default options is",
-			}.ToJSON(),
-		}
+		go func() {
+			for i := int64(0); i < numTasks; i++ {
+				logger.Info().Msgf("enqueuing task %d", i)
+				select {
+				case <-dieChan:
+					fmt.Println("die")
+					return
+				case input <- EngineTaskMsg{
+					Task: InferenceTask{
+						Prompt: fmt.Sprintf("A poem about the number %d", i),
+					}.ToJSON(),
+				}:
+				}
+			}
+		}()
 		output := engine.GetOutput()
 		go func() {
 			for {
@@ -138,6 +149,14 @@ func playgroundEngineSimpleInferenceTestCli() *cli.Command {
 		Name:   "engine-simple-inference-test",
 		Usage:  "engine simple inference test",
 		Action: action,
+		Flags: []cli.Flag{
+			&cli.IntFlag{
+				Name:        "num-tasks",
+				Usage:       "number of tasks to enqueue",
+				Value:       100,
+				Destination: &numTasks,
+			},
+		},
 	}
 }
 
