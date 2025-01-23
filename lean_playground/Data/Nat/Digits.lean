@@ -105,7 +105,7 @@ theorem digits_add_two_add_one (b n : ℕ) :
   simp [digits, digitsAux_def]
 
 @[simp]
-lemma digits_of_two_le_of_pos {b : ℕ} (hb : 2 ≤ b) (hn : 0 < n) :
+theorem digits_of_two_le_of_pos {b : ℕ} (hb : 2 ≤ b) (hn : 0 < n) :
     Nat.digits b n = n % b :: Nat.digits b (n / b) := by
   rw [Nat.eq_add_of_sub_eq hb rfl, Nat.eq_add_of_sub_eq hn rfl, Nat.digits_add_two_add_one]
 
@@ -134,7 +134,7 @@ theorem digits_add (b : ℕ) (h : 1 < b) (x y : ℕ) (hxb : x < b) (hxy : x ≠ 
   · apply Nat.succ_pos
 
 -- If we had a function converting a list into a polynomial,
--- and appropriate lemmas about that function,
+-- and appropriate theorems about that function,
 -- we could rewrite this in terms of that.
 /-- `ofDigits b L` takes a list `L` of natural numbers, and interprets them
 as a number in semiring, as the little-endian digits in base `b`.
@@ -261,7 +261,7 @@ theorem ofDigits_one (L : List ℕ) : ofDigits 1 L = L.sum := by
 /-!
 ### Properties
 
-This section contains various lemmas of properties relating to `digits` and `ofDigits`.
+This section contains various theorems of properties relating to `digits` and `ofDigits`.
 -/
 
 
@@ -505,7 +505,7 @@ theorem base_pow_length_digits_le (b m : ℕ) (hb : 1 < b) :
 
 /-- Interpreting as a base `p` number and dividing by `p` is the same as interpreting the tail.
 -/
-lemma ofDigits_div_eq_ofDigits_tail {p : ℕ} (hpos : 0 < p) (digits : List ℕ)
+theorem ofDigits_div_eq_ofDigits_tail {p : ℕ} (hpos : 0 < p) (digits : List ℕ)
     (w₁ : ∀ l ∈ digits, l < p) : ofDigits p digits / p = ofDigits p digits.tail := by
   induction' digits with hd tl
   · simp [ofDigits]
@@ -515,7 +515,7 @@ lemma ofDigits_div_eq_ofDigits_tail {p : ℕ} (hpos : 0 < p) (digits : List ℕ)
 
 /-- Interpreting as a base `p` number and dividing by `p^i` is the same as dropping `i`.
 -/
-lemma ofDigits_div_pow_eq_ofDigits_drop
+theorem ofDigits_div_pow_eq_ofDigits_drop
     {p : ℕ} (i : ℕ) (hpos : 0 < p) (digits : List ℕ) (w₁ : ∀ l ∈ digits, l < p) :
     ofDigits p digits / p ^ i = ofDigits p (digits.drop i) := by
   induction' i with i hi
@@ -526,7 +526,7 @@ lemma ofDigits_div_pow_eq_ofDigits_drop
 
 /-- Dividing `n` by `p^i` is like truncating the first `i` digits of `n` in base `p`.
 -/
-lemma self_div_pow_eq_ofDigits_drop {p : ℕ} (i n : ℕ) (h : 2 ≤ p) :
+theorem self_div_pow_eq_ofDigits_drop {p : ℕ} (i n : ℕ) (h : 2 ≤ p) :
     n / p ^ i = ofDigits p ((p.digits n).drop i) := by
   convert ofDigits_div_pow_eq_ofDigits_drop i (zero_lt_of_lt h) (p.digits n)
     (fun l hl ↦ digits_lt_base h hl)
@@ -727,7 +727,7 @@ theorem eleven_dvd_of_palindrome (p : (digits 10 n).Palindrome) (h : Even (digit
 
 /-! ### `Nat.toDigits` length -/
 
-lemma toDigitsCore_lens_eq_aux (b f : Nat) :
+theorem toDigitsCore_lens_eq_aux (b f : Nat) :
     ∀ (n : Nat) (l1 l2 : List Char), l1.length = l2.length →
     (Nat.toDigitsCore b f n l1).length = (Nat.toDigitsCore b f n l2).length := by
   induction f with (simp only [Nat.toDigitsCore, List.length]; intro n l1 l2 hlen)
@@ -741,7 +741,7 @@ lemma toDigitsCore_lens_eq_aux (b f : Nat) :
       simp only [List.length, congrArg (fun l ↦ l + 1) hlen] at ih
       exact ih trivial
 
-lemma toDigitsCore_lens_eq (b f : Nat) : ∀ (n : Nat) (c : Char) (tl : List Char),
+theorem toDigitsCore_lens_eq (b f : Nat) : ∀ (n : Nat) (c : Char) (tl : List Char),
     (Nat.toDigitsCore b f n (c :: tl)).length = (Nat.toDigitsCore b f n tl).length + 1 := by
   induction f with (intro n c tl; simp only [Nat.toDigitsCore, List.length])
   | succ f ih =>
@@ -757,14 +757,14 @@ lemma toDigitsCore_lens_eq (b f : Nat) : ∀ (n : Nat) (c : Char) (tl : List Cha
       apply toDigitsCore_lens_eq_aux
       exact lens_eq
 
-lemma nat_repr_len_aux (n b e : Nat) (h_b_pos : 0 < b) :  n < b ^ e.succ → n / b < b ^ e := by
+theorem nat_repr_len_aux (n b e : Nat) (h_b_pos : 0 < b) :  n < b ^ e.succ → n / b < b ^ e := by
   simp only [Nat.pow_succ]
   exact (@Nat.div_lt_iff_lt_mul b n (b ^ e) h_b_pos).mpr
 
 /-- The String representation produced by toDigitsCore has the proper length relative to
 the number of digits in `n < e` for some base `b`. Since this works with any base greater
 than one, it can be used for binary, decimal, and hex. -/
-lemma toDigitsCore_length (b : Nat) (h : 2 <= b) (f n e : Nat)
+theorem toDigitsCore_length (b : Nat) (h : 2 <= b) (f n e : Nat)
     (hlt : n < b ^ e) (h_e_pos : 0 < e) : (Nat.toDigitsCore b f n []).length <= e := by
   induction f generalizing n e hlt h_e_pos with
     simp only [Nat.toDigitsCore, List.length, Nat.zero_le]
@@ -790,7 +790,7 @@ lemma toDigitsCore_length (b : Nat) (h : 2 <= b) (f n e : Nat)
 /-- The core implementation of `Nat.repr` returns a String with length less than or equal to the
 number of digits in the decimal number (represented by `e`). For example, the decimal string
 representation of any number less than 1000 (10 ^ 3) has a length less than or equal to 3. -/
-lemma repr_length (n e : Nat) : 0 < e → n < 10 ^ e → (Nat.repr n).length <= e := by
+theorem repr_length (n e : Nat) : 0 < e → n < 10 ^ e → (Nat.repr n).length <= e := by
   cases n with
     (intro e0 he; simp only [Nat.repr, Nat.toDigits, String.length, List.asString])
   | zero => assumption
@@ -888,7 +888,7 @@ unsafe def eval : expr → tactic (expr × expr)
         else
           if b = 1 then do
             let ic ← mk_instance_cache q(ℕ)
-            let s ← simp_lemmas.add_simp simp_lemmas.mk `list.replicate
+            let s ← simp_theorems.add_simp simp_theorems.mk `list.replicate
             let (rhs, p2, _) ← simplify s [] q(List.replicate $(en) 1)
             let p ← mk_eq_trans q(Nat.digits_one $(en)) p2
             return (rhs, p)

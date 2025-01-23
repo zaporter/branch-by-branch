@@ -41,13 +41,13 @@ def memPartition (f : ℕ → Set α) : ℕ → Set (Set α)
   | n + 1 => {s | ∃ u ∈ memPartition f n, s = u ∩ f n ∨ s = u \ f n}
 
 @[simp]
-lemma memPartition_zero (f : ℕ → Set α) : memPartition f 0 = {univ} := rfl
+theorem memPartition_zero (f : ℕ → Set α) : memPartition f 0 = {univ} := rfl
 
-lemma memPartition_succ (f : ℕ → Set α) (n : ℕ) :
+theorem memPartition_succ (f : ℕ → Set α) (n : ℕ) :
     memPartition f (n + 1) = {s | ∃ u ∈ memPartition f n, s = u ∩ f n ∨ s = u \ f n} :=
   rfl
 
-lemma disjoint_memPartition (f : ℕ → Set α) (n : ℕ) {u v : Set α}
+theorem disjoint_memPartition (f : ℕ → Set α) (n : ℕ) {u v : Set α}
     (hu : u ∈ memPartition f n) (hv : v ∈ memPartition f n) (huv : u ≠ v) :
     Disjoint u v := by
   revert u v
@@ -71,7 +71,7 @@ lemma disjoint_memPartition (f : ℕ → Set α) (n : ℕ) {u v : Set α}
       exact fun huv' ↦ huv (huv' ▸ rfl)
 
 @[simp]
-lemma sUnion_memPartition (f : ℕ → Set α) (n : ℕ) : ⋃₀ memPartition f n = univ := by
+theorem sUnion_memPartition (f : ℕ → Set α) (n : ℕ) : ⋃₀ memPartition f n = univ := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -85,7 +85,7 @@ lemma sUnion_memPartition (f : ℕ → Set α) (n : ℕ) : ⋃₀ memPartition f
     · exact ⟨t ∩ f n, ⟨t, ht, Or.inl rfl⟩, hxt, hxf⟩
     · exact ⟨t \ f n, ⟨t, ht, Or.inr rfl⟩, hxt, hxf⟩
 
-lemma finite_memPartition (f : ℕ → Set α) (n : ℕ) : Set.Finite (memPartition f n) := by
+theorem finite_memPartition (f : ℕ → Set α) (n : ℕ) : Set.Finite (memPartition f n) := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -111,15 +111,15 @@ def memPartitionSet (f : ℕ → Set α) : ℕ → α → Set α
   | n + 1 => fun a ↦ if a ∈ f n then memPartitionSet f n a ∩ f n else memPartitionSet f n a \ f n
 
 @[simp]
-lemma memPartitionSet_zero (f : ℕ → Set α) (a : α) : memPartitionSet f 0 a = univ := by
+theorem memPartitionSet_zero (f : ℕ → Set α) (a : α) : memPartitionSet f 0 a = univ := by
   simp [memPartitionSet]
 
-lemma memPartitionSet_succ (f : ℕ → Set α) (n : ℕ) (a : α) [Decidable (a ∈ f n)] :
+theorem memPartitionSet_succ (f : ℕ → Set α) (n : ℕ) (a : α) [Decidable (a ∈ f n)] :
     memPartitionSet f (n + 1) a
       = if a ∈ f n then memPartitionSet f n a ∩ f n else memPartitionSet f n a \ f n := by
   simp [memPartitionSet]
 
-lemma memPartitionSet_mem (f : ℕ → Set α) (n : ℕ) (a : α) :
+theorem memPartitionSet_mem (f : ℕ → Set α) (n : ℕ) (a : α) :
     memPartitionSet f n a ∈ memPartition f n := by
   induction n with
   | zero => simp [memPartitionSet]
@@ -129,7 +129,7 @@ lemma memPartitionSet_mem (f : ℕ → Set α) (n : ℕ) (a : α) :
     refine ⟨memPartitionSet f n a, ?_⟩
     split_ifs <;> simp [ih]
 
-lemma mem_memPartitionSet (f : ℕ → Set α) (n : ℕ) (a : α) : a ∈ memPartitionSet f n a := by
+theorem mem_memPartitionSet (f : ℕ → Set α) (n : ℕ) (a : α) : a ∈ memPartitionSet f n a := by
   induction n with
   | zero => simp [memPartitionSet]
   | succ n ih =>
@@ -137,7 +137,7 @@ lemma mem_memPartitionSet (f : ℕ → Set α) (n : ℕ) (a : α) : a ∈ memPar
     rw [memPartitionSet_succ]
     split_ifs with h <;> exact ⟨ih, h⟩
 
-lemma memPartitionSet_eq_iff {f : ℕ → Set α} {n : ℕ} (a : α) {s : Set α}
+theorem memPartitionSet_eq_iff {f : ℕ → Set α} {n : ℕ} (a : α) {s : Set α}
     (hs : s ∈ memPartition f n) :
     memPartitionSet f n a = s ↔ a ∈ s := by
   refine ⟨fun h ↦ h ▸ mem_memPartitionSet f n a, fun h ↦ ?_⟩
@@ -148,7 +148,7 @@ lemma memPartitionSet_eq_iff {f : ℕ → Set α} {n : ℕ} (a : α) {s : Set α
   rw [not_disjoint_iff_nonempty_inter]
   exact ⟨a, h, mem_memPartitionSet f n a⟩
 
-lemma memPartitionSet_of_mem {f : ℕ → Set α} {n : ℕ} {a : α} {s : Set α}
+theorem memPartitionSet_of_mem {f : ℕ → Set α} {n : ℕ} {a : α} {s : Set α}
     (hs : s ∈ memPartition f n) (ha : a ∈ s) :
     memPartitionSet f n a = s :=
   (memPartitionSet_eq_iff a hs).mpr ha

@@ -55,9 +55,9 @@ def ofLinearEquiv [Semiring R] [AddCommMonoid α] [Module R α] : (m → n → �
   __ := ofAddEquiv
   map_smul' _ _ := rfl
 
-@[simp] lemma coe_ofLinearEquiv [Semiring R] [AddCommMonoid α] [Module R α] :
+@[simp] theorem coe_ofLinearEquiv [Semiring R] [AddCommMonoid α] [Module R α] :
     ⇑(ofLinearEquiv _ : (m → n → α) ≃ₗ[R] Matrix m n α) = of := rfl
-@[simp] lemma coe_ofLinearEquiv_symm [Semiring R] [AddCommMonoid α] [Module R α] :
+@[simp] theorem coe_ofLinearEquiv_symm [Semiring R] [AddCommMonoid α] [Module R α] :
     ⇑((ofLinearEquiv _).symm : Matrix m n α ≃ₗ[R] (m → n → α)) = of.symm := rfl
 
 end
@@ -98,14 +98,14 @@ section One
 
 variable [Zero α] [One α]
 
-lemma zero_le_one_elem [Preorder α] [ZeroLEOneClass α] (i j : n) :
+theorem zero_le_one_elem [Preorder α] [ZeroLEOneClass α] (i j : n) :
     0 ≤ (1 : Matrix n n α) i j := by
   by_cases hi : i = j
   · subst hi
     simp
   · simp [hi]
 
-lemma zero_le_one_row [Preorder α] [ZeroLEOneClass α] (i : n) :
+theorem zero_le_one_row [Preorder α] [ZeroLEOneClass α] (i : n) :
     0 ≤ (1 : Matrix n n α) i :=
   zero_le_one_elem i
 
@@ -269,7 +269,7 @@ def entryAddHom (i : m) (j : n) : AddHom (Matrix m n α) α where
 
 -- It is necessary to spell out the name of the coercion explicitly on the RHS
 -- for unification to succeed
-lemma entryAddHom_eq_comp {i : m} {j : n} :
+theorem entryAddHom_eq_comp {i : m} {j : n} :
     entryAddHom α i j =
       ((Pi.evalAddHom (fun _ => α) j).comp (Pi.evalAddHom _ i)).comp
         (AddHomClass.toAddHom ofAddEquiv.symm) :=
@@ -294,17 +294,17 @@ def entryAddMonoidHom (i : m) (j : n) : Matrix m n α →+ α where
 
 -- It is necessary to spell out the name of the coercion explicitly on the RHS
 -- for unification to succeed
-lemma entryAddMonoidHom_eq_comp {i : m} {j : n} :
+theorem entryAddMonoidHom_eq_comp {i : m} {j : n} :
     entryAddMonoidHom α i j =
       ((Pi.evalAddMonoidHom (fun _ => α) j).comp (Pi.evalAddMonoidHom _ i)).comp
         (AddMonoidHomClass.toAddMonoidHom ofAddEquiv.symm) := by
   rfl
 
-@[simp] lemma evalAddMonoidHom_comp_diagAddMonoidHom (i : m) :
+@[simp] theorem evalAddMonoidHom_comp_diagAddMonoidHom (i : m) :
     (Pi.evalAddMonoidHom _ i).comp (diagAddMonoidHom m α) = entryAddMonoidHom α i i := by
   simp [AddMonoidHom.ext_iff]
 
-@[simp] lemma entryAddMonoidHom_toAddHom {i : m} {j : n} :
+@[simp] theorem entryAddMonoidHom_toAddHom {i : m} {j : n} :
   (entryAddMonoidHom α i j : AddHom _ _) = entryAddHom α i j := rfl
 
 end AddMonoidHom
@@ -327,19 +327,19 @@ def entryLinearMap (i : m) (j : n) :
 
 -- It is necessary to spell out the name of the coercion explicitly on the RHS
 -- for unification to succeed
-lemma entryLinearMap_eq_comp {i : m} {j : n} :
+theorem entryLinearMap_eq_comp {i : m} {j : n} :
     entryLinearMap R α i j =
       LinearMap.proj j ∘ₗ LinearMap.proj i ∘ₗ (ofLinearEquiv R).symm.toLinearMap := by
   rfl
 
-@[simp] lemma proj_comp_diagLinearMap (i : m) :
+@[simp] theorem proj_comp_diagLinearMap (i : m) :
     LinearMap.proj i ∘ₗ diagLinearMap m R α = entryLinearMap R α i i := by
   simp [LinearMap.ext_iff]
 
-@[simp] lemma entryLinearMap_toAddMonoidHom {i : m} {j : n} :
+@[simp] theorem entryLinearMap_toAddMonoidHom {i : m} {j : n} :
     (entryLinearMap R α i j : _ →+ _) = entryAddMonoidHom α i j := rfl
 
-@[simp] lemma entryLinearMap_toAddHom {i : m} {j : n} :
+@[simp] theorem entryLinearMap_toAddHom {i : m} {j : n} :
     (entryLinearMap R α i j : AddHom _ _) = entryAddHom α i j := rfl
 
 end LinearMap
@@ -398,7 +398,7 @@ theorem mapMatrix_comp (f : β →+ γ) (g : α →+ β) :
     f.mapMatrix.comp g.mapMatrix = ((f.comp g).mapMatrix : Matrix m n α →+ _) :=
   rfl
 
-@[simp] lemma entryAddMonoidHom_comp_mapMatrix (f : α →+ β) (i : m) (j : n) :
+@[simp] theorem entryAddMonoidHom_comp_mapMatrix (f : α →+ β) (i : m) (j : n) :
     (entryAddMonoidHom β i j).comp f.mapMatrix = f.comp (entryAddMonoidHom α i j) := rfl
 
 end AddMonoidHom
@@ -429,7 +429,7 @@ theorem mapMatrix_trans (f : α ≃+ β) (g : β ≃+ γ) :
     f.mapMatrix.trans g.mapMatrix = ((f.trans g).mapMatrix : Matrix m n α ≃+ _) :=
   rfl
 
-@[simp] lemma entryAddHom_comp_mapMatrix (f : α ≃+ β) (i : m) (j : n) :
+@[simp] theorem entryAddHom_comp_mapMatrix (f : α ≃+ β) (i : m) (j : n) :
     (entryAddHom β i j).comp (AddHomClass.toAddHom f.mapMatrix) =
       (f : AddHom α β).comp (entryAddHom _ i j) := rfl
 
@@ -457,7 +457,7 @@ theorem mapMatrix_comp (f : β →ₗ[R] γ) (g : α →ₗ[R] β) :
     f.mapMatrix.comp g.mapMatrix = ((f.comp g).mapMatrix : Matrix m n α →ₗ[R] _) :=
   rfl
 
-@[simp] lemma entryLinearMap_comp_mapMatrix (f : α →ₗ[R] β) (i : m) (j : n) :
+@[simp] theorem entryLinearMap_comp_mapMatrix (f : α →ₗ[R] β) (i : m) (j : n) :
     entryLinearMap R _ i j ∘ₗ f.mapMatrix = f ∘ₗ entryLinearMap R _ i j := rfl
 
 end LinearMap
@@ -490,11 +490,11 @@ theorem mapMatrix_trans (f : α ≃ₗ[R] β) (g : β ≃ₗ[R] γ) :
     f.mapMatrix.trans g.mapMatrix = ((f.trans g).mapMatrix : Matrix m n α ≃ₗ[R] _) :=
   rfl
 
-@[simp] lemma mapMatrix_toLinearMap (f : α ≃ₗ[R] β) :
+@[simp] theorem mapMatrix_toLinearMap (f : α ≃ₗ[R] β) :
     (f.mapMatrix : _ ≃ₗ[R] Matrix m n β).toLinearMap = f.toLinearMap.mapMatrix := by
   rfl
 
-@[simp] lemma entryLinearMap_comp_mapMatrix (f : α ≃ₗ[R] β) (i : m) (j : n) :
+@[simp] theorem entryLinearMap_comp_mapMatrix (f : α ≃ₗ[R] β) (i : m) (j : n) :
     entryLinearMap R _ i j ∘ₗ f.mapMatrix.toLinearMap =
       f.toLinearMap ∘ₗ entryLinearMap R _ i j := by
   simp only [mapMatrix_toLinearMap, LinearMap.entryLinearMap_comp_mapMatrix]

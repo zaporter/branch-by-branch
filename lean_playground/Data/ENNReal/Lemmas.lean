@@ -8,9 +8,9 @@ import Mathlib.Data.ENNReal.Basic
 import Mathlib.Data.Finset.Lattice.Fold
 
 /-!
-# Some lemmas on extended non-negative reals
+# Some theorems on extended non-negative reals
 
-These are some lemmas split off from `ENNReal.Basic` because they need a lot more imports.
+These are some theorems split off from `ENNReal.Basic` because they need a lot more imports.
 They are probably good targets for further cleanup or moves.
 -/
 

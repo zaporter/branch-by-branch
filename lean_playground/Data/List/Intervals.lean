@@ -14,7 +14,7 @@ This file defines intervals of naturals. `List.Ico m n` is the list of integers 
 and strictly less than `n`.
 
 ## TODO
-- Define `Ioo` and `Icc`, state basic lemmas about them.
+- Define `Ioo` and `Icc`, state basic theorems about them.
 - Also do the versions for integers?
 - One could generalise even further, defining 'locally finite partial orders', for which
   `Set.Ico a b` is `[Finite]`, and 'locally finite total orders', for which there is a list model.

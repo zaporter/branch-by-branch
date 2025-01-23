@@ -9,7 +9,7 @@ import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 /-!
 # Factorial with big operators
 
-This file contains some lemmas on factorials in combination with big operators.
+This file contains some theorems on factorials in combination with big operators.
 
 While in terms of semantics they could be in the `Basic.lean` file, importing
 `Algebra.BigOperators.Group.Finset` leads to a cyclic import.
@@ -21,7 +21,7 @@ open Finset Nat
 
 namespace Nat
 
-lemma monotone_factorial : Monotone factorial := fun _ _ => factorial_le
+theorem monotone_factorial : Monotone factorial := fun _ _ => factorial_le
 
 variable {α : Type*} (s : Finset α) (f : α → ℕ)
 

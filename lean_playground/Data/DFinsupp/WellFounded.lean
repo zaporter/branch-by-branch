@@ -56,7 +56,7 @@ section Zero
 
 variable [∀ i, Zero (α i)] (r : ι → ι → Prop) (s : ∀ i, α i → α i → Prop)
 
-/-- This key lemma says that if a finitely supported dependent function `x₀` is obtained by merging
+/-- This key theorem says that if a finitely supported dependent function `x₀` is obtained by merging
   two such functions `x₁` and `x₂`, and if we evolve `x₀` down the `DFinsupp.Lex` relation one
   step and get `x`, we can always evolve one of `x₁` and `x₂` down the `DFinsupp.Lex` relation
   one step while keeping the other unchanged, and merge them back (possibly in a different way)

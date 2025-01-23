@@ -41,7 +41,7 @@ def quotientZMultiplesEquivZMod (a : ℤ) : ℤ ⧸ AddSubgroup.zmultiples a ≃
   (quotientAddEquivOfEq (zmultiples_natAbs a)).symm.trans (quotientZMultiplesNatEquivZMod a.natAbs)
 
 @[simp]
-lemma index_zmultiples (a : ℤ) : (AddSubgroup.zmultiples a).index = a.natAbs := by
+theorem index_zmultiples (a : ℤ) : (AddSubgroup.zmultiples a).index = a.natAbs := by
   rw [AddSubgroup.index, Nat.card_congr (quotientZMultiplesEquivZMod a).toEquiv, Nat.card_zmod]
 
 end Int
@@ -162,12 +162,12 @@ theorem Nat.card_zpowers : Nat.card (zpowers a) = orderOf a := by
 variable {a}
 
 @[to_additive (attr := simp)]
-lemma finite_zpowers : (zpowers a : Set α).Finite ↔ IsOfFinOrder a := by
+theorem finite_zpowers : (zpowers a : Set α).Finite ↔ IsOfFinOrder a := by
   simp only [← orderOf_pos_iff, ← Nat.card_zpowers, Nat.card_pos_iff, ← SetLike.coe_sort_coe,
     nonempty_coe_sort, Nat.card_pos_iff, Set.finite_coe_iff, Subgroup.coe_nonempty, true_and]
 
 @[to_additive (attr := simp)]
-lemma infinite_zpowers : (zpowers a : Set α).Infinite ↔ ¬IsOfFinOrder a := finite_zpowers.not
+theorem infinite_zpowers : (zpowers a : Set α).Infinite ↔ ¬IsOfFinOrder a := finite_zpowers.not
 
 @[to_additive]
 protected alias ⟨_, IsOfFinOrder.finite_zpowers⟩ := finite_zpowers
@@ -185,11 +185,11 @@ noncomputable def quotientEquivSigmaZMod :
   (selfEquivSigmaOrbits (zpowers g) (G ⧸ H)).trans
     (sigmaCongrRight fun q => orbitZPowersEquiv g q.out)
 
-lemma quotientEquivSigmaZMod_symm_apply (q : orbitRel.Quotient (zpowers g) (G ⧸ H))
+theorem quotientEquivSigmaZMod_symm_apply (q : orbitRel.Quotient (zpowers g) (G ⧸ H))
     (k : ZMod (minimalPeriod (g • ·) q.out)) :
     (quotientEquivSigmaZMod H g).symm ⟨q, k⟩ = g ^ (cast k : ℤ) • q.out := rfl
 
-lemma quotientEquivSigmaZMod_apply (q : orbitRel.Quotient (zpowers g) (G ⧸ H)) (k : ℤ) :
+theorem quotientEquivSigmaZMod_apply (q : orbitRel.Quotient (zpowers g) (G ⧸ H)) (k : ℤ) :
     quotientEquivSigmaZMod H g (g ^ k • q.out) = ⟨q, k⟩ := by
   rw [apply_eq_iff_eq_symm_apply, quotientEquivSigmaZMod_symm_apply, ZMod.coe_intCast,
     zpow_smul_mod_minimalPeriod]

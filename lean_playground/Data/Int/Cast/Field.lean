@@ -23,7 +23,7 @@ open Nat
 
 variable {α : Type*}
 
-/-- Auxiliary lemma for norm_cast to move the cast `-↑n` upwards to `↑-↑n`.
+/-- Auxiliary theorem for norm_cast to move the cast `-↑n` upwards to `↑-↑n`.
 
 (The restriction to `DivisionRing` is necessary, otherwise this would also apply in the case where
 `R = ℤ` and cause nontermination.)

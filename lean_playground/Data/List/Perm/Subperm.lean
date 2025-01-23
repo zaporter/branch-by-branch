@@ -31,17 +31,17 @@ attribute [trans] Subperm.trans
 end Subperm
 
 /-- See also `List.subperm_ext_iff`. -/
-lemma subperm_iff_count [DecidableEq α] : l₁ <+~ l₂ ↔ ∀ a, count a l₁ ≤ count a l₂ :=
+theorem subperm_iff_count [DecidableEq α] : l₁ <+~ l₂ ↔ ∀ a, count a l₁ ≤ count a l₂ :=
   subperm_ext_iff.trans <| forall_congr' fun a ↦ by
     by_cases ha : a ∈ l₁ <;> simp [ha, count_eq_zero_of_not_mem]
 
-lemma subperm_iff : l₁ <+~ l₂ ↔ ∃ l, l ~ l₂ ∧ l₁ <+ l := by
+theorem subperm_iff : l₁ <+~ l₂ ↔ ∃ l, l ~ l₂ ∧ l₁ <+ l := by
   refine ⟨?_, fun ⟨l, h₁, h₂⟩ ↦ h₂.subperm.trans h₁.subperm⟩
   rintro ⟨l, h₁, h₂⟩
   obtain ⟨l', h₂⟩ := h₂.exists_perm_append
   exact ⟨l₁ ++ l', (h₂.trans (h₁.append_right _)).symm, (prefix_append _ _).sublist⟩
 
-@[simp] lemma subperm_singleton_iff : l <+~ [a] ↔ l = [] ∨ l = [a] := by
+@[simp] theorem subperm_singleton_iff : l <+~ [a] ↔ l = [] ∨ l = [a] := by
   constructor
   · rw [subperm_iff]
     rintro ⟨s, hla, h⟩
@@ -49,7 +49,7 @@ lemma subperm_iff : l₁ <+~ l₂ ↔ ∃ l, l ~ l₂ ∧ l₁ <+ l := by
   · rintro (rfl | rfl)
     exacts [nil_subperm, Subperm.refl _]
 
-lemma subperm_cons_self : l <+~ a :: l := ⟨l, Perm.refl _, sublist_cons_self _ _⟩
+theorem subperm_cons_self : l <+~ a :: l := ⟨l, Perm.refl _, sublist_cons_self _ _⟩
 
 protected alias ⟨subperm.of_cons, subperm.cons⟩ := subperm_cons
 

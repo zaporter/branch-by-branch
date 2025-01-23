@@ -78,12 +78,12 @@ theorem sdiff_union_of_subset {s₁ s₂ : Finset α} (h : s₁ ⊆ s₂) : s₂
   (union_comm _ _).trans (union_sdiff_of_subset h)
 
 /-- See also `Finset.sdiff_inter_right_comm`. -/
-lemma inter_sdiff_assoc (s t u : Finset α) : (s ∩ t) \ u = s ∩ (t \ u) := inf_sdiff_assoc ..
+theorem inter_sdiff_assoc (s t u : Finset α) : (s ∩ t) \ u = s ∩ (t \ u) := inf_sdiff_assoc ..
 
 /-- See also `Finset.inter_sdiff_assoc`. -/
-lemma sdiff_inter_right_comm (s t u : Finset α) : s \ t ∩ u = (s ∩ u) \ t := sdiff_inf_right_comm ..
+theorem sdiff_inter_right_comm (s t u : Finset α) : s \ t ∩ u = (s ∩ u) \ t := sdiff_inf_right_comm ..
 
-lemma inter_sdiff_left_comm (s t u : Finset α) : s ∩ (t \ u) = t ∩ (s \ u) := inf_sdiff_left_comm ..
+theorem inter_sdiff_left_comm (s t u : Finset α) : s ∩ (t \ u) = t ∩ (s \ u) := inf_sdiff_left_comm ..
 
 @[deprecated inter_sdiff_assoc (since := "2024-05-01")]
 theorem inter_sdiff (s t u : Finset α) : s ∩ (t \ u) = (s ∩ t) \ u := (inter_sdiff_assoc _ _ _).symm
@@ -173,17 +173,17 @@ theorem insert_sdiff_of_mem (s : Finset α) {x : α} (h : x ∈ t) : insert x s 
   rw [← coe_inj, coe_sdiff, coe_sdiff, coe_insert]
   exact Set.insert_diff_of_mem _ h
 
-@[simp] lemma insert_sdiff_cancel (ha : a ∉ s) : insert a s \ s = {a} := by
+@[simp] theorem insert_sdiff_cancel (ha : a ∉ s) : insert a s \ s = {a} := by
   rw [insert_sdiff_of_not_mem _ ha, Finset.sdiff_self, insert_emptyc_eq]
 
 @[simp]
 theorem insert_sdiff_insert (s t : Finset α) (x : α) : insert x s \ insert x t = s \ insert x t :=
   insert_sdiff_of_mem _ (mem_insert_self _ _)
 
-lemma insert_sdiff_insert' (hab : a ≠ b) (ha : a ∉ s) : insert a s \ insert b s = {a} := by
+theorem insert_sdiff_insert' (hab : a ≠ b) (ha : a ∉ s) : insert a s \ insert b s = {a} := by
   ext; aesop
 
-lemma cons_sdiff_cons (hab : a ≠ b) (ha hb) : s.cons a ha \ s.cons b hb = {a} := by
+theorem cons_sdiff_cons (hab : a ≠ b) (ha hb) : s.cons a ha \ s.cons b hb = {a} := by
   rw [cons_eq_insert, cons_eq_insert, insert_sdiff_insert' hab ha]
 
 theorem sdiff_insert_of_not_mem {x : α} (h : x ∉ s) (t : Finset α) : s \ insert x t = s \ t := by

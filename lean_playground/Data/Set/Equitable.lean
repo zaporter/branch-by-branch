@@ -59,7 +59,7 @@ section LinearOrder
 variable [LinearOrder β] [Add β] [One β] {s : Set α} {f : α → β}
 
 @[simp]
-lemma not_equitableOn : ¬s.EquitableOn f ↔ ∃ a ∈ s, ∃ b ∈ s, f b + 1 < f a := by
+theorem not_equitableOn : ¬s.EquitableOn f ↔ ∃ a ∈ s, ∃ b ∈ s, f b + 1 < f a := by
   simp [EquitableOn]
 
 end LinearOrder

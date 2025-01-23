@@ -110,23 +110,23 @@ def sumLexLift : α₁ ⊕ α₂ → β₁ ⊕ β₂ → Finset (γ₁ ⊕ γ₂
   | inr a, inr b => (f₂ a b).map ⟨_, inr_injective⟩
 
 @[simp]
-lemma sumLexLift_inl_inl (a : α₁) (b : β₁) :
+theorem sumLexLift_inl_inl (a : α₁) (b : β₁) :
     sumLexLift f₁ f₂ g₁ g₂ (inl a) (inl b) = (f₁ a b).map Embedding.inl := rfl
 
 @[simp]
-lemma sumLexLift_inl_inr (a : α₁) (b : β₂) :
+theorem sumLexLift_inl_inr (a : α₁) (b : β₂) :
     sumLexLift f₁ f₂ g₁ g₂ (inl a) (inr b) = (g₁ a b).disjSum (g₂ a b) := rfl
 
 @[simp]
-lemma sumLexLift_inr_inl (a : α₂) (b : β₁) : sumLexLift f₁ f₂ g₁ g₂ (inr a) (inl b) = ∅ := rfl
+theorem sumLexLift_inr_inl (a : α₂) (b : β₁) : sumLexLift f₁ f₂ g₁ g₂ (inr a) (inl b) = ∅ := rfl
 
 @[simp]
-lemma sumLexLift_inr_inr (a : α₂) (b : β₂) :
+theorem sumLexLift_inr_inr (a : α₂) (b : β₂) :
     sumLexLift f₁ f₂ g₁ g₂ (inr a) (inr b) = (f₂ a b).map ⟨_, inr_injective⟩ := rfl
 
 variable {f₁ g₁ f₂ g₂ f₁' g₁' f₂' g₂'} {a : α₁ ⊕ α₂} {b : β₁ ⊕ β₂} {c : γ₁ ⊕ γ₂}
 
-lemma mem_sumLexLift :
+theorem mem_sumLexLift :
     c ∈ sumLexLift f₁ f₂ g₁ g₂ a b ↔
       (∃ a₁ b₁ c₁, a = inl a₁ ∧ b = inl b₁ ∧ c = inl c₁ ∧ c₁ ∈ f₁ a₁ b₁) ∨
         (∃ a₁ b₂ c₁, a = inl a₁ ∧ b = inr b₂ ∧ c = inl c₁ ∧ c₁ ∈ g₁ a₁ b₂) ∨
@@ -153,26 +153,26 @@ lemma mem_sumLexLift :
     · exact inr_mem_disjSum.2 hc
     · exact mem_map_of_mem _ hc
 
-lemma inl_mem_sumLexLift {c₁ : γ₁} :
+theorem inl_mem_sumLexLift {c₁ : γ₁} :
     inl c₁ ∈ sumLexLift f₁ f₂ g₁ g₂ a b ↔
       (∃ a₁ b₁, a = inl a₁ ∧ b = inl b₁ ∧ c₁ ∈ f₁ a₁ b₁) ∨
         ∃ a₁ b₂, a = inl a₁ ∧ b = inr b₂ ∧ c₁ ∈ g₁ a₁ b₂ := by
   simp [mem_sumLexLift]
 
-lemma inr_mem_sumLexLift {c₂ : γ₂} :
+theorem inr_mem_sumLexLift {c₂ : γ₂} :
     inr c₂ ∈ sumLexLift f₁ f₂ g₁ g₂ a b ↔
       (∃ a₁ b₂, a = inl a₁ ∧ b = inr b₂ ∧ c₂ ∈ g₂ a₁ b₂) ∨
         ∃ a₂ b₂, a = inr a₂ ∧ b = inr b₂ ∧ c₂ ∈ f₂ a₂ b₂ := by
   simp [mem_sumLexLift]
 
-lemma sumLexLift_mono (hf₁ : ∀ a b, f₁ a b ⊆ f₁' a b) (hf₂ : ∀ a b, f₂ a b ⊆ f₂' a b)
+theorem sumLexLift_mono (hf₁ : ∀ a b, f₁ a b ⊆ f₁' a b) (hf₂ : ∀ a b, f₂ a b ⊆ f₂' a b)
     (hg₁ : ∀ a b, g₁ a b ⊆ g₁' a b) (hg₂ : ∀ a b, g₂ a b ⊆ g₂' a b) (a : α₁ ⊕ α₂)
     (b : β₁ ⊕ β₂) : sumLexLift f₁ f₂ g₁ g₂ a b ⊆ sumLexLift f₁' f₂' g₁' g₂' a b := by
   cases a <;> cases b
   exacts [map_subset_map.2 (hf₁ _ _), disjSum_mono (hg₁ _ _) (hg₂ _ _), Subset.rfl,
     map_subset_map.2 (hf₂ _ _)]
 
-lemma sumLexLift_eq_empty :
+theorem sumLexLift_eq_empty :
     sumLexLift f₁ f₂ g₁ g₂ a b = ∅ ↔
       (∀ a₁ b₁, a = inl a₁ → b = inl b₁ → f₁ a₁ b₁ = ∅) ∧
         (∀ a₁ b₂, a = inl a₁ → b = inr b₂ → g₁ a₁ b₂ = ∅ ∧ g₂ a₁ b₂ = ∅) ∧
@@ -186,7 +186,7 @@ lemma sumLexLift_eq_empty :
   · rfl
   · exact map_eq_empty.2 (h.2.2 _ _ rfl rfl)
 
-lemma sumLexLift_nonempty :
+theorem sumLexLift_nonempty :
     (sumLexLift f₁ f₂ g₁ g₂ a b).Nonempty ↔
       (∃ a₁ b₁, a = inl a₁ ∧ b = inl b₁ ∧ (f₁ a₁ b₁).Nonempty) ∨
         (∃ a₁ b₂, a = inl a₁ ∧ b = inr b₂ ∧ ((g₁ a₁ b₂).Nonempty ∨ (g₂ a₁ b₂).Nonempty)) ∨
@@ -319,59 +319,59 @@ instance locallyFiniteOrder : LocallyFiniteOrder (α ⊕ₗ β) where
 
 variable (a a₁ a₂ : α) (b b₁ b₂ : β)
 
-lemma Icc_inl_inl :
+theorem Icc_inl_inl :
     Icc (inlₗ a₁ : α ⊕ₗ β) (inlₗ a₂) = (Icc a₁ a₂).map (Embedding.inl.trans toLex.toEmbedding) := by
   rw [← Finset.map_map]; rfl
 
-lemma Ico_inl_inl :
+theorem Ico_inl_inl :
     Ico (inlₗ a₁ : α ⊕ₗ β) (inlₗ a₂) = (Ico a₁ a₂).map (Embedding.inl.trans toLex.toEmbedding) := by
   rw [← Finset.map_map]; rfl
 
-lemma Ioc_inl_inl :
+theorem Ioc_inl_inl :
     Ioc (inlₗ a₁ : α ⊕ₗ β) (inlₗ a₂) = (Ioc a₁ a₂).map (Embedding.inl.trans toLex.toEmbedding) := by
   rw [← Finset.map_map]; rfl
 
-lemma Ioo_inl_inl :
+theorem Ioo_inl_inl :
     Ioo (inlₗ a₁ : α ⊕ₗ β) (inlₗ a₂) = (Ioo a₁ a₂).map (Embedding.inl.trans toLex.toEmbedding) := by
   rw [← Finset.map_map]; rfl
 
 @[simp]
-lemma Icc_inl_inr : Icc (inlₗ a) (inrₗ b) = ((Ici a).disjSum (Iic b)).map toLex.toEmbedding := rfl
+theorem Icc_inl_inr : Icc (inlₗ a) (inrₗ b) = ((Ici a).disjSum (Iic b)).map toLex.toEmbedding := rfl
 
 @[simp]
-lemma Ico_inl_inr : Ico (inlₗ a) (inrₗ b) = ((Ici a).disjSum (Iio b)).map toLex.toEmbedding := rfl
+theorem Ico_inl_inr : Ico (inlₗ a) (inrₗ b) = ((Ici a).disjSum (Iio b)).map toLex.toEmbedding := rfl
 
 @[simp]
-lemma Ioc_inl_inr : Ioc (inlₗ a) (inrₗ b) = ((Ioi a).disjSum (Iic b)).map toLex.toEmbedding := rfl
+theorem Ioc_inl_inr : Ioc (inlₗ a) (inrₗ b) = ((Ioi a).disjSum (Iic b)).map toLex.toEmbedding := rfl
 
 @[simp]
-lemma Ioo_inl_inr : Ioo (inlₗ a) (inrₗ b) = ((Ioi a).disjSum (Iio b)).map toLex.toEmbedding := rfl
+theorem Ioo_inl_inr : Ioo (inlₗ a) (inrₗ b) = ((Ioi a).disjSum (Iio b)).map toLex.toEmbedding := rfl
 
 @[simp]
-lemma Icc_inr_inl : Icc (inrₗ b) (inlₗ a) = ∅ := rfl
+theorem Icc_inr_inl : Icc (inrₗ b) (inlₗ a) = ∅ := rfl
 
 @[simp]
-lemma Ico_inr_inl : Ico (inrₗ b) (inlₗ a) = ∅ := rfl
+theorem Ico_inr_inl : Ico (inrₗ b) (inlₗ a) = ∅ := rfl
 
 @[simp]
-lemma Ioc_inr_inl : Ioc (inrₗ b) (inlₗ a) = ∅ := rfl
+theorem Ioc_inr_inl : Ioc (inrₗ b) (inlₗ a) = ∅ := rfl
 
 @[simp]
-lemma Ioo_inr_inl : Ioo (inrₗ b) (inlₗ a) = ∅ := rfl
+theorem Ioo_inr_inl : Ioo (inrₗ b) (inlₗ a) = ∅ := rfl
 
-lemma Icc_inr_inr :
+theorem Icc_inr_inr :
     Icc (inrₗ b₁ : α ⊕ₗ β) (inrₗ b₂) = (Icc b₁ b₂).map (Embedding.inr.trans toLex.toEmbedding) := by
   rw [← Finset.map_map]; rfl
 
-lemma Ico_inr_inr :
+theorem Ico_inr_inr :
     Ico (inrₗ b₁ : α ⊕ₗ β) (inrₗ b₂) = (Ico b₁ b₂).map (Embedding.inr.trans toLex.toEmbedding) := by
   rw [← Finset.map_map]; rfl
 
-lemma Ioc_inr_inr :
+theorem Ioc_inr_inr :
     Ioc (inrₗ b₁ : α ⊕ₗ β) (inrₗ b₂) = (Ioc b₁ b₂).map (Embedding.inr.trans toLex.toEmbedding) := by
   rw [← Finset.map_map]; rfl
 
-lemma Ioo_inr_inr :
+theorem Ioo_inr_inr :
     Ioo (inrₗ b₁ : α ⊕ₗ β) (inrₗ b₂) = (Ioo b₁ b₂).map (Embedding.inr.trans toLex.toEmbedding) := by
   rw [← Finset.map_map]; rfl
 

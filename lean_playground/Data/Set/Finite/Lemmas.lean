@@ -12,7 +12,7 @@ import Mathlib.Logic.Embedding.Set
 /-!
 # Lemmas on finiteness of sets
 
-This file should contain lemmas that prove some result under the *assumption* of `Set.Finite`.
+This file should contain theorems that prove some result under the *assumption* of `Set.Finite`.
 If your proof has as *result* `Set.Finite`, then it should go to a more specific file.
 
 ## Tags

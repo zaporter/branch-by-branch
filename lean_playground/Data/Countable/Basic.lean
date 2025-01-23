@@ -42,7 +42,7 @@ theorem nonempty_embedding_nat (α) [Countable α] : Nonempty (α ↪ ℕ) :=
 protected theorem Function.Embedding.countable [Countable β] (f : α ↪ β) : Countable α :=
   f.injective.countable
 
-protected lemma Function.Embedding.uncountable [Uncountable α] (f : α ↪ β) : Uncountable β :=
+protected theorem Function.Embedding.uncountable [Uncountable α] (f : α ↪ β) : Uncountable β :=
   f.injective.uncountable
 
 end Embedding
@@ -92,17 +92,17 @@ instance [Nonempty α] [Uncountable β] : Uncountable (α × β) := by
   inhabit α
   exact (Prod.mk.inj_left default).uncountable
 
-lemma countable_left_of_prod_of_nonempty [Nonempty β] (h : Countable (α × β)) : Countable α := by
+theorem countable_left_of_prod_of_nonempty [Nonempty β] (h : Countable (α × β)) : Countable α := by
   contrapose h
   rw [not_countable_iff] at *
   infer_instance
 
-lemma countable_right_of_prod_of_nonempty [Nonempty α] (h : Countable (α × β)) : Countable β := by
+theorem countable_right_of_prod_of_nonempty [Nonempty α] (h : Countable (α × β)) : Countable β := by
   contrapose h
   rw [not_countable_iff] at *
   infer_instance
 
-lemma countable_prod_swap [Countable (α × β)] : Countable (β × α) :=
+theorem countable_prod_swap [Countable (α × β)] : Countable (β × α) :=
   Countable.of_equiv _ (Equiv.prodComm α β)
 
 instance [Countable α] [∀ a, Countable (π a)] : Countable (Sigma π) := by
@@ -110,7 +110,7 @@ instance [Countable α] [∀ a, Countable (π a)] : Countable (Sigma π) := by
   choose g hg using fun a => exists_injective_nat (π a)
   exact ((Equiv.sigmaEquivProd ℕ ℕ).injective.comp <| hf.sigma_map hg).countable
 
-lemma Sigma.uncountable (a : α) [Uncountable (π a)] : Uncountable (Sigma π) :=
+theorem Sigma.uncountable (a : α) [Uncountable (π a)] : Uncountable (Sigma π) :=
   (sigma_mk_injective (i := a)).uncountable
 
 instance [Nonempty α] [∀ a, Uncountable (π a)] : Uncountable (Sigma π) := by

@@ -152,7 +152,7 @@ theorem filter_False {h} (s : Finset α) : @filter _ (fun _ => False) h s = ∅ 
 
 variable {p q}
 
-lemma filter_eq_self : s.filter p = s ↔ ∀ x ∈ s, p x := by simp [Finset.ext_iff]
+theorem filter_eq_self : s.filter p = s ↔ ∀ x ∈ s, p x := by simp [Finset.ext_iff]
 
 theorem filter_eq_empty_iff : s.filter p = ∅ ↔ ∀ ⦃x⦄, x ∈ s → ¬p x := by simp [Finset.ext_iff]
 
@@ -202,7 +202,7 @@ theorem disjoint_filter_filter {s t : Finset α}
     Disjoint s t → Disjoint (s.filter p) (t.filter q) :=
   Disjoint.mono (filter_subset _ _) (filter_subset _ _)
 
-lemma _root_.Set.pairwiseDisjoint_filter [DecidableEq β] (f : α → β) (s : Set β) (t : Finset α) :
+theorem _root_.Set.pairwiseDisjoint_filter [DecidableEq β] (f : α → β) (s : Set β) (t : Finset α) :
     s.PairwiseDisjoint fun x ↦ t.filter (f · = x) := by
   rintro i - j - h u hi hj x hx
   obtain ⟨-, rfl⟩ : x ∈ t ∧ f x = i := by simpa using hi hx
@@ -220,10 +220,10 @@ theorem disjoint_filter_and_not_filter :
 
 variable {p q}
 
-lemma filter_inj : s.filter p = t.filter p ↔ ∀ ⦃a⦄, p a → (a ∈ s ↔ a ∈ t) := by
+theorem filter_inj : s.filter p = t.filter p ↔ ∀ ⦃a⦄, p a → (a ∈ s ↔ a ∈ t) := by
   simp [Finset.ext_iff]
 
-lemma filter_inj' : s.filter p = s.filter q ↔ ∀ ⦃a⦄, a ∈ s → (p a ↔ q a) := by
+theorem filter_inj' : s.filter p = s.filter q ↔ ∀ ⦃a⦄, a ∈ s → (p a ↔ q a) := by
   simp [Finset.ext_iff]
 
 end Filter

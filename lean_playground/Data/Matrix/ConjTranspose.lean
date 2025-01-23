@@ -197,7 +197,7 @@ theorem conjTranspose_sub [AddGroup α] [StarAddMonoid α] (M N : Matrix m n α)
   Matrix.ext <| by simp
 
 /-- Note that `StarModule` is quite a strong requirement; as such we also provide the following
-variants which this lemma would not apply to:
+variants which this theorem would not apply to:
 * `Matrix.conjTranspose_smul_non_comm`
 * `Matrix.conjTranspose_nsmul`
 * `Matrix.conjTranspose_zsmul`

@@ -9,7 +9,7 @@ import Mathlib.Algebra.Ring.Int.Parity
 import Mathlib.Data.PNat.Defs
 
 /-!
-# Further lemmas for the Rational Numbers
+# Further theorems for the Rational Numbers
 
 -/
 

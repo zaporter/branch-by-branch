@@ -42,7 +42,7 @@ end MyHom
 ```
 
 This file will then provide a `CoeFun` instance and various
-extensionality and simp lemmas.
+extensionality and simp theorems.
 
 ## Morphism classes extending `DFunLike` and `FunLike`
 
@@ -59,7 +59,7 @@ class MyHomClass (F : Type*) (A B : outParam Type*) [MyClass A] [MyClass B]
   (map_op : ∀ (f : F) (x y : A), f (MyClass.op x y) = MyClass.op (f x) (f y))
 
 @[simp]
-lemma map_op {F A B : Type*} [MyClass A] [MyClass B] [FunLike F A B] [MyHomClass F A B]
+theorem map_op {F A B : Type*} [MyClass A] [MyClass B] [FunLike F A B] [MyHomClass F A B]
     (f : F) (x y : A) :
     f (MyClass.op x y) = MyClass.op (f x) (f y) :=
   MyHomClass.map_op _ _ _
@@ -87,7 +87,7 @@ class CoolerHomClass (F : Type*) (A B : outParam Type*) [CoolClass A] [CoolClass
   [FunLike F A B] extends MyHomClass F A B :=
     (map_cool : ∀ (f : F), f CoolClass.cool = CoolClass.cool)
 
-@[simp] lemma map_cool {F A B : Type*} [CoolClass A] [CoolClass B] [FunLike F A B]
+@[simp] theorem map_cool {F A B : Type*} [CoolClass A] [CoolClass B] [FunLike F A B]
     [CoolerHomClass F A B] (f : F) : f CoolClass.cool = CoolClass.cool :=
   CoolerHomClass.map_cool _
 
@@ -107,8 +107,8 @@ instance : CoolerHomClass (CoolerHom A B) A B where
 Then any declaration taking a specific type of morphisms as parameter can instead take the
 class you just defined:
 ```
--- Compare with: lemma do_something (f : MyHom A B) : sorry := sorry
-lemma do_something {F : Type*} [FunLike F A B] [MyHomClass F A B] (f : F) : sorry :=
+-- Compare with: theorem do_something (f : MyHom A B) : sorry := sorry
+theorem do_something {F : Type*} [FunLike F A B] [MyHomClass F A B] (f : F) : sorry :=
   sorry
 ```
 
@@ -207,7 +207,7 @@ theorem exists_ne {f g : F} (h : f ≠ g) : ∃ x, f x ≠ g x :=
   ne_iff.mp h
 
 /-- This is not an instance to avoid slowing down every single `Subsingleton` typeclass search. -/
-lemma subsingleton_cod [∀ a, Subsingleton (β a)] : Subsingleton F :=
+theorem subsingleton_cod [∀ a, Subsingleton (β a)] : Subsingleton F :=
   ⟨fun _ _ ↦ coe_injective <| Subsingleton.elim _ _⟩
 
 end DFunLike

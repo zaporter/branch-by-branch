@@ -31,7 +31,7 @@ instance : Trans (@List.Perm α) (@List.Perm α) List.Perm where
 
 open Perm (swap)
 
-lemma perm_rfl : l ~ l := Perm.refl _
+theorem perm_rfl : l ~ l := Perm.refl _
 
 attribute [symm] Perm.symm
 attribute [trans] Perm.trans
@@ -98,7 +98,7 @@ theorem rel_perm (hr : BiUnique r) : (Forall₂ r ⇒ Forall₂ r ⇒ (· ↔ ·
 
 end Rel
 
-lemma count_eq_count_filter_add [DecidableEq α] (P : α → Prop) [DecidablePred P]
+theorem count_eq_count_filter_add [DecidableEq α] (P : α → Prop) [DecidablePred P]
     (l : List α) (a : α) :
     count a l = count a (l.filter P) + count a (l.filter (¬ P ·)) := by
   convert countP_eq_countP_filter_add l _ P

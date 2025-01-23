@@ -44,35 +44,35 @@ variable {x y : ℝ≥0}
 noncomputable def sqrt : ℝ≥0 ≃o ℝ≥0 :=
   OrderIso.symm <| powOrderIso 2 two_ne_zero
 
-@[simp] lemma sq_sqrt (x : ℝ≥0) : sqrt x ^ 2 = x := sqrt.symm_apply_apply _
+@[simp] theorem sq_sqrt (x : ℝ≥0) : sqrt x ^ 2 = x := sqrt.symm_apply_apply _
 
-@[simp] lemma sqrt_sq (x : ℝ≥0) : sqrt (x ^ 2) = x := sqrt.apply_symm_apply _
+@[simp] theorem sqrt_sq (x : ℝ≥0) : sqrt (x ^ 2) = x := sqrt.apply_symm_apply _
 
-@[simp] lemma mul_self_sqrt (x : ℝ≥0) : sqrt x * sqrt x = x := by rw [← sq, sq_sqrt]
+@[simp] theorem mul_self_sqrt (x : ℝ≥0) : sqrt x * sqrt x = x := by rw [← sq, sq_sqrt]
 
-@[simp] lemma sqrt_mul_self (x : ℝ≥0) : sqrt (x * x) = x := by rw [← sq, sqrt_sq]
+@[simp] theorem sqrt_mul_self (x : ℝ≥0) : sqrt (x * x) = x := by rw [← sq, sqrt_sq]
 
-lemma sqrt_le_sqrt : sqrt x ≤ sqrt y ↔ x ≤ y := sqrt.le_iff_le
+theorem sqrt_le_sqrt : sqrt x ≤ sqrt y ↔ x ≤ y := sqrt.le_iff_le
 
-lemma sqrt_lt_sqrt : sqrt x < sqrt y ↔ x < y := sqrt.lt_iff_lt
+theorem sqrt_lt_sqrt : sqrt x < sqrt y ↔ x < y := sqrt.lt_iff_lt
 
-lemma sqrt_eq_iff_eq_sq : sqrt x = y ↔ x = y ^ 2 := sqrt.toEquiv.apply_eq_iff_eq_symm_apply
+theorem sqrt_eq_iff_eq_sq : sqrt x = y ↔ x = y ^ 2 := sqrt.toEquiv.apply_eq_iff_eq_symm_apply
 
-lemma sqrt_le_iff_le_sq : sqrt x ≤ y ↔ x ≤ y ^ 2 := sqrt.to_galoisConnection _ _
+theorem sqrt_le_iff_le_sq : sqrt x ≤ y ↔ x ≤ y ^ 2 := sqrt.to_galoisConnection _ _
 
-lemma le_sqrt_iff_sq_le : x ≤ sqrt y ↔ x ^ 2 ≤ y := (sqrt.symm.to_galoisConnection _ _).symm
+theorem le_sqrt_iff_sq_le : x ≤ sqrt y ↔ x ^ 2 ≤ y := (sqrt.symm.to_galoisConnection _ _).symm
 
 
-@[simp] lemma sqrt_eq_zero : sqrt x = 0 ↔ x = 0 := by simp [sqrt_eq_iff_eq_sq]
+@[simp] theorem sqrt_eq_zero : sqrt x = 0 ↔ x = 0 := by simp [sqrt_eq_iff_eq_sq]
 
-@[simp] lemma sqrt_eq_one : sqrt x = 1 ↔ x = 1 := by simp [sqrt_eq_iff_eq_sq]
+@[simp] theorem sqrt_eq_one : sqrt x = 1 ↔ x = 1 := by simp [sqrt_eq_iff_eq_sq]
 
-@[simp] lemma sqrt_zero : sqrt 0 = 0 := by simp
+@[simp] theorem sqrt_zero : sqrt 0 = 0 := by simp
 
-@[simp] lemma sqrt_one : sqrt 1 = 1 := by simp
+@[simp] theorem sqrt_one : sqrt 1 = 1 := by simp
 
-@[simp] lemma sqrt_le_one : sqrt x ≤ 1 ↔ x ≤ 1 := by rw [← sqrt_one, sqrt_le_sqrt, sqrt_one]
-@[simp] lemma one_le_sqrt : 1 ≤ sqrt x ↔ 1 ≤ x := by rw [← sqrt_one, sqrt_le_sqrt, sqrt_one]
+@[simp] theorem sqrt_le_one : sqrt x ≤ 1 ↔ x ≤ 1 := by rw [← sqrt_one, sqrt_le_sqrt, sqrt_one]
+@[simp] theorem one_le_sqrt : 1 ≤ sqrt x ↔ 1 ≤ x := by rw [← sqrt_one, sqrt_le_sqrt, sqrt_one]
 
 theorem sqrt_mul (x y : ℝ≥0) : sqrt (x * y) = sqrt x * sqrt y := by
   rw [sqrt_eq_iff_eq_sq, mul_pow, sq_sqrt, sq_sqrt]
@@ -258,16 +258,16 @@ theorem sqrt_pos : 0 < √x ↔ 0 < x :=
 
 alias ⟨_, sqrt_pos_of_pos⟩ := sqrt_pos
 
-lemma sqrt_le_sqrt_iff' (hx : 0 < x) : √x ≤ √y ↔ x ≤ y := by
+theorem sqrt_le_sqrt_iff' (hx : 0 < x) : √x ≤ √y ↔ x ≤ y := by
   obtain hy | hy := le_total y 0
   · exact iff_of_false ((sqrt_eq_zero_of_nonpos hy).trans_lt <| sqrt_pos.2 hx).not_le
       (hy.trans_lt hx).not_le
   · exact sqrt_le_sqrt_iff hy
 
-@[simp] lemma one_le_sqrt : 1 ≤ √x ↔ 1 ≤ x := by
+@[simp] theorem one_le_sqrt : 1 ≤ √x ↔ 1 ≤ x := by
   rw [← sqrt_one, sqrt_le_sqrt_iff' zero_lt_one, sqrt_one]
 
-@[simp] lemma sqrt_le_one : √x ≤ 1 ↔ x ≤ 1 := by
+@[simp] theorem sqrt_le_one : √x ≤ 1 ↔ x ≤ 1 := by
   rw [← sqrt_one, sqrt_le_sqrt_iff zero_le_one, sqrt_one]
 
 end Real
@@ -422,12 +422,12 @@ variable {ι : Type*}
 open Finset
 
 /-- **Cauchy-Schwarz inequality** for finsets using square roots in `ℝ≥0`. -/
-lemma sum_mul_le_sqrt_mul_sqrt (s : Finset ι) (f g : ι → ℝ≥0) :
+theorem sum_mul_le_sqrt_mul_sqrt (s : Finset ι) (f g : ι → ℝ≥0) :
     ∑ i ∈ s, f i * g i ≤ sqrt (∑ i ∈ s, f i ^ 2) * sqrt (∑ i ∈ s, g i ^ 2) :=
   (le_sqrt_iff_sq_le.2 <| sum_mul_sq_le_sq_mul_sq _ _ _).trans_eq <| sqrt_mul _ _
 
 /-- **Cauchy-Schwarz inequality** for finsets using square roots in `ℝ≥0`. -/
-lemma sum_sqrt_mul_sqrt_le (s : Finset ι) (f g : ι → ℝ≥0) :
+theorem sum_sqrt_mul_sqrt_le (s : Finset ι) (f g : ι → ℝ≥0) :
     ∑ i ∈ s, sqrt (f i) * sqrt (g i) ≤ sqrt (∑ i ∈ s, f i) * sqrt (∑ i ∈ s, g i) := by
   simpa [*] using sum_mul_le_sqrt_mul_sqrt _ (fun x ↦ sqrt (f x)) (fun x ↦ sqrt (g x))
 
@@ -438,13 +438,13 @@ variable {ι : Type*} {f g : ι → ℝ}
 open Finset
 
 /-- **Cauchy-Schwarz inequality** for finsets using square roots in `ℝ`. -/
-lemma sum_mul_le_sqrt_mul_sqrt (s : Finset ι) (f g : ι → ℝ) :
+theorem sum_mul_le_sqrt_mul_sqrt (s : Finset ι) (f g : ι → ℝ) :
     ∑ i ∈ s, f i * g i ≤ √(∑ i ∈ s, f i ^ 2) * √(∑ i ∈ s, g i ^ 2) :=
   (le_sqrt_of_sq_le <| sum_mul_sq_le_sq_mul_sq _ _ _).trans_eq <| sqrt_mul
     (sum_nonneg fun _ _ ↦ by positivity) _
 
 /-- **Cauchy-Schwarz inequality** for finsets using square roots in `ℝ`. -/
-lemma sum_sqrt_mul_sqrt_le (s : Finset ι) (hf : ∀ i, 0 ≤ f i) (hg : ∀ i, 0 ≤ g i) :
+theorem sum_sqrt_mul_sqrt_le (s : Finset ι) (hf : ∀ i, 0 ≤ f i) (hg : ∀ i, 0 ≤ g i) :
     ∑ i ∈ s, √(f i) * √(g i) ≤ √(∑ i ∈ s, f i) * √(∑ i ∈ s, g i) := by
   simpa [*] using sum_mul_le_sqrt_mul_sqrt _ (fun x ↦ √(f x)) (fun x ↦ √(g x))
 

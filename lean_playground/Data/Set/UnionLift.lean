@@ -23,9 +23,9 @@ sets to make a function on the Union of those sets.
 There are proofs of the obvious properties of `iUnionLift`, i.e. what it does to elements of
 each of the sets in the `iUnion`, stated in different ways.
 
-There are also three lemmas about `iUnionLift` intended to aid with proving that `iUnionLift` is a
-homomorphism when defined on a Union of substructures. There is one lemma each to show that
-constants, unary functions, or binary functions are preserved. These lemmas are:
+There are also three theorems about `iUnionLift` intended to aid with proving that `iUnionLift` is a
+homomorphism when defined on a Union of substructures. There is one theorem each to show that
+constants, unary functions, or binary functions are preserved. These theorems are:
 
 *`Set.iUnionLift_const`
 *`Set.iUnionLift_unary`
@@ -42,7 +42,7 @@ namespace Set
 
 section UnionLift
 
-/- The unused argument is left in the definition so that the `simp` lemmas
+/- The unused argument is left in the definition so that the `simp` theorems
 `iUnionLift_inclusion` will work without the user having to provide it explicitly to
 simplify terms involving `iUnionLift`. -/
 /-- Given a union of sets `iUnion S`, define a function on the Union by defining

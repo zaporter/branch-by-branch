@@ -17,7 +17,7 @@ This allows "proof by reflection", where we prove `A = !![A 0 0, A 0 1;  A 1 0, 
 `A = eta_expand A`.
 
 The definitions in this file should normally not be used directly; the intent is for the
-corresponding `*_eq` lemmas to be used in a place where they are definitionally unfolded.
+corresponding `*_eq` theorems to be used in a place where they are definitionally unfolded.
 
 ## Main definitions
 

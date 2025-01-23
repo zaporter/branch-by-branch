@@ -44,8 +44,8 @@ theorem mem_symmDiff : a ∈ s ∆ t ↔ a ∈ s ∧ a ∉ t ∨ a ∈ t ∧ a �
 theorem coe_symmDiff : (↑(s ∆ t) : Set α) = (s : Set α) ∆ t :=
   Set.ext fun x => by simp [mem_symmDiff, Set.mem_symmDiff]
 
-@[simp] lemma symmDiff_eq_empty : s ∆ t = ∅ ↔ s = t := symmDiff_eq_bot
-@[simp] lemma symmDiff_nonempty : (s ∆ t).Nonempty ↔ s ≠ t :=
+@[simp] theorem symmDiff_eq_empty : s ∆ t = ∅ ↔ s = t := symmDiff_eq_bot
+@[simp] theorem symmDiff_nonempty : (s ∆ t).Nonempty ↔ s ≠ t :=
   nonempty_iff_ne_empty.trans symmDiff_eq_empty.not
 
 end SymmDiff

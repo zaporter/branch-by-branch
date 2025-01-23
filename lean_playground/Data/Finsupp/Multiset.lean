@@ -239,11 +239,11 @@ def equivNatSum :
     Sym α n ≃ {P : α →₀ ℕ // P.sum (fun _ ↦ id) = n} :=
   Multiset.toFinsupp.toEquiv.subtypeEquiv <| by simp
 
-@[simp] lemma coe_equivNatSum_apply_apply (s : Sym α n) (a : α) :
+@[simp] theorem coe_equivNatSum_apply_apply (s : Sym α n) (a : α) :
     (equivNatSum α n s : α →₀ ℕ) a = (s : Multiset α).count a :=
   rfl
 
-@[simp] lemma coe_equivNatSum_symm_apply (P : {P : α →₀ ℕ // P.sum (fun _ ↦ id) = n}) :
+@[simp] theorem coe_equivNatSum_symm_apply (P : {P : α →₀ ℕ // P.sum (fun _ ↦ id) = n}) :
     ((equivNatSum α n).symm P : Multiset α) = Finsupp.toMultiset P :=
   rfl
 
@@ -255,11 +255,11 @@ noncomputable def equivNatSumOfFintype [Fintype α] :
     Sym α n ≃ {P : α → ℕ // ∑ i, P i = n} :=
   (equivNatSum α n).trans <| Finsupp.equivFunOnFinite.subtypeEquiv <| by simp [Finsupp.sum_fintype]
 
-@[simp] lemma coe_equivNatSumOfFintype_apply_apply [Fintype α] (s : Sym α n) (a : α) :
+@[simp] theorem coe_equivNatSumOfFintype_apply_apply [Fintype α] (s : Sym α n) (a : α) :
     (equivNatSumOfFintype α n s : α → ℕ) a = (s : Multiset α).count a :=
   rfl
 
-@[simp] lemma coe_equivNatSumOfFintype_symm_apply [Fintype α] (P : {P : α → ℕ // ∑ i, P i = n}) :
+@[simp] theorem coe_equivNatSumOfFintype_symm_apply [Fintype α] (P : {P : α → ℕ // ∑ i, P i = n}) :
     ((equivNatSumOfFintype α n).symm P : Multiset α) = ∑ a, ((P : α → ℕ) a) • {a} := by
   obtain ⟨P, hP⟩ := P
   change Finsupp.toMultiset (Finsupp.equivFunOnFinite.symm P) = Multiset.sum _

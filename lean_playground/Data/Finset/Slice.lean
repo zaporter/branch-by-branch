@@ -44,8 +44,8 @@ def Sized (r : ℕ) (A : Set (Finset α)) : Prop := ∀ ⦃x⦄, x ∈ A → #x 
 
 theorem Sized.mono (h : A ⊆ B) (hB : B.Sized r) : A.Sized r := fun _x hx => hB <| h hx
 
-@[simp] lemma sized_empty : (∅ : Set (Finset α)).Sized r := by simp [Sized]
-@[simp] lemma sized_singleton : ({s} : Set (Finset α)).Sized r ↔ #s = r := by simp [Sized]
+@[simp] theorem sized_empty : (∅ : Set (Finset α)).Sized r := by simp [Sized]
+@[simp] theorem sized_singleton : ({s} : Set (Finset α)).Sized r ↔ #s = r := by simp [Sized]
 
 theorem sized_union : (A ∪ B).Sized r ↔ A.Sized r ∧ B.Sized r :=
   ⟨fun hA => ⟨hA.mono subset_union_left, hA.mono subset_union_right⟩, fun hA _x hx =>
@@ -53,7 +53,7 @@ theorem sized_union : (A ∪ B).Sized r ↔ A.Sized r ∧ B.Sized r :=
 
 alias ⟨_, sized.union⟩ := sized_union
 
---TODO: A `forall_iUnion` lemma would be handy here.
+--TODO: A `forall_iUnion` theorem would be handy here.
 @[simp]
 theorem sized_iUnion {f : ι → Set (Finset α)} : (⋃ i, f i).Sized r ↔ ∀ i, (f i).Sized r := by
   simp_rw [Set.Sized, Set.mem_iUnion, forall_exists_index]

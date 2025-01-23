@@ -89,9 +89,9 @@ theorem factorial_lt (hn : 0 < n) : n ! < m ! ↔ n < m := by
   | step hnk ih => exact lt_trans (ih hn) <| this <| lt_trans hn <| lt_of_succ_le hnk
 
 @[gcongr]
-lemma factorial_lt_of_lt {m n : ℕ} (hn : 0 < n) (h : n < m) : n ! < m ! := (factorial_lt hn).mpr h
+theorem factorial_lt_of_lt {m n : ℕ} (hn : 0 < n) (h : n < m) : n ! < m ! := (factorial_lt hn).mpr h
 
-@[simp] lemma one_lt_factorial : 1 < n ! ↔ 1 < n := factorial_lt Nat.one_pos
+@[simp] theorem one_lt_factorial : 1 < n ! ↔ 1 < n := factorial_lt Nat.one_pos
 
 @[simp]
 theorem factorial_eq_one : n ! = 1 ↔ n ≤ 1 := by
@@ -166,7 +166,7 @@ theorem factorial_mul_pow_sub_le_factorial {n m : ℕ} (hnm : n ≤ m) : n ! * n
     _ ≤ n ! * (n + 1) ^ (m - n) := Nat.mul_le_mul_left _ (Nat.pow_le_pow_left n.le_succ _)
     _ ≤ _ := by simpa [hnm] using @Nat.factorial_mul_pow_le_factorial n (m - n)
 
-lemma factorial_le_pow : ∀ n, n ! ≤ n ^ n
+theorem factorial_le_pow : ∀ n, n ! ≤ n ^ n
   | 0 => le_refl _
   | n + 1 =>
     calc
@@ -424,11 +424,11 @@ theorem descFactorial_lt_pow {n : ℕ} (hn : 1 ≤ n) : ∀ {k : ℕ}, 2 ≤ k �
 
 end DescFactorial
 
-lemma factorial_two_mul_le (n : ℕ) : (2 * n)! ≤ (2 * n) ^ n * n ! := by
+theorem factorial_two_mul_le (n : ℕ) : (2 * n)! ≤ (2 * n) ^ n * n ! := by
   rw [Nat.two_mul, ← factorial_mul_ascFactorial, Nat.mul_comm]
   exact Nat.mul_le_mul_right _ (ascFactorial_le_pow_add _ _)
 
-lemma two_pow_mul_factorial_le_factorial_two_mul (n : ℕ) : 2 ^ n * n ! ≤ (2 * n) ! := by
+theorem two_pow_mul_factorial_le_factorial_two_mul (n : ℕ) : 2 ^ n * n ! ≤ (2 * n) ! := by
   obtain _ | n := n
   · simp
   rw [Nat.mul_comm, Nat.two_mul]

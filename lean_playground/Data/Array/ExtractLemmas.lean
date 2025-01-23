@@ -7,7 +7,7 @@ import Mathlib.Init
 /-!
 # Lemmas about `Array.extract`
 
-Some useful lemmas about Array.extract
+Some useful theorems about Array.extract
 -/
 
 universe u

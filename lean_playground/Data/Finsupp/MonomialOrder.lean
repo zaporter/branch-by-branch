@@ -37,7 +37,7 @@ For the graded lexicographic ordering, see `Mathlib/Data/Finsupp/DegLex.lean`
 For this, `σ` needs to be embedded with an ordering relation which satisfies `WellFoundedGT σ`.
 (This last property is automatic when `σ` is finite).
 
-The type synonym is `Lex (σ →₀ ℕ)` and the two lemmas `MonomialOrder.lex_le_iff`
+The type synonym is `Lex (σ →₀ ℕ)` and the two theorems `MonomialOrder.lex_le_iff`
 and `MonomialOrder.lex_lt_iff` rewrite the ordering as comparisons in the type `Lex (σ →₀ ℕ)`.
 
 ## References
@@ -71,7 +71,7 @@ namespace MonomialOrder
 
 variable {σ : Type*} (m : MonomialOrder σ)
 
-lemma le_add_right (a b : σ →₀ ℕ) :
+theorem le_add_right (a b : σ →₀ ℕ) :
     m.toSyn a ≤ m.toSyn a + m.toSyn b := by
   rw [← map_add]
   exact m.toSyn_monotone le_self_add
@@ -88,7 +88,7 @@ theorem bot_eq_zero : (⊥ : m.syn) = 0 := rfl
 
 theorem eq_zero_iff {a : m.syn} : a = 0 ↔ a ≤ 0 := eq_bot_iff
 
-lemma toSyn_strictMono : StrictMono (m.toSyn) := by
+theorem toSyn_strictMono : StrictMono (m.toSyn) := by
   apply m.toSyn_monotone.strictMono_of_injective m.toSyn.injective
 
 /-- Given a monomial order, notation for the corresponding strict order relation on `σ →₀ ℕ` -/

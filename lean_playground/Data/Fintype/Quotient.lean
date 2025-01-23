@@ -52,7 +52,7 @@ theorem listChoice_mk {l : List ι} (a : ∀ i ∈ l, α i) : listChoice (S := S
 
 /-- Choice-free induction principle for quotients indexed by a `List`. -/
 @[elab_as_elim]
-lemma list_ind {l : List ι} {C : (∀ i ∈ l, Quotient (S i)) → Prop}
+theorem list_ind {l : List ι} {C : (∀ i ∈ l, Quotient (S i)) → Prop}
     (f : ∀ a : ∀ i ∈ l, α i, C (⟦a · ·⟧)) (q : ∀ i ∈ l, Quotient (S i)) : C q :=
   match l with
   |     [] => cast (congr_arg _ (funext₂ nofun)) (f nofun)
@@ -72,7 +72,7 @@ variable {ι : Type*} [Fintype ι] [DecidableEq ι] {α : ι → Sort*} {S : ∀
 /-- Choice-free induction principle for quotients indexed by a finite type.
   See `Quotient.induction_on_pi` for the general version assuming `Classical.choice`. -/
 @[elab_as_elim]
-lemma ind_fintype_pi {C : (∀ i, Quotient (S i)) → Prop}
+theorem ind_fintype_pi {C : (∀ i, Quotient (S i)) → Prop}
     (f : ∀ a : ∀ i, α i, C (⟦a ·⟧)) (q : ∀ i, Quotient (S i)) : C q := by
   have {m : Multiset ι} (C : (∀ i ∈ m, Quotient (S i)) → Prop) :
       ∀ (_ : ∀ a : ∀ i ∈ m, α i, C (⟦a · ·⟧)) (q : ∀ i ∈ m, Quotient (S i)), C q := by
@@ -83,7 +83,7 @@ lemma ind_fintype_pi {C : (∀ i, Quotient (S i)) → Prop}
 /-- Choice-free induction principle for quotients indexed by a finite type.
   See `Quotient.induction_on_pi` for the general version assuming `Classical.choice`. -/
 @[elab_as_elim]
-lemma induction_on_fintype_pi {C : (∀ i, Quotient (S i)) → Prop}
+theorem induction_on_fintype_pi {C : (∀ i, Quotient (S i)) → Prop}
     (q : ∀ i, Quotient (S i)) (f : ∀ a : ∀ i, α i, C (⟦a ·⟧)) : C q :=
   ind_fintype_pi f q
 
@@ -109,7 +109,7 @@ theorem finChoice_eq (a : ∀ i, α i) :
   simp_rw [← hl, Equiv.subtypeQuotientEquivQuotientSubtype, listChoice_mk]
   rfl
 
-lemma eval_finChoice (f : ∀ i, Quotient (S i)) :
+theorem eval_finChoice (f : ∀ i, Quotient (S i)) :
     eval (finChoice f) = f :=
   induction_on_fintype_pi f (fun a ↦ by rw [finChoice_eq]; rfl)
 
@@ -119,7 +119,7 @@ def finLiftOn (q : ∀ i, Quotient (S i)) (f : (∀ i, α i) → β)
   (finChoice q).liftOn f h
 
 @[simp]
-lemma finLiftOn_empty [e : IsEmpty ι] (q : ∀ i, Quotient (S i)) :
+theorem finLiftOn_empty [e : IsEmpty ι] (q : ∀ i, Quotient (S i)) :
     finLiftOn (β := β) q = fun f _ ↦ f e.elim := by
   ext f h
   dsimp [finLiftOn]
@@ -127,7 +127,7 @@ lemma finLiftOn_empty [e : IsEmpty ι] (q : ∀ i, Quotient (S i)) :
   exact h _ _ e.elim
 
 @[simp]
-lemma finLiftOn_mk (a : ∀ i, α i) :
+theorem finLiftOn_mk (a : ∀ i, α i) :
     finLiftOn (S := S) (β := β) (⟦a ·⟧) = fun f _ ↦ f a := by
   ext f h
   dsimp [finLiftOn]
@@ -168,7 +168,7 @@ def finRecOn {C : (∀ i, Quotient (S i)) → Sort*}
   finHRecOn q f (rec_heq_iff_heq.mp <| heq_of_eq <| h · · ·)
 
 @[simp]
-lemma finHRecOn_mk {C : (∀ i, Quotient (S i)) → Sort*}
+theorem finHRecOn_mk {C : (∀ i, Quotient (S i)) → Sort*}
     (a : ∀ i, α i) :
     finHRecOn (C := C) (⟦a ·⟧) = fun f _ ↦ f a := by
   ext f h
@@ -177,7 +177,7 @@ lemma finHRecOn_mk {C : (∀ i, Quotient (S i)) → Sort*}
   rfl
 
 @[simp]
-lemma finRecOn_mk {C : (∀ i, Quotient (S i)) → Sort*}
+theorem finRecOn_mk {C : (∀ i, Quotient (S i)) → Sort*}
     (a : ∀ i, α i) :
     finRecOn (C := C) (⟦a ·⟧) = fun f _ ↦ f a := by
   unfold finRecOn
@@ -203,12 +203,12 @@ def finLiftOn (q : ∀ i, Trunc (α i)) (f : (∀ i, α i) → β) (h : ∀ (a b
   Quotient.finLiftOn q f (fun _ _ _ ↦ h _ _)
 
 @[simp]
-lemma finLiftOn_empty [e : IsEmpty ι] (q : ∀ i, Trunc (α i)) :
+theorem finLiftOn_empty [e : IsEmpty ι] (q : ∀ i, Trunc (α i)) :
     finLiftOn (β := β) q = fun f _ ↦ f e.elim :=
   funext₂ fun _ _ ↦ congrFun₂ (Quotient.finLiftOn_empty q) _ _
 
 @[simp]
-lemma finLiftOn_mk (a : ∀ i, α i) :
+theorem finLiftOn_mk (a : ∀ i, α i) :
     finLiftOn (β := β) (⟦a ·⟧) = fun f _ ↦ f a :=
   funext₂ fun _ _ ↦ congrFun₂ (Quotient.finLiftOn_mk a) _ _
 
@@ -230,7 +230,7 @@ def finRecOn {C : (∀ i, Trunc (α i)) → Sort*}
   Quotient.finRecOn q (f ·) (fun _ _ _ ↦ h _ _)
 
 @[simp]
-lemma finRecOn_mk {C : (∀ i, Trunc (α i)) → Sort*}
+theorem finRecOn_mk {C : (∀ i, Trunc (α i)) → Sort*}
     (a : ∀ i, α i) :
     finRecOn (C := C) (⟦a ·⟧) = fun f _ ↦ f a := by
   unfold finRecOn

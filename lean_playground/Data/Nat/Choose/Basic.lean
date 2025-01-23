@@ -9,7 +9,7 @@ import Mathlib.Order.Monotone.Basic
 /-!
 # Binomial coefficients
 
-This file defines binomial coefficients and proves simple lemmas (i.e. those not
+This file defines binomial coefficients and proves simple theorems (i.e. those not
 requiring more imports).
 
 ## Main definition and results
@@ -92,7 +92,7 @@ theorem choose_succ_self (n : ℕ) : choose n (succ n) = 0 :=
   choose_eq_zero_of_lt (lt_succ_self _)
 
 @[simp]
-lemma choose_one_right (n : ℕ) : choose n 1 = n := by induction n <;> simp [*, choose, Nat.add_comm]
+theorem choose_one_right (n : ℕ) : choose n 1 = n := by induction n <;> simp [*, choose, Nat.add_comm]
 
 -- The `n+1`-st triangle number is `n` more than the `n`-th triangle number
 theorem triangle_succ (n : ℕ) : (n + 1) * (n + 1 - 1) / 2 = n * (n - 1) / 2 + n := by
@@ -265,7 +265,7 @@ theorem choose_eq_descFactorial_div_factorial (n k : ℕ) : n.choose k = n.descF
 and in compiled code. -/
 def fast_choose n k := Nat.descFactorial n k / Nat.factorial k
 
-@[csimp] lemma choose_eq_fast_choose : Nat.choose = fast_choose :=
+@[csimp] theorem choose_eq_fast_choose : Nat.choose = fast_choose :=
   funext (fun _ => funext (Nat.choose_eq_descFactorial_div_factorial _))
 
 

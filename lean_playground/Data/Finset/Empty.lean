@@ -129,7 +129,7 @@ theorem eq_empty_iff_forall_not_mem {s : Finset α} : s = ∅ ↔ ∀ x, x ∉ s
 theorem val_eq_zero {s : Finset α} : s.1 = 0 ↔ s = ∅ :=
   @val_inj _ s ∅
 
-@[simp] lemma subset_empty : s ⊆ ∅ ↔ s = ∅ := subset_zero.trans val_eq_zero
+@[simp] theorem subset_empty : s ⊆ ∅ ↔ s = ∅ := subset_zero.trans val_eq_zero
 
 @[simp]
 theorem not_ssubset_empty (s : Finset α) : ¬s ⊂ ∅ := fun h =>
@@ -197,12 +197,12 @@ open Qq Lean Meta Finset
 
 /-- Attempt to prove that a finset is nonempty using the `finsetNonempty` aesop rule-set.
 
-You can add lemmas to the rule-set by tagging them with either:
+You can add theorems to the rule-set by tagging them with either:
 * `aesop safe apply (rule_sets := [finsetNonempty])` if they are always a good idea to follow or
 * `aesop unsafe apply (rule_sets := [finsetNonempty])` if they risk directing the search to a blind
   alley.
 
-TODO: should some of the lemmas be `aesop safe simp` instead?
+TODO: should some of the theorems be `aesop safe simp` instead?
 -/
 def proveFinsetNonempty {u : Level} {α : Q(Type u)} (s : Q(Finset $α)) :
     MetaM (Option Q(Finset.Nonempty $s)) := do

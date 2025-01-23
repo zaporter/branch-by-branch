@@ -47,13 +47,13 @@ def castAddMonoidHom (α : Type*) [AddMonoidWithOne α] :
 theorem coe_castAddMonoidHom [AddMonoidWithOne α] : (castAddMonoidHom α : ℕ → α) = Nat.cast :=
   rfl
 
-lemma _root_.Even.natCast [AddMonoidWithOne α] {n : ℕ} (hn : Even n) : Even (n : α) :=
+theorem _root_.Even.natCast [AddMonoidWithOne α] {n : ℕ} (hn : Even n) : Even (n : α) :=
   hn.map <| Nat.castAddMonoidHom α
 
 section NonAssocSemiring
 variable [NonAssocSemiring α]
 
-@[simp, norm_cast] lemma cast_mul (m n : ℕ) : ((m * n : ℕ) : α) = m * n := by
+@[simp, norm_cast] theorem cast_mul (m n : ℕ) : ((m * n : ℕ) : α) = m * n := by
   induction n <;> simp [mul_succ, mul_add, *]
 
 variable (α) in
@@ -61,14 +61,14 @@ variable (α) in
 def castRingHom : ℕ →+* α :=
   { castAddMonoidHom α with toFun := Nat.cast, map_one' := cast_one, map_mul' := cast_mul }
 
-@[simp, norm_cast] lemma coe_castRingHom : (castRingHom α : ℕ → α) = Nat.cast := rfl
+@[simp, norm_cast] theorem coe_castRingHom : (castRingHom α : ℕ → α) = Nat.cast := rfl
 
-lemma _root_.nsmul_eq_mul' (a : α) (n : ℕ) : n • a = a * n := by
+theorem _root_.nsmul_eq_mul' (a : α) (n : ℕ) : n • a = a * n := by
   induction n with
   | zero => rw [zero_nsmul, Nat.cast_zero, mul_zero]
   | succ n ih => rw [succ_nsmul, ih, Nat.cast_succ, mul_add, mul_one]
 
-@[simp] lemma _root_.nsmul_eq_mul (n : ℕ) (a : α) : n • a = n * a := by
+@[simp] theorem _root_.nsmul_eq_mul (n : ℕ) (a : α) : n • a = n * a := by
   induction n with
   | zero => rw [zero_nsmul, Nat.cast_zero, zero_mul]
   | succ n ih => rw [succ_nsmul, ih, Nat.cast_succ, add_mul, one_mul]
@@ -79,11 +79,11 @@ section Semiring
 variable [Semiring α] {m n : ℕ}
 
 @[simp, norm_cast]
-lemma cast_pow (m : ℕ) : ∀ n : ℕ, ↑(m ^ n) = (m ^ n : α)
+theorem cast_pow (m : ℕ) : ∀ n : ℕ, ↑(m ^ n) = (m ^ n : α)
   | 0 => by simp
   | n + 1 => by rw [_root_.pow_succ', _root_.pow_succ', cast_mul, cast_pow m n]
 
-lemma cast_dvd_cast (h : m ∣ n) : (m : α) ∣ (n : α) := map_dvd (Nat.castRingHom α) h
+theorem cast_dvd_cast (h : m ∣ n) : (m : α) ∣ (n : α) := map_dvd (Nat.castRingHom α) h
 
 alias _root_.Dvd.dvd.natCast := cast_dvd_cast
 
@@ -154,7 +154,7 @@ theorem eq_natCast [FunLike F ℕ R] [RingHomClass F ℕ R] (f : F) : ∀ n, f n
 theorem map_natCast [FunLike F R S] [RingHomClass F R S] (f : F) : ∀ n : ℕ, f (n : R) = n :=
   map_natCast' f <| map_one f
 
-/-- This lemma is not marked `@[simp]` lemma because its `#discr_tree_key` (for the LHS) would just
+/-- This theorem is not marked `@[simp]` theorem because its `#discr_tree_key` (for the LHS) would just
 be `DFunLike.coe _ _`, due to the `ofNat` that https://github.com/leanprover/lean4/issues/2867
 forces us to include, and therefore it would negatively impact performance.
 
@@ -216,30 +216,30 @@ def powersHom : α ≃ (Multiplicative ℕ →* α) :=
 
 variable {α}
 
--- TODO: can `to_additive` generate the following lemmas automatically?
+-- TODO: can `to_additive` generate the following theorems automatically?
 
-lemma multiplesHom_apply (x : β) (n : ℕ) : multiplesHom β x n = n • x := rfl
+theorem multiplesHom_apply (x : β) (n : ℕ) : multiplesHom β x n = n • x := rfl
 
 @[to_additive existing (attr := simp)]
-lemma powersHom_apply (x : α) (n : Multiplicative ℕ) :
+theorem powersHom_apply (x : α) (n : Multiplicative ℕ) :
     powersHom α x n = x ^ n.toAdd := rfl
 
-lemma multiplesHom_symm_apply (f : ℕ →+ β) : (multiplesHom β).symm f = f 1 := rfl
+theorem multiplesHom_symm_apply (f : ℕ →+ β) : (multiplesHom β).symm f = f 1 := rfl
 
 @[to_additive existing (attr := simp)]
-lemma powersHom_symm_apply (f : Multiplicative ℕ →* α) :
+theorem powersHom_symm_apply (f : Multiplicative ℕ →* α) :
     (powersHom α).symm f = f (Multiplicative.ofAdd 1) := rfl
 
-lemma MonoidHom.apply_mnat (f : Multiplicative ℕ →* α) (n : Multiplicative ℕ) :
+theorem MonoidHom.apply_mnat (f : Multiplicative ℕ →* α) (n : Multiplicative ℕ) :
     f n = f (Multiplicative.ofAdd 1) ^ n.toAdd := by
   rw [← powersHom_symm_apply, ← powersHom_apply, Equiv.apply_symm_apply]
 
 @[ext]
-lemma MonoidHom.ext_mnat ⦃f g : Multiplicative ℕ →* α⦄
+theorem MonoidHom.ext_mnat ⦃f g : Multiplicative ℕ →* α⦄
     (h : f (Multiplicative.ofAdd 1) = g (Multiplicative.ofAdd 1)) : f = g :=
   MonoidHom.ext fun n ↦ by rw [f.apply_mnat, g.apply_mnat, h]
 
-lemma AddMonoidHom.apply_nat (f : ℕ →+ β) (n : ℕ) : f n = n • f 1 := by
+theorem AddMonoidHom.apply_nat (f : ℕ →+ β) (n : ℕ) : f n = n • f 1 := by
   rw [← multiplesHom_symm_apply, ← multiplesHom_apply, Equiv.apply_symm_apply]
 
 end Monoid
@@ -255,14 +255,14 @@ def multiplesAddHom : β ≃+ (ℕ →+ β) :=
 def powersMulHom : α ≃* (Multiplicative ℕ →* α) :=
   { powersHom α with map_mul' := fun a b ↦ MonoidHom.ext fun n ↦ by simp [mul_pow] }
 
-@[simp] lemma multiplesAddHom_apply (x : β) (n : ℕ) : multiplesAddHom β x n = n • x := rfl
+@[simp] theorem multiplesAddHom_apply (x : β) (n : ℕ) : multiplesAddHom β x n = n • x := rfl
 
 @[simp]
-lemma powersMulHom_apply (x : α) (n : Multiplicative ℕ) : powersMulHom α x n = x ^ n.toAdd := rfl
+theorem powersMulHom_apply (x : α) (n : Multiplicative ℕ) : powersMulHom α x n = x ^ n.toAdd := rfl
 
-@[simp] lemma multiplesAddHom_symm_apply (f : ℕ →+ β) : (multiplesAddHom β).symm f = f 1 := rfl
+@[simp] theorem multiplesAddHom_symm_apply (f : ℕ →+ β) : (multiplesAddHom β).symm f = f 1 := rfl
 
-@[simp] lemma powersMulHom_symm_apply (f : Multiplicative ℕ →* α) :
+@[simp] theorem powersMulHom_symm_apply (f : Multiplicative ℕ →* α) :
     (powersMulHom α).symm f = f (ofAdd 1) := rfl
 
 end CommMonoid
@@ -286,7 +286,7 @@ theorem natCast_def (n : ℕ) : (n : ∀ a, π a) = fun _ ↦ ↑n :=
 @[simp]
 theorem ofNat_apply (n : ℕ) [n.AtLeastTwo] (a : α) : (OfNat.ofNat n : ∀ a, π a) a = n := rfl
 
-lemma ofNat_def (n : ℕ) [n.AtLeastTwo] : (OfNat.ofNat n : ∀ a, π a) = fun _ ↦ OfNat.ofNat n := rfl
+theorem ofNat_def (n : ℕ) [n.AtLeastTwo] : (OfNat.ofNat n : ∀ a, π a) = fun _ ↦ OfNat.ofNat n := rfl
 
 end Pi
 

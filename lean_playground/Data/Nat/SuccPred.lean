@@ -61,7 +61,7 @@ protected theorem pred_iterate (a : ℕ) : ∀ n, pred^[n] a = a - n
     rw [Function.iterate_succ', sub_succ]
     exact congr_arg _ (Nat.pred_iterate a n)
 
-lemma le_succ_iff_eq_or_le : m ≤ n.succ ↔ m = n.succ ∨ m ≤ n := Order.le_succ_iff_eq_or_le
+theorem le_succ_iff_eq_or_le : m ≤ n.succ ↔ m = n.succ ∨ m ≤ n := Order.le_succ_iff_eq_or_le
 
 instance : IsSuccArchimedean ℕ :=
   ⟨fun {a} {b} h => ⟨b - a, by rw [succ_eq_succ, Nat.succ_iterate, add_tsub_cancel_of_le h]⟩⟩
@@ -69,7 +69,7 @@ instance : IsSuccArchimedean ℕ :=
 instance : IsPredArchimedean ℕ :=
   ⟨fun {a} {b} h => ⟨b - a, by rw [pred_eq_pred, Nat.pred_iterate, tsub_tsub_cancel_of_le h]⟩⟩
 
-lemma forall_ne_zero_iff (P : ℕ → Prop) :
+theorem forall_ne_zero_iff (P : ℕ → Prop) :
     (∀ i, i ≠ 0 → P i) ↔ (∀ i, P (i + 1)) :=
   SuccOrder.forall_ne_bot_iff P
 

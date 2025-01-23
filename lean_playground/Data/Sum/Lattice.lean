@@ -46,8 +46,8 @@ instance instSemilatticeSup : SemilatticeSup (α ⊕ₗ β) where
     | inrₗ b₁, inlₗ a₂, inrₗ b₃, Lex.inr h₁₃, Lex.sep _ _ => inr_le_inr_iff.2 h₁₃
     | inrₗ b₁, inrₗ b₂, inrₗ b₃, Lex.inr h₁₃, Lex.inr h₂₃ => inr_le_inr_iff.2 <| sup_le h₁₃ h₂₃
 
-@[simp] lemma inl_sup (a₁ a₂ : α) : (inlₗ (a₁ ⊔ a₂) : α ⊕ β) = inlₗ a₁ ⊔ inlₗ a₂ := rfl
-@[simp] lemma inr_sup (b₁ b₂ : β) : (inrₗ (b₁ ⊔ b₂) : α ⊕ β) = inrₗ b₁ ⊔ inrₗ b₂ := rfl
+@[simp] theorem inl_sup (a₁ a₂ : α) : (inlₗ (a₁ ⊔ a₂) : α ⊕ β) = inlₗ a₁ ⊔ inlₗ a₂ := rfl
+@[simp] theorem inr_sup (b₁ b₂ : β) : (inrₗ (b₁ ⊔ b₂) : α ⊕ β) = inrₗ b₁ ⊔ inrₗ b₂ := rfl
 
 end SemilatticeSup
 
@@ -79,8 +79,8 @@ instance instSemilatticeInf : SemilatticeInf (α ⊕ₗ β) where
     | inlₗ a₁, inrₗ b₂, inrₗ b₃, Lex.sep _ _, Lex.sep _ _ => Lex.sep _ _
     | inrₗ b₁, inrₗ b₂, inrₗ b₃, Lex.inr h₁₃, Lex.inr h₂₃ => inr_le_inr_iff.2 <| le_inf h₁₃ h₂₃
 
-@[simp] lemma inl_inf (a₁ a₂ : α) : (inlₗ (a₁ ⊓ a₂) : α ⊕ β) = inlₗ a₁ ⊓ inlₗ a₂ := rfl
-@[simp] lemma inr_inf (b₁ b₂ : β) : (inrₗ (b₁ ⊓ b₂) : α ⊕ β) = inrₗ b₁ ⊓ inrₗ b₂ := rfl
+@[simp] theorem inl_inf (a₁ a₂ : α) : (inlₗ (a₁ ⊓ a₂) : α ⊕ β) = inlₗ a₁ ⊓ inlₗ a₂ := rfl
+@[simp] theorem inr_inf (b₁ b₂ : β) : (inrₗ (b₁ ⊓ b₂) : α ⊕ β) = inrₗ b₁ ⊓ inrₗ b₂ := rfl
 
 end SemilatticeInf
 

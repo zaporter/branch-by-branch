@@ -71,7 +71,7 @@ This file is a `noncomputable theory` and uses classical logic throughout.
 
 ## TODO
 
-* Expand the list of definitions and important lemmas to the module docstring.
+* Expand the list of definitions and important theorems to the module docstring.
 
 -/
 
@@ -117,7 +117,7 @@ instance instFunLike : FunLike (α →₀ M) α M :=
 theorem ext {f g : α →₀ M} (h : ∀ a, f a = g a) : f = g :=
   DFunLike.ext _ _ h
 
-lemma ne_iff {f g : α →₀ M} : f ≠ g ↔ ∃ a, f a ≠ g a := DFunLike.ne_iff
+theorem ne_iff {f g : α →₀ M} : f ≠ g ↔ ∃ a, f a ≠ g a := DFunLike.ne_iff
 
 @[simp, norm_cast]
 theorem coe_mk (f : α → M) (s : Finset α) (h : ∀ a, a ∈ s ↔ f a ≠ 0) : ⇑(⟨s, f, h⟩ : α →₀ M) = f :=
@@ -126,7 +126,7 @@ theorem coe_mk (f : α → M) (s : Finset α) (h : ∀ a, a ∈ s ↔ f a ≠ 0)
 instance instZero : Zero (α →₀ M) :=
   ⟨⟨∅, 0, fun _ => ⟨fun h ↦ (not_mem_empty _ h).elim, fun H => (H rfl).elim⟩⟩⟩
 
-@[simp, norm_cast] lemma coe_zero : ⇑(0 : α →₀ M) = 0 := rfl
+@[simp, norm_cast] theorem coe_zero : ⇑(0 : α →₀ M) = 0 := rfl
 
 theorem zero_apply {a : α} : (0 : α →₀ M) a = 0 :=
   rfl
@@ -194,7 +194,7 @@ theorem equivFunOnFinite_symm_coe {α} [Finite α] (f : α →₀ M) : equivFunO
   equivFunOnFinite.symm_apply_apply f
 
 @[simp]
-lemma coe_equivFunOnFinite_symm {α} [Finite α] (f : α → M) : ⇑(equivFunOnFinite.symm f) = f := rfl
+theorem coe_equivFunOnFinite_symm {α} [Finite α] (f : α → M) : ⇑(equivFunOnFinite.symm f) = f := rfl
 
 /--
 If `α` has a unique term, the type of finitely supported functions `α →₀ β` is equivalent to `β`.
@@ -226,7 +226,7 @@ def onFinset (s : Finset α) (f : α → M) (hf : ∀ a, f a ≠ 0 → a ∈ s) 
   toFun := f
   mem_support_toFun := by classical simpa
 
-@[simp, norm_cast] lemma coe_onFinset (s : Finset α) (f : α → M) (hf) : onFinset s f hf = f := rfl
+@[simp, norm_cast] theorem coe_onFinset (s : Finset α) (f : α → M) (hf) : onFinset s f hf = f := rfl
 
 @[simp]
 theorem onFinset_apply {s : Finset α} {f : α → M} {hf a} : (onFinset s f hf : α →₀ M) a = f a :=
@@ -309,7 +309,7 @@ theorem mapRange_comp (f : N → P) (hf : f 0 = 0) (f₂ : M → N) (hf₂ : f�
   ext fun _ => rfl
 
 @[simp]
-lemma mapRange_mapRange (e₁ : N → P) (e₂ : M → N) (he₁ he₂) (f : α →₀ M) :
+theorem mapRange_mapRange (e₁ : N → P) (e₂ : M → N) (he₁ he₂) (f : α →₀ M) :
     mapRange e₁ he₁ (mapRange e₂ he₂ f) = mapRange (e₁ ∘ e₂) (by simp [*]) f := ext fun _ ↦ rfl
 
 theorem support_mapRange {f : M → N} {hf : f 0 = 0} {g : α →₀ M} :
@@ -322,7 +322,7 @@ theorem support_mapRange_of_injective {e : M → N} (he0 : e 0 = 0) (f : ι →�
   simp only [Finsupp.mem_support_iff, Ne, Finsupp.mapRange_apply]
   exact he.ne_iff' he0
 
-lemma range_mapRange (e : M → N) (he₀ : e 0 = 0) :
+theorem range_mapRange (e : M → N) (he₀ : e 0 = 0) :
     Set.range (Finsupp.mapRange (α := α) e he₀) = {g | ∀ i, g i ∈ Set.range e} := by
   ext g
   simp only [Set.mem_range, Set.mem_setOf]
@@ -338,14 +338,14 @@ lemma range_mapRange (e : M → N) (he₀ : e 0 = 0) :
     split_ifs <;> simp_all
 
 /-- `Finsupp.mapRange` of a injective function is injective. -/
-lemma mapRange_injective (e : M → N) (he₀ : e 0 = 0) (he : Injective e) :
+theorem mapRange_injective (e : M → N) (he₀ : e 0 = 0) (he : Injective e) :
     Injective (Finsupp.mapRange (α := α) e he₀) := by
   intro a b h
   rw [Finsupp.ext_iff] at h ⊢
   simpa only [mapRange_apply, he.eq_iff] using h
 
 /-- `Finsupp.mapRange` of a surjective function is surjective. -/
-lemma mapRange_surjective (e : M → N) (he₀ : e 0 = 0) (he : Surjective e) :
+theorem mapRange_surjective (e : M → N) (he₀ : e 0 = 0) (he : Surjective e) :
     Surjective (Finsupp.mapRange (α := α) e he₀) := by
   rw [← Set.range_eq_univ, range_mapRange, he.range_eq]
   simp
@@ -466,7 +466,7 @@ variable [AddZeroClass M]
 instance instAdd : Add (α →₀ M) :=
   ⟨zipWith (· + ·) (add_zero 0)⟩
 
-@[simp, norm_cast] lemma coe_add (f g : α →₀ M) : ⇑(f + g) = f + g := rfl
+@[simp, norm_cast] theorem coe_add (f g : α →₀ M) : ⇑(f + g) = f + g := rfl
 
 theorem add_apply (g₁ g₂ : α →₀ M) (a : α) : (g₁ + g₂) a = g₁ a + g₂ a :=
   rfl
@@ -578,7 +578,7 @@ instance instAddCommMonoid [AddCommMonoid M] : AddCommMonoid (α →₀ M) :=
 instance instNeg [NegZeroClass G] : Neg (α →₀ G) :=
   ⟨mapRange Neg.neg neg_zero⟩
 
-@[simp, norm_cast] lemma coe_neg [NegZeroClass G] (g : α →₀ G) : ⇑(-g) = -g := rfl
+@[simp, norm_cast] theorem coe_neg [NegZeroClass G] (g : α →₀ G) : ⇑(-g) = -g := rfl
 
 theorem neg_apply [NegZeroClass G] (g : α →₀ G) (a : α) : (-g) a = -g a :=
   rfl
@@ -595,7 +595,7 @@ theorem mapRange_neg' [AddGroup G] [SubtractionMonoid H] [FunLike β G H] [AddMo
 instance instSub [SubNegZeroMonoid G] : Sub (α →₀ G) :=
   ⟨zipWith Sub.sub (sub_zero _)⟩
 
-@[simp, norm_cast] lemma coe_sub [SubNegZeroMonoid G] (g₁ g₂ : α →₀ G) : ⇑(g₁ - g₂) = g₁ - g₂ := rfl
+@[simp, norm_cast] theorem coe_sub [SubNegZeroMonoid G] (g₁ g₂ : α →₀ G) : ⇑(g₁ - g₂) = g₁ - g₂ := rfl
 
 theorem sub_apply [SubNegZeroMonoid G] (g₁ g₂ : α →₀ G) (a : α) : (g₁ - g₂) a = g₁ a - g₂ a :=
   rfl

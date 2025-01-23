@@ -97,11 +97,11 @@ protected theorem max_le {M : WithBot α} {s : Finset α} (st : ∀ a ∈ s, (a 
   Finset.sup_le st
 
 @[simp]
-protected lemma max_le_iff {m : WithBot α} {s : Finset α} : s.max ≤ m ↔ ∀ a ∈ s, a ≤ m :=
+protected theorem max_le_iff {m : WithBot α} {s : Finset α} : s.max ≤ m ↔ ∀ a ∈ s, a ≤ m :=
   Finset.sup_le_iff
 
 @[simp]
-protected lemma max_eq_top [OrderTop α] {s : Finset α} : s.max = ⊤ ↔ ⊤ ∈ s :=
+protected theorem max_eq_top [OrderTop α] {s : Finset α} : s.max = ⊤ ↔ ⊤ ∈ s :=
   Finset.sup_eq_top_iff.trans <| by simp
 
 /-- Let `s` be a finset in a linear order. Then `s.min` is the minimum of `s` if `s` is not empty,
@@ -337,7 +337,7 @@ theorem max'_image [LinearOrder β] {f : α → β} (hf : Monotone f) (s : Finse
 
 /-- A version of `Finset.max'_image` with LHS and RHS reversed.
 Also, this version assumes that `s` is nonempty, not its image. -/
-lemma _root_.Monotone.map_finset_max' [LinearOrder β] {f : α → β} (hf : Monotone f) {s : Finset α}
+theorem _root_.Monotone.map_finset_max' [LinearOrder β] {f : α → β} (hf : Monotone f) {s : Finset α}
     (h : s.Nonempty) : f (s.max' h) = (s.image f).max' (h.image f) :=
   .symm <| max'_image hf ..
 
@@ -350,7 +350,7 @@ theorem min'_image [LinearOrder β] {f : α → β} (hf : Monotone f) (s : Finse
 
 /-- A version of `Finset.min'_image` with LHS and RHS reversed.
 Also, this version assumes that `s` is nonempty, not its image. -/
-lemma _root_.Monotone.map_finset_min' [LinearOrder β] {f : α → β} (hf : Monotone f) {s : Finset α}
+theorem _root_.Monotone.map_finset_min' [LinearOrder β] {f : α → β} (hf : Monotone f) {s : Finset α}
     (h : s.Nonempty) : f (s.min' h) = (s.image f).min' (h.image f) :=
   .symm <| min'_image hf ..
 

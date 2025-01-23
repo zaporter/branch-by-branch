@@ -12,7 +12,7 @@ This file allows calculating factorials (including ascending and descending ones
 semiring.
 
 This is particularly crucial for `Nat.descFactorial` as subtraction on `ℕ` does **not** correspond
-to subtraction on a general semiring. For example, we can't rely on existing cast lemmas to prove
+to subtraction on a general semiring. For example, we can't rely on existing cast theorems to prove
 `↑(a.descFactorial 2) = ↑a * (↑a - 1)`. We must use the fact that, whenever `↑(a - 1)` is not equal
 to `↑a - 1`, the other factor is `0` anyway.
 -/
@@ -53,7 +53,7 @@ section Ring
 
 variable [Ring S] (a b : ℕ)
 
-/-- Convenience lemma. The `a - 1` is not using truncated subtraction, as opposed to the definition
+/-- Convenience theorem. The `a - 1` is not using truncated subtraction, as opposed to the definition
 of `Nat.descFactorial` as a natural. -/
 theorem cast_descFactorial_two : (a.descFactorial 2 : S) = a * (a - 1) := by
   rw [cast_descFactorial]

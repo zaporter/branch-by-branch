@@ -91,10 +91,10 @@ theorem card_ulift [FinEnum (ULift α)] [FinEnum α] : card (ULift α) = card α
 section ULift
 variable [FinEnum α] (a : α) (a' : ULift α) (i : Fin (card α))
 
-@[simp] lemma equiv_up : equiv (ULift.up a) = equiv a := rfl
-@[simp] lemma equiv_down : equiv a'.down = equiv a' := rfl
-@[simp] lemma up_equiv_symm : ULift.up (equiv.symm i) = (equiv (α := ULift α)).symm i := rfl
-@[simp] lemma down_equiv_symm : ((equiv (α := ULift α)).symm i).down = equiv.symm i := rfl
+@[simp] theorem equiv_up : equiv (ULift.up a) = equiv a := rfl
+@[simp] theorem equiv_down : equiv a'.down = equiv a' := rfl
+@[simp] theorem up_equiv_symm : ULift.up (equiv.symm i) = (equiv (α := ULift α)).symm i := rfl
+@[simp] theorem down_equiv_symm : ((equiv (α := ULift α)).symm i).down = equiv.symm i := rfl
 
 end ULift
 
@@ -201,11 +201,11 @@ theorem card_pos_iff {α : Type u} [FinEnum α] : 0 < card α ↔ Nonempty α :=
   card_eq_fintypeCard (α := α) ▸ Fintype.card_pos_iff
 
 /-- Any non-empty enumeration has more than one element. -/
-lemma card_pos {α : Type*} [FinEnum α] [Nonempty α] : 0 < card α :=
+theorem card_pos {α : Type*} [FinEnum α] [Nonempty α] : 0 < card α :=
   card_pos_iff.mpr ‹_›
 
 /-- No non-empty enumeration has 0 elements. -/
-lemma card_ne_zero {α : Type*} [FinEnum α] [Nonempty α] : card α ≠ 0 := card_pos.ne'
+theorem card_ne_zero {α : Type*} [FinEnum α] [Nonempty α] : card α ≠ 0 := card_pos.ne'
 
 /-- Any enumeration of a type with unique inhabitant has length 1. -/
 theorem card_eq_one (α : Type u) [FinEnum α] [Unique α] : card α = 1 :=

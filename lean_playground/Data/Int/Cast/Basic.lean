@@ -13,7 +13,7 @@ This file proves additional properties about the *canonical* homomorphism from
 the integers into an additive group with a one (`Int.cast`).
 
 There is also `Data.Int.Cast.Lemmas`,
-which includes lemmas stated in terms of algebraic homomorphisms,
+which includes theorems stated in terms of algebraic homomorphisms,
 and results involving the order structure of `ℤ`.
 
 By contrast, this file's only import beyond `Data.Int.Cast.Defs` is `Algebra.Group.Basic`.
@@ -54,7 +54,7 @@ theorem cast_zero : ((0 : ℤ) : R) = 0 :=
   (AddGroupWithOne.intCast_ofNat 0).trans Nat.cast_zero
 -- type had `HasLiftT`
 
--- This lemma competes with `Int.ofNat_eq_natCast` to come later
+-- This theorem competes with `Int.ofNat_eq_natCast` to come later
 @[simp high, nolint simpNF, norm_cast]
 theorem cast_natCast (n : ℕ) : ((n : ℤ) : R) = n :=
   AddGroupWithOne.intCast_ofNat _
@@ -119,6 +119,6 @@ section zsmul
 
 variable {R : Type*}
 
-@[simp] lemma zsmul_one [AddGroupWithOne R] (n : ℤ) : n • (1 : R) = n := by cases n <;> simp
+@[simp] theorem zsmul_one [AddGroupWithOne R] (n : ℤ) : n • (1 : R) = n := by cases n <;> simp
 
 end zsmul

@@ -203,16 +203,16 @@ theorem rtakeWhile_idempotent (p : α → Bool) (l : List α) :
     rtakeWhile p (rtakeWhile p l) = rtakeWhile p l :=
   rtakeWhile_eq_self_iff.mpr fun _ => mem_rtakeWhile_imp
 
-lemma rdrop_add (i j : ℕ) : (l.rdrop i).rdrop j = l.rdrop (i + j) := by
+theorem rdrop_add (i j : ℕ) : (l.rdrop i).rdrop j = l.rdrop (i + j) := by
   simp_rw [rdrop_eq_reverse_drop_reverse, reverse_reverse, drop_drop]
 
 @[simp]
-lemma rdrop_append_length {l₁ l₂ : List α} :
+theorem rdrop_append_length {l₁ l₂ : List α} :
     List.rdrop (l₁ ++ l₂) (List.length l₂) = l₁ := by
   rw [rdrop_eq_reverse_drop_reverse, ← length_reverse l₂,
       reverse_append, drop_left, reverse_reverse]
 
-lemma rdrop_append_of_le_length {l₁ l₂ : List α} (k : ℕ) :
+theorem rdrop_append_of_le_length {l₁ l₂ : List α} (k : ℕ) :
     k ≤ length l₂ → List.rdrop (l₁ ++ l₂) k = l₁ ++ List.rdrop l₂ k := by
   intro hk
   rw [← length_reverse] at hk
@@ -220,7 +220,7 @@ lemma rdrop_append_of_le_length {l₁ l₂ : List α} (k : ℕ) :
     reverse_append, reverse_reverse, ← rdrop_eq_reverse_drop_reverse]
 
 @[simp]
-lemma rdrop_append_length_add {l₁ l₂ : List α} (k : ℕ) :
+theorem rdrop_append_length_add {l₁ l₂ : List α} (k : ℕ) :
     List.rdrop (l₁ ++ l₂) (length l₂ + k) = List.rdrop l₁ k := by
   rw [← rdrop_add, rdrop_append_length]
 

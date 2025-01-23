@@ -194,26 +194,26 @@ theorem coprime_mul_right_add_left (m n k : ℕ) : Coprime (k * n + m) n ↔ Cop
 theorem coprime_mul_left_add_left (m n k : ℕ) : Coprime (n * k + m) n ↔ Coprime m n := by
   rw [Coprime, Coprime, gcd_mul_left_add_left]
 
-lemma add_coprime_iff_left (h : c ∣ b) : Coprime (a + b) c ↔ Coprime a c := by
+theorem add_coprime_iff_left (h : c ∣ b) : Coprime (a + b) c ↔ Coprime a c := by
   obtain ⟨n, rfl⟩ := h; simp
 
-lemma add_coprime_iff_right (h : c ∣ a) : Coprime (a + b) c ↔ Coprime b c := by
+theorem add_coprime_iff_right (h : c ∣ a) : Coprime (a + b) c ↔ Coprime b c := by
   obtain ⟨n, rfl⟩ := h; simp
 
-lemma coprime_add_iff_left (h : a ∣ c) : Coprime a (b + c) ↔ Coprime a b := by
+theorem coprime_add_iff_left (h : a ∣ c) : Coprime a (b + c) ↔ Coprime a b := by
   obtain ⟨n, rfl⟩ := h; simp
 
-lemma coprime_add_iff_right (h : a ∣ b) : Coprime a (b + c) ↔ Coprime a c := by
+theorem coprime_add_iff_right (h : a ∣ b) : Coprime a (b + c) ↔ Coprime a c := by
   obtain ⟨n, rfl⟩ := h; simp
 
 -- TODO: Replace `Nat.Coprime.coprime_dvd_left`
-lemma Coprime.of_dvd_left (ha : a₁ ∣ a₂) (h : Coprime a₂ b) : Coprime a₁ b := h.coprime_dvd_left ha
+theorem Coprime.of_dvd_left (ha : a₁ ∣ a₂) (h : Coprime a₂ b) : Coprime a₁ b := h.coprime_dvd_left ha
 
 -- TODO: Replace `Nat.Coprime.coprime_dvd_right`
-lemma Coprime.of_dvd_right (hb : b₁ ∣ b₂) (h : Coprime a b₂) : Coprime a b₁ :=
+theorem Coprime.of_dvd_right (hb : b₁ ∣ b₂) (h : Coprime a b₂) : Coprime a b₁ :=
   h.coprime_dvd_right hb
 
-lemma Coprime.of_dvd (ha : a₁ ∣ a₂) (hb : b₁ ∣ b₂) (h : Coprime a₂ b₂) : Coprime a₁ b₁ :=
+theorem Coprime.of_dvd (ha : a₁ ∣ a₂) (hb : b₁ ∣ b₂) (h : Coprime a₂ b₂) : Coprime a₁ b₁ :=
   (h.of_dvd_left ha).of_dvd_right hb
 
 @[simp]

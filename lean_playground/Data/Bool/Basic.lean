@@ -10,7 +10,7 @@ import Mathlib.Order.Defs.LinearOrder
 /-!
 # Booleans
 
-This file proves various trivial lemmas about booleans and their
+This file proves various trivial theorems about booleans and their
 relation to decidable propositions.
 
 ## Tags
@@ -23,8 +23,8 @@ namespace Bool
 section
 
 /-!
-This section contains lemmas about booleans which were present in core Lean 3.
-The remainder of this file contains lemmas about booleans from mathlib 3.
+This section contains theorems about booleans which were present in core Lean 3.
+The remainder of this file contains theorems about booleans from mathlib 3.
 -/
 
 theorem true_eq_false_eq_False : ¬true = false := by decide
@@ -49,7 +49,7 @@ theorem or_eq_true_eq_eq_true_or_eq_true (a b : Bool) :
 
 theorem not_eq_true_eq_eq_false (a : Bool) : (not a = true) = (a = false) := by cases a <;> simp
 
-#adaptation_note /-- this is no longer a simp lemma,
+#adaptation_note /-- this is no longer a simp theorem,
   as after nightly-2024-03-05 the LHS simplifies. -/
 theorem and_eq_false_eq_eq_false_or_eq_false (a b : Bool) :
     ((a && b) = false) = (a = false ∨ b = false) := by
@@ -136,20 +136,20 @@ theorem and_intro : ∀ {a b : Bool}, a → b → a && b := by decide
 
 theorem and_elim_right : ∀ {a b : Bool}, a && b → b := by decide
 
-lemma eq_not_iff : ∀ {a b : Bool}, a = !b ↔ a ≠ b := by decide
+theorem eq_not_iff : ∀ {a b : Bool}, a = !b ↔ a ≠ b := by decide
 
-lemma not_eq_iff : ∀ {a b : Bool}, !a = b ↔ a ≠ b := by decide
+theorem not_eq_iff : ∀ {a b : Bool}, !a = b ↔ a ≠ b := by decide
 
 theorem ne_not {a b : Bool} : a ≠ !b ↔ a = b :=
   not_eq_not
 
 @[deprecated (since := "2024-06-07")] alias not_ne := not_not_eq
 
-lemma not_ne_self : ∀ b : Bool, (!b) ≠ b := by decide
+theorem not_ne_self : ∀ b : Bool, (!b) ≠ b := by decide
 
-lemma self_ne_not : ∀ b : Bool, b ≠ !b := by decide
+theorem self_ne_not : ∀ b : Bool, b ≠ !b := by decide
 
-lemma eq_or_eq_not : ∀ a b, a = b ∨ a = !b := by decide
+theorem eq_or_eq_not : ∀ a b, a = b ∨ a = !b := by decide
 
 -- Porting note: naming issue again: these two `not` are different.
 theorem not_iff_not : ∀ {b : Bool}, !b ↔ ¬b := by simp
@@ -204,10 +204,10 @@ theorem or_le : ∀ {x y z}, x ≤ z → y ≤ z → (x || y) ≤ z := by decide
 def ofNat (n : Nat) : Bool :=
   decide (n ≠ 0)
 
-@[simp] lemma toNat_beq_zero (b : Bool) : (b.toNat == 0) = !b := by cases b <;> rfl
-@[simp] lemma toNat_bne_zero (b : Bool) : (b.toNat != 0) =  b := by simp [bne]
-@[simp] lemma toNat_beq_one (b : Bool) : (b.toNat == 1) =  b := by cases b <;> rfl
-@[simp] lemma toNat_bne_one (b : Bool) : (b.toNat != 1) = !b := by simp [bne]
+@[simp] theorem toNat_beq_zero (b : Bool) : (b.toNat == 0) = !b := by cases b <;> rfl
+@[simp] theorem toNat_bne_zero (b : Bool) : (b.toNat != 0) =  b := by simp [bne]
+@[simp] theorem toNat_beq_one (b : Bool) : (b.toNat == 1) =  b := by cases b <;> rfl
+@[simp] theorem toNat_bne_one (b : Bool) : (b.toNat != 1) = !b := by simp [bne]
 
 theorem ofNat_le_ofNat {n m : Nat} (h : n ≤ m) : ofNat n ≤ ofNat m := by
   simp only [ofNat, ne_eq, _root_.decide_not]

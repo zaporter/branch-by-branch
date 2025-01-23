@@ -67,7 +67,7 @@ def rangeIcc (f g : ι →₀ α) : ι →₀ Finset α where
     exact Icc_eq_singleton_iff.symm
 
 -- Porting note: Added as alternative to rangeIcc_toFun to be used in proof of card_Icc
-lemma coe_rangeIcc (f g : ι →₀ α) : rangeIcc f g i = Icc (f i) (g i) := rfl
+theorem coe_rangeIcc (f g : ι →₀ α) : rangeIcc f g i = Icc (f i) (g i) := rfl
 
 open scoped Classical in
 @[simp]

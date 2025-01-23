@@ -45,20 +45,20 @@ section
 variable {f : Bool → Bool → Bool}
 
 @[simp]
-lemma bitwise_zero_left (m : Nat) : bitwise f 0 m = if f false true then m else 0 := by
+theorem bitwise_zero_left (m : Nat) : bitwise f 0 m = if f false true then m else 0 := by
   simp [bitwise]
 
 @[simp]
-lemma bitwise_zero_right (n : Nat) : bitwise f n 0 = if f true false then n else 0 := by
+theorem bitwise_zero_right (n : Nat) : bitwise f n 0 = if f true false then n else 0 := by
   unfold bitwise
   simp only [ite_self, decide_false, Nat.zero_div, ite_true, ite_eq_right_iff]
   rintro ⟨⟩
   split_ifs <;> rfl
 
-lemma bitwise_zero : bitwise f 0 0 = 0 := by
+theorem bitwise_zero : bitwise f 0 0 = 0 := by
   simp only [bitwise_zero_right, ite_self]
 
-lemma bitwise_of_ne_zero {n m : Nat} (hn : n ≠ 0) (hm : m ≠ 0) :
+theorem bitwise_of_ne_zero {n m : Nat} (hn : n ≠ 0) (hm : m ≠ 0) :
     bitwise f n m = bit (f (bodd n) (bodd m)) (bitwise f (n / 2) (m / 2)) := by
   conv_lhs => unfold bitwise
   have mod_two_iff_bod x : (x % 2 = 1 : Bool) = bodd x := by
@@ -77,7 +77,7 @@ theorem binaryRec_of_ne_zero {C : Nat → Sort*} (z : C 0) (f : ∀ b n, C n →
     simp
 
 @[simp]
-lemma bitwise_bit {f : Bool → Bool → Bool} (h : f false false = false := by rfl) (a m b n) :
+theorem bitwise_bit {f : Bool → Bool → Bool} (h : f false false = false := by rfl) (a m b n) :
     bitwise f (bit a m) (bit b n) = bit (f a b) (bitwise f m n) := by
   conv_lhs => unfold bitwise
   simp only [bit, ite_apply, Bool.cond_eq_ite]
@@ -85,11 +85,11 @@ lemma bitwise_bit {f : Bool → Bool → Bool} (h : f false false = false := by 
   cases a <;> cases b <;> simp [h4] <;> split_ifs
     <;> simp_all +decide [two_mul]
 
-lemma bit_mod_two_eq_zero_iff (a x) :
+theorem bit_mod_two_eq_zero_iff (a x) :
     bit a x % 2 = 0 ↔ !a := by
   simp
 
-lemma bit_mod_two_eq_one_iff (a x) :
+theorem bit_mod_two_eq_one_iff (a x) :
     bit a x % 2 = 1 ↔ a := by
   simp
 
@@ -141,7 +141,7 @@ theorem bit_ne_zero_iff {n : ℕ} {b : Bool} : n.bit b ≠ 0 ↔ n = 0 → b = t
 /-- An alternative for `bitwise_bit` which replaces the `f false false = false` assumption
 with assumptions that neither `bit a m` nor `bit b n` are `0`
 (albeit, phrased as the implications `m = 0 → a = true` and `n = 0 → b = true`) -/
-lemma bitwise_bit' {f : Bool → Bool → Bool} (a : Bool) (m : Nat) (b : Bool) (n : Nat)
+theorem bitwise_bit' {f : Bool → Bool → Bool} (a : Bool) (m : Nat) (b : Bool) (n : Nat)
     (ham : m = 0 → a = true) (hbn : n = 0 → b = true) :
     bitwise f (bit a m) (bit b n) = bit (f a b) (bitwise f m n) := by
   conv_lhs => unfold bitwise
@@ -151,7 +151,7 @@ lemma bitwise_bit' {f : Bool → Bool → Bool} (a : Bool) (m : Nat) (b : Bool) 
   conv_rhs => simp only [bit, two_mul, Bool.cond_eq_ite]
   split_ifs with hf <;> rfl
 
-lemma bitwise_eq_binaryRec (f : Bool → Bool → Bool) :
+theorem bitwise_eq_binaryRec (f : Bool → Bool → Bool) :
     bitwise f =
     binaryRec (fun n => cond (f false true) n 0) fun a m Ia =>
       binaryRec (cond (f true false) (bit a m) 0) fun b n _ => bit (f a b) (Ia n) := by
@@ -260,7 +260,7 @@ theorem lor_comm (n m : ℕ) : n ||| m = m ||| n :=
 theorem land_comm (n m : ℕ) : n &&& m = m &&& n :=
   bitwise_comm Bool.and_comm n m
 
-lemma and_two_pow (n i : ℕ) : n &&& 2 ^ i = (n.testBit i).toNat * 2 ^ i := by
+theorem and_two_pow (n i : ℕ) : n &&& 2 ^ i = (n.testBit i).toNat * 2 ^ i := by
   refine eq_of_testBit_eq fun j => ?_
   obtain rfl | hij := Decidable.eq_or_ne i j <;> cases' h : n.testBit i
   · simp [h]
@@ -268,7 +268,7 @@ lemma and_two_pow (n i : ℕ) : n &&& 2 ^ i = (n.testBit i).toNat * 2 ^ i := by
   · simp [h, testBit_two_pow_of_ne hij]
   · simp [h, testBit_two_pow_of_ne hij]
 
-lemma two_pow_and (n i : ℕ) : 2 ^ i &&& n = 2 ^ i * (n.testBit i).toNat := by
+theorem two_pow_and (n i : ℕ) : 2 ^ i &&& n = 2 ^ i * (n.testBit i).toNat := by
   rw [mul_comm, land_comm, and_two_pow]
 
 /-- Proving associativity of bitwise operations in general essentially boils down to a huge case
@@ -280,14 +280,14 @@ macro "bitwise_assoc_tac" : tactic => set_option hygiene false in `(tactic| (
   · simp
   induction' k using Nat.binaryRec with b'' k hk
   -- Porting note (https://github.com/leanprover-community/mathlib4/issues/10745): was `simp [hn]`
-  -- This is necessary because these are simp lemmas in mathlib
+  -- This is necessary because these are simp theorems in mathlib
   <;> simp [hn, Bool.or_assoc, Bool.and_assoc, Bool.bne_eq_xor]))
 
 theorem land_assoc (n m k : ℕ) : (n &&& m) &&& k = n &&& (m &&& k) := by bitwise_assoc_tac
 
 theorem lor_assoc (n m k : ℕ) : (n ||| m) ||| k = n ||| (m ||| k) := by bitwise_assoc_tac
 
--- These lemmas match `mul_inv_cancel_right` and `mul_inv_cancel_left`.
+-- These theorems match `mul_inv_cancel_right` and `mul_inv_cancel_left`.
 theorem xor_cancel_right (n m : ℕ) : (m ^^^ n) ^^^ n = m := by
   rw [Nat.xor_assoc, Nat.xor_self, xor_zero]
 
@@ -371,11 +371,11 @@ theorem even_xor {m n : ℕ} : Even (m ^^^ n) ↔ (Even m ↔ Even n) := by
 @[deprecated bitwise_lt_two_pow (since := "2024-12-28")]
 alias bitwise_lt := bitwise_lt_two_pow
 
-lemma shiftLeft_lt {x n m : ℕ} (h : x < 2 ^ n) : x <<< m < 2 ^ (n + m) := by
+theorem shiftLeft_lt {x n m : ℕ} (h : x < 2 ^ n) : x <<< m < 2 ^ (n + m) := by
   simp only [Nat.pow_add, shiftLeft_eq, Nat.mul_lt_mul_right (Nat.two_pow_pos _), h]
 
 /-- Note that the LHS is the expression used within `Std.BitVec.append`, hence the name. -/
-lemma append_lt {x y n m} (hx : x < 2 ^ n) (hy : y < 2 ^ m) : y <<< n ||| x < 2 ^ (n + m) := by
+theorem append_lt {x y n m} (hx : x < 2 ^ n) (hy : y < 2 ^ m) : y <<< n ||| x < 2 ^ (n + m) := by
   apply bitwise_lt_two_pow
   · rw [add_comm]; apply shiftLeft_lt hy
   · apply lt_of_lt_of_le hx <| Nat.pow_le_pow_right (le_succ _) (le_add_right _ _)

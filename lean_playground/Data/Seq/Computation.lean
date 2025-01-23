@@ -1054,16 +1054,16 @@ variable {R : α → β → Prop} {C : Computation α → Computation β → Pro
 
 -- Porting note: was attribute [simp] LiftRelAux
 -- but right now `simp` on defs is a Lean 4 catastrophe
--- Instead we add the equation lemmas and tag them @[simp]
-@[simp] lemma liftRelAux_inl_inl {a : α} {b : β} :
+-- Instead we add the equation theorems and tag them @[simp]
+@[simp] theorem liftRelAux_inl_inl {a : α} {b : β} :
   LiftRelAux R C (Sum.inl a) (Sum.inl b) = R a b := rfl
-@[simp] lemma liftRelAux_inl_inr {a : α} {cb} :
+@[simp] theorem liftRelAux_inl_inr {a : α} {cb} :
     LiftRelAux R C (Sum.inl a) (Sum.inr cb) = ∃ b, b ∈ cb ∧ R a b :=
   rfl
-@[simp] lemma liftRelAux_inr_inl {b : β} {ca} :
+@[simp] theorem liftRelAux_inr_inl {b : β} {ca} :
     LiftRelAux R C (Sum.inr ca) (Sum.inl b) = ∃ a, a ∈ ca ∧ R a b :=
   rfl
-@[simp] lemma liftRelAux_inr_inr {ca cb} :
+@[simp] theorem liftRelAux_inr_inr {ca cb} :
     LiftRelAux R C (Sum.inr ca) (Sum.inr cb) = C ca cb :=
   rfl
 

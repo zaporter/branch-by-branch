@@ -36,7 +36,7 @@ def hyperoperation : ℕ → ℕ → ℕ → ℕ
   | _ + 3, _, 0 => 1
   | n + 1, m, k + 1 => hyperoperation n m (hyperoperation (n + 1) m k)
 
--- Basic hyperoperation lemmas
+-- Basic hyperoperation theorems
 @[simp]
 theorem hyperoperation_zero (m : ℕ) : hyperoperation 0 m = Nat.succ :=
   funext fun k => by rw [hyperoperation, Nat.succ_eq_add_one]
@@ -48,7 +48,7 @@ theorem hyperoperation_recursion (n m k : ℕ) :
     hyperoperation (n + 1) m (k + 1) = hyperoperation n m (hyperoperation (n + 1) m k) := by
   rw [hyperoperation]
 
--- Interesting hyperoperation lemmas
+-- Interesting hyperoperation theorems
 @[simp]
 theorem hyperoperation_one : hyperoperation 1 = (· + ·) := by
   ext m k

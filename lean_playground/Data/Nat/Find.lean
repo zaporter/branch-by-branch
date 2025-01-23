@@ -71,45 +71,45 @@ protected theorem find_min : ∀ {m : ℕ}, m < Nat.find H → ¬p m :=
 protected theorem find_min' {m : ℕ} (h : p m) : Nat.find H ≤ m :=
   Nat.le_of_not_lt fun l => Nat.find_min H l h
 
-lemma find_eq_iff (h : ∃ n : ℕ, p n) : Nat.find h = m ↔ p m ∧ ∀ n < m, ¬ p n := by
+theorem find_eq_iff (h : ∃ n : ℕ, p n) : Nat.find h = m ↔ p m ∧ ∀ n < m, ¬ p n := by
   constructor
   · rintro rfl
     exact ⟨Nat.find_spec h, fun _ ↦ Nat.find_min h⟩
   · rintro ⟨hm, hlt⟩
     exact le_antisymm (Nat.find_min' h hm) (not_lt.1 <| imp_not_comm.1 (hlt _) <| Nat.find_spec h)
 
-@[simp] lemma find_lt_iff (h : ∃ n : ℕ, p n) (n : ℕ) : Nat.find h < n ↔ ∃ m < n, p m :=
+@[simp] theorem find_lt_iff (h : ∃ n : ℕ, p n) (n : ℕ) : Nat.find h < n ↔ ∃ m < n, p m :=
   ⟨fun h2 ↦ ⟨Nat.find h, h2, Nat.find_spec h⟩,
     fun ⟨_, hmn, hm⟩ ↦ Nat.lt_of_le_of_lt (Nat.find_min' h hm) hmn⟩
 
-@[simp] lemma find_le_iff (h : ∃ n : ℕ, p n) (n : ℕ) : Nat.find h ≤ n ↔ ∃ m ≤ n, p m := by
+@[simp] theorem find_le_iff (h : ∃ n : ℕ, p n) (n : ℕ) : Nat.find h ≤ n ↔ ∃ m ≤ n, p m := by
   simp only [exists_prop, ← Nat.lt_succ_iff, find_lt_iff]
 
-@[simp] lemma le_find_iff (h : ∃ n : ℕ, p n) (n : ℕ) : n ≤ Nat.find h ↔ ∀ m < n, ¬ p m := by
+@[simp] theorem le_find_iff (h : ∃ n : ℕ, p n) (n : ℕ) : n ≤ Nat.find h ↔ ∀ m < n, ¬ p m := by
   simp only [← not_lt, find_lt_iff, not_exists, not_and]
 
-@[simp] lemma lt_find_iff (h : ∃ n : ℕ, p n) (n : ℕ) : n < Nat.find h ↔ ∀ m ≤ n, ¬ p m := by
+@[simp] theorem lt_find_iff (h : ∃ n : ℕ, p n) (n : ℕ) : n < Nat.find h ↔ ∀ m ≤ n, ¬ p m := by
   simp only [← succ_le_iff, le_find_iff, succ_le_succ_iff]
 
-@[simp] lemma find_eq_zero (h : ∃ n : ℕ, p n) : Nat.find h = 0 ↔ p 0 := by simp [find_eq_iff]
+@[simp] theorem find_eq_zero (h : ∃ n : ℕ, p n) : Nat.find h = 0 ↔ p 0 := by simp [find_eq_iff]
 
 variable [DecidablePred q] in
-lemma find_mono (h : ∀ n, q n → p n) {hp : ∃ n, p n} {hq : ∃ n, q n} : Nat.find hp ≤ Nat.find hq :=
+theorem find_mono (h : ∀ n, q n → p n) {hp : ∃ n, p n} {hq : ∃ n, q n} : Nat.find hp ≤ Nat.find hq :=
   Nat.find_min' _ (h _ (Nat.find_spec hq))
 
-lemma find_le {h : ∃ n, p n} (hn : p n) : Nat.find h ≤ n :=
+theorem find_le {h : ∃ n, p n} (hn : p n) : Nat.find h ≤ n :=
   (Nat.find_le_iff _ _).2 ⟨n, le_refl _, hn⟩
 
-lemma find_comp_succ (h₁ : ∃ n, p n) (h₂ : ∃ n, p (n + 1)) (h0 : ¬ p 0) :
+theorem find_comp_succ (h₁ : ∃ n, p n) (h₂ : ∃ n, p (n + 1)) (h0 : ¬ p 0) :
     Nat.find h₁ = Nat.find h₂ + 1 := by
   refine (find_eq_iff _).2 ⟨Nat.find_spec h₂, fun n hn ↦ ?_⟩
   cases n
   exacts [h0, @Nat.find_min (fun n ↦ p (n + 1)) _ h₂ _ (succ_lt_succ_iff.1 hn)]
 
-lemma find_pos (h : ∃ n : ℕ, p n) : 0 < Nat.find h ↔ ¬p 0 :=
+theorem find_pos (h : ∃ n : ℕ, p n) : 0 < Nat.find h ↔ ¬p 0 :=
   Nat.pos_iff_ne_zero.trans (Nat.find_eq_zero _).not
 
-lemma find_add {hₘ : ∃ m, p (m + n)} {hₙ : ∃ n, p n} (hn : n ≤ Nat.find hₙ) :
+theorem find_add {hₘ : ∃ m, p (m + n)} {hₙ : ∃ n, p n} (hn : n ≤ Nat.find hₙ) :
     Nat.find hₘ + n = Nat.find hₙ := by
   refine le_antisymm ((le_find_iff _ _).2 fun m hm hpm => Nat.not_le.2 hm ?_) ?_
   · have hnm : n ≤ m := le_trans hn (find_le hpm)
@@ -134,20 +134,20 @@ def findGreatest (P : ℕ → Prop) [DecidablePred P] : ℕ → ℕ
 
 variable {P Q : ℕ → Prop} [DecidablePred P] {n : ℕ}
 
-@[simp] lemma findGreatest_zero : Nat.findGreatest P 0 = 0 := rfl
+@[simp] theorem findGreatest_zero : Nat.findGreatest P 0 = 0 := rfl
 
-lemma findGreatest_succ (n : ℕ) :
+theorem findGreatest_succ (n : ℕ) :
     Nat.findGreatest P (n + 1) = if P (n + 1) then n + 1 else Nat.findGreatest P n := rfl
 
-@[simp] lemma findGreatest_eq : ∀ {n}, P n → Nat.findGreatest P n = n
+@[simp] theorem findGreatest_eq : ∀ {n}, P n → Nat.findGreatest P n = n
   | 0, _ => rfl
   | n + 1, h => by simp [Nat.findGreatest, h]
 
 @[simp]
-lemma findGreatest_of_not (h : ¬ P (n + 1)) : findGreatest P (n + 1) = findGreatest P n := by
+theorem findGreatest_of_not (h : ¬ P (n + 1)) : findGreatest P (n + 1) = findGreatest P n := by
   simp [Nat.findGreatest, h]
 
-lemma findGreatest_eq_iff :
+theorem findGreatest_eq_iff :
     Nat.findGreatest P k = m ↔ m ≤ k ∧ (m ≠ 0 → P m) ∧ ∀ ⦃n⦄, m < n → n ≤ k → ¬P n := by
   induction k generalizing m with
   | zero =>
@@ -176,26 +176,26 @@ lemma findGreatest_eq_iff :
         rintro rfl
         exact hk (hP k.succ_ne_zero)
 
-lemma findGreatest_eq_zero_iff : Nat.findGreatest P k = 0 ↔ ∀ ⦃n⦄, 0 < n → n ≤ k → ¬P n := by
+theorem findGreatest_eq_zero_iff : Nat.findGreatest P k = 0 ↔ ∀ ⦃n⦄, 0 < n → n ≤ k → ¬P n := by
   simp [findGreatest_eq_iff]
 
-@[simp] lemma findGreatest_pos : 0 < Nat.findGreatest P k ↔ ∃ n, 0 < n ∧ n ≤ k ∧ P n := by
+@[simp] theorem findGreatest_pos : 0 < Nat.findGreatest P k ↔ ∃ n, 0 < n ∧ n ≤ k ∧ P n := by
   rw [Nat.pos_iff_ne_zero, Ne, findGreatest_eq_zero_iff]; push_neg; rfl
 
-lemma findGreatest_spec (hmb : m ≤ n) (hm : P m) : P (Nat.findGreatest P n) := by
+theorem findGreatest_spec (hmb : m ≤ n) (hm : P m) : P (Nat.findGreatest P n) := by
   by_cases h : Nat.findGreatest P n = 0
   · cases m
     · rwa [h]
     exact ((findGreatest_eq_zero_iff.1 h) (zero_lt_succ _) hmb hm).elim
   · exact (findGreatest_eq_iff.1 rfl).2.1 h
 
-lemma findGreatest_le (n : ℕ) : Nat.findGreatest P n ≤ n :=
+theorem findGreatest_le (n : ℕ) : Nat.findGreatest P n ≤ n :=
   (findGreatest_eq_iff.1 rfl).1
 
-lemma le_findGreatest (hmb : m ≤ n) (hm : P m) : m ≤ Nat.findGreatest P n :=
+theorem le_findGreatest (hmb : m ≤ n) (hm : P m) : m ≤ Nat.findGreatest P n :=
   le_of_not_lt fun hlt => (findGreatest_eq_iff.1 rfl).2.2 hlt hmb hm
 
-lemma findGreatest_mono_right (P : ℕ → Prop) [DecidablePred P] {m n} (hmn : m ≤ n) :
+theorem findGreatest_mono_right (P : ℕ → Prop) [DecidablePred P] {m n} (hmn : m ≤ n) :
     Nat.findGreatest P m ≤ Nat.findGreatest P n := by
   induction hmn with
   | refl => simp
@@ -205,7 +205,7 @@ lemma findGreatest_mono_right (P : ℕ → Prop) [DecidablePred P] {m n} (hmn : 
     · exact le_trans ih <| le_trans (findGreatest_le _) (le_succ _)
     · exact ih
 
-lemma findGreatest_mono_left [DecidablePred Q] (hPQ : ∀ n, P n → Q n) (n : ℕ) :
+theorem findGreatest_mono_left [DecidablePred Q] (hPQ : ∀ n, P n → Q n) (n : ℕ) :
     Nat.findGreatest P n ≤ Nat.findGreatest Q n := by
   induction n with
   | zero => rfl
@@ -215,7 +215,7 @@ lemma findGreatest_mono_left [DecidablePred Q] (hPQ : ∀ n, P n → Q n) (n : �
     · rw [findGreatest_of_not h]
       exact le_trans hn (Nat.findGreatest_mono_right _ <| le_succ _)
 
-lemma findGreatest_mono [DecidablePred Q] (hPQ : ∀ n, P n → Q n) (hmn : m ≤ n) :
+theorem findGreatest_mono [DecidablePred Q] (hPQ : ∀ n, P n → Q n) (hmn : m ≤ n) :
     Nat.findGreatest P m ≤ Nat.findGreatest Q n :=
   le_trans (Nat.findGreatest_mono_right _ hmn) (findGreatest_mono_left hPQ _)
 

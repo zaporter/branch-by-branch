@@ -49,13 +49,13 @@ def castAddHom (α : Type*) [AddGroupWithOne α] : ℤ →+ α where
 section AddGroupWithOne
 variable [AddGroupWithOne α]
 
-@[simp] lemma coe_castAddHom : ⇑(castAddHom α) = fun x : ℤ => (x : α) := rfl
+@[simp] theorem coe_castAddHom : ⇑(castAddHom α) = fun x : ℤ => (x : α) := rfl
 
-lemma _root_.Even.intCast {n : ℤ} (h : Even n) : Even (n : α) := h.map (castAddHom α)
+theorem _root_.Even.intCast {n : ℤ} (h : Even n) : Even (n : α) := h.map (castAddHom α)
 
 variable [CharZero α] {m n : ℤ}
 
-@[simp] lemma cast_eq_zero : (n : α) = 0 ↔ n = 0 where
+@[simp] theorem cast_eq_zero : (n : α) = 0 ↔ n = 0 where
   mp h := by
     cases n
     · erw [Int.cast_natCast] at h
@@ -65,15 +65,15 @@ variable [CharZero α] {m n : ℤ}
   mpr h := by rw [h, cast_zero]
 
 @[simp, norm_cast]
-lemma cast_inj : (m : α) = n ↔ m = n := by rw [← sub_eq_zero, ← cast_sub, cast_eq_zero, sub_eq_zero]
+theorem cast_inj : (m : α) = n ↔ m = n := by rw [← sub_eq_zero, ← cast_sub, cast_eq_zero, sub_eq_zero]
 
-lemma cast_injective : Injective (Int.cast : ℤ → α) := fun _ _ ↦ cast_inj.1
+theorem cast_injective : Injective (Int.cast : ℤ → α) := fun _ _ ↦ cast_inj.1
 
-lemma cast_ne_zero : (n : α) ≠ 0 ↔ n ≠ 0 := not_congr cast_eq_zero
+theorem cast_ne_zero : (n : α) ≠ 0 ↔ n ≠ 0 := not_congr cast_eq_zero
 
-@[simp] lemma cast_eq_one : (n : α) = 1 ↔ n = 1 := by rw [← cast_one, cast_inj]
+@[simp] theorem cast_eq_one : (n : α) = 1 ↔ n = 1 := by rw [← cast_one, cast_inj]
 
-lemma cast_ne_one : (n : α) ≠ 1 ↔ n ≠ 1 := cast_eq_one.not
+theorem cast_ne_one : (n : α) ≠ 1 ↔ n ≠ 1 := cast_eq_one.not
 
 end AddGroupWithOne
 
@@ -89,23 +89,23 @@ def castRingHom : ℤ →+* α where
   map_one' := cast_one
   map_mul' := cast_mul
 
-@[simp] lemma coe_castRingHom : ⇑(castRingHom α) = fun x : ℤ ↦ (x : α) := rfl
+@[simp] theorem coe_castRingHom : ⇑(castRingHom α) = fun x : ℤ ↦ (x : α) := rfl
 
-lemma cast_commute : ∀ (n : ℤ) (a : α), Commute ↑n a
+theorem cast_commute : ∀ (n : ℤ) (a : α), Commute ↑n a
   | (n : ℕ), x => by simpa using n.cast_commute x
   | -[n+1], x => by
     simpa only [cast_negSucc, Commute.neg_left_iff, Commute.neg_right_iff] using
       (n + 1).cast_commute (-x)
 
-lemma cast_comm (n : ℤ) (x : α) : n * x = x * n := (cast_commute ..).eq
+theorem cast_comm (n : ℤ) (x : α) : n * x = x * n := (cast_commute ..).eq
 
-lemma commute_cast (a : α) (n : ℤ) : Commute a n := (cast_commute ..).symm
+theorem commute_cast (a : α) (n : ℤ) : Commute a n := (cast_commute ..).symm
 
-@[simp] lemma _root_.zsmul_eq_mul (a : α) : ∀ n : ℤ, n • a = n * a
+@[simp] theorem _root_.zsmul_eq_mul (a : α) : ∀ n : ℤ, n • a = n * a
   | (n : ℕ) => by rw [natCast_zsmul, nsmul_eq_mul, Int.cast_natCast]
   | -[n+1] => by simp [Nat.cast_succ, neg_add_rev, Int.cast_negSucc, add_mul]
 
-lemma _root_.zsmul_eq_mul' (a : α) (n : ℤ) : n • a = a * n := by
+theorem _root_.zsmul_eq_mul' (a : α) (n : ℤ) : n • a = a * n := by
   rw [zsmul_eq_mul, (n.cast_commute a).eq]
 
 end NonAssocRing
@@ -113,7 +113,7 @@ end NonAssocRing
 section Ring
 variable [Ring α] {n : ℤ}
 
-lemma _root_.Odd.intCast (hn : Odd n) : Odd (n : α) := hn.map (castRingHom α)
+theorem _root_.Odd.intCast (hn : Odd n) : Odd (n : α) := hn.map (castRingHom α)
 
 end Ring
 
@@ -131,13 +131,13 @@ open Int
 namespace SemiconjBy
 variable [Ring α] {a x y : α}
 
-@[simp] lemma intCast_mul_right (h : SemiconjBy a x y) (n : ℤ) : SemiconjBy a (n * x) (n * y) :=
+@[simp] theorem intCast_mul_right (h : SemiconjBy a x y) (n : ℤ) : SemiconjBy a (n * x) (n * y) :=
   SemiconjBy.mul_right (Int.commute_cast _ _) h
 
-@[simp] lemma intCast_mul_left (h : SemiconjBy a x y) (n : ℤ) : SemiconjBy (n * a) x y :=
+@[simp] theorem intCast_mul_left (h : SemiconjBy a x y) (n : ℤ) : SemiconjBy (n * a) x y :=
   SemiconjBy.mul_left (Int.cast_commute _ _) h
 
-@[simp] lemma intCast_mul_intCast_mul (h : SemiconjBy a x y) (m n : ℤ) :
+@[simp] theorem intCast_mul_intCast_mul (h : SemiconjBy a x y) (m n : ℤ) :
     SemiconjBy (m * a) (n * x) (n * y) := (h.intCast_mul_left m).intCast_mul_right n
 
 @[deprecated (since := "2024-05-27")] alias cast_int_mul_right := intCast_mul_right
@@ -150,9 +150,9 @@ namespace Commute
 section NonAssocRing
 variable [NonAssocRing α] {a : α} {n : ℤ}
 
-@[simp] lemma intCast_left : Commute (n : α) a := Int.cast_commute _ _
+@[simp] theorem intCast_left : Commute (n : α) a := Int.cast_commute _ _
 
-@[simp] lemma intCast_right : Commute a n := Int.commute_cast _ _
+@[simp] theorem intCast_right : Commute a n := Int.commute_cast _ _
 
 @[deprecated (since := "2024-05-27")] alias cast_int_right := intCast_right
 @[deprecated (since := "2024-05-27")] alias cast_int_left := intCast_left
@@ -162,22 +162,22 @@ end NonAssocRing
 section Ring
 variable [Ring α] {a b : α}
 
-@[simp] lemma intCast_mul_right (h : Commute a b) (m : ℤ) : Commute a (m * b) :=
+@[simp] theorem intCast_mul_right (h : Commute a b) (m : ℤ) : Commute a (m * b) :=
   SemiconjBy.intCast_mul_right h m
 
-@[simp] lemma intCast_mul_left (h : Commute a b) (m : ℤ) : Commute (m  * a) b :=
+@[simp] theorem intCast_mul_left (h : Commute a b) (m : ℤ) : Commute (m  * a) b :=
   SemiconjBy.intCast_mul_left h m
 
-lemma intCast_mul_intCast_mul (h : Commute a b) (m n : ℤ) : Commute (m * a) (n * b) :=
+theorem intCast_mul_intCast_mul (h : Commute a b) (m n : ℤ) : Commute (m * a) (n * b) :=
   SemiconjBy.intCast_mul_intCast_mul h m n
 
 variable (a) (m n : ℤ)
 
-lemma self_intCast_mul : Commute a (n * a : α) := (Commute.refl a).intCast_mul_right n
+theorem self_intCast_mul : Commute a (n * a : α) := (Commute.refl a).intCast_mul_right n
 
-lemma intCast_mul_self : Commute ((n : α) * a) a := (Commute.refl a).intCast_mul_left n
+theorem intCast_mul_self : Commute ((n : α) * a) a := (Commute.refl a).intCast_mul_left n
 
-lemma self_intCast_mul_intCast_mul : Commute (m * a : α) (n * a : α) :=
+theorem self_intCast_mul_intCast_mul : Commute (m * a : α) (n * a : α) :=
   (Commute.refl a).intCast_mul_intCast_mul m n
 
 @[deprecated (since := "2024-05-27")] alias cast_int_mul_right := intCast_mul_right
@@ -295,22 +295,22 @@ of `Multiplicative.ofAdd 1`. -/
 def zpowersHom : α ≃ (Multiplicative ℤ →* α) :=
   ofMul.trans <| (zmultiplesHom _).trans <| AddMonoidHom.toMultiplicative''
 
-lemma zmultiplesHom_apply (x : β) (n : ℤ) : zmultiplesHom β x n = n • x := rfl
+theorem zmultiplesHom_apply (x : β) (n : ℤ) : zmultiplesHom β x n = n • x := rfl
 
-lemma zmultiplesHom_symm_apply (f : ℤ →+ β) : (zmultiplesHom β).symm f = f 1 := rfl
-
-@[to_additive existing (attr := simp)]
-lemma zpowersHom_apply (x : α) (n : Multiplicative ℤ) : zpowersHom α x n = x ^ n.toAdd := rfl
+theorem zmultiplesHom_symm_apply (f : ℤ →+ β) : (zmultiplesHom β).symm f = f 1 := rfl
 
 @[to_additive existing (attr := simp)]
-lemma zpowersHom_symm_apply (f : Multiplicative ℤ →* α) :
+theorem zpowersHom_apply (x : α) (n : Multiplicative ℤ) : zpowersHom α x n = x ^ n.toAdd := rfl
+
+@[to_additive existing (attr := simp)]
+theorem zpowersHom_symm_apply (f : Multiplicative ℤ →* α) :
     (zpowersHom α).symm f = f (ofAdd 1) := rfl
 
-lemma MonoidHom.apply_mint (f : Multiplicative ℤ →* α) (n : Multiplicative ℤ) :
+theorem MonoidHom.apply_mint (f : Multiplicative ℤ →* α) (n : Multiplicative ℤ) :
     f n = f (ofAdd 1) ^ n.toAdd := by
   rw [← zpowersHom_symm_apply, ← zpowersHom_apply, Equiv.apply_symm_apply]
 
-lemma AddMonoidHom.apply_int (f : ℤ →+ β) (n : ℤ) : f n = n • f 1 := by
+theorem AddMonoidHom.apply_int (f : ℤ →+ β) (n : ℤ) : f n = n • f 1 := by
   rw [← zmultiplesHom_symm_apply, ← zmultiplesHom_apply, Equiv.apply_symm_apply]
 
 end Group
@@ -329,15 +329,15 @@ def zpowersMulHom : α ≃* (Multiplicative ℤ →* α) :=
 variable {α}
 
 @[simp]
-lemma zpowersMulHom_apply (x : α) (n : Multiplicative ℤ) : zpowersMulHom α x n = x ^ n.toAdd := rfl
+theorem zpowersMulHom_apply (x : α) (n : Multiplicative ℤ) : zpowersMulHom α x n = x ^ n.toAdd := rfl
 
 @[simp]
-lemma zpowersMulHom_symm_apply (f : Multiplicative ℤ →* α) :
+theorem zpowersMulHom_symm_apply (f : Multiplicative ℤ →* α) :
     (zpowersMulHom α).symm f = f (ofAdd 1) := rfl
 
-@[simp] lemma zmultiplesAddHom_apply (x : β) (n : ℤ) : zmultiplesAddHom β x n = n • x := rfl
+@[simp] theorem zmultiplesAddHom_apply (x : β) (n : ℤ) : zmultiplesAddHom β x n = n • x := rfl
 
-@[simp] lemma zmultiplesAddHom_symm_apply (f : ℤ →+ β) : (zmultiplesAddHom β).symm f = f 1 := rfl
+@[simp] theorem zmultiplesAddHom_symm_apply (f : ℤ →+ β) : (zmultiplesAddHom β).symm f = f 1 := rfl
 
 end CommGroup
 

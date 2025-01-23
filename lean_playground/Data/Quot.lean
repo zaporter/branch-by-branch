@@ -26,7 +26,7 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   Lean.Meta.registerCoercion ``Setoid.r
     (some { numArgs := 2, coercee := 1, type := .coeFun })
 
-/-- When writing a lemma about `someSetoid x y` (which uses this instance),
+/-- When writing a theorem about `someSetoid x y` (which uses this instance),
 call it `someSetoid_apply` not `someSetoid_r`. -/
 instance : CoeFun (Setoid α) (fun _ ↦ α → α → Prop) where
   coe := @Setoid.r _
@@ -566,7 +566,7 @@ namespace Quotient
 
 variable {γ : Sort*} {φ : Sort*} {s₁ : Setoid α} {s₂ : Setoid β} {s₃ : Setoid γ}
 
-/-! Versions of quotient definitions and lemmas ending in `'` use unification instead
+/-! Versions of quotient definitions and theorems ending in `'` use unification instead
 of typeclass inference for inferring the `Setoid` argument. This is useful when there are
 several different quotient relations on a type, for example quotient groups, rings and modules. -/
 
@@ -596,7 +596,7 @@ protected theorem liftOn'_mk'' (f : α → φ) (h) (x : α) :
     Quotient.liftOn' (@Quotient.mk'' _ s₁ x) f h = f x :=
   rfl
 
-@[simp] lemma surjective_liftOn' {f : α → φ} (h) :
+@[simp] theorem surjective_liftOn' {f : α → φ} (h) :
     Function.Surjective (fun x : Quotient s₁ ↦ x.liftOn' f h) ↔ Function.Surjective f :=
   Quot.surjective_lift _
 
@@ -765,7 +765,7 @@ instance (q₁ : Quotient s₁) (q₂ : Quotient s₂) (f : α → β → Prop)
 end Quotient
 
 @[simp]
-lemma Equivalence.quot_mk_eq_iff {α : Type*} {r : α → α → Prop} (h : Equivalence r) (x y : α) :
+theorem Equivalence.quot_mk_eq_iff {α : Type*} {r : α → α → Prop} (h : Equivalence r) (x y : α) :
     Quot.mk r x = Quot.mk r y ↔ r x y := by
   constructor
   · rw [Quot.eq]

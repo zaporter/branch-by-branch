@@ -492,7 +492,7 @@ theorem ncard_eq_toFinset_card' (s : Set α) [Fintype s] :
     s.ncard = s.toFinset.card := by
   simp [← Nat.card_coe_set_eq, Nat.card_eq_fintype_card]
 
-lemma cast_ncard {s : Set α} (hs : s.Finite) :
+theorem cast_ncard {s : Set α} (hs : s.Finite) :
     (s.ncard : Cardinal) = Cardinal.mk s := @Nat.cast_card _ hs
 
 theorem encard_le_coe_iff_finite_ncard_le {k : ℕ} : s.encard ≤ k ↔ s.Finite ∧ s.ncard ≤ k := by
@@ -618,12 +618,12 @@ theorem ncard_exchange' {a b : α} (ha : a ∉ s) (hb : b ∈ s) :
   rw [← ncard_exchange ha hb, ← singleton_union, ← singleton_union, union_diff_distrib,
     @diff_singleton_eq_self _ b {a} fun h ↦ ha (by rwa [← mem_singleton_iff.mp h])]
 
-lemma odd_card_insert_iff {a : α} (hs : s.Finite := by toFinite_tac) (ha : a ∉ s) :
+theorem odd_card_insert_iff {a : α} (hs : s.Finite := by toFinite_tac) (ha : a ∉ s) :
     Odd (insert a s).ncard ↔ Even s.ncard := by
   rw [ncard_insert_of_not_mem ha hs, Nat.odd_add]
   simp only [Nat.odd_add, ← Nat.not_even_iff_odd, Nat.not_even_one, iff_false, Decidable.not_not]
 
-lemma even_card_insert_iff {a : α} (hs : s.Finite := by toFinite_tac) (ha : a ∉ s) :
+theorem even_card_insert_iff {a : α} (hs : s.Finite := by toFinite_tac) (ha : a ∉ s) :
     Even (insert a s).ncard ↔ Odd s.ncard := by
   rw [ncard_insert_of_not_mem ha hs, Nat.even_add_one, Nat.not_even_iff_odd]
 
@@ -792,7 +792,7 @@ theorem inj_on_of_surj_on_of_ncard_le {t : Set β} (f : ∀ a ∈ s, β) (hf : �
       (by { rwa [← ncard_eq_toFinset_card', ← ncard_eq_toFinset_card'] }) a₁
       (by simpa) a₂ (by simpa) (by simpa)
 
-@[simp] lemma ncard_graphOn (s : Set α) (f : α → β) : (s.graphOn f).ncard = s.ncard := by
+@[simp] theorem ncard_graphOn (s : Set α) (f : α → β) : (s.graphOn f).ncard = s.ncard := by
   rw [← ncard_image_of_injOn fst_injOn_graph, image_fst_graphOn]
 
 section Lattice
@@ -832,7 +832,7 @@ theorem ncard_diff (hst : s ⊆ t) (hs : s.Finite := by toFinite_tac) :
   · rw [← ncard_diff_add_ncard_of_subset hst ht, add_tsub_cancel_right]
   · rw [ht.ncard, Nat.zero_sub, (ht.diff hs).ncard]
 
-lemma cast_ncard_sdiff {R : Type*} [AddGroupWithOne R] (hst : s ⊆ t) (ht : t.Finite) :
+theorem cast_ncard_sdiff {R : Type*} [AddGroupWithOne R] (hst : s ⊆ t) (ht : t.Finite) :
     ((t \ s).ncard : R) = t.ncard - s.ncard := by
   rw [ncard_diff hst (ht.subset hst), Nat.cast_sub (ncard_le_ncard hst ht)]
 
@@ -891,7 +891,7 @@ end Lattice
 
 /-- Given a subset `s` of a set `t`, of sizes at most and at least `n` respectively, there exists a
 set `u` of size `n` which is both a superset of `s` and a subset of `t`. -/
-lemma exists_subsuperset_card_eq {n : ℕ} (hst : s ⊆ t) (hsn : s.ncard ≤ n) (hnt : n ≤ t.ncard) :
+theorem exists_subsuperset_card_eq {n : ℕ} (hst : s ⊆ t) (hsn : s.ncard ≤ n) (hnt : n ≤ t.ncard) :
     ∃ u, s ⊆ u ∧ u ⊆ t ∧ u.ncard = n := by
   obtain ht | ht := t.infinite_or_finite
   · rw [ht.ncard, Nat.le_zero, ← ht.ncard] at hnt
@@ -903,7 +903,7 @@ lemma exists_subsuperset_card_eq {n : ℕ} (hst : s ⊆ t) (hsn : s.ncard ≤ n)
   exact ⟨u, mod_cast hsu, mod_cast hut, mod_cast hu⟩
 
 /-- We can shrink a set to any smaller size. -/
-lemma exists_subset_card_eq {n : ℕ} (hns : n ≤ s.ncard) : ∃ t ⊆ s, t.ncard = n := by
+theorem exists_subset_card_eq {n : ℕ} (hns : n ≤ s.ncard) : ∃ t ⊆ s, t.ncard = n := by
   simpa using exists_subsuperset_card_eq s.empty_subset (by simp) hns
 
 /-- Given a set `t` and a set `s` inside it, we can shrink `t` to any appropriate size, and keep `s`
@@ -1012,7 +1012,7 @@ theorem one_lt_ncard_iff (hs : s.Finite := by toFinite_tac) :
   rw [one_lt_ncard hs]
   simp only [exists_prop, exists_and_left]
 
-lemma one_lt_ncard_of_nonempty_of_even (hs : Set.Finite s) (hn : Set.Nonempty s := by toFinite_tac)
+theorem one_lt_ncard_of_nonempty_of_even (hs : Set.Finite s) (hn : Set.Nonempty s := by toFinite_tac)
     (he : Even (s.ncard)) : 1 < s.ncard := by
   rw [← Set.ncard_pos hs] at hn
   have : s.ncard ≠ 1 := fun h ↦ by simp [h] at he

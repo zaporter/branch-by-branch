@@ -61,10 +61,10 @@ variable {α : Type*} {β : Type*} {γ : Type*}
 def toOption (o : Part α) [Decidable o.Dom] : Option α :=
   if h : Dom o then some (o.get h) else none
 
-@[simp] lemma toOption_isSome (o : Part α) [Decidable o.Dom] : o.toOption.isSome ↔ o.Dom := by
+@[simp] theorem toOption_isSome (o : Part α) [Decidable o.Dom] : o.toOption.isSome ↔ o.Dom := by
   by_cases h : o.Dom <;> simp [h, toOption]
 
-@[simp] lemma toOption_eq_none (o : Part α) [Decidable o.Dom] : o.toOption = none ↔ ¬o.Dom := by
+@[simp] theorem toOption_eq_none (o : Part α) [Decidable o.Dom] : o.toOption = none ↔ ¬o.Dom := by
   by_cases h : o.Dom <;> simp [h, toOption]
 
 @[deprecated (since := "2024-06-20")] alias toOption_isNone := toOption_eq_none

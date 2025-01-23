@@ -176,7 +176,7 @@ noncomputable def quotientEquivClasses (r : Setoid α) : Quotient r ≃ Setoid.c
     exact ⟨a, Subtype.ext hc.symm⟩
 
 @[simp]
-lemma quotientEquivClasses_mk_eq (r : Setoid α) (a : α) :
+theorem quotientEquivClasses_mk_eq (r : Setoid α) (a : α) :
     (quotientEquivClasses r (Quotient.mk r a) : Set α) = { x | r x a } :=
   (@Subtype.ext_iff_val _ _ _ ⟨{ x | r x a }, Setoid.mem_classes r a⟩).mp rfl
 
@@ -198,7 +198,7 @@ theorem IsPartition.pairwiseDisjoint {c : Set (Set α)} (hc : IsPartition c) :
     c.PairwiseDisjoint id :=
   eqv_classes_disjoint hc.2
 
-lemma _root_.Set.PairwiseDisjoint.isPartition_of_exists_of_ne_empty {α : Type*} {s : Set (Set α)}
+theorem _root_.Set.PairwiseDisjoint.isPartition_of_exists_of_ne_empty {α : Type*} {s : Set (Set α)}
     (h₁ : s.PairwiseDisjoint id) (h₂ : ∀ a : α, ∃ x ∈ s, a ∈ x) (h₃ : ∅ ∉ s) :
     Setoid.IsPartition s := by
   refine ⟨h₃, fun a ↦ existsUnique_of_exists_of_unique (h₂ a) ?_⟩
@@ -410,7 +410,7 @@ partition. This is a computable version of `Quotient.out` using `IndexedPartitio
 def out : hs.Quotient ↪ α :=
   hs.equivQuotient.symm.toEmbedding.trans ⟨hs.some, Function.LeftInverse.injective hs.index_some⟩
 
-/-- This lemma is analogous to `Quotient.mk_out'`. -/
+/-- This theorem is analogous to `Quotient.mk_out'`. -/
 @[simp]
 theorem out_proj (x : α) : hs.out (hs.proj x) = hs.some (hs.index x) :=
   rfl
@@ -421,7 +421,7 @@ theorem index_out (x : hs.Quotient) : hs.index x.out = hs.index (hs.out x) :=
 
 @[deprecated (since := "2024-10-19")] alias index_out' := index_out
 
-/-- This lemma is analogous to `Quotient.out_eq'`. -/
+/-- This theorem is analogous to `Quotient.out_eq'`. -/
 @[simp]
 theorem proj_out (x : hs.Quotient) : hs.proj (hs.out x) = x :=
   Quotient.inductionOn' x fun x => Quotient.sound' <| hs.some_index x
@@ -440,7 +440,7 @@ You can use the regular expression `def.*piecewise` to search for
 other ways to define piecewise functions in mathlib4. -/
 def piecewise {β : Type*} (f : ι → α → β) : α → β := fun x => f (hs.index x) x
 
-lemma piecewise_apply {β : Type*} {f : ι → α → β} (x : α) : hs.piecewise f x = f (hs.index x) x :=
+theorem piecewise_apply {β : Type*} {f : ι → α → β} (x : α) : hs.piecewise f x = f (hs.index x) x :=
   rfl
 
 open Function

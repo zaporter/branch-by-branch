@@ -23,7 +23,7 @@ variable {α : Type*}
 
 /-- `Compares o a b` means that `a` and `b` have the ordering relation `o` between them, assuming
 that the relation `a < b` is defined. -/
--- Porting note: we have removed `@[simp]` here in favour of separate simp lemmas,
+-- Porting note: we have removed `@[simp]` here in favour of separate simp theorems,
 -- otherwise this definition will unfold to a match.
 def Compares [LT α] : Ordering → α → α → Prop
   | lt, a, b => a < b
@@ -32,11 +32,11 @@ def Compares [LT α] : Ordering → α → α → Prop
 
 @[deprecated (since := "2024-09-13")] alias toRel := Compares
 
-@[simp] lemma compares_lt [LT α] (a b : α) : Compares lt a b = (a < b) := rfl
+@[simp] theorem compares_lt [LT α] (a b : α) : Compares lt a b = (a < b) := rfl
 
-@[simp] lemma compares_eq [LT α] (a b : α) : Compares eq a b = (a = b) := rfl
+@[simp] theorem compares_eq [LT α] (a b : α) : Compares eq a b = (a = b) := rfl
 
-@[simp] lemma compares_gt [LT α] (a b : α) : Compares gt a b = (a > b) := rfl
+@[simp] theorem compares_gt [LT α] (a b : α) : Compares gt a b = (a > b) := rfl
 
 /-- `o₁.dthen fun h => o₂(h)` is like `o₁.then o₂` but `o₂` is allowed to depend on
 `h : o₁ = .eq`. -/

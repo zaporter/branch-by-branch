@@ -55,12 +55,12 @@ theorem natPred_inj {m n : ℕ+} : m.natPred = n.natPred ↔ m = n :=
   natPred_injective.eq_iff
 
 @[simp, norm_cast]
-lemma val_ofNat (n : ℕ) [NeZero n] :
+theorem val_ofNat (n : ℕ) [NeZero n] :
     ((ofNat(n) : ℕ+) : ℕ) = OfNat.ofNat n :=
   rfl
 
 @[simp]
-lemma mk_ofNat (n : ℕ) (h : 0 < n) :
+theorem mk_ofNat (n : ℕ) (h : 0 < n) :
     @Eq ℕ+ (⟨ofNat(n), h⟩ : ℕ+) (haveI : NeZero n := ⟨h.ne'⟩; OfNat.ofNat n) :=
   rfl
 

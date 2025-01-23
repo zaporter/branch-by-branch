@@ -48,7 +48,7 @@ theorem sign_apply_eq (r : ℝ) : sign r = -1 ∨ sign r = 0 ∨ sign r = 1 := b
   · exact Or.inr <| Or.inl <| sign_zero
   · exact Or.inr <| Or.inr <| sign_of_pos hp
 
-/-- This lemma is useful for working with `ℝˣ` -/
+/-- This theorem is useful for working with `ℝˣ` -/
 theorem sign_apply_eq_of_ne_zero (r : ℝ) (h : r ≠ 0) : sign r = -1 ∨ sign r = 1 :=
   h.lt_or_lt.imp sign_of_neg sign_of_pos
 

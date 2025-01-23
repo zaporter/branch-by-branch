@@ -117,8 +117,8 @@ theorem coe_union (s₁ s₂ : Finset α) : ↑(s₁ ∪ s₂) = (s₁ ∪ s₂ 
 theorem union_subset (hs : s ⊆ u) : t ⊆ u → s ∪ t ⊆ u :=
   sup_le <| le_iff_subset.2 hs
 
-@[simp] lemma subset_union_left : s₁ ⊆ s₁ ∪ s₂ := fun _ ↦ mem_union_left _
-@[simp] lemma subset_union_right : s₂ ⊆ s₁ ∪ s₂ := fun _ ↦  mem_union_right _
+@[simp] theorem subset_union_left : s₁ ⊆ s₁ ∪ s₂ := fun _ ↦ mem_union_left _
+@[simp] theorem subset_union_right : s₂ ⊆ s₁ ∪ s₂ := fun _ ↦  mem_union_right _
 
 @[gcongr]
 theorem union_subset_union (hsu : s ⊆ u) (htv : t ⊆ v) : s ∪ t ⊆ u ∪ v :=
@@ -164,13 +164,13 @@ theorem union_right_comm (s t u : Finset α) : s ∪ t ∪ u = s ∪ u ∪ t :=
 theorem union_self (s : Finset α) : s ∪ s = s :=
   union_idempotent s
 
-@[simp] lemma union_eq_left : s ∪ t = s ↔ t ⊆ s := sup_eq_left
+@[simp] theorem union_eq_left : s ∪ t = s ↔ t ⊆ s := sup_eq_left
 
-@[simp] lemma left_eq_union : s = s ∪ t ↔ t ⊆ s := by rw [eq_comm, union_eq_left]
+@[simp] theorem left_eq_union : s = s ∪ t ↔ t ⊆ s := by rw [eq_comm, union_eq_left]
 
-@[simp] lemma union_eq_right : s ∪ t = t ↔ s ⊆ t := sup_eq_right
+@[simp] theorem union_eq_right : s ∪ t = t ↔ s ⊆ t := sup_eq_right
 
-@[simp] lemma right_eq_union : s = t ∪ s ↔ t ⊆ s := by rw [eq_comm, union_eq_right]
+@[simp] theorem right_eq_union : s = t ∪ s ↔ t ⊆ s := by rw [eq_comm, union_eq_right]
 
 -- Porting note: replaced `⊔` in RHS
 theorem union_congr_left (ht : t ⊆ s ∪ u) (hu : u ⊆ s ∪ t) : s ∪ t = s ∪ u :=
@@ -205,8 +205,8 @@ theorem mem_of_mem_inter_right {a : α} {s₁ s₂ : Finset α} (h : a ∈ s₁ 
 theorem mem_inter_of_mem {a : α} {s₁ s₂ : Finset α} : a ∈ s₁ → a ∈ s₂ → a ∈ s₁ ∩ s₂ :=
   and_imp.1 mem_inter.2
 
-@[simp] lemma inter_subset_left : s₁ ∩ s₂ ⊆ s₁ := fun _ ↦ mem_of_mem_inter_left
-@[simp] lemma inter_subset_right : s₁ ∩ s₂ ⊆ s₂ := fun _ ↦ mem_of_mem_inter_right
+@[simp] theorem inter_subset_left : s₁ ∩ s₂ ⊆ s₁ := fun _ ↦ mem_of_mem_inter_left
+@[simp] theorem inter_subset_right : s₁ ∩ s₂ ⊆ s₂ := fun _ ↦ mem_of_mem_inter_right
 
 theorem subset_inter {s₁ s₂ u : Finset α} : s₁ ⊆ s₂ → s₁ ⊆ u → s₁ ⊆ s₂ ∩ u := by
   simp +contextual [subset_iff, mem_inter]
@@ -314,9 +314,9 @@ theorem union_subset_iff : s ∪ t ⊆ u ↔ s ⊆ u ∧ t ⊆ u :=
 theorem subset_inter_iff : s ⊆ t ∩ u ↔ s ⊆ t ∧ s ⊆ u :=
   (le_inf_iff : s ≤ t ⊓ u ↔ s ≤ t ∧ s ≤ u)
 
-@[simp] lemma inter_eq_left : s ∩ t = s ↔ s ⊆ t := inf_eq_left
+@[simp] theorem inter_eq_left : s ∩ t = s ↔ s ⊆ t := inf_eq_left
 
-@[simp] lemma inter_eq_right : t ∩ s = s ↔ s ⊆ t := inf_eq_right
+@[simp] theorem inter_eq_right : t ∩ s = s ↔ s ⊆ t := inf_eq_right
 
 theorem inter_congr_left (ht : s ∩ u ⊆ t) (hu : s ∩ t ⊆ u) : s ∩ t = s ∩ u :=
   inf_congr_left ht hu

@@ -153,15 +153,15 @@ instance instIntCast : IntCast ℝ where intCast z := ⟨z⟩
 instance instNNRatCast : NNRatCast ℝ where nnratCast q := ⟨q⟩
 instance instRatCast : RatCast ℝ where ratCast q := ⟨q⟩
 
-lemma ofCauchy_natCast (n : ℕ) : (⟨n⟩ : ℝ) = n := rfl
-lemma ofCauchy_intCast (z : ℤ) : (⟨z⟩ : ℝ) = z := rfl
-lemma ofCauchy_nnratCast (q : ℚ≥0) : (⟨q⟩ : ℝ) = q := rfl
-lemma ofCauchy_ratCast (q : ℚ) : (⟨q⟩ : ℝ) = q := rfl
+theorem ofCauchy_natCast (n : ℕ) : (⟨n⟩ : ℝ) = n := rfl
+theorem ofCauchy_intCast (z : ℤ) : (⟨z⟩ : ℝ) = z := rfl
+theorem ofCauchy_nnratCast (q : ℚ≥0) : (⟨q⟩ : ℝ) = q := rfl
+theorem ofCauchy_ratCast (q : ℚ) : (⟨q⟩ : ℝ) = q := rfl
 
-lemma cauchy_natCast (n : ℕ) : (n : ℝ).cauchy = n := rfl
-lemma cauchy_intCast (z : ℤ) : (z : ℝ).cauchy = z := rfl
-lemma cauchy_nnratCast (q : ℚ≥0) : (q : ℝ).cauchy = q := rfl
-lemma cauchy_ratCast (q : ℚ) : (q : ℝ).cauchy = q := rfl
+theorem cauchy_natCast (n : ℕ) : (n : ℝ).cauchy = n := rfl
+theorem cauchy_intCast (z : ℤ) : (z : ℝ).cauchy = z := rfl
+theorem cauchy_nnratCast (q : ℚ≥0) : (q : ℝ).cauchy = q := rfl
+theorem cauchy_ratCast (q : ℚ) : (q : ℝ).cauchy = q := rfl
 
 instance commRing : CommRing ℝ where
   natCast n := ⟨n⟩
@@ -504,7 +504,7 @@ instance : IsDomain ℝ :=
 
 noncomputable instance instDivInvMonoid : DivInvMonoid ℝ where
 
-lemma ofCauchy_div (f g) : (⟨f / g⟩ : ℝ) = (⟨f⟩ : ℝ) / (⟨g⟩ : ℝ) := by
+theorem ofCauchy_div (f g) : (⟨f / g⟩ : ℝ) = (⟨f⟩ : ℝ) / (⟨g⟩ : ℝ) := by
   simp_rw [div_eq_mul_inv, ofCauchy_mul, ofCauchy_inv]
 
 noncomputable instance instLinearOrderedField : LinearOrderedField ℝ where
@@ -574,7 +574,7 @@ theorem mk_near_of_forall_near {f : CauSeq ℚ abs} {x : ℝ} {ε : ℝ}
       sub_le_comm.1 <|
         le_mk_of_forall_le <| H.imp fun _ h j ij => sub_le_comm.1 (abs_sub_le_iff.1 <| h j ij).2⟩
 
-lemma mul_add_one_le_add_one_pow {a : ℝ} (ha : 0 ≤ a) (b : ℕ) : a * b + 1 ≤ (a + 1) ^ b := by
+theorem mul_add_one_le_add_one_pow {a : ℝ} (ha : 0 ≤ a) (b : ℕ) : a * b + 1 ≤ (a + 1) ^ b := by
   rcases ha.eq_or_lt with rfl|ha'
   · simp
   clear ha

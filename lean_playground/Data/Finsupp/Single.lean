@@ -182,7 +182,7 @@ theorem unique_single_eq_iff [Unique α] {b' : M} : single a b = single a' b' �
   rw [Finsupp.unique_ext_iff, Unique.eq_default a, Unique.eq_default a', single_eq_same,
     single_eq_same]
 
-lemma apply_single' [Zero N] [Zero P] (e : N → P) (he : e 0 = 0) (a : α) (n : N) (b : α) :
+theorem apply_single' [Zero N] [Zero P] (e : N → P) (he : e 0 = 0) (a : α) (n : N) (b : α) :
     e ((single a n) b) = single a (e n) b := by
   classical
   simp only [single_apply]
@@ -190,7 +190,7 @@ lemma apply_single' [Zero N] [Zero P] (e : N → P) (he : e 0 = 0) (a : α) (n :
   · rfl
   · exact he
 
-lemma apply_single [Zero N] [Zero P] {F : Type*} [FunLike F N P] [ZeroHomClass F N P]
+theorem apply_single [Zero N] [Zero P] {F : Type*} [FunLike F N P] [ZeroHomClass F N P]
     (e : F) (a : α) (n : N) (b : α) :
     e ((single a n) b) = single a (e n) b :=
   apply_single' e (map_zero e) a n b
@@ -527,7 +527,7 @@ theorem support_add_single {a : α} {b : M} {f : α →₀ M} (ha : a ∉ f.supp
   rw [support_add_eq, H, union_comm, cons_eq_insert, insert_eq]
   rwa [H, disjoint_singleton_right]
 
-lemma _root_.AddEquiv.finsuppUnique_symm {M : Type*} [AddZeroClass M] (d : M) :
+theorem _root_.AddEquiv.finsuppUnique_symm {M : Type*} [AddZeroClass M] (d : M) :
     AddEquiv.finsuppUnique.symm d = single () d := by
   rw [Finsupp.unique_single (AddEquiv.finsuppUnique.symm d), Finsupp.unique_single_eq_iff]
   simp [AddEquiv.finsuppUnique]

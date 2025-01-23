@@ -51,49 +51,49 @@ def doublyStochastic (R n : Type*) [Fintype n] [DecidableEq n] [OrderedSemiring 
     next => rw [← vecMul_vecMul, hM.2.2, hN.2.2]
   one_mem' := by simp [zero_le_one_elem]
 
-lemma mem_doublyStochastic :
+theorem mem_doublyStochastic :
     M ∈ doublyStochastic R n ↔ (∀ i j, 0 ≤ M i j) ∧ M *ᵥ 1 = 1 ∧ 1 ᵥ* M = 1 :=
   Iff.rfl
 
-lemma mem_doublyStochastic_iff_sum :
+theorem mem_doublyStochastic_iff_sum :
     M ∈ doublyStochastic R n ↔
       (∀ i j, 0 ≤ M i j) ∧ (∀ i, ∑ j, M i j = 1) ∧ ∀ j, ∑ i, M i j = 1 := by
   simp [funext_iff, doublyStochastic, mulVec, vecMul, dotProduct]
 
 /-- Every entry of a doubly stochastic matrix is nonnegative. -/
-lemma nonneg_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) {i j : n} : 0 ≤ M i j :=
+theorem nonneg_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) {i j : n} : 0 ≤ M i j :=
   hM.1 _ _
 
 /-- Each row sum of a doubly stochastic matrix is 1. -/
-lemma sum_row_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) (i : n) : ∑ j, M i j = 1 :=
+theorem sum_row_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) (i : n) : ∑ j, M i j = 1 :=
   (mem_doublyStochastic_iff_sum.1 hM).2.1 _
 
 /-- Each column sum of a doubly stochastic matrix is 1. -/
-lemma sum_col_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) (j : n) : ∑ i, M i j = 1 :=
+theorem sum_col_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) (j : n) : ∑ i, M i j = 1 :=
   (mem_doublyStochastic_iff_sum.1 hM).2.2 _
 
 /-- A doubly stochastic matrix multiplied with the all-ones column vector is 1. -/
-lemma mulVec_one_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) : M *ᵥ 1 = 1 :=
+theorem mulVec_one_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) : M *ᵥ 1 = 1 :=
   (mem_doublyStochastic.1 hM).2.1
 
 /-- The all-ones row vector multiplied with a doubly stochastic matrix is 1. -/
-lemma one_vecMul_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) : 1 ᵥ* M = 1 :=
+theorem one_vecMul_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) : 1 ᵥ* M = 1 :=
   (mem_doublyStochastic.1 hM).2.2
 
 /-- Every entry of a doubly stochastic matrix is less than or equal to 1. -/
-lemma le_one_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) {i j : n} :
+theorem le_one_of_mem_doublyStochastic (hM : M ∈ doublyStochastic R n) {i j : n} :
     M i j ≤ 1 := by
   rw [← sum_row_of_mem_doublyStochastic hM i]
   exact single_le_sum (fun k _ => hM.1 _ k) (mem_univ j)
 
 /-- The set of doubly stochastic matrices is convex. -/
-lemma convex_doublyStochastic : Convex R (doublyStochastic R n : Set (Matrix n n R)) := by
+theorem convex_doublyStochastic : Convex R (doublyStochastic R n : Set (Matrix n n R)) := by
   intro x hx y hy a b ha hb h
   simp only [SetLike.mem_coe, mem_doublyStochastic_iff_sum] at hx hy ⊢
   simp [add_nonneg, ha, hb, mul_nonneg, hx, hy, sum_add_distrib, ← mul_sum, h]
 
 /-- Any permutation matrix is doubly stochastic. -/
-lemma permMatrix_mem_doublyStochastic {σ : Equiv.Perm n} :
+theorem permMatrix_mem_doublyStochastic {σ : Equiv.Perm n} :
     σ.permMatrix R ∈ doublyStochastic R n := by
   rw [mem_doublyStochastic_iff_sum]
   refine ⟨fun i j => ?g1, ?g2, ?g3⟩
@@ -111,10 +111,10 @@ variable [LinearOrderedSemifield R]
 A matrix is `s` times a doubly stochastic matrix iff all entries are nonnegative, and all row and
 column sums are equal to `s`.
 
-This lemma is useful for the proof of Birkhoff's theorem - in particular because it allows scaling
+This theorem is useful for the proof of Birkhoff's theorem - in particular because it allows scaling
 by nonnegative factors rather than positive ones only.
 -/
-lemma exists_mem_doublyStochastic_eq_smul_iff {M : Matrix n n R} {s : R} (hs : 0 ≤ s) :
+theorem exists_mem_doublyStochastic_eq_smul_iff {M : Matrix n n R} {s : R} (hs : 0 ≤ s) :
     (∃ M' ∈ doublyStochastic R n, M = s • M') ↔
       (∀ i j, 0 ≤ M i j) ∧ (∀ i, ∑ j, M i j = s) ∧ (∀ j, ∑ i, M i j = s) := by
   classical

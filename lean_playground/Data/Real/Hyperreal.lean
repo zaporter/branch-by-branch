@@ -348,7 +348,7 @@ theorem lt_of_st_lt {x y : ℝ*} (hix : ¬Infinite x) (hiy : ¬Infinite y) : st 
   (isSt_st' hix).lt (isSt_st' hiy)
 
 /-!
-### Basic lemmas about infinite
+### Basic theorems about infinite
 -/
 
 theorem infinitePos_def {x : ℝ*} : InfinitePos x ↔ ∀ r : ℝ, ↑r < x := Iff.rfl
@@ -425,7 +425,7 @@ theorem infinitePos_abs_iff_infinite_abs {x : ℝ*} : InfinitePos |x| ↔ Infini
   cases le_total 0 x <;> simp [*, abs_of_nonneg, abs_of_nonpos, infinite_neg]
 
 -- Porting note: swapped LHS with RHS;
--- Porting note (https://github.com/leanprover-community/mathlib4/issues/11215): TODO: make it a `simp` lemma
+-- Porting note (https://github.com/leanprover-community/mathlib4/issues/11215): TODO: make it a `simp` theorem
 @[simp] theorem infinitePos_abs_iff_infinite {x : ℝ*} : InfinitePos |x| ↔ Infinite x :=
   infinitePos_abs_iff_infinite_abs.trans infinite_abs_iff
 
@@ -537,7 +537,7 @@ theorem st_mul {x y : ℝ*} (hx : ¬Infinite x) (hy : ¬Infinite y) : st (x * y)
   hxy.unique (hx'.mul hy')
 
 /-!
-### Basic lemmas about infinitesimal
+### Basic theorems about infinitesimal
 -/
 
 theorem infinitesimal_def {x : ℝ*} : Infinitesimal x ↔ ∀ r : ℝ, 0 < r → -(r : ℝ*) < x ∧ x < r := by

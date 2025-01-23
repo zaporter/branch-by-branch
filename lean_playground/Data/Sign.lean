@@ -16,7 +16,7 @@ This file defines the sign function for types with zero and a decidable less-tha
 proves some basic theorems about it.
 -/
 
--- Don't generate unnecessary `sizeOf_spec` lemmas which the `simpNF` linter will complain about.
+-- Don't generate unnecessary `sizeOf_spec` theorems which the `simpNF` linter will complain about.
 set_option genSizeOfSpec false in
 /-- The type of signs. -/
 inductive SignType
@@ -74,8 +74,8 @@ instance LE.decidableRel : DecidableRel SignType.LE := fun a b => by
 instance decidableEq : DecidableEq SignType := fun a b => by
   cases a <;> cases b <;> first | exact isTrue (by constructor)| exact isFalse (by rintro ⟨_⟩)
 
-private lemma mul_comm : ∀ (a b : SignType), a * b = b * a := by rintro ⟨⟩ ⟨⟩ <;> rfl
-private lemma mul_assoc : ∀ (a b c : SignType), (a * b) * c = a * (b * c) := by
+private theorem mul_comm : ∀ (a b : SignType), a * b = b * a := by rintro ⟨⟩ ⟨⟩ <;> rfl
+private theorem mul_assoc : ∀ (a b c : SignType), (a * b) * c = a * (b * c) := by
   rintro ⟨⟩ ⟨⟩ ⟨⟩ <;> rfl
 
 /- We can define a `Field` instance on `SignType`, but it's not mathematically sensible,
@@ -95,10 +95,10 @@ instance : CommGroupWithZero SignType where
   exists_pair_ne := ⟨0, 1, by rintro ⟨_⟩⟩
   inv_zero := rfl
 
-private lemma le_antisymm (a b : SignType) (_ : a ≤ b) (_ : b ≤ a) : a = b := by
+private theorem le_antisymm (a b : SignType) (_ : a ≤ b) (_ : b ≤ a) : a = b := by
   cases a <;> cases b <;> trivial
 
-private lemma le_trans (a b c : SignType) (_ : a ≤ b) (_ : b ≤ c) : a ≤ c := by
+private theorem le_trans (a b c : SignType) (_ : a ≤ b) (_ : b ≤ c) : a ≤ c := by
   cases a <;> cases b <;> cases c <;> tauto
 
 instance : LinearOrder SignType where
@@ -224,13 +224,13 @@ instance : CoeTC SignType α :=
 -- Porting note: `cast_eq_coe` removed, syntactic equality
 
 /-- Casting out of `SignType` respects composition with functions preserving `0, 1, -1`. -/
-lemma map_cast' {β : Type*} [One β] [Neg β] [Zero β]
+theorem map_cast' {β : Type*} [One β] [Neg β] [Zero β]
     (f : α → β) (h₁ : f 1 = 1) (h₂ : f 0 = 0) (h₃ : f (-1) = -1) (s : SignType) :
     f s = s := by
   cases s <;> simp only [SignType.cast, h₁, h₂, h₃]
 
 /-- Casting out of `SignType` respects composition with suitable bundled homomorphism types. -/
-lemma map_cast {α β F : Type*} [AddGroupWithOne α] [One β] [SubtractionMonoid β]
+theorem map_cast {α β F : Type*} [AddGroupWithOne α] [One β] [SubtractionMonoid β]
     [FunLike F α β] [AddMonoidHomClass F α β] [OneHomClass F α β] (f : F) (s : SignType) :
     f s = s := by
   apply map_cast' <;> simp
@@ -248,13 +248,13 @@ theorem coe_neg_one : ↑(-1 : SignType) = (-1 : α) :=
   rfl
 
 @[simp, norm_cast]
-lemma coe_neg {α : Type*} [One α] [SubtractionMonoid α] (s : SignType) :
+theorem coe_neg {α : Type*} [One α] [SubtractionMonoid α] (s : SignType) :
     (↑(-s) : α) = -↑s := by
   cases s <;> simp
 
 /-- Casting `SignType → ℤ → α` is the same as casting directly `SignType → α`. -/
 @[simp, norm_cast]
-lemma intCast_cast {α : Type*} [AddGroupWithOne α] (s : SignType) : ((s : ℤ) : α) = s :=
+theorem intCast_cast {α : Type*} [AddGroupWithOne α] (s : SignType) : ((s : ℤ) : α) = s :=
   map_cast' _ Int.cast_one Int.cast_zero (@Int.cast_one α _ ▸ Int.cast_neg 1) _
 
 end cast
@@ -274,15 +274,15 @@ theorem range_eq {α} (f : SignType → α) : Set.range f = {f zero, f neg, f po
   classical rw [← Fintype.coe_image_univ, univ_eq]
   classical simp [Finset.coe_insert]
 
-@[simp, norm_cast] lemma coe_mul {α} [MulZeroOneClass α] [HasDistribNeg α] (a b : SignType) :
+@[simp, norm_cast] theorem coe_mul {α} [MulZeroOneClass α] [HasDistribNeg α] (a b : SignType) :
     ↑(a * b) = (a : α) * b :=
   map_mul SignType.castHom _ _
 
-@[simp, norm_cast] lemma coe_pow {α} [MonoidWithZero α] [HasDistribNeg α] (a : SignType) (k : ℕ) :
+@[simp, norm_cast] theorem coe_pow {α} [MonoidWithZero α] [HasDistribNeg α] (a : SignType) (k : ℕ) :
     ↑(a ^ k) = (a : α) ^ k :=
   map_pow SignType.castHom _ _
 
-@[simp, norm_cast] lemma coe_zpow {α} [GroupWithZero α] [HasDistribNeg α] (a : SignType) (k : ℤ) :
+@[simp, norm_cast] theorem coe_zpow {α} [GroupWithZero α] [HasDistribNeg α] (a : SignType) (k : ℤ) :
     ↑(a ^ k) = (a : α) ^ k :=
   map_zpow₀ SignType.castHom _ _
 
@@ -337,7 +337,7 @@ section LinearOrder
 variable [Zero α] [LinearOrder α] {a : α}
 
 /-- `SignType.sign` respects strictly monotone zero-preserving maps. -/
-lemma StrictMono.sign_comp {β F : Type*} [Zero β] [Preorder β] [DecidableRel ((· < ·) : β → β → _)]
+theorem StrictMono.sign_comp {β F : Type*} [Zero β] [Preorder β] [DecidableRel ((· < ·) : β → β → _)]
     [FunLike F α β] [ZeroHomClass F α β] {f : F} (hf : StrictMono f) (a : α) :
     sign (f a) = sign a := by
   simp only [sign_apply, ← map_zero f, hf.lt_iff_lt]
@@ -381,7 +381,7 @@ end OrderedSemiring
 section OrderedRing
 
 @[simp]
-lemma sign_intCast {α : Type*} [OrderedRing α] [Nontrivial α]
+theorem sign_intCast {α : Type*} [OrderedRing α] [Nontrivial α]
     [DecidableRel ((· < ·) : α → α → Prop)] (n : ℤ) :
     sign (n : α) = sign n := by
   simp only [sign_apply, Int.cast_pos, Int.cast_lt_zero]

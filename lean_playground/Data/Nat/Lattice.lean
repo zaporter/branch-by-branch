@@ -12,7 +12,7 @@ import Mathlib.Order.Interval.Finset.Nat
 In this file we
 
 * define a `ConditionallyCompleteLinearOrderBot` structure on `ℕ`;
-* prove a few lemmas about `iSup`/`iInf`/`Set.iUnion`/`Set.iInter` and natural numbers.
+* prove a few theorems about `iSup`/`iInf`/`Set.iUnion`/`Set.iInter` and natural numbers.
 -/
 
 assert_not_exists MonoidWithZero
@@ -63,7 +63,7 @@ theorem iInf_of_empty {ι : Sort*} [IsEmpty ι] (f : ι → ℕ) : iInf f = 0 :=
 
 /-- This combines `Nat.iInf_of_empty` with `ciInf_const`. -/
 @[simp]
-lemma iInf_const_zero {ι : Sort*} : ⨅ _ : ι, 0 = 0 :=
+theorem iInf_const_zero {ι : Sort*} : ⨅ _ : ι, 0 = 0 :=
   (isEmpty_or_nonempty ι).elim (fun h ↦ by simp) fun h ↦ sInf_eq_zero.2 <| by simp
 
 theorem sInf_mem {s : Set ℕ} (h : s.Nonempty) : sInf s ∈ s := by

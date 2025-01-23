@@ -8,12 +8,12 @@ import Mathlib.Data.Rat.Cast.Defs
 import Mathlib.Tactic.Positivity.Basic
 
 /-!
-# Some exiled lemmas about casting
+# Some exiled theorems about casting
 
-These lemmas have been removed from `Mathlib.Data.Rat.Cast.Defs`
+These theorems have been removed from `Mathlib.Data.Rat.Cast.Defs`
 to avoiding needing to import `Mathlib.Algebra.Field.Basic` there.
 
-In fact, these lemmas don't appear to be used anywhere in Mathlib,
+In fact, these theorems don't appear to be used anywhere in Mathlib,
 so perhaps this file can simply be deleted.
 -/
 
@@ -22,7 +22,7 @@ namespace Rat
 variable {α : Type*} [DivisionRing α]
 
 @[simp, norm_cast]
-lemma cast_pow (p : ℚ) (n : ℕ) : ↑(p ^ n) = (p ^ n : α) := by
+theorem cast_pow (p : ℚ) (n : ℕ) : ↑(p ^ n) = (p ^ n : α) := by
   rw [cast_def, cast_def, den_pow, num_pow, Nat.cast_pow, Int.cast_pow, div_eq_mul_inv, ← inv_pow,
     ← (Int.cast_commute _ _).mul_pow, ← div_eq_mul_inv]
 

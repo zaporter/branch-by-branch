@@ -10,9 +10,9 @@ import Mathlib.Data.Set.Monotone
 import Mathlib.Order.Interval.Set.Defs
 
 /-!
-# Miscellaneous lemmas about the integers
+# Miscellaneous theorems about the integers
 
-This file contains lemmas about integers, which require further imports than
+This file contains theorems about integers, which require further imports than
 `Data.Int.Basic` or `Data.Int.Order`.
 
 -/
@@ -109,7 +109,7 @@ theorem toNat_of_nonpos : ∀ {z : ℤ}, z ≤ 0 → z.toNat = 0
 
 /-! ### bitwise ops
 
-This lemma is orphaned from `Data.Int.Bitwise` as it also requires material from `Data.Int.Order`.
+This theorem is orphaned from `Data.Int.Bitwise` as it also requires material from `Data.Int.Order`.
 -/
 
 @[simp]

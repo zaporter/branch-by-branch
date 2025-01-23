@@ -147,7 +147,7 @@ theorem Nat.mul_divisors_filter_prime_pow {a b : ℕ} (hab : a.Coprime b) :
     and_congr_left_iff, not_false_iff, Nat.mem_divisors, or_self_iff]
   apply hab.isPrimePow_dvd_mul
 
-lemma IsPrimePow.factorization_minFac_ne_zero {n : ℕ} (hn : IsPrimePow n) :
+theorem IsPrimePow.factorization_minFac_ne_zero {n : ℕ} (hn : IsPrimePow n) :
     n.factorization n.minFac ≠ 0 := by
   refine mt (Nat.factorization_eq_zero_iff _ _).mp ?_
   push_neg
@@ -170,17 +170,17 @@ def Nat.Primes.prodNatEquiv : Nat.Primes × ℕ ≃ {n : ℕ // IsPrimePow n} wh
     rw [sub_one_add_one n.prop.factorization_minFac_ne_zero, n.prop.minFac_pow_factorization_eq]
 
 @[simp]
-lemma Nat.Primes.prodNatEquiv_apply (p : Nat.Primes) (k : ℕ) :
+theorem Nat.Primes.prodNatEquiv_apply (p : Nat.Primes) (k : ℕ) :
     prodNatEquiv (p, k) = ⟨p ^ (k + 1), p, k + 1, prime_iff.mp p.prop, k.add_one_pos, rfl⟩ := by
   rfl
 
 @[simp]
-lemma Nat.Primes.coe_prodNatEquiv_apply (p : Nat.Primes) (k : ℕ) :
+theorem Nat.Primes.coe_prodNatEquiv_apply (p : Nat.Primes) (k : ℕ) :
     (prodNatEquiv (p, k) : ℕ) = p ^ (k + 1) :=
   rfl
 
 @[simp]
-lemma Nat.Primes.prodNatEquiv_symm_apply {n : ℕ} (hn : IsPrimePow n) :
+theorem Nat.Primes.prodNatEquiv_symm_apply {n : ℕ} (hn : IsPrimePow n) :
     prodNatEquiv.symm ⟨n, hn⟩ =
       (⟨n.minFac, minFac_prime hn.ne_one⟩, n.factorization n.minFac - 1) :=
   rfl

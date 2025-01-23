@@ -19,7 +19,7 @@ The `Finite` predicate has no computational relevance and, being `Prop`-valued, 
 irrelevance -- it represents the mere fact that the type is finite.  While the `Finite` class also
 represents finiteness of a type, a key difference is that a `Fintype` instance represents finiteness
 in a computable way: it gives a concrete algorithm to produce a `Finset` whose elements enumerate
-the terms of the given type. As such, one generally relies on congruence lemmas when rewriting
+the terms of the given type. As such, one generally relies on congruence theorems when rewriting
 expressions involving `Fintype` instances.
 
 Every `Fintype` instance automatically gives a `Finite` instance, see `Fintype.finite`, but not vice

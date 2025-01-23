@@ -161,7 +161,7 @@ protected alias ⟨_, toFinset_strictMono⟩ := Finite.toFinset_ssubset_toFinset
 protected theorem toFinset_setOf [Fintype α] (p : α → Prop) [DecidablePred p]
     (h : { x | p x }.Finite) : h.toFinset = Finset.univ.filter p := by
   ext
-  -- Porting note: `simp` doesn't use the `simp` lemma `Set.toFinset_setOf` without the `_`
+  -- Porting note: `simp` doesn't use the `simp` theorem `Set.toFinset_setOf` without the `_`
   simp [Set.toFinset_setOf _]
 
 @[simp]
@@ -504,7 +504,7 @@ theorem Finite.inf_of_left {s : Set α} (h : s.Finite) (t : Set α) : (s ⊓ t).
 theorem Finite.inf_of_right {s : Set α} (h : s.Finite) (t : Set α) : (t ⊓ s).Finite :=
   h.inter_of_right t
 
-protected lemma Infinite.mono {s t : Set α} (h : s ⊆ t) : s.Infinite → t.Infinite :=
+protected theorem Infinite.mono {s t : Set α} (h : s ⊆ t) : s.Infinite → t.Infinite :=
   mt fun ht ↦ ht.subset h
 
 theorem Finite.diff (hs : s.Finite) : (s \ t).Finite := hs.subset diff_subset
@@ -512,9 +512,9 @@ theorem Finite.diff (hs : s.Finite) : (s \ t).Finite := hs.subset diff_subset
 theorem Finite.of_diff {s t : Set α} (hd : (s \ t).Finite) (ht : t.Finite) : s.Finite :=
   (hd.union ht).subset <| subset_diff_union _ _
 
-lemma Finite.symmDiff (hs : s.Finite) (ht : t.Finite) : (s ∆ t).Finite := hs.diff.union ht.diff
+theorem Finite.symmDiff (hs : s.Finite) (ht : t.Finite) : (s ∆ t).Finite := hs.diff.union ht.diff
 
-lemma Finite.symmDiff_congr (hst : (s ∆ t).Finite) : (s ∆ u).Finite ↔ (t ∆ u).Finite where
+theorem Finite.symmDiff_congr (hst : (s ∆ t).Finite) : (s ∆ u).Finite ↔ (t ∆ u).Finite where
   mp hsu := (hst.union hsu).subset (symmDiff_comm s t ▸ symmDiff_triangle ..)
   mpr htu := (hst.union htu).subset (symmDiff_triangle ..)
 
@@ -539,7 +539,7 @@ theorem Finite.image {s : Set α} (f : α → β) (hs : s.Finite) : (f '' s).Fin
   have := hs.to_subtype
   apply toFinite
 
-lemma Finite.of_surjOn {s : Set α} {t : Set β} (f : α → β) (hf : SurjOn f s t) (hs : s.Finite) :
+theorem Finite.of_surjOn {s : Set α} {t : Set β} (f : α → β) (hf : SurjOn f s t) (hs : s.Finite) :
     t.Finite := (hs.image _).subset hf
 
 theorem Finite.map {α β} {s : Set α} : ∀ f : α → β, s.Finite → (f <$> s).Finite :=
@@ -563,10 +563,10 @@ theorem Finite.of_preimage (h : (f ⁻¹' s).Finite) (hf : Surjective f) : s.Fin
 theorem Finite.preimage (I : Set.InjOn f (f ⁻¹' s)) (h : s.Finite) : (f ⁻¹' s).Finite :=
   (h.subset (image_preimage_subset f s)).of_finite_image I
 
-protected lemma Infinite.preimage (hs : s.Infinite) (hf : s ⊆ range f) : (f ⁻¹' s).Infinite :=
+protected theorem Infinite.preimage (hs : s.Infinite) (hf : s ⊆ range f) : (f ⁻¹' s).Infinite :=
   fun h ↦ hs <| finite_of_finite_preimage h hf
 
-lemma Infinite.preimage' (hs : (s ∩ range f).Infinite) : (f ⁻¹' s).Infinite :=
+theorem Infinite.preimage' (hs : (s ∩ range f).Infinite) : (f ⁻¹' s).Infinite :=
   (hs.preimage inter_subset_right).mono <| preimage_mono inter_subset_left
 
 theorem Finite.preimage_embedding {s : Set β} (f : α ↪ β) (h : s.Finite) : (f ⁻¹' s).Finite :=
@@ -798,19 +798,19 @@ theorem infinite_univ_iff : (@univ α).Infinite ↔ Infinite α := by
 theorem infinite_univ [h : Infinite α] : (@univ α).Infinite :=
   infinite_univ_iff.2 h
 
-lemma Infinite.exists_not_mem_finite (hs : s.Infinite) (ht : t.Finite) : ∃ a, a ∈ s ∧ a ∉ t := by
+theorem Infinite.exists_not_mem_finite (hs : s.Infinite) (ht : t.Finite) : ∃ a, a ∈ s ∧ a ∉ t := by
   by_contra! h; exact hs <| ht.subset h
 
-lemma Infinite.exists_not_mem_finset (hs : s.Infinite) (t : Finset α) : ∃ a ∈ s, a ∉ t :=
+theorem Infinite.exists_not_mem_finset (hs : s.Infinite) (t : Finset α) : ∃ a ∈ s, a ∉ t :=
   hs.exists_not_mem_finite t.finite_toSet
 
 section Infinite
 variable [Infinite α]
 
-lemma Finite.exists_not_mem (hs : s.Finite) : ∃ a, a ∉ s := by
+theorem Finite.exists_not_mem (hs : s.Finite) : ∃ a, a ∉ s := by
   by_contra! h; exact infinite_univ (hs.subset fun a _ ↦ h _)
 
-lemma _root_.Finset.exists_not_mem (s : Finset α) : ∃ a, a ∉ s := s.finite_toSet.exists_not_mem
+theorem _root_.Finset.exists_not_mem (s : Finset α) : ∃ a, a ∉ s := s.finite_toSet.exists_not_mem
 
 end Infinite
 
@@ -947,7 +947,7 @@ theorem Finite.exists_minimal_wrt [PartialOrder β] (f : α → β) (s : Set α)
 
 /-- A version of `Finite.exists_minimal_wrt` with the (weaker) hypothesis that the image of `s`
   is finite rather than `s` itself. -/
-lemma Finite.exists_minimal_wrt' [PartialOrder β] (f : α → β) (s : Set α) (h : (f '' s).Finite)
+theorem Finite.exists_minimal_wrt' [PartialOrder β] (f : α → β) (s : Set α) (h : (f '' s).Finite)
     (hs : s.Nonempty) : (∃ a ∈ s, ∀ (a' : α), a' ∈ s → f a' ≤ f a → f a = f a') :=
   Set.Finite.exists_maximal_wrt' (β := βᵒᵈ) f s h hs
 
@@ -955,7 +955,7 @@ end Set
 
 namespace Finset
 
-lemma exists_card_eq [Infinite α] : ∀ n : ℕ, ∃ s : Finset α, s.card = n
+theorem exists_card_eq [Infinite α] : ∀ n : ℕ, ∃ s : Finset α, s.card = n
   | 0 => ⟨∅, card_empty⟩
   | n + 1 => by
     classical
@@ -970,18 +970,18 @@ variable [LinearOrder α] {s : Set α}
 
 /-- If a linear order does not contain any triple of elements `x < y < z`, then this type
 is finite. -/
-lemma Finite.of_forall_not_lt_lt (h : ∀ ⦃x y z : α⦄, x < y → y < z → False) : Finite α := by
+theorem Finite.of_forall_not_lt_lt (h : ∀ ⦃x y z : α⦄, x < y → y < z → False) : Finite α := by
   nontriviality α
   rcases exists_pair_ne α with ⟨x, y, hne⟩
   refine @Finite.of_fintype α ⟨{x, y}, fun z => ?_⟩
   simpa [hne] using eq_or_eq_or_eq_of_forall_not_lt_lt h z x y
 
 /-- If a set `s` does not contain any triple of elements `x < y < z`, then `s` is finite. -/
-lemma Set.finite_of_forall_not_lt_lt (h : ∀ x ∈ s, ∀ y ∈ s, ∀ z ∈ s, x < y → y < z → False) :
+theorem Set.finite_of_forall_not_lt_lt (h : ∀ x ∈ s, ∀ y ∈ s, ∀ z ∈ s, x < y → y < z → False) :
     Set.Finite s :=
   @Set.toFinite _ s <| Finite.of_forall_not_lt_lt <| by simpa only [SetCoe.forall'] using h
 
-lemma Directed.exists_mem_subset_of_finset_subset_biUnion {α ι : Type*} [Nonempty ι]
+theorem Directed.exists_mem_subset_of_finset_subset_biUnion {α ι : Type*} [Nonempty ι]
     {f : ι → Set α} (h : Directed (· ⊆ ·) f) {s : Finset α} (hs : (s : Set α) ⊆ ⋃ i, f i) :
     ∃ i, (s : Set α) ⊆ f i := by
   induction s using Finset.cons_induction with

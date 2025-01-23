@@ -228,7 +228,7 @@ theorem infinite_image2 (hfs : ∀ b ∈ t, InjOn (fun a => f a b) s) (hft : ∀
     · exact hs.image2_left hb (hfs _ hb)
     · exact ht.image2_right ha (hft _ ha)
 
-lemma finite_image2 (hfs : ∀ b ∈ t, InjOn (f · b) s) (hft : ∀ a ∈ s, InjOn (f a) t) :
+theorem finite_image2 (hfs : ∀ b ∈ t, InjOn (f · b) s) (hft : ∀ a ∈ s, InjOn (f a) t) :
     (image2 f s t).Finite ↔ s.Finite ∧ t.Finite ∨ s = ∅ ∨ t = ∅ := by
   rw [← not_infinite, infinite_image2 hfs hft]
   simp [not_or, -not_and, not_and_or, not_nonempty_iff_eq_empty]

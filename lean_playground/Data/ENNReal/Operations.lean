@@ -36,12 +36,12 @@ protected theorem mul_left_mono : Monotone (a * ·) := mul_left_mono
 @[deprecated mul_right_mono (since := "2024-10-15")]
 protected theorem mul_right_mono : Monotone (· * a) := mul_right_mono
 
-protected lemma pow_right_strictMono {n : ℕ} (hn : n ≠ 0) : StrictMono fun a : ℝ≥0∞ ↦ a ^ n :=
+protected theorem pow_right_strictMono {n : ℕ} (hn : n ≠ 0) : StrictMono fun a : ℝ≥0∞ ↦ a ^ n :=
   WithTop.pow_right_strictMono hn
 
 @[deprecated (since := "2024-10-15")] alias pow_strictMono := ENNReal.pow_right_strictMono
 
-@[gcongr] protected lemma pow_lt_pow_left (hab : a < b) {n : ℕ} (hn : n ≠ 0) : a ^ n < b ^ n :=
+@[gcongr] protected theorem pow_lt_pow_left (hab : a < b) {n : ℕ} (hn : n ≠ 0) : a ^ n < b ^ n :=
   WithTop.pow_lt_pow_left hab hn
 
 @[deprecated max_mul (since := "2024-10-15")]
@@ -97,10 +97,10 @@ theorem mul_lt_mul_left (h0 : a ≠ 0) (hinf : a ≠ ∞) : a * b < a * c ↔ b 
 theorem mul_lt_mul_right : c ≠ 0 → c ≠ ∞ → (a * c < b * c ↔ a < b) :=
   mul_comm c a ▸ mul_comm c b ▸ mul_lt_mul_left
 
-protected lemma mul_eq_left (ha₀ : a ≠ 0) (ha : a ≠ ∞) : a * b = a ↔ b = 1 := by
+protected theorem mul_eq_left (ha₀ : a ≠ 0) (ha : a ≠ ∞) : a * b = a ↔ b = 1 := by
   simpa using ENNReal.mul_right_inj ha₀ ha (c := 1)
 
-protected lemma mul_eq_right (hb₀ : b ≠ 0) (hb : b ≠ ∞) : a * b = b ↔ a = 1 := by
+protected theorem mul_eq_right (hb₀ : b ≠ 0) (hb : b ≠ ∞) : a * b = b ↔ a = 1 := by
   simpa using ENNReal.mul_left_inj hb₀ hb (b := 1)
 
 end Mul
@@ -172,17 +172,17 @@ theorem not_lt_top {x : ℝ≥0∞} : ¬x < ∞ ↔ x = ∞ := by rw [lt_top_iff
 theorem add_ne_top : a + b ≠ ∞ ↔ a ≠ ∞ ∧ b ≠ ∞ := by simpa only [lt_top_iff_ne_top] using add_lt_top
 
 @[aesop (rule_sets := [finiteness]) safe apply]
-protected lemma Finiteness.add_ne_top {a b : ℝ≥0∞} (ha : a ≠ ∞) (hb : b ≠ ∞) : a + b ≠ ∞ :=
+protected theorem Finiteness.add_ne_top {a b : ℝ≥0∞} (ha : a ≠ ∞) (hb : b ≠ ∞) : a + b ≠ ∞ :=
   ENNReal.add_ne_top.2 ⟨ha, hb⟩
 
 theorem mul_top' : a * ∞ = if a = 0 then 0 else ∞ := by convert WithTop.mul_top' a
 
--- Porting note: added because `simp` no longer uses `WithTop` lemmas for `ℝ≥0∞`
+-- Porting note: added because `simp` no longer uses `WithTop` theorems for `ℝ≥0∞`
 @[simp] theorem mul_top (h : a ≠ 0) : a * ∞ = ∞ := WithTop.mul_top h
 
 theorem top_mul' : ∞ * a = if a = 0 then 0 else ∞ := by convert WithTop.top_mul' a
 
--- Porting note: added because `simp` no longer uses `WithTop` lemmas for `ℝ≥0∞`
+-- Porting note: added because `simp` no longer uses `WithTop` theorems for `ℝ≥0∞`
 @[simp] theorem top_mul (h : a ≠ 0) : ∞ * a = ∞ := WithTop.top_mul h
 
 theorem top_mul_top : ∞ * ∞ = ∞ := WithTop.top_mul_top
@@ -274,19 +274,19 @@ theorem addLECancellable_iff_ne {a : ℝ≥0∞} : AddLECancellable a ↔ a ≠ 
   · rintro h b c hbc
     apply ENNReal.le_of_add_le_add_left h hbc
 
-/-- This lemma has an abbreviated name because it is used frequently. -/
+/-- This theorem has an abbreviated name because it is used frequently. -/
 theorem cancel_of_ne {a : ℝ≥0∞} (h : a ≠ ∞) : AddLECancellable a :=
   addLECancellable_iff_ne.mpr h
 
-/-- This lemma has an abbreviated name because it is used frequently. -/
+/-- This theorem has an abbreviated name because it is used frequently. -/
 theorem cancel_of_lt {a : ℝ≥0∞} (h : a < ∞) : AddLECancellable a :=
   cancel_of_ne h.ne
 
-/-- This lemma has an abbreviated name because it is used frequently. -/
+/-- This theorem has an abbreviated name because it is used frequently. -/
 theorem cancel_of_lt' {a b : ℝ≥0∞} (h : a < b) : AddLECancellable a :=
   cancel_of_ne h.ne_top
 
-/-- This lemma has an abbreviated name because it is used frequently. -/
+/-- This theorem has an abbreviated name because it is used frequently. -/
 theorem cancel_coe {a : ℝ≥0} : AddLECancellable (a : ℝ≥0∞) :=
   cancel_of_ne coe_ne_top
 
@@ -309,13 +309,13 @@ theorem sub_eq_sInf {a b : ℝ≥0∞} : a - b = sInf { d | a ≤ d + b } :=
 /-- This is a special case of `WithTop.top_sub_coe` in the `ENNReal` namespace -/
 @[simp] theorem top_sub_coe : ∞ - ↑r = ∞ := WithTop.top_sub_coe
 
-@[simp] lemma top_sub (ha : a ≠ ∞) : ∞ - a = ∞ := by lift a to ℝ≥0 using ha; exact top_sub_coe
+@[simp] theorem top_sub (ha : a ≠ ∞) : ∞ - a = ∞ := by lift a to ℝ≥0 using ha; exact top_sub_coe
 
 /-- This is a special case of `WithTop.sub_top` in the `ENNReal` namespace -/
 theorem sub_top : a - ∞ = 0 := WithTop.sub_top
 
 @[simp] theorem sub_eq_top_iff : a - b = ∞ ↔ a = ∞ ∧ b ≠ ∞ := WithTop.sub_eq_top_iff
-lemma sub_ne_top_iff : a - b ≠ ∞ ↔ a ≠ ∞ ∨ b = ∞ := WithTop.sub_ne_top_iff
+theorem sub_ne_top_iff : a - b ≠ ∞ ↔ a ≠ ∞ ∨ b = ∞ := WithTop.sub_ne_top_iff
 
 -- This is unsafe because we could have `a = b = ∞`
 @[aesop (rule_sets := [finiteness]) unsafe 75% apply]
@@ -335,7 +335,7 @@ protected theorem sub_eq_of_eq_add (hb : b ≠ ∞) : a = c + b → a - b = c :=
 
 /-- Weaker version of `ENNReal.sub_eq_of_eq_add` assuming that `a = c + b` itself is finite rather
 han `b`. -/
-protected lemma sub_eq_of_eq_add' (ha : a ≠ ∞) : a = c + b → a - b = c :=
+protected theorem sub_eq_of_eq_add' (ha : a ≠ ∞) : a = c + b → a - b = c :=
   (cancel_of_ne ha).tsub_eq_of_eq_add'
 
 /-- See `ENNReal.eq_sub_of_add_eq'` for a version assuming that `b = a + c` itself is finite rather
@@ -345,7 +345,7 @@ protected theorem eq_sub_of_add_eq (hc : c ≠ ∞) : a + c = b → a = b - c :=
 
 /-- Weaker version of `ENNReal.eq_sub_of_add_eq` assuming that `b = a + c` itself is finite rather
 than `c`. -/
-protected lemma eq_sub_of_add_eq' (hb : b ≠ ∞) : a + c = b → a = b - c :=
+protected theorem eq_sub_of_add_eq' (hb : b ≠ ∞) : a + c = b → a = b - c :=
   (cancel_of_ne hb).eq_tsub_of_add_eq'
 
 /-- See `ENNReal.sub_eq_of_eq_add_rev'` for a version assuming that `a = b + c` itself is finite
@@ -355,7 +355,7 @@ protected theorem sub_eq_of_eq_add_rev (hb : b ≠ ∞) : a = b + c → a - b = 
 
 /-- Weaker version of `ENNReal.sub_eq_of_eq_add_rev` assuming that `a = b + c` itself is finite
 rather than `b`. -/
-protected lemma sub_eq_of_eq_add_rev' (ha : a ≠ ∞) : a = b + c → a - b = c :=
+protected theorem sub_eq_of_eq_add_rev' (ha : a ≠ ∞) : a = b + c → a - b = c :=
   (cancel_of_ne ha).tsub_eq_of_eq_add_rev'
 
 @[deprecated ENNReal.sub_eq_of_eq_add (since := "2024-09-30")]
@@ -438,19 +438,19 @@ open Finset
 variable {α : Type*} {s : Finset α} {f : α → ℝ≥0∞}
 
 /-- A product of finite numbers is still finite. -/
-lemma prod_ne_top (h : ∀ a ∈ s, f a ≠ ∞) : ∏ a ∈ s, f a ≠ ∞ := WithTop.prod_ne_top h
+theorem prod_ne_top (h : ∀ a ∈ s, f a ≠ ∞) : ∏ a ∈ s, f a ≠ ∞ := WithTop.prod_ne_top h
 
 /-- A product of finite numbers is still finite. -/
-lemma prod_lt_top (h : ∀ a ∈ s, f a < ∞) : ∏ a ∈ s, f a < ∞ := WithTop.prod_lt_top h
+theorem prod_lt_top (h : ∀ a ∈ s, f a < ∞) : ∏ a ∈ s, f a < ∞ := WithTop.prod_lt_top h
 
 /-- A sum is infinite iff one of the summands is infinite. -/
-@[simp] lemma sum_eq_top : ∑ x ∈ s, f x = ∞ ↔ ∃ a ∈ s, f a = ∞ := WithTop.sum_eq_top
+@[simp] theorem sum_eq_top : ∑ x ∈ s, f x = ∞ ↔ ∃ a ∈ s, f a = ∞ := WithTop.sum_eq_top
 
 /-- A sum is finite iff all summands are finite. -/
-lemma sum_ne_top : ∑ a ∈ s, f a ≠ ∞ ↔ ∀ a ∈ s, f a ≠ ∞ := WithTop.sum_ne_top
+theorem sum_ne_top : ∑ a ∈ s, f a ≠ ∞ ↔ ∀ a ∈ s, f a ≠ ∞ := WithTop.sum_ne_top
 
 /-- A sum is finite iff all summands are finite. -/
-@[simp] lemma sum_lt_top : ∑ a ∈ s, f a < ∞ ↔ ∀ a ∈ s, f a < ∞ := WithTop.sum_lt_top
+@[simp] theorem sum_lt_top : ∑ a ∈ s, f a < ∞ ↔ ∀ a ∈ s, f a < ∞ := WithTop.sum_lt_top
 
 @[deprecated (since := "2024-08-25")] alias sum_lt_top_iff := sum_lt_top
 
@@ -560,13 +560,13 @@ theorem smul_top {R} [Zero R] [SMulWithZero R ℝ≥0∞] [IsScalarTower R ℝ�
   -- Porting note: need the primed version of `one_ne_zero` now
   simp_rw [smul_eq_zero, or_iff_left (one_ne_zero' ℝ≥0∞)]
 
-lemma nnreal_smul_lt_top {x : ℝ≥0} {y : ℝ≥0∞} (hy : y < ⊤) : x • y < ⊤ := mul_lt_top (by simp) hy
-lemma nnreal_smul_ne_top {x : ℝ≥0} {y : ℝ≥0∞} (hy : y ≠ ⊤) : x • y ≠ ⊤ := mul_ne_top (by simp) hy
+theorem nnreal_smul_lt_top {x : ℝ≥0} {y : ℝ≥0∞} (hy : y < ⊤) : x • y < ⊤ := mul_lt_top (by simp) hy
+theorem nnreal_smul_ne_top {x : ℝ≥0} {y : ℝ≥0∞} (hy : y ≠ ⊤) : x • y ≠ ⊤ := mul_ne_top (by simp) hy
 
-lemma nnreal_smul_ne_top_iff {x : ℝ≥0} {y : ℝ≥0∞} (hx : x ≠ 0) : x • y ≠ ⊤ ↔ y ≠ ⊤ :=
+theorem nnreal_smul_ne_top_iff {x : ℝ≥0} {y : ℝ≥0∞} (hx : x ≠ 0) : x • y ≠ ⊤ ↔ y ≠ ⊤ :=
   ⟨by rintro h rfl; simp [smul_top, hx] at h, nnreal_smul_ne_top⟩
 
-lemma nnreal_smul_lt_top_iff {x : ℝ≥0} {y : ℝ≥0∞} (hx : x ≠ 0) : x • y < ⊤ ↔ y < ⊤ := by
+theorem nnreal_smul_lt_top_iff {x : ℝ≥0} {y : ℝ≥0∞} (hx : x ≠ 0) : x • y < ⊤ ↔ y < ⊤ := by
   rw [lt_top_iff_ne_top, lt_top_iff_ne_top, nnreal_smul_ne_top_iff hx]
 
 end Actions

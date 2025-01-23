@@ -8,7 +8,7 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 
 /-! # Lemmas about coprimality with big products.
 
-These lemmas are kept separate from `Data.Nat.GCD.Basic` in order to minimize imports.
+These theorems are kept separate from `Data.Nat.GCD.Basic` in order to minimize imports.
 -/
 
 
@@ -40,10 +40,10 @@ theorem coprime_prod_right_iff {x : ℕ} {t : Finset ι} {s : ι → ℕ} :
     Coprime x (∏ i ∈ t, s i) ↔ ∀ i ∈ t, Coprime x (s i) := by
   simpa using coprime_multiset_prod_right_iff (m := t.val.map s)
 
-/-- See `IsCoprime.prod_left` for the corresponding lemma about `IsCoprime` -/
+/-- See `IsCoprime.prod_left` for the corresponding theorem about `IsCoprime` -/
 alias ⟨_, Coprime.prod_left⟩ := coprime_prod_left_iff
 
-/-- See `IsCoprime.prod_right` for the corresponding lemma about `IsCoprime` -/
+/-- See `IsCoprime.prod_right` for the corresponding theorem about `IsCoprime` -/
 alias ⟨_, Coprime.prod_right⟩ := coprime_prod_right_iff
 
 theorem coprime_fintype_prod_left_iff [Fintype ι] {s : ι → ℕ} {x : ℕ} :

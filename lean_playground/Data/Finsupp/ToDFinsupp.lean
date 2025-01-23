@@ -43,7 +43,7 @@ and therefore map `Finsupp.single` to `DFinsupp.single` and vice versa:
 
 as well as preserving arithmetic operations.
 
-For the bundled equivalences, we provide lemmas that they reduce to `Finsupp.toDFinsupp`:
+For the bundled equivalences, we provide theorems that they reduce to `Finsupp.toDFinsupp`:
 
 * `finsupp_add_equiv_dfinsupp_apply`
 * `finsupp_lequiv_dfinsupp_apply`
@@ -60,7 +60,7 @@ these arguments are also present on the `noncomputable` equivs.
 
 variable {ι : Type*} {R : Type*} {M : Type*}
 
-/-! ### Basic definitions and lemmas -/
+/-! ### Basic definitions and theorems -/
 
 
 section Defs

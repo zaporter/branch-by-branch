@@ -75,10 +75,10 @@ theorem get_succ (n : ℕ) (s : Stream' α) : get s (succ n) = get (tail s) n :=
 theorem get_succ_cons (n : ℕ) (s : Stream' α) (x : α) : get (x :: s) n.succ = get s n :=
   rfl
 
-@[simp] lemma get_cons_append_zero {a : α} {x : List α} {s : Stream' α} :
+@[simp] theorem get_cons_append_zero {a : α} {x : List α} {s : Stream' α} :
   (a :: x ++ₛ s).get 0 = a := rfl
 
-@[simp] lemma append_eq_cons {a : α} {as : Stream' α} : [a] ++ₛ as = a :: as := by rfl
+@[simp] theorem append_eq_cons {a : α} {as : Stream' α} : [a] ++ₛ as = a :: as := by rfl
 
 @[simp] theorem drop_zero {s : Stream' α} : s.drop 0 = s := rfl
 
@@ -452,25 +452,25 @@ theorem cons_append_stream (a : α) (l : List α) (s : Stream' α) :
   | List.cons a l₁, l₂, s => by
     rw [List.cons_append, cons_append_stream, cons_append_stream, append_append_stream l₁]
 
-lemma get_append_left (h : n < x.length) : (x ++ₛ a).get n = x[n] := by
+theorem get_append_left (h : n < x.length) : (x ++ₛ a).get n = x[n] := by
   induction' x with b x ih generalizing n
   · simp at h
   · rcases n with (_ | n)
     · simp
     · simp [ih n (by simpa using h), cons_append_stream]
 
-@[simp] lemma get_append_right : (x ++ₛ a).get (x.length + n) = a.get n := by
+@[simp] theorem get_append_right : (x ++ₛ a).get (x.length + n) = a.get n := by
   induction' x <;> simp [Nat.succ_add, *, cons_append_stream]
 
-@[simp] lemma get_append_length : (x ++ₛ a).get x.length = a.get 0 := get_append_right 0 x a
+@[simp] theorem get_append_length : (x ++ₛ a).get x.length = a.get 0 := get_append_right 0 x a
 
-lemma append_right_injective (h : x ++ₛ a = x ++ₛ b) : a = b := by
+theorem append_right_injective (h : x ++ₛ a = x ++ₛ b) : a = b := by
   ext n; replace h := congr_arg (fun a ↦ a.get (x.length + n)) h; simpa using h
 
-@[simp] lemma append_right_inj : x ++ₛ a = x ++ₛ b ↔ a = b :=
+@[simp] theorem append_right_inj : x ++ₛ a = x ++ₛ b ↔ a = b :=
   ⟨append_right_injective x a b, by simp (config := {contextual := true})⟩
 
-lemma append_left_injective (h : x ++ₛ a = y ++ₛ b) (hl : x.length = y.length) : x = y := by
+theorem append_left_injective (h : x ++ₛ a = y ++ₛ b) (hl : x.length = y.length) : x = y := by
   apply List.ext_getElem hl
   intros
   rw [← get_append_left, ← get_append_left, h]
@@ -505,9 +505,9 @@ theorem mem_append_stream_left : ∀ {a : α} {l : List α} (s : Stream' α), a 
 theorem take_zero (s : Stream' α) : take 0 s = [] :=
   rfl
 
--- This lemma used to be simp, but we removed it from the simp set because:
+-- This theorem used to be simp, but we removed it from the simp set because:
 -- 1) It duplicates the (often large) `s` term, resulting in large tactic states.
--- 2) It conflicts with the very useful `dropLast_take` lemma below (causing nonconfluence).
+-- 2) It conflicts with the very useful `dropLast_take` theorem below (causing nonconfluence).
 theorem take_succ (n : ℕ) (s : Stream' α) : take (succ n) s = head s::take n (tail s) :=
   rfl
 
@@ -555,10 +555,10 @@ theorem append_take_drop : ∀ (n : ℕ) (s : Stream' α),
   · intro s
     rw [take_succ, drop_succ, cons_append_stream, ih (tail s), Stream'.eta]
 
-lemma append_take : x ++ (a.take n) = (x ++ₛ a).take (x.length + n) := by
+theorem append_take : x ++ (a.take n) = (x ++ₛ a).take (x.length + n) := by
   induction' x <;> simp [take, Nat.add_comm, cons_append_stream, *]
 
-@[simp] lemma take_get (h : m < (a.take n).length) : (a.take n)[m] = a.get m := by
+@[simp] theorem take_get (h : m < (a.take n).length) : (a.take n)[m] = a.get m := by
   nth_rw 2 [← append_take_drop n a]; rw [get_append_left]
 
 theorem take_append_of_le_length (h : n ≤ x.length) :
@@ -566,24 +566,24 @@ theorem take_append_of_le_length (h : n ≤ x.length) :
   apply List.ext_getElem (by simp [h])
   intro _ _ _; rw [List.getElem_take, take_get, get_append_left]
 
-lemma take_add : a.take (m + n) = a.take m ++ (a.drop m).take n := by
+theorem take_add : a.take (m + n) = a.take m ++ (a.drop m).take n := by
   apply append_left_injective _ _ (a.drop (m + n)) ((a.drop m).drop n) <;>
     simp [- drop_drop]
 
-@[gcongr] lemma take_prefix_take_left (h : m ≤ n) : a.take m <+: a.take n := by
+@[gcongr] theorem take_prefix_take_left (h : m ≤ n) : a.take m <+: a.take n := by
   rw [(by simp [h] : a.take m = (a.take n).take m)]
   apply List.take_prefix
 
-@[simp] lemma take_prefix : a.take m <+: a.take n ↔ m ≤ n :=
+@[simp] theorem take_prefix : a.take m <+: a.take n ↔ m ≤ n :=
   ⟨fun h ↦ by simpa using h.length_le, take_prefix_take_left m n a⟩
 
-lemma map_take (f : α → β) : (a.take n).map f = (a.map f).take n := by
+theorem map_take (f : α → β) : (a.take n).map f = (a.map f).take n := by
   apply List.ext_getElem <;> simp
 
-lemma take_drop : (a.drop m).take n = (a.take (m + n)).drop m := by
+theorem take_drop : (a.drop m).take n = (a.take (m + n)).drop m := by
   apply List.ext_getElem <;> simp
 
-lemma drop_append_of_le_length (h : n ≤ x.length) :
+theorem drop_append_of_le_length (h : n ≤ x.length) :
     (x ++ₛ a).drop n = x.drop n ++ₛ a := by
   obtain ⟨m, hm⟩ := Nat.exists_eq_add_of_le h
   ext k; rcases lt_or_ge k m with _ | hk

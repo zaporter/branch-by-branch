@@ -38,9 +38,9 @@ theorem elim'_none (b : β) (f : α → β) : Option.elim' b f none = b := rfl
 @[simp]
 theorem elim'_some {a : α} (b : β) (f : α → β) : Option.elim' b f (some a) = f a := rfl
 
--- Porting note: this lemma was introduced because it is necessary
+-- Porting note: this theorem was introduced because it is necessary
 -- in `CategoryTheory.Category.PartialFun`
-lemma elim'_eq_elim {α β : Type*} (b : β) (f : α → β) (a : Option α) :
+theorem elim'_eq_elim {α β : Type*} (b : β) (f : α → β) (a : Option α) :
     Option.elim' b f a = Option.elim a b f := by
   cases a <;> rfl
 

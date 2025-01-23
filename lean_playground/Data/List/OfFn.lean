@@ -8,7 +8,7 @@ import Mathlib.Data.Fin.Tuple.Basic
 /-!
 # Lists from functions
 
-Theorems and lemmas for dealing with `List.ofFn`, which converts a function on `Fin n` to a list
+Theorems and theorems for dealing with `List.ofFn`, which converts a function on `Fin n` to a list
 of length `n`.
 
 ## Main Statements
@@ -127,7 +127,7 @@ theorem ofFn_getElem_eq_map {β : Type*} (l : List α) (f : α → β) :
 theorem ofFn_get_eq_map {β : Type*} (l : List α) (f : α → β) : ofFn (f <| l.get ·) = l.map f := by
   simp
 
--- not registered as a simp lemma, as otherwise it fires before `forall_mem_ofFn_iff` which
+-- not registered as a simp theorem, as otherwise it fires before `forall_mem_ofFn_iff` which
 -- is much more useful
 theorem mem_ofFn {n} (f : Fin n → α) (a : α) : a ∈ ofFn f ↔ a ∈ Set.range f := by
   simp only [mem_iff_get, Set.mem_range, get_ofFn]
@@ -155,7 +155,7 @@ theorem pairwise_ofFn {R : α → α → Prop} {n} {f : Fin n → α} :
     (Fin.rightInverse_cast (length_ofFn f)).surjective.forall, Fin.forall_iff, Fin.cast_mk,
     Fin.mk_lt_mk, forall_comm (α := (_ : Prop)) (β := ℕ)]
 
-lemma getLast_ofFn_succ {n : ℕ} (f : Fin n.succ → α) :
+theorem getLast_ofFn_succ {n : ℕ} (f : Fin n.succ → α) :
     (ofFn f).getLast (mt ofFn_eq_nil_iff.1 (Nat.succ_ne_zero _)) = f (Fin.last _) :=
   getLast_ofFn f _
 
@@ -170,11 +170,11 @@ theorem last_ofFn_succ {n : ℕ} (f : Fin n.succ → α)
     getLast (ofFn f) h = f (Fin.last _) :=
   getLast_ofFn_succ _
 
-lemma ofFn_cons {n} (a : α) (f : Fin n → α) : ofFn (Fin.cons a f) = a :: ofFn f := by
+theorem ofFn_cons {n} (a : α) (f : Fin n → α) : ofFn (Fin.cons a f) = a :: ofFn f := by
   rw [ofFn_succ]
   rfl
 
-lemma find?_ofFn_eq_some {n} {f : Fin n → α} {p : α → Bool} {b : α} :
+theorem find?_ofFn_eq_some {n} {f : Fin n → α} {p : α → Bool} {b : α} :
     (ofFn f).find? p = some b ↔ p b = true ∧ ∃ i, f i = b ∧ ∀ j < i, ¬(p (f j) = true) := by
   rw [find?_eq_some_iff_getElem]
   exact ⟨fun ⟨hpb, i, hi, hfb, h⟩ ↦
@@ -183,7 +183,7 @@ lemma find?_ofFn_eq_some {n} {f : Fin n → α} {p : α → Bool} {b : α} :
       ⟨hpb, ⟨i, (length_ofFn f).symm ▸ i.isLt, by simpa using hfb,
         fun j hj ↦ by simpa using h ⟨j, by omega⟩ (by simpa using hj)⟩⟩⟩
 
-lemma find?_ofFn_eq_some_of_injective {n} {f : Fin n → α} {p : α → Bool} {i : Fin n}
+theorem find?_ofFn_eq_some_of_injective {n} {f : Fin n → α} {p : α → Bool} {i : Fin n}
     (h : Function.Injective f) :
     (ofFn f).find? p = some (f i) ↔ p (f i) = true ∧ ∀ j < i, ¬(p (f j) = true) := by
   simp only [find?_ofFn_eq_some, h.eq_iff, Bool.not_eq_true, exists_eq_left]

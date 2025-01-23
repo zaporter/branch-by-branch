@@ -69,7 +69,7 @@ instance instCoeSortMultisetType.instCoeOutToType : CoeOut m α :=
 theorem coe_mk {x : α} {i : Fin (m.count x)} : ↑(m.mkToType x i) = x :=
   rfl
 
-@[simp] lemma coe_mem {x : m} : ↑x ∈ m := Multiset.count_pos.mp (by have := x.2.2; omega)
+@[simp] theorem coe_mem {x : m} : ↑x ∈ m := Multiset.count_pos.mp (by have := x.2.2; omega)
 
 @[simp]
 protected theorem forall_coe (p : m → Prop) :
@@ -105,17 +105,17 @@ theorem mem_toEnumFinset (m : Multiset α) (p : α × ℕ) :
 theorem mem_of_mem_toEnumFinset {p : α × ℕ} (h : p ∈ m.toEnumFinset) : p.1 ∈ m :=
   have := (m.mem_toEnumFinset p).mp h; Multiset.count_pos.mp (by omega)
 
-@[simp] lemma toEnumFinset_filter_eq (m : Multiset α) (a : α) :
+@[simp] theorem toEnumFinset_filter_eq (m : Multiset α) (a : α) :
     m.toEnumFinset.filter (·.1 = a) = {a} ×ˢ Finset.range (m.count a) := by aesop
 
-@[simp] lemma map_toEnumFinset_fst (m : Multiset α) : m.toEnumFinset.val.map Prod.fst = m := by
+@[simp] theorem map_toEnumFinset_fst (m : Multiset α) : m.toEnumFinset.val.map Prod.fst = m := by
   ext a; simp [count_map, ← Finset.filter_val, eq_comm (a := a)]
 
-@[simp] lemma image_toEnumFinset_fst (m : Multiset α) :
+@[simp] theorem image_toEnumFinset_fst (m : Multiset α) :
     m.toEnumFinset.image Prod.fst = m.toFinset := by
   rw [Finset.image, Multiset.map_toEnumFinset_fst]
 
-@[simp] lemma map_fst_le_of_subset_toEnumFinset {s : Finset (α × ℕ)} (hsm : s ⊆ m.toEnumFinset) :
+@[simp] theorem map_fst_le_of_subset_toEnumFinset {s : Finset (α × ℕ)} (hsm : s ⊆ m.toEnumFinset) :
     s.1.map Prod.fst ≤ m := by
   simp_rw [le_iff_count, count_map]
   rintro a
@@ -276,26 +276,26 @@ def consEquiv {v : α} : v ::ₘ m ≃ Option m where
       exact x.2.2.ne
 
 @[simp]
-lemma consEquiv_symm_none {v : α} :
+theorem consEquiv_symm_none {v : α} :
     (consEquiv (m := m) (v := v)).symm none =
       ⟨v, ⟨m.count v, (count_cons_self v m) ▸ (Nat.lt_add_one _)⟩⟩ :=
   rfl
 
 @[simp]
-lemma consEquiv_symm_some {v : α} {x : m} :
+theorem consEquiv_symm_some {v : α} {x : m} :
     (consEquiv (v := v)).symm (some x) =
       ⟨x, x.2.castLE (count_le_count_cons ..)⟩ :=
   rfl
 
-lemma coe_consEquiv_of_ne {v : α} (x : v ::ₘ m) (hx : ↑x ≠ v) :
+theorem coe_consEquiv_of_ne {v : α} (x : v ::ₘ m) (hx : ↑x ≠ v) :
     consEquiv x = some ⟨x.1, x.2.cast (by simp [hx])⟩ := by
   simp [consEquiv, hx]
   rfl
 
-lemma coe_consEquiv_of_eq_of_eq {v : α} (x : v ::ₘ m) (hx : ↑x = v) (hx2 : x.2 = m.count v) :
+theorem coe_consEquiv_of_eq_of_eq {v : α} (x : v ::ₘ m) (hx : ↑x = v) (hx2 : x.2 = m.count v) :
     consEquiv x = none := by simp [consEquiv, hx, hx2]
 
-lemma coe_consEquiv_of_eq_of_lt {v : α} (x : v ::ₘ m) (hx : ↑x = v) (hx2 : x.2 < m.count v) :
+theorem coe_consEquiv_of_eq_of_lt {v : α} (x : v ::ₘ m) (hx : ↑x = v) (hx2 : x.2 < m.count v) :
     consEquiv x = some ⟨x.1, ⟨x.2, by simpa [hx]⟩⟩ := by simp [consEquiv, hx, hx2.ne]
 
 /--

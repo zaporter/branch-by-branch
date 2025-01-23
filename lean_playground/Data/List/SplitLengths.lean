@@ -30,10 +30,10 @@ theorem length_splitLengths : (sz.splitLengths l).length = sz.length := by
   induction sz generalizing l <;> simp [splitLengths, *]
 
 @[simp]
-lemma splitLengths_nil : [].splitLengths l = [] := rfl
+theorem splitLengths_nil : [].splitLengths l = [] := rfl
 
 @[simp]
-lemma splitLengths_cons (n : ℕ) :
+theorem splitLengths_cons (n : ℕ) :
     (n :: sz).splitLengths l = l.take n :: sz.splitLengths (l.drop n) := by
   simp [splitLengths]
 

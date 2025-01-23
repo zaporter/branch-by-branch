@@ -44,7 +44,7 @@ end MyEmbedding
 ```
 
 This file will then provide a `CoeFun` instance and various
-extensionality and simp lemmas.
+extensionality and simp theorems.
 
 ## Embedding classes extending `EmbeddingLike`
 
@@ -62,7 +62,7 @@ class MyEmbeddingClass (F : Type*) (A B : outParam Type*) [MyClass A] [MyClass B
   map_op : ∀ (f : F) (x y : A), f (MyClass.op x y) = MyClass.op (f x) (f y)
 
 @[simp]
-lemma map_op {F A B : Type*} [MyClass A] [MyClass B] [FunLike F A B] [MyEmbeddingClass F A B]
+theorem map_op {F A B : Type*} [MyClass A] [MyClass B] [FunLike F A B] [MyEmbeddingClass F A B]
     (f : F) (x y : A) :
     f (MyClass.op x y) = MyClass.op (f x) (f y) :=
   MyEmbeddingClass.map_op _ _ _
@@ -93,7 +93,7 @@ class CoolerEmbeddingClass (F : Type*) (A B : outParam Type*) [CoolClass A] [Coo
   (map_cool : ∀ (f : F), f CoolClass.cool = CoolClass.cool)
 
 @[simp]
-lemma map_cool {F A B : Type*} [CoolClass A] [CoolClass B]
+theorem map_cool {F A B : Type*} [CoolClass A] [CoolClass B]
     [FunLike F A B] [CoolerEmbeddingClass F A B] (f : F) :
     f CoolClass.cool = CoolClass.cool :=
   CoolerEmbeddingClass.map_cool _
@@ -115,8 +115,8 @@ instance : CoolerEmbeddingClass (CoolerEmbedding A B) A B where
 Then any declaration taking a specific type of morphisms as parameter can instead take the
 class you just defined:
 ```
--- Compare with: lemma do_something (f : MyEmbedding A B) : sorry := sorry
-lemma do_something {F : Type*} [FunLike F A B] [MyEmbeddingClass F A B] (f : F) : sorry := sorry
+-- Compare with: theorem do_something (f : MyEmbedding A B) : sorry := sorry
+theorem do_something {F : Type*} [FunLike F A B] [MyEmbeddingClass F A B] (f : F) : sorry := sorry
 ```
 
 This means anything set up for `MyEmbedding`s will automatically work for `CoolerEmbeddingClass`es,

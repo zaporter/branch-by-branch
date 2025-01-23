@@ -19,7 +19,7 @@ which computes `suffixLevenshtein C xs (y :: ys)` using `xs`, `y`, and `suffixLe
 (This corresponds to the usual algorithm
 using the last two rows of the matrix of distances between suffixes.)
 
-After setting up these definitions, we prove lemmas specifying their behaviour,
+After setting up these definitions, we prove theorems specifying their behaviour,
 particularly
 
 ```
@@ -107,7 +107,7 @@ def impl
 variable {C}
 variable (x : α) (xs : List α) (y : β) (d : δ) (ds : List δ) (w : 0 < (d :: ds).length)
 
--- Note this lemma has an unspecified proof `w'` on the right-hand-side,
+-- Note this theorem has an unspecified proof `w'` on the right-hand-side,
 -- which will become an extra goal when rewriting.
 theorem impl_cons (w' : 0 < List.length ds) :
     impl C (x :: xs) y ⟨d :: ds, w⟩ =
@@ -115,7 +115,7 @@ theorem impl_cons (w' : 0 < List.length ds) :
       ⟨min (C.delete x + r[0]) (min (C.insert y + d) (C.substitute x y + ds[0])) :: r, by simp⟩ :=
   match ds, w' with | _ :: _, _ => rfl
 
--- Note this lemma has two unspecified proofs: `h` appears on the left-hand-side
+-- Note this theorem has two unspecified proofs: `h` appears on the left-hand-side
 -- and should be found by matching, but `w'` will become an extra goal when rewriting.
 theorem impl_cons_fst_zero (h : 0 < (impl C (x :: xs) y ⟨d :: ds, w⟩).val.length)
     (w' : 0 < List.length ds) : (impl C (x :: xs) y ⟨d :: ds, w⟩).1[0] =

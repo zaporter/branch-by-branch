@@ -49,10 +49,10 @@ theorem image_subset_image2_left (hb : b ∈ t) : (fun a => f a b) '' s ⊆ imag
 theorem image_subset_image2_right (ha : a ∈ s) : f a '' t ⊆ image2 f s t :=
   forall_mem_image.2 fun _ => mem_image2_of_mem ha
 
-lemma forall_mem_image2 {p : γ → Prop} :
+theorem forall_mem_image2 {p : γ → Prop} :
     (∀ z ∈ image2 f s t, p z) ↔ ∀ x ∈ s, ∀ y ∈ t, p (f x y) := by aesop
 
-lemma exists_mem_image2 {p : γ → Prop} :
+theorem exists_mem_image2 {p : γ → Prop} :
     (∃ z ∈ image2 f s t, p z) ↔ ∃ x ∈ s, ∃ y ∈ t, p (f x y) := by aesop
 
 @[deprecated (since := "2024-11-23")] alias forall_image2_iff := forall_mem_image2
@@ -70,16 +70,16 @@ theorem image2_subset_iff_right : image2 f s t ⊆ u ↔ ∀ b ∈ t, (fun a => 
 variable (f)
 
 -- Porting note: Removing `simp` - LHS does not simplify
-lemma image_prod : (fun x : α × β ↦ f x.1 x.2) '' s ×ˢ t = image2 f s t :=
+theorem image_prod : (fun x : α × β ↦ f x.1 x.2) '' s ×ˢ t = image2 f s t :=
   ext fun _ ↦ by simp [and_assoc]
 
-@[simp] lemma image_uncurry_prod (s : Set α) (t : Set β) : uncurry f '' s ×ˢ t = image2 f s t :=
+@[simp] theorem image_uncurry_prod (s : Set α) (t : Set β) : uncurry f '' s ×ˢ t = image2 f s t :=
   image_prod _
 
-@[simp] lemma image2_mk_eq_prod : image2 Prod.mk s t = s ×ˢ t := ext <| by simp
+@[simp] theorem image2_mk_eq_prod : image2 Prod.mk s t = s ×ˢ t := ext <| by simp
 
 -- Porting note: Removing `simp` - LHS does not simplify
-lemma image2_curry (f : α × β → γ) (s : Set α) (t : Set β) :
+theorem image2_curry (f : α × β → γ) (s : Set α) (t : Set β) :
     image2 (fun a b ↦ f (a, b)) s t = f '' s ×ˢ t := by
   simp [← image_uncurry_prod, uncurry]
 
@@ -95,11 +95,11 @@ theorem image2_union_left : image2 f (s ∪ s') t = image2 f s t ∪ image2 f s'
 theorem image2_union_right : image2 f s (t ∪ t') = image2 f s t ∪ image2 f s t' := by
   rw [← image2_swap, image2_union_left, image2_swap f, image2_swap f]
 
-lemma image2_inter_left (hf : Injective2 f) :
+theorem image2_inter_left (hf : Injective2 f) :
     image2 f (s ∩ s') t = image2 f s t ∩ image2 f s' t := by
   simp_rw [← image_uncurry_prod, inter_prod, image_inter hf.uncurry]
 
-lemma image2_inter_right (hf : Injective2 f) :
+theorem image2_inter_right (hf : Injective2 f) :
     image2 f s (t ∩ t') = image2 f s t ∩ image2 f s t' := by
   simp_rw [← image_uncurry_prod, prod_inter, image_inter hf.uncurry]
 
@@ -187,7 +187,7 @@ theorem image2_left (h : t.Nonempty) : image2 (fun x _ => x) s t = s := by
 theorem image2_right (h : s.Nonempty) : image2 (fun _ y => y) s t = t := by
   simp [nonempty_def.mp h, Set.ext_iff]
 
-lemma image2_range (f : α' → β' → γ) (g : α → α') (h : β → β') :
+theorem image2_range (f : α' → β' → γ) (g : α → α') (h : β → β') :
     image2 f (range g) (range h) = range fun x : α × β ↦ f (g x.1) (h x.2) := by
   simp_rw [← image_univ, image2_image_left, image2_image_right, ← image_prod, univ_prod_univ]
 
@@ -298,13 +298,13 @@ theorem image_image2_right_anticomm {f : α → β' → γ} {g : β → β'} {f'
 
 /-- If `a` is a left identity for `f : α → β → β`, then `{a}` is a left identity for
 `Set.image2 f`. -/
-lemma image2_left_identity {f : α → β → β} {a : α} (h : ∀ b, f a b = b) (t : Set β) :
+theorem image2_left_identity {f : α → β → β} {a : α} (h : ∀ b, f a b = b) (t : Set β) :
     image2 f {a} t = t := by
   rw [image2_singleton_left, show f a = id from funext h, image_id]
 
 /-- If `b` is a right identity for `f : α → β → α`, then `{b}` is a right identity for
 `Set.image2 f`. -/
-lemma image2_right_identity {f : α → β → α} {b : β} (h : ∀ a, f a b = a) (s : Set α) :
+theorem image2_right_identity {f : α → β → α} {b : β} (h : ∀ a, f a b = a) (s : Set α) :
     image2 f s {b} = s := by
   rw [image2_singleton_right, funext h, image_id']
 

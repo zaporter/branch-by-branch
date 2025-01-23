@@ -58,16 +58,16 @@ theorem piFinset_eq_empty : piFinset s = ∅ ↔ ∃ i, s i = ∅ := by simp [pi
 theorem piFinset_empty [Nonempty α] : piFinset (fun _ => ∅ : ∀ i, Finset (δ i)) = ∅ := by simp
 
 @[simp]
-lemma piFinset_nonempty : (piFinset s).Nonempty ↔ ∀ a, (s a).Nonempty := by simp [piFinset]
+theorem piFinset_nonempty : (piFinset s).Nonempty ↔ ∀ a, (s a).Nonempty := by simp [piFinset]
 
 @[aesop safe apply (rule_sets := [finsetNonempty])]
 alias ⟨_, Aesop.piFinset_nonempty_of_forall_nonempty⟩ := piFinset_nonempty
 
-lemma _root_.Finset.Nonempty.piFinset_const {ι : Type*} [Fintype ι] [DecidableEq ι] {s : Finset β}
+theorem _root_.Finset.Nonempty.piFinset_const {ι : Type*} [Fintype ι] [DecidableEq ι] {s : Finset β}
     (hs : s.Nonempty) : (piFinset fun _ : ι ↦ s).Nonempty := piFinset_nonempty.2 fun _ ↦ hs
 
 @[simp]
-lemma piFinset_of_isEmpty [IsEmpty α] (s : ∀ a, Finset (γ a)) : piFinset s = univ :=
+theorem piFinset_of_isEmpty [IsEmpty α] (s : ∀ a, Finset (γ a)) : piFinset s = univ :=
   eq_univ_of_forall fun _ ↦ by simp
 
 @[simp]
@@ -84,20 +84,20 @@ theorem piFinset_disjoint_of_disjoint (t₁ t₂ : ∀ a, Finset (δ a)) {a : α
     disjoint_iff_ne.1 h (f₁ a) (mem_piFinset.1 hf₁ a) (f₂ a) (mem_piFinset.1 hf₂ a)
       (congr_fun eq₁₂ a)
 
-lemma piFinset_image [∀ a, DecidableEq (δ a)] (f : ∀ a, γ a → δ a) (s : ∀ a, Finset (γ a)) :
+theorem piFinset_image [∀ a, DecidableEq (δ a)] (f : ∀ a, γ a → δ a) (s : ∀ a, Finset (γ a)) :
     piFinset (fun a ↦ (s a).image (f a)) = (piFinset s).image fun b a ↦ f _ (b a) := by
   ext; simp only [mem_piFinset, mem_image, Classical.skolem, forall_and, funext_iff]
 
-lemma eval_image_piFinset_subset (t : ∀ a, Finset (δ a)) (a : α) [DecidableEq (δ a)] :
+theorem eval_image_piFinset_subset (t : ∀ a, Finset (δ a)) (a : α) [DecidableEq (δ a)] :
     ((piFinset t).image fun f ↦ f a) ⊆ t a := image_subset_iff.2 fun _x hx ↦ mem_piFinset.1 hx _
 
-lemma eval_image_piFinset (t : ∀ a, Finset (δ a)) (a : α) [DecidableEq (δ a)]
+theorem eval_image_piFinset (t : ∀ a, Finset (δ a)) (a : α) [DecidableEq (δ a)]
     (ht : ∀ b, a ≠ b → (t b).Nonempty) : ((piFinset t).image fun f ↦ f a) = t a := by
   refine (eval_image_piFinset_subset _ _).antisymm fun x h ↦ mem_image.2 ?_
   choose f hf using ht
   exact ⟨fun b ↦ if h : a = b then h ▸ x else f _ h, by aesop, by simp⟩
 
-lemma eval_image_piFinset_const {β} [DecidableEq β] (t : Finset β) (a : α) :
+theorem eval_image_piFinset_const {β} [DecidableEq β] (t : Finset β) (a : α) :
     ((piFinset fun _i : α ↦ t).image fun f ↦ f a) = t := by
   obtain rfl | ht := t.eq_empty_or_nonempty
   · haveI : Nonempty α := ⟨a⟩
@@ -106,12 +106,12 @@ lemma eval_image_piFinset_const {β} [DecidableEq β] (t : Finset β) (a : α) :
 
 variable [∀ a, DecidableEq (δ a)]
 
-lemma filter_piFinset_of_not_mem (t : ∀ a, Finset (δ a)) (a : α) (x : δ a) (hx : x ∉ t a) :
+theorem filter_piFinset_of_not_mem (t : ∀ a, Finset (δ a)) (a : α) (x : δ a) (hx : x ∉ t a) :
     {f ∈ piFinset t | f a = x} = ∅ := by
   simp only [filter_eq_empty_iff, mem_piFinset]; rintro f hf rfl; exact hx (hf _)
 
 -- TODO: This proof looks like a good example of something that `aesop` can't do but should
-lemma piFinset_update_eq_filter_piFinset_mem (s : ∀ i, Finset (δ i)) (i : α) {t : Finset (δ i)}
+theorem piFinset_update_eq_filter_piFinset_mem (s : ∀ i, Finset (δ i)) (i : α) {t : Finset (δ i)}
     (hts : t ⊆ s i) : piFinset (Function.update s i t) = {f ∈ piFinset s | f i ∈ t} := by
   ext f
   simp only [mem_piFinset, mem_filter]
@@ -125,7 +125,7 @@ lemma piFinset_update_eq_filter_piFinset_mem (s : ∀ i, Finset (δ i)) (i : α)
     · simpa using h.2
     · simpa [hji] using h.1 j
 
-lemma piFinset_update_singleton_eq_filter_piFinset_eq (s : ∀ i, Finset (δ i)) (i : α) {a : δ i}
+theorem piFinset_update_singleton_eq_filter_piFinset_eq (s : ∀ i, Finset (δ i)) (i : α) {a : δ i}
     (ha : a ∈ s i) :
     piFinset (Function.update s i {a}) = {f ∈ piFinset s | f i = a} := by
   simp [piFinset_update_eq_filter_piFinset_mem, ha]
@@ -174,10 +174,10 @@ theorem Finset.univ_pi_univ {α : Type*} {β : α → Type*} [DecidableEq α] [F
 namespace Finset
 variable {ι : Type*} [DecidableEq (ι → α)] {s : Finset α} {f : ι → α}
 
-lemma piFinset_filter_const [DecidableEq ι] [Fintype ι] :
+theorem piFinset_filter_const [DecidableEq ι] [Fintype ι] :
     {f ∈ Fintype.piFinset fun _ : ι ↦ s | ∃ a ∈ s, const ι a = f} = s.piDiag ι := by aesop
 
-lemma piDiag_subset_piFinset [DecidableEq ι] [Fintype ι] :
+theorem piDiag_subset_piFinset [DecidableEq ι] [Fintype ι] :
     s.piDiag ι ⊆ Fintype.piFinset fun _ ↦ s := by simp [← piFinset_filter_const]
 
 end Finset
@@ -209,7 +209,7 @@ theorem Finite.pi (ht : ∀ i, (t i).Finite) : (pi univ t).Finite := by
 
 /-- Finite product of finite sets is finite. Note this is a variant of `Set.Finite.pi` without the
 extra `i ∈ univ` binder. -/
-lemma Finite.pi' (ht : ∀ i, (t i).Finite) : {f : ∀ i, κ i | ∀ i, f i ∈ t i}.Finite := by
+theorem Finite.pi' (ht : ∀ i, (t i).Finite) : {f : ∀ i, κ i | ∀ i, f i ∈ t i}.Finite := by
   simpa [Set.pi] using Finite.pi ht
 
 end Pi

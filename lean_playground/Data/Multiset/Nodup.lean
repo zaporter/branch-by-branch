@@ -168,8 +168,8 @@ protected theorem Nodup.filterMap (f : α → Option β) (H : ∀ a a' b, b ∈ 
 theorem nodup_range (n : ℕ) : Nodup (range n) :=
   List.nodup_range _
 
-lemma Nodup.inter_left [DecidableEq α] (t) : Nodup s → Nodup (s ∩ t) := nodup_of_le inter_le_left
-lemma Nodup.inter_right [DecidableEq α] (s) : Nodup t → Nodup (s ∩ t) := nodup_of_le inter_le_right
+theorem Nodup.inter_left [DecidableEq α] (t) : Nodup s → Nodup (s ∩ t) := nodup_of_le inter_le_left
+theorem Nodup.inter_right [DecidableEq α] (s) : Nodup t → Nodup (s ∩ t) := nodup_of_le inter_le_right
 
 @[simp]
 theorem nodup_union [DecidableEq α] {s t : Multiset α} : Nodup (s ∪ t) ↔ Nodup s ∧ Nodup t :=

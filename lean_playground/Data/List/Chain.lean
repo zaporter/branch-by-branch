@@ -308,7 +308,7 @@ theorem Chain'.append_overlap {l₁ l₂ l₃ : List α} (h₁ : Chain' R (l₁ 
   h₁.append h₂.right_of_append <| by
     simpa only [getLast?_append_of_ne_nil _ hn] using (chain'_append.1 h₂).2.2
 
-lemma chain'_flatten : ∀ {L : List (List α)}, [] ∉ L →
+theorem chain'_flatten : ∀ {L : List (List α)}, [] ∉ L →
     (Chain' R L.flatten ↔ (∀ l ∈ L, Chain' R l) ∧
     L.Chain' (fun l₁ l₂ => ∀ᵉ (x ∈ l₁.getLast?) (y ∈ l₂.head?), R x y))
 | [], _ => by simp
@@ -435,7 +435,7 @@ theorem Chain'.cons_of_le [LinearOrder α] {a : α} {as m : List α}
         exact (List.lt_iff_lex_lt _ _).mp (List.Lex.rel hh)
       · simp_all only [List.cons.injEq, le_refl]
 
-lemma Chain'.chain {α : Type*} {R : α → α → Prop} {l : List α} {v : α}
+theorem Chain'.chain {α : Type*} {R : α → α → Prop} {l : List α} {v : α}
     (hl : l.Chain' R) (hv : (lne : l ≠ []) → R v (l.head lne)) : l.Chain R v := by
   rw [List.chain_iff_get]
   constructor
@@ -444,7 +444,7 @@ lemma Chain'.chain {α : Type*} {R : α → α → Prop} {l : List α} {v : α}
     apply hv
   · exact List.chain'_iff_get.mp hl
 
-lemma Chain'.iterate_eq_of_apply_eq {α : Type*} {f : α → α} {l : List α}
+theorem Chain'.iterate_eq_of_apply_eq {α : Type*} {f : α → α} {l : List α}
     (hl : l.Chain' (fun x y ↦ f x = y)) (i : ℕ) (hi : i < l.length) :
     f^[i] l[0] = l[i] := by
   induction' i with i h

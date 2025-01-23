@@ -51,26 +51,26 @@ def floorRoot (n a : ℕ) : ℕ :=
 
 /-- The RHS is a noncomputable version of `Nat.floorRoot` with better order theoretical
 properties. -/
-lemma floorRoot_def :
+theorem floorRoot_def :
     floorRoot n a = if n = 0 ∨ a = 0 then 0 else (a.factorization ⌊/⌋ n).prod (· ^ ·) := by
   unfold floorRoot; split_ifs with h <;> simp [Finsupp.floorDiv_def, prod_mapRange_index pow_zero]
 
-@[simp] lemma floorRoot_zero_left (a : ℕ) : floorRoot 0 a = 0 := by simp [floorRoot]
-@[simp] lemma floorRoot_zero_right (n : ℕ) : floorRoot n 0 = 0 := by simp [floorRoot]
-@[simp] lemma floorRoot_one_left (a : ℕ) : floorRoot 1 a = a := by
+@[simp] theorem floorRoot_zero_left (a : ℕ) : floorRoot 0 a = 0 := by simp [floorRoot]
+@[simp] theorem floorRoot_zero_right (n : ℕ) : floorRoot n 0 = 0 := by simp [floorRoot]
+@[simp] theorem floorRoot_one_left (a : ℕ) : floorRoot 1 a = a := by
   simp [floorRoot]; split_ifs <;> simp [*]
-@[simp] lemma floorRoot_one_right (hn : n ≠ 0) : floorRoot n 1 = 1 := by simp [floorRoot, hn]
+@[simp] theorem floorRoot_one_right (hn : n ≠ 0) : floorRoot n 1 = 1 := by simp [floorRoot, hn]
 
-@[simp] lemma floorRoot_pow_self (hn : n ≠ 0) (a : ℕ) : floorRoot n (a ^ n) = a := by
+@[simp] theorem floorRoot_pow_self (hn : n ≠ 0) (a : ℕ) : floorRoot n (a ^ n) = a := by
   simp [floorRoot_def, pos_iff_ne_zero.2, hn]; split_ifs <;> simp [*]
 
-lemma floorRoot_ne_zero : floorRoot n a ≠ 0 ↔ n ≠ 0 ∧ a ≠ 0 := by
+theorem floorRoot_ne_zero : floorRoot n a ≠ 0 ↔ n ≠ 0 ∧ a ≠ 0 := by
   simp +contextual [floorRoot, not_imp_not, not_or]
 
-@[simp] lemma floorRoot_eq_zero : floorRoot n a = 0 ↔ n = 0 ∨ a = 0 :=
+@[simp] theorem floorRoot_eq_zero : floorRoot n a = 0 ↔ n = 0 ∨ a = 0 :=
   floorRoot_ne_zero.not_right.trans <| by simp only [not_and_or, ne_eq, not_not]
 
-@[simp] lemma factorization_floorRoot (n a : ℕ) :
+@[simp] theorem factorization_floorRoot (n a : ℕ) :
     (floorRoot n a).factorization = a.factorization ⌊/⌋ n := by
   rw [floorRoot_def]
   split_ifs with h
@@ -81,7 +81,7 @@ lemma floorRoot_ne_zero : floorRoot n a ≠ 0 ↔ n ≠ 0 ∧ a ≠ 0 := by
 
 /-- Galois connection between `a ↦ a ^ n : ℕ → ℕ` and `floorRoot n : ℕ → ℕ` where `ℕ` is ordered
 by divisibility. -/
-lemma pow_dvd_iff_dvd_floorRoot : a ^ n ∣ b ↔ a ∣ floorRoot n b := by
+theorem pow_dvd_iff_dvd_floorRoot : a ^ n ∣ b ↔ a ∣ floorRoot n b := by
   obtain rfl | hn := eq_or_ne n 0
   · simp
   obtain rfl | hb := eq_or_ne b 0
@@ -92,7 +92,7 @@ lemma pow_dvd_iff_dvd_floorRoot : a ^ n ∣ b ↔ a ∣ floorRoot n b := by
     ← factorization_le_iff_dvd ha (floorRoot_ne_zero.2 ⟨hn, hb⟩), factorization_pow,
     factorization_floorRoot, le_floorDiv_iff_smul_le (β := ℕ →₀ ℕ) (pos_iff_ne_zero.2 hn)]
 
-lemma floorRoot_pow_dvd : floorRoot n a ^ n ∣ a := pow_dvd_iff_dvd_floorRoot.2 dvd_rfl
+theorem floorRoot_pow_dvd : floorRoot n a ^ n ∣ a := pow_dvd_iff_dvd_floorRoot.2 dvd_rfl
 
 /-- Ceiling root of a natural number. This divides the valuation of every prime number rounding up.
 
@@ -111,28 +111,28 @@ def ceilRoot (n a : ℕ) : ℕ :=
 
 /-- The RHS is a noncomputable version of `Nat.ceilRoot` with better order theoretical
 properties. -/
-lemma ceilRoot_def :
+theorem ceilRoot_def :
     ceilRoot n a = if n = 0 ∨ a = 0 then 0 else (a.factorization ⌈/⌉ n).prod (· ^ ·) := by
   unfold ceilRoot
   split_ifs with h <;>
     simp [Finsupp.ceilDiv_def, prod_mapRange_index pow_zero, Nat.ceilDiv_eq_add_pred_div]
 
-@[simp] lemma ceilRoot_zero_left (a : ℕ) : ceilRoot 0 a = 0 := by simp [ceilRoot]
-@[simp] lemma ceilRoot_zero_right (n : ℕ) : ceilRoot n 0 = 0 := by simp [ceilRoot]
-@[simp] lemma ceilRoot_one_left (a : ℕ) : ceilRoot 1 a = a := by
+@[simp] theorem ceilRoot_zero_left (a : ℕ) : ceilRoot 0 a = 0 := by simp [ceilRoot]
+@[simp] theorem ceilRoot_zero_right (n : ℕ) : ceilRoot n 0 = 0 := by simp [ceilRoot]
+@[simp] theorem ceilRoot_one_left (a : ℕ) : ceilRoot 1 a = a := by
   simp [ceilRoot]; split_ifs <;> simp [*]
-@[simp] lemma ceilRoot_one_right (hn : n ≠ 0) : ceilRoot n 1 = 1 := by simp [ceilRoot, hn]
+@[simp] theorem ceilRoot_one_right (hn : n ≠ 0) : ceilRoot n 1 = 1 := by simp [ceilRoot, hn]
 
-@[simp] lemma ceilRoot_pow_self (hn : n ≠ 0) (a : ℕ) : ceilRoot n (a ^ n) = a := by
+@[simp] theorem ceilRoot_pow_self (hn : n ≠ 0) (a : ℕ) : ceilRoot n (a ^ n) = a := by
   simp [ceilRoot_def, pos_iff_ne_zero.2, hn]; split_ifs <;> simp [*]
 
-lemma ceilRoot_ne_zero : ceilRoot n a ≠ 0 ↔ n ≠ 0 ∧ a ≠ 0 := by
+theorem ceilRoot_ne_zero : ceilRoot n a ≠ 0 ↔ n ≠ 0 ∧ a ≠ 0 := by
   simp +contextual [ceilRoot_def, not_imp_not, not_or]
 
-@[simp] lemma ceilRoot_eq_zero : ceilRoot n a = 0 ↔ n = 0 ∨ a = 0 :=
+@[simp] theorem ceilRoot_eq_zero : ceilRoot n a = 0 ↔ n = 0 ∨ a = 0 :=
   ceilRoot_ne_zero.not_right.trans <| by simp only [not_and_or, ne_eq, not_not]
 
-@[simp] lemma factorization_ceilRoot (n a : ℕ) :
+@[simp] theorem factorization_ceilRoot (n a : ℕ) :
     (ceilRoot n a).factorization = a.factorization ⌈/⌉ n := by
   rw [ceilRoot_def]
   split_ifs with h
@@ -147,7 +147,7 @@ by divisibility.
 Note that this cannot possibly hold for `n = 0`, regardless of the value of `ceilRoot 0 a`, because
 the statement reduces to `a = 1 ↔ ceilRoot 0 a ∣ b`, which is false for eg `a = 0`,
 `b = ceilRoot 0 a`. -/
-lemma dvd_pow_iff_ceilRoot_dvd (hn : n ≠ 0) : a ∣ b ^ n ↔ ceilRoot n a ∣ b := by
+theorem dvd_pow_iff_ceilRoot_dvd (hn : n ≠ 0) : a ∣ b ^ n ↔ ceilRoot n a ∣ b := by
   obtain rfl | ha := eq_or_ne a 0
   · aesop
   obtain rfl | hb := eq_or_ne b 0
@@ -156,7 +156,7 @@ lemma dvd_pow_iff_ceilRoot_dvd (hn : n ≠ 0) : a ∣ b ^ n ↔ ceilRoot n a ∣
     ← factorization_le_iff_dvd (ceilRoot_ne_zero.2 ⟨hn, ha⟩) hb, factorization_pow,
     factorization_ceilRoot, ceilDiv_le_iff_le_smul (β := ℕ →₀ ℕ) (pos_iff_ne_zero.2 hn)]
 
-lemma dvd_ceilRoot_pow (hn : n ≠ 0) : a ∣ ceilRoot n a ^ n :=
+theorem dvd_ceilRoot_pow (hn : n ≠ 0) : a ∣ ceilRoot n a ^ n :=
   (dvd_pow_iff_ceilRoot_dvd hn).2 dvd_rfl
 
 end Nat

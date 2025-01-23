@@ -36,9 +36,9 @@ variable [∀ i, LE (α i)] {f g : Π₀ i, α i}
 instance : LE (Π₀ i, α i) :=
   ⟨fun f g ↦ ∀ i, f i ≤ g i⟩
 
-lemma le_def : f ≤ g ↔ ∀ i, f i ≤ g i := Iff.rfl
+theorem le_def : f ≤ g ↔ ∀ i, f i ≤ g i := Iff.rfl
 
-@[simp, norm_cast] lemma coe_le_coe : ⇑f ≤ g ↔ f ≤ g := Iff.rfl
+@[simp, norm_cast] theorem coe_le_coe : ⇑f ≤ g ↔ f ≤ g := Iff.rfl
 
 /-- The order on `DFinsupp`s over a partial order embeds into the order on functions -/
 def orderEmbeddingToFun : (Π₀ i, α i) ↪o ∀ i, α i where
@@ -54,7 +54,7 @@ def orderEmbeddingToFun : (Π₀ i, α i) ↪o ∀ i, α i where
     Iff.rfl
 
 @[simp, norm_cast]
-lemma coe_orderEmbeddingToFun : ⇑(orderEmbeddingToFun (α := α)) = DFunLike.coe := rfl
+theorem coe_orderEmbeddingToFun : ⇑(orderEmbeddingToFun (α := α)) = DFunLike.coe := rfl
 
 -- Porting note: we added implicit arguments here in https://github.com/leanprover-community/mathlib4/pull/3414.
 theorem orderEmbeddingToFun_apply {f : Π₀ i, α i} {i : ι} :
@@ -71,12 +71,12 @@ instance : Preorder (Π₀ i, α i) :=
     le_refl := fun _ _ ↦ le_rfl
     le_trans := fun _ _ _ hfg hgh i ↦ (hfg i).trans (hgh i) }
 
-lemma lt_def : f < g ↔ f ≤ g ∧ ∃ i, f i < g i := Pi.lt_def
-@[simp, norm_cast] lemma coe_lt_coe : ⇑f < g ↔ f < g := Iff.rfl
+theorem lt_def : f < g ↔ f ≤ g ∧ ∃ i, f i < g i := Pi.lt_def
+@[simp, norm_cast] theorem coe_lt_coe : ⇑f < g ↔ f < g := Iff.rfl
 
-lemma coe_mono : Monotone ((⇑) : (Π₀ i, α i) → ∀ i, α i) := fun _ _ ↦ id
+theorem coe_mono : Monotone ((⇑) : (Π₀ i, α i) → ∀ i, α i) := fun _ _ ↦ id
 
-lemma coe_strictMono : Monotone ((⇑) : (Π₀ i, α i) → ∀ i, α i) := fun _ _ ↦ id
+theorem coe_strictMono : Monotone ((⇑) : (Π₀ i, α i) → ∀ i, α i) := fun _ _ ↦ id
 
 end Preorder
 
@@ -92,7 +92,7 @@ instance [∀ i, SemilatticeInf (α i)] : SemilatticeInf (Π₀ i, α i) :=
     le_inf := fun _ _ _ hf hg i ↦ le_inf (hf i) (hg i) }
 
 @[simp, norm_cast]
-lemma coe_inf [∀ i, SemilatticeInf (α i)] (f g : Π₀ i, α i) : f ⊓ g = ⇑f ⊓ g := rfl
+theorem coe_inf [∀ i, SemilatticeInf (α i)] (f g : Π₀ i, α i) : f ⊓ g = ⇑f ⊓ g := rfl
 
 theorem inf_apply [∀ i, SemilatticeInf (α i)] (f g : Π₀ i, α i) (i : ι) : (f ⊓ g) i = f i ⊓ g i :=
   zipWith_apply _ _ _ _ _
@@ -105,7 +105,7 @@ instance [∀ i, SemilatticeSup (α i)] : SemilatticeSup (Π₀ i, α i) :=
     sup_le := fun _ _ _ hf hg i ↦ sup_le (hf i) (hg i) }
 
 @[simp, norm_cast]
-lemma coe_sup [∀ i, SemilatticeSup (α i)] (f g : Π₀ i, α i) : f ⊔ g = ⇑f ⊔ g := rfl
+theorem coe_sup [∀ i, SemilatticeSup (α i)] (f g : Π₀ i, α i) : f ⊔ g = ⇑f ⊔ g := rfl
 
 theorem sup_apply [∀ i, SemilatticeSup (α i)] (f g : Π₀ i, α i) (i : ι) : (f ⊔ g) i = f i ⊔ g i :=
   zipWith_apply _ _ _ _ _
@@ -215,10 +215,10 @@ theorem le_iff' (hf : f.support ⊆ s) : f ≤ g ↔ ∀ i ∈ s, f i ≤ g i :=
 theorem le_iff : f ≤ g ↔ ∀ i ∈ f.support, f i ≤ g i :=
   le_iff' <| Subset.refl _
 
-lemma support_monotone : Monotone (support (ι := ι) (β := α)) :=
+theorem support_monotone : Monotone (support (ι := ι) (β := α)) :=
   fun f g h a ha ↦ by rw [mem_support_iff, ← pos_iff_ne_zero] at ha ⊢; exact ha.trans_le (h _)
 
-lemma support_mono (hfg : f ≤ g) : f.support ⊆ g.support := support_monotone hfg
+theorem support_mono (hfg : f ≤ g) : f.support ⊆ g.support := support_monotone hfg
 
 variable (α)
 

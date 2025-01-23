@@ -312,7 +312,7 @@ theorem scanl_nil : scanl f b nil = b ::ᵥ nil :=
 into the provided starting value `b : β` and the recursed `scanl`
 `f b x : β` as the starting value.
 
-This lemma is the `cons` version of `scanl_get`.
+This theorem is the `cons` version of `scanl_get`.
 -/
 @[simp]
 theorem scanl_cons (x : α) : scanl f b (x ::ᵥ v) = b ::ᵥ scanl f (f b x) v := by
@@ -358,7 +358,7 @@ vector `v : Vector α n` at `i.succ`, is equal to the application
 function `f : β → α → β` of the `castSucc i` element of
 `scanl f b v` and `get v i`.
 
-This lemma is the `get` version of `scanl_cons`.
+This theorem is the `get` version of `scanl_cons`.
 -/
 @[simp]
 theorem scanl_get (i : Fin n) :
@@ -746,7 +746,7 @@ theorem replicate_succ (val : α) :
 section Append
 variable (ys : Vector α m)
 
-@[simp] lemma get_append_cons_zero : get (append (x ::ᵥ xs) ys) ⟨0, by omega⟩ = x := rfl
+@[simp] theorem get_append_cons_zero : get (append (x ::ᵥ xs) ys) ⟨0, by omega⟩ = x := rfl
 
 @[simp]
 theorem get_append_cons_succ {i : Fin (n + m)} {h} :

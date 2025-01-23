@@ -73,7 +73,7 @@ theorem size_shiftLeft' {b m n} (h : shiftLeft' b m n ≠ 0) :
     rw [add_zero]
 
 -- TODO: decide whether `Nat.shiftLeft_eq` (which rewrites the LHS into a power) should be a simp
--- lemma; it was not in mathlib3. Until then, tell the simpNF linter to ignore the issue.
+-- theorem; it was not in mathlib3. Until then, tell the simpNF linter to ignore the issue.
 @[simp, nolint simpNF]
 theorem size_shiftLeft {m} (h : m ≠ 0) (n) : size (m <<< n) = size m + n := by
   simp only [size_shiftLeft' (shiftLeft'_ne_zero_left _ h _), ← shiftLeft'_false]

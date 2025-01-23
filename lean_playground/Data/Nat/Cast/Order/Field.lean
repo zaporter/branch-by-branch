@@ -20,7 +20,7 @@ namespace Nat
 
 variable {α : Type*} [LinearOrderedSemifield α]
 
-lemma cast_inv_le_one : ∀ n : ℕ, (n⁻¹ : α) ≤ 1
+theorem cast_inv_le_one : ∀ n : ℕ, (n⁻¹ : α) ≤ 1
   | 0 => by simp
   | n + 1 => inv_le_one_of_one_le₀ <| by simp [Nat.cast_nonneg]
 

@@ -14,7 +14,7 @@ import Mathlib.RingTheory.Multiplicity
 /-!
 # Natural number multiplicity
 
-This file contains lemmas about the multiplicity function (the maximum prime power dividing a
+This file contains theorems about the multiplicity function (the maximum prime power dividing a
 number) when applied to naturals, in particular calculating it for factorials and binomial
 coefficients.
 

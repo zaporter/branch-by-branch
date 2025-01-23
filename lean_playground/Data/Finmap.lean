@@ -38,12 +38,12 @@ def NodupKeys (s : Multiset (Sigma β)) : Prop :=
 theorem coe_nodupKeys {l : List (Sigma β)} : @NodupKeys α β l ↔ l.NodupKeys :=
   Iff.rfl
 
-lemma nodup_keys {m : Multiset (Σ a, β a)} : m.keys.Nodup ↔ m.NodupKeys := by
+theorem nodup_keys {m : Multiset (Σ a, β a)} : m.keys.Nodup ↔ m.NodupKeys := by
   rcases m with ⟨l⟩; rfl
 
 alias ⟨_, NodupKeys.nodup_keys⟩ := nodup_keys
 
-protected lemma NodupKeys.nodup {m : Multiset (Σ a, β a)} (h : m.NodupKeys) : m.Nodup :=
+protected theorem NodupKeys.nodup {m : Multiset (Σ a, β a)} (h : m.NodupKeys) : m.Nodup :=
   h.nodup_keys.of_map _
 
 end Multiset
@@ -83,7 +83,7 @@ namespace Finmap
 
 open AList
 
-lemma nodup_entries (f : Finmap β) : f.entries.Nodup := f.nodupKeys.nodup
+theorem nodup_entries (f : Finmap β) : f.entries.Nodup := f.nodupKeys.nodup
 
 /-! ### Lifting from AList -/
 
@@ -245,14 +245,14 @@ theorem lookup_isSome {a : α} {s : Finmap β} : (s.lookup a).isSome ↔ a ∈ s
 theorem lookup_eq_none {a} {s : Finmap β} : lookup a s = none ↔ a ∉ s :=
   induction_on s fun _ => AList.lookup_eq_none
 
-lemma mem_lookup_iff {s : Finmap β} {a : α} {b : β a} :
+theorem mem_lookup_iff {s : Finmap β} {a : α} {b : β a} :
     b ∈ s.lookup a ↔ Sigma.mk a b ∈ s.entries := by
   rcases s with ⟨⟨l⟩, hl⟩; exact List.mem_dlookup_iff hl
 
-lemma lookup_eq_some_iff {s : Finmap β} {a : α} {b : β a} :
+theorem lookup_eq_some_iff {s : Finmap β} {a : α} {b : β a} :
     s.lookup a = b ↔ Sigma.mk a b ∈ s.entries := mem_lookup_iff
 
-@[simp] lemma sigma_keys_lookup (s : Finmap β) :
+@[simp] theorem sigma_keys_lookup (s : Finmap β) :
     s.keys.sigma (fun i => (s.lookup i).toFinset) = ⟨s.entries, s.nodup_entries⟩ := by
   ext x
   have : x ∈ s.entries → x.1 ∈ s.keys := Multiset.mem_map_of_mem _
@@ -298,13 +298,13 @@ def keysLookupEquiv :
     · simp [keys, Multiset.keys, ← hf, Option.isSome_iff_exists]
     · simp +contextual [lookup_eq_some_iff, ← hf]
 
-@[simp] lemma keysLookupEquiv_symm_apply_keys :
+@[simp] theorem keysLookupEquiv_symm_apply_keys :
     ∀ f : {f : Finset α × (∀ a, Option (β a)) // ∀ i, (f.2 i).isSome ↔ i ∈ f.1},
       (keysLookupEquiv.symm f).keys = f.1.1 :=
   keysLookupEquiv.surjective.forall.2 fun _ => by
     simp only [Equiv.symm_apply_apply, keysLookupEquiv_apply_coe_fst]
 
-@[simp] lemma keysLookupEquiv_symm_apply_lookup :
+@[simp] theorem keysLookupEquiv_symm_apply_lookup :
     ∀ (f : {f : Finset α × (∀ a, Option (β a)) // ∀ i, (f.2 i).isSome ↔ i ∈ f.1}) a,
       (keysLookupEquiv.symm f).lookup a = f.1.2 a :=
   keysLookupEquiv.surjective.forall.2 fun _ _ => by

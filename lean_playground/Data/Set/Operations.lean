@@ -14,7 +14,7 @@ import Mathlib.Util.CompileInductive
 # Basic definitions about sets
 
 In this file we define various operations on sets.
-We also provide basic lemmas needed to unfold the definitions.
+We also provide basic theorems needed to unfold the definitions.
 More advanced theorems about these definitions are located in other files in `Mathlib/Data/Set`.
 
 ## Main definitions
@@ -117,7 +117,7 @@ def imageFactorization (f : α → β) (s : Set α) : s → f '' s := fun p =>
 /-- `kernImage f s` is the set of `y` such that `f ⁻¹ y ⊆ s`. -/
 def kernImage (f : α → β) (s : Set α) : Set β := {y | ∀ ⦃x⦄, f x = y → x ∈ s}
 
-lemma subset_kernImage_iff {s : Set β} {t : Set α} {f : α → β} : s ⊆ kernImage f t ↔ f ⁻¹' s ⊆ t :=
+theorem subset_kernImage_iff {s : Set β} {t : Set α} {f : α → β} : s ⊆ kernImage f t ↔ f ⁻¹' s ⊆ t :=
   ⟨fun h _ hx ↦ h hx rfl,
     fun h _ hx y hy ↦ h (show f y ∈ s from hy.symm ▸ hx)⟩
 
@@ -143,7 +143,7 @@ end Range
 /-- We can use the axiom of choice to pick a preimage for every element of `range f`. -/
 noncomputable def rangeSplitting (f : α → β) : range f → α := fun x => x.2.choose
 
--- This can not be a `@[simp]` lemma because the head of the left hand side is a variable.
+-- This can not be a `@[simp]` theorem because the head of the left hand side is a variable.
 theorem apply_rangeSplitting (f : α → β) (x : range f) : f (rangeSplitting f x) = x :=
   x.2.choose_spec
 
@@ -280,6 +280,6 @@ theorem mem_seq_iff {s : Set (α → β)} {t : Set α} {b : β} :
     b ∈ seq s t ↔ ∃ f ∈ s, ∃ a ∈ t, (f : α → β) a = b :=
   Iff.rfl
 
-lemma seq_eq_image2 (s : Set (α → β)) (t : Set α) : seq s t = image2 (fun f a ↦ f a) s t := rfl
+theorem seq_eq_image2 (s : Set (α → β)) (t : Set α) : seq s t = image2 (fun f a ↦ f a) s t := rfl
 
 end Set

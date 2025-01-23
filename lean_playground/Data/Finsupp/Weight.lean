@@ -106,7 +106,7 @@ theorem NonTorsionWeight.ne_zero [NonTorsionWeight w] (s : σ) :
   exact NonTorsionWeight.eq_zero_of_smul_eq_zero h
 
 variable {w} in
-lemma weight_sub_single_add {f : σ →₀ ℕ} {i : σ} (hi : f i ≠ 0) :
+theorem weight_sub_single_add {f : σ →₀ ℕ} {i : σ} (hi : f i ≠ 0) :
     (f - single i 1).weight w + w i = f.weight w := by
   conv_rhs => rw [← sub_add_single_one_cancel hi, weight_apply]
   rw [sum_add_index', sum_single_index, one_smul, weight_apply]
@@ -216,7 +216,7 @@ theorem degree_single (a : σ) (m : ℕ) : (Finsupp.single a m).degree = m := by
     simp only [mem_support_iff, single_eq_same, ne_eq, Decidable.not_not] at ha
     rw [single_eq_same, ha]
 
-lemma degree_eq_zero_iff (d : σ →₀ ℕ) : degree d = 0 ↔ d = 0 := by
+theorem degree_eq_zero_iff (d : σ →₀ ℕ) : degree d = 0 ↔ d = 0 := by
   simp only [degree, Finset.sum_eq_zero_iff, Finsupp.mem_support_iff, ne_eq, Decidable.not_imp_self,
     DFunLike.ext_iff, Finsupp.coe_zero, Pi.zero_apply]
 

@@ -8,7 +8,7 @@ import Mathlib.Data.List.Basic
 /-!
 # Lemmas about List.*Idx functions.
 
-Some specification lemmas for `List.mapIdx`, `List.mapIdxM`, `List.foldlIdx` and `List.foldrIdx`.
+Some specification theorems for `List.mapIdx`, `List.mapIdxM`, `List.foldlIdx` and `List.foldrIdx`.
 -/
 
 assert_not_exists MonoidWithZero

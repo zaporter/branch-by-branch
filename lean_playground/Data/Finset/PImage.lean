@@ -10,7 +10,7 @@ import Mathlib.Data.Part
 /-!
 # Image of a `Finset α` under a partially defined function
 
-In this file we define `Part.toFinset` and `Finset.pimage`. We also prove some trivial lemmas about
+In this file we define `Part.toFinset` and `Finset.pimage`. We also prove some trivial theorems about
 these definitions.
 
 ## Tags

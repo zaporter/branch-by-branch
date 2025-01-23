@@ -196,7 +196,7 @@ theorem M.dest_corec {α : TypeVec n} {β : Type u} (g : β → P (α.append1 β
   conv_rhs => rw [← split_dropFun_lastFun f, appendFun_comp_splitFun]
   rfl
 
-theorem M.bisim_lemma {α : TypeVec n} {a₁ : (mp P).A} {f₁ : (mp P).B a₁ ⟹ α} {a' : P.A}
+theorem M.bisim_theorem {α : TypeVec n} {a₁ : (mp P).A} {f₁ : (mp P).B a₁ ⟹ α} {a' : P.A}
     {f' : (P.B a').drop ⟹ α} {f₁' : (P.B a').last → M P α}
     (e₁ : M.dest P ⟨a₁, f₁⟩ = ⟨a', splitFun f' f₁'⟩) :
     ∃ (g₁' : _)(e₁' : PFunctor.M.dest a₁ = ⟨a', g₁'⟩),
@@ -225,8 +225,8 @@ theorem M.bisim {α : TypeVec n} (R : P.M α → P.M α → Prop)
         ⟨⟨a₁, f₁⟩, ⟨a₂, f₂⟩, r, rfl, rfl⟩
     rintro _ _ ⟨⟨a₁, f₁⟩, ⟨a₂, f₂⟩, r, rfl, rfl⟩
     rcases h _ _ r with ⟨a', f', f₁', f₂', e₁, e₂, h'⟩
-    rcases M.bisim_lemma P e₁ with ⟨g₁', e₁', rfl, rfl⟩
-    rcases M.bisim_lemma P e₂ with ⟨g₂', e₂', _, rfl⟩
+    rcases M.bisim_theorem P e₁ with ⟨g₁', e₁', rfl, rfl⟩
+    rcases M.bisim_theorem P e₂ with ⟨g₂', e₂', _, rfl⟩
     rw [e₁', e₂']
     exact ⟨_, _, _, rfl, rfl, fun b => ⟨_, _, h' b, rfl, rfl⟩⟩
   subst this
@@ -234,8 +234,8 @@ theorem M.bisim {α : TypeVec n} (R : P.M α → P.M α → Prop)
   induction' p with x a f h' i c x a f h' i c p IH <;>
     try
       rcases h _ _ r with ⟨a', f', f₁', f₂', e₁, e₂, h''⟩
-      rcases M.bisim_lemma P e₁ with ⟨g₁', e₁', rfl, rfl⟩
-      rcases M.bisim_lemma P e₂ with ⟨g₂', e₂', e₃, rfl⟩
+      rcases M.bisim_theorem P e₁ with ⟨g₁', e₁', rfl, rfl⟩
+      rcases M.bisim_theorem P e₂ with ⟨g₂', e₂', e₃, rfl⟩
       cases h'.symm.trans e₁'
       cases h'.symm.trans e₂'
   · exact (congr_fun (congr_fun e₃ i) c :)

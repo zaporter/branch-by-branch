@@ -17,7 +17,7 @@ import Mathlib.Algebra.GroupWithZero.Units.Lemmas
 ## Summary
 
 We define the canonical injection from ℚ into an arbitrary division ring and prove various
-casting lemmas showing the well-behavedness of this injection.
+casting theorems showing the well-behavedness of this injection.
 
 ## Tags
 
@@ -31,22 +31,22 @@ variable {F ι α β : Type*}
 namespace NNRat
 variable [DivisionSemiring α] {q r : ℚ≥0}
 
-@[simp, norm_cast] lemma cast_natCast (n : ℕ) : ((n : ℚ≥0) : α) = n := by simp [cast_def]
+@[simp, norm_cast] theorem cast_natCast (n : ℕ) : ((n : ℚ≥0) : α) = n := by simp [cast_def]
 
-@[simp, norm_cast] lemma cast_ofNat (n : ℕ) [n.AtLeastTwo] :
+@[simp, norm_cast] theorem cast_ofNat (n : ℕ) [n.AtLeastTwo] :
     (ofNat(n) : ℚ≥0) = (ofNat(n) : α) := cast_natCast _
 
-@[simp, norm_cast] lemma cast_zero : ((0 : ℚ≥0) : α) = 0 := (cast_natCast _).trans Nat.cast_zero
-@[simp, norm_cast] lemma cast_one : ((1 : ℚ≥0) : α) = 1 := (cast_natCast _).trans Nat.cast_one
+@[simp, norm_cast] theorem cast_zero : ((0 : ℚ≥0) : α) = 0 := (cast_natCast _).trans Nat.cast_zero
+@[simp, norm_cast] theorem cast_one : ((1 : ℚ≥0) : α) = 1 := (cast_natCast _).trans Nat.cast_one
 
-lemma cast_commute (q : ℚ≥0) (a : α) : Commute (↑q) a := by
+theorem cast_commute (q : ℚ≥0) (a : α) : Commute (↑q) a := by
   simpa only [cast_def] using (q.num.cast_commute a).div_left (q.den.cast_commute a)
 
-lemma commute_cast (a : α) (q : ℚ≥0) : Commute a q := (cast_commute ..).symm
+theorem commute_cast (a : α) (q : ℚ≥0) : Commute a q := (cast_commute ..).symm
 
-lemma cast_comm (q : ℚ≥0) (a : α) : q * a = a * q := cast_commute _ _
+theorem cast_comm (q : ℚ≥0) (a : α) : q * a = a * q := cast_commute _ _
 
-@[norm_cast] lemma cast_divNat_of_ne_zero (a : ℕ) {b : ℕ} (hb : (b : α) ≠ 0) :
+@[norm_cast] theorem cast_divNat_of_ne_zero (a : ℕ) {b : ℕ} (hb : (b : α) ≠ 0) :
     divNat a b = (a / b : α) := by
   rcases e : divNat a b with ⟨⟨n, d, h, c⟩, hn⟩
   rw [← Rat.num_nonneg] at hn
@@ -67,7 +67,7 @@ lemma cast_comm (q : ℚ≥0) (a : α) : q * a = a * q := cast_commute _ _
   exact b.commute_cast _
 
 @[norm_cast]
-lemma cast_add_of_ne_zero (hq : (q.den : α) ≠ 0) (hr : (r.den : α) ≠ 0) :
+theorem cast_add_of_ne_zero (hq : (q.den : α) ≠ 0) (hr : (r.den : α) ≠ 0) :
     ↑(q + r) = (q + r : α) := by
   rw [add_def, cast_divNat_of_ne_zero, cast_def, cast_def, mul_comm _ q.den,
     (Nat.commute_cast _ _).div_add_div (Nat.commute_cast _ _) hq hr]
@@ -77,7 +77,7 @@ lemma cast_add_of_ne_zero (hq : (q.den : α) ≠ 0) (hr : (r.den : α) ≠ 0) :
     exact mul_ne_zero hq hr
 
 @[norm_cast]
-lemma cast_mul_of_ne_zero (hq : (q.den : α) ≠ 0) (hr : (r.den : α) ≠ 0) :
+theorem cast_mul_of_ne_zero (hq : (q.den : α) ≠ 0) (hr : (r.den : α) ≠ 0) :
     ↑(q * r) = (q * r : α) := by
   rw [mul_def, cast_divNat_of_ne_zero, cast_def, cast_def,
     (Nat.commute_cast _ _).div_mul_div_comm (Nat.commute_cast _ _)]
@@ -87,11 +87,11 @@ lemma cast_mul_of_ne_zero (hq : (q.den : α) ≠ 0) (hr : (r.den : α) ≠ 0) :
     exact mul_ne_zero hq hr
 
 @[norm_cast]
-lemma cast_inv_of_ne_zero (hq : (q.num : α) ≠ 0) : (q⁻¹ : ℚ≥0) = (q⁻¹ : α) := by
+theorem cast_inv_of_ne_zero (hq : (q.num : α) ≠ 0) : (q⁻¹ : ℚ≥0) = (q⁻¹ : α) := by
   rw [inv_def, cast_divNat_of_ne_zero _ hq, cast_def, inv_div]
 
 @[norm_cast]
-lemma cast_div_of_ne_zero (hq : (q.den : α) ≠ 0) (hr : (r.num : α) ≠ 0) :
+theorem cast_div_of_ne_zero (hq : (q.den : α) ≠ 0) (hr : (r.num : α) ≠ 0) :
     ↑(q / r) = (q / r : α) := by
   rw [div_def, cast_divNat_of_ne_zero, cast_def, cast_def, div_eq_mul_inv (_ / _),
     inv_div, (Nat.commute_cast _ _).div_mul_div_comm (Nat.commute_cast _ _)]
@@ -115,7 +115,7 @@ theorem cast_natCast (n : ℕ) : ((n : ℚ) : α) = n := by
   rw [← Int.cast_natCast, cast_intCast, Int.cast_natCast]
 
 
-@[simp, norm_cast] lemma cast_ofNat (n : ℕ) [n.AtLeastTwo] :
+@[simp, norm_cast] theorem cast_ofNat (n : ℕ) [n.AtLeastTwo] :
     ((ofNat(n) : ℚ) : α) = (ofNat(n) : α) := by
   simp [cast_def]
 
@@ -137,7 +137,7 @@ theorem commute_cast (a : α) (r : ℚ) : Commute a r :=
   (r.cast_commute a).symm
 
 @[norm_cast]
-lemma cast_divInt_of_ne_zero (a : ℤ) {b : ℤ} (b0 : (b : α) ≠ 0) : (a /. b : α) = a / b := by
+theorem cast_divInt_of_ne_zero (a : ℤ) {b : ℤ} (b0 : (b : α) ≠ 0) : (a /. b : α) = a / b := by
   have b0' : b ≠ 0 := by
     refine mt ?_ b0
     simp +contextual
@@ -157,11 +157,11 @@ lemma cast_divInt_of_ne_zero (a : ℤ) {b : ℤ} (b0 : (b : α) ≠ 0) : (a /. b
     ← mul_assoc, this, mul_assoc, mul_inv_cancel₀ b0, mul_one]
 
 @[norm_cast]
-lemma cast_mkRat_of_ne_zero (a : ℤ) {b : ℕ} (hb : (b : α) ≠ 0) : (mkRat a b : α) = a / b := by
+theorem cast_mkRat_of_ne_zero (a : ℤ) {b : ℕ} (hb : (b : α) ≠ 0) : (mkRat a b : α) = a / b := by
   rw [Rat.mkRat_eq_divInt, cast_divInt_of_ne_zero, Int.cast_natCast]; rwa [Int.cast_natCast]
 
 @[norm_cast]
-lemma cast_add_of_ne_zero {q r : ℚ} (hq : (q.den : α) ≠ 0) (hr : (r.den : α) ≠ 0) :
+theorem cast_add_of_ne_zero {q r : ℚ} (hq : (q.den : α) ≠ 0) (hr : (r.den : α) ≠ 0) :
     (q + r : ℚ) = (q + r : α) := by
   rw [add_def', cast_mkRat_of_ne_zero, cast_def, cast_def, mul_comm r.num,
     (Nat.cast_commute _ _).div_add_div (Nat.commute_cast _ _) hq hr]
@@ -170,12 +170,12 @@ lemma cast_add_of_ne_zero {q r : ℚ} (hq : (q.den : α) ≠ 0) (hr : (r.den : �
   · push_cast
     exact mul_ne_zero hq hr
 
-@[simp, norm_cast] lemma cast_neg (q : ℚ) : ↑(-q) = (-q : α) := by simp [cast_def, neg_div]
+@[simp, norm_cast] theorem cast_neg (q : ℚ) : ↑(-q) = (-q : α) := by simp [cast_def, neg_div]
 
-@[norm_cast] lemma cast_sub_of_ne_zero (hp : (p.den : α) ≠ 0) (hq : (q.den : α) ≠ 0) :
+@[norm_cast] theorem cast_sub_of_ne_zero (hp : (p.den : α) ≠ 0) (hq : (q.den : α) ≠ 0) :
     ↑(p - q) = (p - q : α) := by simp [sub_eq_add_neg, cast_add_of_ne_zero, hp, hq]
 
-@[norm_cast] lemma cast_mul_of_ne_zero (hp : (p.den : α) ≠ 0) (hq : (q.den : α) ≠ 0) :
+@[norm_cast] theorem cast_mul_of_ne_zero (hp : (p.den : α) ≠ 0) (hq : (q.den : α) ≠ 0) :
     ↑(p * q) = (p * q : α) := by
   rw [mul_eq_mkRat, cast_mkRat_of_ne_zero, cast_def, cast_def,
     (Nat.commute_cast _ _).div_mul_div_comm (Int.commute_cast _ _)]
@@ -185,10 +185,10 @@ lemma cast_add_of_ne_zero {q r : ℚ} (hq : (q.den : α) ≠ 0) (hr : (r.den : �
     exact mul_ne_zero hp hq
 
 @[norm_cast]
-lemma cast_inv_of_ne_zero (hq : (q.num : α) ≠ 0) : ↑(q⁻¹) = (q⁻¹ : α) := by
+theorem cast_inv_of_ne_zero (hq : (q.num : α) ≠ 0) : ↑(q⁻¹) = (q⁻¹ : α) := by
   rw [inv_def', cast_divInt_of_ne_zero _ hq, cast_def, inv_div, Int.cast_natCast]
 
-@[norm_cast] lemma cast_div_of_ne_zero (hp : (p.den : α) ≠ 0) (hq : (q.num : α) ≠ 0) :
+@[norm_cast] theorem cast_div_of_ne_zero (hp : (p.den : α) ≠ 0) (hq : (q.num : α) ≠ 0) :
     ↑(p / q) = (p / q : α) := by
   rw [div_def', cast_divInt_of_ne_zero, cast_def, cast_def, div_eq_mul_inv (_ / _), inv_div,
     (Int.commute_cast _ _).div_mul_div_comm (Nat.commute_cast _ _)]
@@ -203,18 +203,18 @@ open Rat
 
 variable [FunLike F α β]
 
-@[simp] lemma map_nnratCast [DivisionSemiring α] [DivisionSemiring β] [RingHomClass F α β] (f : F)
+@[simp] theorem map_nnratCast [DivisionSemiring α] [DivisionSemiring β] [RingHomClass F α β] (f : F)
     (q : ℚ≥0) : f q = q := by simp_rw [NNRat.cast_def, map_div₀, map_natCast]
 
 @[simp]
-lemma eq_nnratCast [DivisionSemiring α] [FunLike F ℚ≥0 α] [RingHomClass F ℚ≥0 α] (f : F) (q : ℚ≥0) :
+theorem eq_nnratCast [DivisionSemiring α] [FunLike F ℚ≥0 α] [RingHomClass F ℚ≥0 α] (f : F) (q : ℚ≥0) :
     f q = q := by rw [← map_nnratCast f, NNRat.cast_id]
 
 @[simp]
 theorem map_ratCast [DivisionRing α] [DivisionRing β] [RingHomClass F α β] (f : F) (q : ℚ) :
     f q = q := by rw [cast_def, map_div₀, map_intCast, map_natCast, cast_def]
 
-@[simp] lemma eq_ratCast [DivisionRing α] [FunLike F ℚ α] [RingHomClass F ℚ α] (f : F) (q : ℚ) :
+@[simp] theorem eq_ratCast [DivisionRing α] [FunLike F ℚ α] [RingHomClass F ℚ α] (f : F) (q : ℚ) :
     f q = q := by rw [← map_ratCast f, Rat.cast_id]
 
 namespace MonoidWithZeroHomClass
@@ -225,22 +225,22 @@ section NNRat
 variable [FunLike F ℚ≥0 M₀] [MonoidWithZeroHomClass F ℚ≥0 M₀] {f g : F}
 
 /-- If monoid with zero homs `f` and `g` from `ℚ≥0` agree on the naturals then they are equal. -/
-lemma ext_nnrat' (h : ∀ n : ℕ, f n = g n) : f = g :=
+theorem ext_nnrat' (h : ∀ n : ℕ, f n = g n) : f = g :=
   (DFunLike.ext f g) fun r => by
     rw [← r.num_div_den, div_eq_mul_inv, map_mul, map_mul, h, eq_on_inv₀ f g]
     apply h
 
 /-- If monoid with zero homs `f` and `g` from `ℚ≥0` agree on the naturals then they are equal.
 
-See note [partially-applied ext lemmas] for why `comp` is used here. -/
+See note [partially-applied ext theorems] for why `comp` is used here. -/
 @[ext]
-lemma ext_nnrat {f g : ℚ≥0 →*₀ M₀}
+theorem ext_nnrat {f g : ℚ≥0 →*₀ M₀}
     (h : f.comp (Nat.castRingHom ℚ≥0 : ℕ →*₀ ℚ≥0) = g.comp (Nat.castRingHom ℚ≥0)) : f = g :=
   ext_nnrat' <| DFunLike.congr_fun h
 
 /-- If monoid with zero homs `f` and `g` from `ℚ≥0` agree on the positive naturals then they are
 equal. -/
-lemma ext_nnrat_on_pnat (same_on_pnat : ∀ n : ℕ, 0 < n → f n = g n) : f = g :=
+theorem ext_nnrat_on_pnat (same_on_pnat : ∀ n : ℕ, 0 < n → f n = g n) : f = g :=
   ext_nnrat' <| DFunLike.congr_fun <| ext_nat''
     ((f : ℚ≥0 →*₀ M₀).comp (Nat.castRingHom ℚ≥0 : ℕ →*₀ ℚ≥0))
     ((g : ℚ≥0 →*₀ M₀).comp (Nat.castRingHom ℚ≥0 : ℕ →*₀ ℚ≥0)) (by simpa)
@@ -259,7 +259,7 @@ theorem ext_rat' (h : ∀ m : ℤ, f m = g m) : f = g :=
 
 /-- If monoid with zero homs `f` and `g` from `ℚ` agree on the integers then they are equal.
 
-See note [partially-applied ext lemmas] for why `comp` is used here. -/
+See note [partially-applied ext theorems] for why `comp` is used here. -/
 @[ext]
 theorem ext_rat {f g : ℚ →*₀ M₀}
     (h : f.comp (Int.castRingHom ℚ : ℤ →*₀ ℚ) = g.comp (Int.castRingHom ℚ)) : f = g :=
@@ -280,7 +280,7 @@ end Rat
 end MonoidWithZeroHomClass
 
 /-- Any two ring homomorphisms from `ℚ` to a semiring are equal. If the codomain is a division ring,
-then this lemma follows from `eq_ratCast`. -/
+then this theorem follows from `eq_ratCast`. -/
 theorem RingHom.ext_rat {R : Type*} [Semiring R] [FunLike F ℚ R] [RingHomClass F ℚ R] (f g : F) :
     f = g :=
   MonoidWithZeroHomClass.ext_rat' <|

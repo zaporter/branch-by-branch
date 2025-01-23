@@ -12,7 +12,7 @@ import Mathlib.Algebra.BigOperators.Fin
 /-!
 # Matrix and vector notation
 
-This file includes `simp` lemmas for applying operations in `Data.Matrix.Basic` to values built out
+This file includes `simp` theorems for applying operations in `Data.Matrix.Basic` to values built out
 of the matrix notation `![a, b] = vecCons a (vecCons b vecEmpty)` defined in
 `Data.Fin.VecNotation`.
 
@@ -22,7 +22,7 @@ This notation also works for empty matrices; `!![,,,] : Matrix (Fin 0) (Fin 3)` 
 
 ## Implementation notes
 
-The `simp` lemmas require that one of the arguments is of the form `vecCons _ _`.
+The `simp` theorems require that one of the arguments is of the form `vecCons _ _`.
 This ensures `simp` works with entries only when (some) entries are already given.
 In other words, this notation will only appear in the output of `simp` if it
 already appears in the input.

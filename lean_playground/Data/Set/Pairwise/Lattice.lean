@@ -133,12 +133,12 @@ section
 
 variable {f : ι → Set α} {s t : Set ι}
 
-lemma Set.pairwiseDisjoint_iff :
+theorem Set.pairwiseDisjoint_iff :
     s.PairwiseDisjoint f ↔ ∀ ⦃i⦄, i ∈ s → ∀ ⦃j⦄, j ∈ s → (f i ∩ f j).Nonempty → i = j := by
   simp [Set.PairwiseDisjoint, Set.Pairwise, Function.onFun, not_imp_comm (a := _ = _),
     not_disjoint_iff_nonempty_inter]
 
-lemma Set.pairwiseDisjoint_pair_insert {s : Set α} {a : α} (ha : a ∉ s) :
+theorem Set.pairwiseDisjoint_pair_insert {s : Set α} {a : α} (ha : a ∉ s) :
     s.powerset.PairwiseDisjoint fun t ↦ ({t, insert a t} : Set (Set α)) := by
   rw [pairwiseDisjoint_iff]
   rintro i hi j hj

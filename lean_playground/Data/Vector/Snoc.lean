@@ -9,7 +9,7 @@ import Mathlib.Data.Vector.Basic
   This file establishes a `snoc : Vector α n → α → Vector α (n+1)` operation, that appends a single
   element to the back of a vector.
 
-  It provides a collection of lemmas that show how different `Vector` operations reduce when their
+  It provides a collection of theorems that show how different `Vector` operations reduce when their
   argument is `snoc xs x`.
 
   Also, an alternative, reverse, induction principle is added, that breaks down a vector into
@@ -26,7 +26,7 @@ variable {α β σ φ : Type*} {n : ℕ} {x : α} {s : σ} (xs : Vector α n)
 def snoc : Vector α n → α → Vector α (n+1) :=
   fun xs x => append xs (x ::ᵥ Vector.nil)
 
-/-! ## Simplification lemmas -/
+/-! ## Simplification theorems -/
 
 section Simp
 
@@ -114,7 +114,7 @@ def revCasesOn {C : ∀ {n : ℕ}, Vector α n → Sort*} {n : ℕ} (v : Vector 
 
 end Induction
 
-/-! ## More simplification lemmas -/
+/-! ## More simplification theorems -/
 
 section Simp
 

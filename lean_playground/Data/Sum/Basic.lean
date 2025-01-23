@@ -7,7 +7,7 @@ import Mathlib.Logic.Function.Basic
 import Mathlib.Tactic.MkIffOfInductiveProp
 
 /-!
-# Additional lemmas about sum types
+# Additional theorems about sum types
 
 Most of the former contents of this file have been moved to Batteries.
 -/
@@ -17,7 +17,7 @@ universe u v w x
 
 variable {α : Type u} {α' : Type w} {β : Type v} {β' : Type x} {γ δ : Type*}
 
-lemma not_isLeft_and_isRight {x : α ⊕ β} : ¬(x.isLeft ∧ x.isRight) := by simp
+theorem not_isLeft_and_isRight {x : α ⊕ β} : ¬(x.isLeft ∧ x.isRight) := by simp
 
 namespace Sum
 

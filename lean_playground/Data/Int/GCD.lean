@@ -22,11 +22,11 @@ import Mathlib.Algebra.Group.Int.Defs
 
 ## Main statements
 
-* `gcd_eq_gcd_ab`: Bézout's lemma, given `x y : ℕ`, `gcd x y = x * gcdA x y + y * gcdB x y`.
+* `gcd_eq_gcd_ab`: Bézout's theorem, given `x y : ℕ`, `gcd x y = x * gcdA x y + y * gcdB x y`.
 
 ## Tags
 
-Bézout's lemma, Bezout's lemma
+Bézout's theorem, Bezout's theorem
 -/
 
 /-! ### Extended Euclidean algorithm -/
@@ -118,7 +118,7 @@ theorem xgcdAux_P {r r'} :
     rw [p, p', Int.mul_sub, sub_add_eq_add_sub, Int.mul_sub, Int.add_mul, mul_comm k t,
       mul_comm k s, ← mul_assoc, ← mul_assoc, add_comm (x * s * k), ← add_sub_assoc, sub_sub]
 
-/-- **Bézout's lemma**: given `x y : ℕ`, `gcd x y = x * a + y * b`, where `a = gcd_a x y` and
+/-- **Bézout's theorem**: given `x y : ℕ`, `gcd x y = x * a + y * b`, where `a = gcd_a x y` and
 `b = gcd_b x y` are computed by the extended Euclidean algorithm.
 -/
 theorem gcd_eq_gcd_ab : (gcd x y : ℤ) = x * gcdA x y + y * gcdB x y := by
@@ -151,7 +151,7 @@ namespace Int
 
 theorem gcd_def (i j : ℤ) : gcd i j = Nat.gcd i.natAbs j.natAbs := rfl
 
-@[simp, norm_cast] protected lemma gcd_natCast_natCast (m n : ℕ) : gcd ↑m ↑n = m.gcd n := rfl
+@[simp, norm_cast] protected theorem gcd_natCast_natCast (m n : ℕ) : gcd ↑m ↑n = m.gcd n := rfl
 
 @[deprecated (since := "2024-05-25")] alias coe_nat_gcd := Int.gcd_natCast_natCast
 
@@ -165,7 +165,7 @@ def gcdB : ℤ → ℤ → ℤ
   | m, ofNat n => m.natAbs.gcdB n
   | m, -[n+1] => -m.natAbs.gcdB n.succ
 
-/-- **Bézout's lemma** -/
+/-- **Bézout's theorem** -/
 theorem gcd_eq_gcd_ab : ∀ x y : ℤ, (gcd x y : ℤ) = x * gcdA x y + y * gcdB x y
   | (m : ℕ), (n : ℕ) => Nat.gcd_eq_gcd_ab _ _
   | (m : ℕ), -[n+1] =>
@@ -299,7 +299,7 @@ theorem gcd_greatest {a b d : ℤ} (hd_pos : 0 ≤ d) (hda : d ∣ a) (hdb : d �
   dvd_antisymm hd_pos (ofNat_zero_le (gcd a b)) (dvd_gcd hda hdb)
     (hd _ gcd_dvd_left gcd_dvd_right)
 
-/-- Euclid's lemma: if `a ∣ b * c` and `gcd a c = 1` then `a ∣ b`.
+/-- Euclid's theorem: if `a ∣ b * c` and `gcd a c = 1` then `a ∣ b`.
 Compare with `IsCoprime.dvd_of_dvd_mul_left` and
 `UniqueFactorizationMonoid.dvd_of_dvd_mul_left_of_no_prime_factors` -/
 theorem dvd_of_dvd_mul_left_of_gcd_one {a b c : ℤ} (habc : a ∣ b * c) (hab : gcd a c = 1) :
@@ -310,7 +310,7 @@ theorem dvd_of_dvd_mul_left_of_gcd_one {a b c : ℤ} (habc : a ∣ b * c) (hab :
   rw [← this]
   exact Int.dvd_add (dvd_mul_of_dvd_left (dvd_mul_left a b) _) (dvd_mul_of_dvd_left habc _)
 
-/-- Euclid's lemma: if `a ∣ b * c` and `gcd a b = 1` then `a ∣ c`.
+/-- Euclid's theorem: if `a ∣ b * c` and `gcd a b = 1` then `a ∣ c`.
 Compare with `IsCoprime.dvd_of_dvd_mul_right` and
 `UniqueFactorizationMonoid.dvd_of_dvd_mul_right_of_no_prime_factors` -/
 theorem dvd_of_dvd_mul_right_of_gcd_one {a b c : ℤ} (habc : a ∣ b * c) (hab : gcd a b = 1) :
@@ -385,7 +385,7 @@ variable {α : Type*}
 section GroupWithZero
 variable [GroupWithZero α] {a b : α} {m n : ℕ}
 
-protected lemma Commute.pow_eq_pow_iff_of_coprime (hab : Commute a b) (hmn : m.Coprime n) :
+protected theorem Commute.pow_eq_pow_iff_of_coprime (hab : Commute a b) (hmn : m.Coprime n) :
     a ^ m = b ^ n ↔ ∃ c, a = c ^ n ∧ b = c ^ m := by
   refine ⟨fun h ↦ ?_, by rintro ⟨c, rfl, rfl⟩; rw [← pow_mul, ← pow_mul']⟩
   by_cases m = 0; · aesop
@@ -405,10 +405,10 @@ end GroupWithZero
 section CommGroupWithZero
 variable [CommGroupWithZero α] {a b : α} {m n : ℕ}
 
-lemma pow_eq_pow_iff_of_coprime (hmn : m.Coprime n) : a ^ m = b ^ n ↔ ∃ c, a = c ^ n ∧ b = c ^ m :=
+theorem pow_eq_pow_iff_of_coprime (hmn : m.Coprime n) : a ^ m = b ^ n ↔ ∃ c, a = c ^ n ∧ b = c ^ m :=
   (Commute.all _ _).pow_eq_pow_iff_of_coprime hmn
 
-lemma pow_mem_range_pow_of_coprime (hmn : m.Coprime n) (a : α) :
+theorem pow_mem_range_pow_of_coprime (hmn : m.Coprime n) (a : α) :
     a ^ m ∈ Set.range (· ^ n : α → α) ↔ a ∈ Set.range (· ^ n : α → α) := by
   simp [pow_eq_pow_iff_of_coprime hmn.symm]; aesop
 

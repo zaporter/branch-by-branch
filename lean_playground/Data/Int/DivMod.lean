@@ -7,7 +7,7 @@ Authors: Kim Morrison
 import Mathlib.Init
 
 /-!
-# Basic lemmas about division and modulo for integers
+# Basic theorems about division and modulo for integers
 
 -/
 

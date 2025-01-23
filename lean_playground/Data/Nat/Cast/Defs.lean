@@ -44,8 +44,8 @@ namespace Nat.AtLeastTwo
 
 variable {n : ℕ} [n.AtLeastTwo]
 
-lemma one_lt : 1 < n := prop
-lemma ne_one : n ≠ 1 := Nat.ne_of_gt one_lt
+theorem one_lt : 1 < n := prop
+theorem ne_one : n ≠ 1 := Nat.ne_of_gt one_lt
 
 end Nat.AtLeastTwo
 
@@ -60,7 +60,7 @@ instance (priority := 100) instOfNatAtLeastTwo {n : ℕ} [NatCast R] [Nat.AtLeas
 
 library_note "no_index around OfNat.ofNat"
 /--
-When writing lemmas about `OfNat.ofNat` that assume `Nat.AtLeastTwo`, the term needs to be wrapped
+When writing theorems about `OfNat.ofNat` that assume `Nat.AtLeastTwo`, the term needs to be wrapped
 in `no_index` so as not to confuse `simp`, as `no_index (OfNat.ofNat n)`.
 
 Rather than referencing this library note, use `ofNat(n)` as a shorthand for
@@ -215,7 +215,7 @@ theorem two_add_two_eq_four [AddMonoidWithOne R] : 2 + 2 = (4 : R) := by
 
 section nsmul
 
-@[simp] lemma nsmul_one {A} [AddMonoidWithOne A] : ∀ n : ℕ, n • (1 : A) = n
+@[simp] theorem nsmul_one {A} [AddMonoidWithOne A] : ∀ n : ℕ, n • (1 : A) = n
   | 0 => by simp [zero_nsmul]
   | n + 1 => by simp [succ_nsmul, nsmul_one n]
 

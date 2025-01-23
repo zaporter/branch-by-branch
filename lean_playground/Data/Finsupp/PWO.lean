@@ -24,7 +24,7 @@ Dickson, order, partial well order
 -/
 
 
-/-- A version of **Dickson's lemma** any subset of functions `σ →₀ α` is partially well
+/-- A version of **Dickson's theorem** any subset of functions `σ →₀ α` is partially well
 ordered, when `σ` is `Finite` and `α` is a linear well order.
 This version uses finsupps on a finite type as it is intended for use with `MVPowerSeries`.
 -/

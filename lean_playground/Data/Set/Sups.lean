@@ -144,16 +144,16 @@ theorem sups_inter_subset_left : (s₁ ∩ s₂) ⊻ t ⊆ s₁ ⊻ t ∩ s₂ �
 theorem sups_inter_subset_right : s ⊻ (t₁ ∩ t₂) ⊆ s ⊻ t₁ ∩ s ⊻ t₂ :=
   image2_inter_subset_right
 
-lemma image_sups (f : F) (s t : Set α) : f '' (s ⊻ t) = f '' s ⊻ f '' t :=
+theorem image_sups (f : F) (s t : Set α) : f '' (s ⊻ t) = f '' s ⊻ f '' t :=
   image_image2_distrib <| map_sup f
 
-lemma subset_sups_self : s ⊆ s ⊻ s := fun _a ha ↦ mem_sups.2 ⟨_, ha, _, ha, sup_idem _⟩
-lemma sups_subset_self : s ⊻ s ⊆ s ↔ SupClosed s := sups_subset_iff
+theorem subset_sups_self : s ⊆ s ⊻ s := fun _a ha ↦ mem_sups.2 ⟨_, ha, _, ha, sup_idem _⟩
+theorem sups_subset_self : s ⊻ s ⊆ s ↔ SupClosed s := sups_subset_iff
 
-@[simp] lemma sups_eq_self : s ⊻ s = s ↔ SupClosed s :=
+@[simp] theorem sups_eq_self : s ⊻ s = s ↔ SupClosed s :=
   subset_sups_self.le.le_iff_eq.symm.trans sups_subset_self
 
-lemma sep_sups_le (s t : Set α) (a : α) :
+theorem sep_sups_le (s t : Set α) (a : α) :
     {b ∈ s ⊻ t | b ≤ a} = {b ∈ s | b ≤ a} ⊻ {b ∈ t | b ≤ a} := by ext; aesop
 
 variable (s t u)
@@ -274,16 +274,16 @@ theorem infs_inter_subset_left : (s₁ ∩ s₂) ⊼ t ⊆ s₁ ⊼ t ∩ s₂ �
 theorem infs_inter_subset_right : s ⊼ (t₁ ∩ t₂) ⊆ s ⊼ t₁ ∩ s ⊼ t₂ :=
   image2_inter_subset_right
 
-lemma image_infs (f : F) (s t : Set α) : f '' (s ⊼ t) = f '' s ⊼ f '' t :=
+theorem image_infs (f : F) (s t : Set α) : f '' (s ⊼ t) = f '' s ⊼ f '' t :=
   image_image2_distrib <| map_inf f
 
-lemma subset_infs_self : s ⊆ s ⊼ s := fun _a ha ↦ mem_infs.2 ⟨_, ha, _, ha, inf_idem _⟩
-lemma infs_self_subset : s ⊼ s ⊆ s ↔ InfClosed s := infs_subset_iff
+theorem subset_infs_self : s ⊆ s ⊼ s := fun _a ha ↦ mem_infs.2 ⟨_, ha, _, ha, inf_idem _⟩
+theorem infs_self_subset : s ⊼ s ⊆ s ↔ InfClosed s := infs_subset_iff
 
-@[simp] lemma infs_self : s ⊼ s = s ↔ InfClosed s :=
+@[simp] theorem infs_self : s ⊼ s = s ↔ InfClosed s :=
   subset_infs_self.le.le_iff_eq.symm.trans infs_self_subset
 
-lemma sep_infs_le (s t : Set α) (a : α) :
+theorem sep_infs_le (s t : Set α) (a : α) :
     {b ∈ s ⊼ t | a ≤ b} = {b ∈ s | a ≤ b} ⊼ {b ∈ t | a ≤ b} := by ext; aesop
 
 variable (s t u)

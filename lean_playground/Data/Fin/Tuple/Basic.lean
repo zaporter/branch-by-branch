@@ -384,17 +384,17 @@ theorem cons_eq_append (x : α) (xs : Fin n → α) :
     cons x xs = append (cons x Fin.elim0) xs ∘ Fin.cast (Nat.add_comm ..) := by
   funext i; simp [append_left_eq_cons]
 
-@[simp] lemma append_cast_left {n m} (xs : Fin n → α) (ys : Fin m → α) (n' : ℕ)
+@[simp] theorem append_cast_left {n m} (xs : Fin n → α) (ys : Fin m → α) (n' : ℕ)
     (h : n' = n) :
     Fin.append (xs ∘ Fin.cast h) ys = Fin.append xs ys ∘ (Fin.cast <| by rw [h]) := by
   subst h; simp
 
-@[simp] lemma append_cast_right {n m} (xs : Fin n → α) (ys : Fin m → α) (m' : ℕ)
+@[simp] theorem append_cast_right {n m} (xs : Fin n → α) (ys : Fin m → α) (m' : ℕ)
     (h : m' = m) :
     Fin.append xs (ys ∘ Fin.cast h) = Fin.append xs ys ∘ (Fin.cast <| by rw [h]) := by
   subst h; simp
 
-lemma append_rev {m n} (xs : Fin m → α) (ys : Fin n → α) (i : Fin (m + n)) :
+theorem append_rev {m n} (xs : Fin m → α) (ys : Fin n → α) (i : Fin (m + n)) :
     append xs ys (rev i) = append (ys ∘ rev) (xs ∘ rev) (i.cast (Nat.add_comm ..)) := by
   rcases rev_surjective i with ⟨i, rfl⟩
   rw [rev_rev]
@@ -402,7 +402,7 @@ lemma append_rev {m n} (xs : Fin m → α) (ys : Fin n → α) (i : Fin (m + n))
   · simp [rev_castAdd]
   · simp [cast_rev, rev_addNat]
 
-lemma append_comp_rev {m n} (xs : Fin m → α) (ys : Fin n → α) :
+theorem append_comp_rev {m n} (xs : Fin m → α) (ys : Fin n → α) :
     append xs ys ∘ rev = append (ys ∘ rev) (xs ∘ rev) ∘ Fin.cast (Nat.add_comm ..) :=
   funext <| append_rev xs ys
 
@@ -517,7 +517,7 @@ theorem snoc_comp_castSucc {α : Sort*} {a : α} {f : Fin n → α} :
 @[simp]
 theorem snoc_last : snoc p x (last n) = x := by simp [snoc]
 
-lemma snoc_zero {α : Sort*} (p : Fin 0 → α) (x : α) :
+theorem snoc_zero {α : Sort*} (p : Fin 0 → α) (x : α) :
     Fin.snoc p x = fun _ ↦ x := by
   ext y
   have : Subsingleton (Fin (0 + 1)) := Fin.subsingleton_one
@@ -626,14 +626,14 @@ theorem init_update_castSucc : init (update q i.castSucc y) = update (init q) i 
     simp [init]
   · simp [init, h, castSucc_inj]
 
-/-- `tail` and `init` commute. We state this lemma in a non-dependent setting, as otherwise it
+/-- `tail` and `init` commute. We state this theorem in a non-dependent setting, as otherwise it
 would involve a cast to convince Lean that the two types are equal, making it harder to use. -/
 theorem tail_init_eq_init_tail {β : Sort*} (q : Fin (n + 2) → β) :
     tail (init q) = init (tail q) := by
   ext i
   simp [tail, init, castSucc_fin_succ]
 
-/-- `cons` and `snoc` commute. We state this lemma in a non-dependent setting, as otherwise it
+/-- `cons` and `snoc` commute. We state this theorem in a non-dependent setting, as otherwise it
 would involve a cast to convince Lean that the two types are equal, making it harder to use. -/
 theorem cons_snoc_eq_snoc_cons {β : Sort*} (a : β) (q : Fin n → β) (b : β) :
     @cons n.succ (fun _ ↦ β) a (snoc q b) = snoc (cons a q) b := by
@@ -739,7 +739,7 @@ def snocCases {P : (∀ i : Fin n.succ, α i) → Sort*}
     (x : ∀ i : Fin n.succ, α i) : P x :=
   _root_.cast (by rw [Fin.snoc_init_self]) <| h (Fin.init x) (x <| Fin.last _)
 
-@[simp] lemma snocCases_snoc
+@[simp] theorem snocCases_snoc
     {P : (∀ i : Fin (n+1), α i) → Sort*} (h : ∀ x x₀, P (Fin.snoc x x₀))
     (x : ∀ i : Fin n, (Fin.init α) i) (x₀ : α (Fin.last _)) :
     snocCases h (Fin.snoc x x₀) = h x x₀ := by
@@ -781,11 +781,11 @@ alias forall_iff_succ := forall_fin_succ
 -- This is a duplicate of `Fin.exists_fin_succ` in Core. We should upstream the name change.
 alias exists_iff_succ := exists_fin_succ
 
-lemma forall_iff_castSucc {P : Fin (n + 1) → Prop} :
+theorem forall_iff_castSucc {P : Fin (n + 1) → Prop} :
     (∀ i, P i) ↔ P (last n) ∧ ∀ i : Fin n, P i.castSucc :=
   ⟨fun h ↦ ⟨h _, fun _ ↦ h _⟩, fun h ↦ lastCases h.1 h.2⟩
 
-lemma exists_iff_castSucc {P : Fin (n + 1) → Prop} :
+theorem exists_iff_castSucc {P : Fin (n + 1) → Prop} :
     (∃ i, P i) ↔ P (last n) ∨ ∃ i : Fin n, P i.castSucc where
   mp := by
     rintro ⟨i, hi⟩
@@ -798,7 +798,7 @@ theorem forall_iff_succAbove {P : Fin (n + 1) → Prop} (p : Fin (n + 1)) :
     (∀ i, P i) ↔ P p ∧ ∀ i, P (p.succAbove i) :=
   ⟨fun h ↦ ⟨h _, fun _ ↦ h _⟩, fun h ↦ succAboveCases p h.1 h.2⟩
 
-lemma exists_iff_succAbove {P : Fin (n + 1) → Prop} (p : Fin (n + 1)) :
+theorem exists_iff_succAbove {P : Fin (n + 1) → Prop} (p : Fin (n + 1)) :
     (∃ i, P i) ↔ P p ∨ ∃ i, P (p.succAbove i) where
   mp := by
     rintro ⟨i, hi⟩
@@ -843,13 +843,13 @@ theorem insertNth_apply_succAbove (i : Fin (n + 1)) (x : α i) (p : ∀ j, α (i
 theorem succAbove_cases_eq_insertNth : @succAboveCases = @insertNth :=
   rfl
 
-@[simp] lemma removeNth_insertNth (p : Fin (n + 1)) (a : α p) (f : ∀ i, α (succAbove p i)) :
+@[simp] theorem removeNth_insertNth (p : Fin (n + 1)) (a : α p) (f : ∀ i, α (succAbove p i)) :
     removeNth p (insertNth p a f) = f := by ext; unfold removeNth; simp
 
-@[simp] lemma removeNth_zero (f : ∀ i, α i) : removeNth 0 f = tail f := by
+@[simp] theorem removeNth_zero (f : ∀ i, α i) : removeNth 0 f = tail f := by
   ext; simp [tail, removeNth]
 
-@[simp] lemma removeNth_last {α : Type*} (f : Fin (n + 1) → α) : removeNth (last n) f = init f := by
+@[simp] theorem removeNth_last {α : Type*} (f : Fin (n + 1) → α) : removeNth (last n) f = init f := by
   ext; simp [init, removeNth]
 
 /- Porting note: Had to `unfold comp`. Sometimes, when I use a placeholder, if I try to insert
@@ -928,7 +928,7 @@ theorem insertNth_last (x : α (last n)) (p : ∀ j : Fin n, α ((last n).succAb
 theorem insertNth_last' (x : β) (p : Fin n → β) :
     @insertNth _ (fun _ ↦ β) (last n) x p = snoc p x := by simp [insertNth_last]
 
-lemma insertNth_rev {α : Sort*} (i : Fin (n + 1)) (a : α) (f : Fin n → α) (j : Fin (n + 1)) :
+theorem insertNth_rev {α : Sort*} (i : Fin (n + 1)) (a : α) (f : Fin n → α) (j : Fin (n + 1)) :
     insertNth (α := fun _ ↦ α) i a f (rev j) = insertNth (α := fun _ ↦ α) i.rev a (f ∘ rev) j := by
   induction j using Fin.succAboveCases
   · exact rev i
@@ -978,13 +978,13 @@ end Preorder
 
 open Set
 
-@[simp] lemma removeNth_update (p : Fin (n + 1)) (x) (f : ∀ j, α j) :
+@[simp] theorem removeNth_update (p : Fin (n + 1)) (x) (f : ∀ j, α j) :
     removeNth p (update f p x) = removeNth p f := by ext i; simp [removeNth, succAbove_ne]
 
-@[simp] lemma insertNth_removeNth (p : Fin (n + 1)) (x) (f : ∀ j, α j) :
+@[simp] theorem insertNth_removeNth (p : Fin (n + 1)) (x) (f : ∀ j, α j) :
     insertNth p x (removeNth p f) = update f p x := by simp [Fin.insertNth_eq_iff]
 
-lemma insertNth_self_removeNth (p : Fin (n + 1)) (f : ∀ j, α j) :
+theorem insertNth_self_removeNth (p : Fin (n + 1)) (f : ∀ j, α j) :
     insertNth p (f p) (removeNth p f) = f := by simp
 
 @[simp]
@@ -1005,12 +1005,12 @@ def insertNthEquiv (α : Fin (n + 1) → Type u) (p : Fin (n + 1)) :
   left_inv f := by ext <;> simp
   right_inv f := by simp
 
-@[simp] lemma insertNthEquiv_zero (α : Fin (n + 1) → Type*) : insertNthEquiv α 0 = consEquiv α :=
+@[simp] theorem insertNthEquiv_zero (α : Fin (n + 1) → Type*) : insertNthEquiv α 0 = consEquiv α :=
   Equiv.symm_bijective.injective <| by ext <;> rfl
 
-/-- Note this lemma can only be written about non-dependent tuples as `insertNth (last n) = snoc` is
+/-- Note this theorem can only be written about non-dependent tuples as `insertNth (last n) = snoc` is
 not a definitional equality. -/
-@[simp] lemma insertNthEquiv_last (n : ℕ) (α : Type*) :
+@[simp] theorem insertNthEquiv_last (n : ℕ) (α : Type*) :
     insertNthEquiv (fun _ ↦ α) (last n) = snocEquiv (fun _ ↦ α) := by ext; simp
 
 /-- Separates an `n+1`-tuple, returning a selected index and then the rest of the tuple.

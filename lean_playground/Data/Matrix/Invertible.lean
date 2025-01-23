@@ -6,11 +6,11 @@ Authors: Eric Wieser, Ahmad Alkhalawi
 import Mathlib.Data.Matrix.ConjTranspose
 import Mathlib.Tactic.Abel
 
-/-! # Extra lemmas about invertible matrices
+/-! # Extra theorems about invertible matrices
 
-A few of the `Invertible` lemmas generalize to multiplication of rectangular matrices.
+A few of the `Invertible` theorems generalize to multiplication of rectangular matrices.
 
-For lemmas about the matrix inverse in terms of the determinant and adjugate, see `Matrix.inv`
+For theorems about the matrix inverse in terms of the determinant and adjugate, see `Matrix.inv`
 in `LinearAlgebra/Matrix/NonsingularInverse.lean`.
 
 ## Main results
@@ -63,14 +63,14 @@ variable [StarRing α] (A : Matrix n n α)
 /-- The conjugate transpose of an invertible matrix is invertible. -/
 instance invertibleConjTranspose [Invertible A] : Invertible Aᴴ := Invertible.star _
 
-lemma conjTranspose_invOf [Invertible A] [Invertible Aᴴ] : (⅟A)ᴴ = ⅟(Aᴴ) := star_invOf _
+theorem conjTranspose_invOf [Invertible A] [Invertible Aᴴ] : (⅟A)ᴴ = ⅟(Aᴴ) := star_invOf _
 
 /-- A matrix is invertible if the conjugate transpose is invertible. -/
 def invertibleOfInvertibleConjTranspose [Invertible Aᴴ] : Invertible A := by
   rw [← conjTranspose_conjTranspose A, ← star_eq_conjTranspose]
   infer_instance
 
-@[simp] lemma isUnit_conjTranspose : IsUnit Aᴴ ↔ IsUnit A := isUnit_star
+@[simp] theorem isUnit_conjTranspose : IsUnit Aᴴ ↔ IsUnit A := isUnit_star
 
 end ConjTranspose
 
@@ -86,7 +86,7 @@ instance invertibleTranspose [Invertible A] : Invertible Aᵀ where
   invOf_mul_self := by rw [← transpose_mul, mul_invOf_self, transpose_one]
   mul_invOf_self := by rw [← transpose_mul, invOf_mul_self, transpose_one]
 
-lemma transpose_invOf [Invertible A] [Invertible Aᵀ] : (⅟A)ᵀ = ⅟(Aᵀ) := by
+theorem transpose_invOf [Invertible A] [Invertible Aᵀ] : (⅟A)ᵀ = ⅟(Aᵀ) := by
   letI := invertibleTranspose A
   convert (rfl : _ = ⅟(Aᵀ))
 
@@ -105,7 +105,7 @@ def transposeInvertibleEquivInvertible : Invertible Aᵀ ≃ Invertible A where
   left_inv _ := Subsingleton.elim _ _
   right_inv _ := Subsingleton.elim _ _
 
-@[simp] lemma isUnit_transpose : IsUnit Aᵀ ↔ IsUnit A := by
+@[simp] theorem isUnit_transpose : IsUnit Aᵀ ↔ IsUnit A := by
   simp only [← nonempty_invertible_iff_isUnit,
     (transposeInvertibleEquivInvertible A).nonempty_congr]
 
@@ -120,7 +120,7 @@ variable [Fintype m] [DecidableEq m] [Ring α]
     [Invertible A] [Invertible C] [Invertible (⅟C + V * ⅟A * U)]
 
 -- No spaces around multiplication signs for better clarity
-lemma add_mul_mul_invOf_mul_eq_one :
+theorem add_mul_mul_invOf_mul_eq_one :
     (A + U*C*V)*(⅟A - ⅟A*U*⅟(⅟C + V*⅟A*U)*V*⅟A) = 1 := by
   calc
     (A + U*C*V)*(⅟A - ⅟A*U*⅟(⅟C + V*⅟A*U)*V*⅟A)
@@ -139,7 +139,7 @@ lemma add_mul_mul_invOf_mul_eq_one :
       abel
 
 /-- Like `add_mul_mul_invOf_mul_eq_one`, but with multiplication reversed. -/
-lemma add_mul_mul_invOf_mul_eq_one' :
+theorem add_mul_mul_invOf_mul_eq_one' :
     (⅟A - ⅟A*U*⅟(⅟C + V*⅟A*U)*V*⅟A)*(A + U*C*V) = 1 := by
   calc
     (⅟A - ⅟A*U*⅟(⅟C + V*⅟A*U)*V*⅟A)*(A + U*C*V)

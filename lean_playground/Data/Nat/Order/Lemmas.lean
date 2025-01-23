@@ -8,7 +8,7 @@ import Mathlib.Data.Nat.Find
 import Mathlib.Data.Set.Basic
 
 /-!
-# Further lemmas about the natural numbers
+# Further theorems about the natural numbers
 
 The distinction between this file and `Mathlib.Algebra.Order.Ring.Nat` is not particularly clear.
 They were separated for now to minimize the porting requirements for tactics
@@ -34,7 +34,7 @@ theorem Subtype.coe_bot {s : Set ℕ} [DecidablePred (· ∈ s)] [h : Nonempty s
 theorem set_eq_univ {S : Set ℕ} : S = Set.univ ↔ 0 ∈ S ∧ ∀ k : ℕ, k ∈ S → k + 1 ∈ S :=
   ⟨by rintro rfl; simp, fun ⟨h0, hs⟩ => Set.eq_univ_of_forall (set_induction h0 hs)⟩
 
-lemma exists_not_and_succ_of_not_zero_of_exists {p : ℕ → Prop} (H' : ¬ p 0) (H : ∃ n, p n) :
+theorem exists_not_and_succ_of_not_zero_of_exists {p : ℕ → Prop} (H' : ¬ p 0) (H : ∃ n, p n) :
     ∃ n, ¬ p n ∧ p (n + 1) := by
   classical
   let k := Nat.find H

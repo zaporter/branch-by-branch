@@ -184,7 +184,7 @@ theorem pairwise_bot_iff : s.Pairwise (⊥ : α → α → Prop) ↔ (s : Set α
 alias ⟨Pairwise.subsingleton, _⟩ := pairwise_bot_iff
 
 /-- See also `Function.injective_iff_pairwise_ne` -/
-lemma injOn_iff_pairwise_ne {s : Set ι} : InjOn f s ↔ s.Pairwise (f · ≠ f ·) := by
+theorem injOn_iff_pairwise_ne {s : Set ι} : InjOn f s ↔ s.Pairwise (f · ≠ f ·) := by
   simp only [InjOn, Set.Pairwise, not_imp_not]
 
 alias ⟨InjOn.pairwise_ne, _⟩ := injOn_iff_pairwise_ne
@@ -197,7 +197,7 @@ theorem InjOn.pairwise_image {s : Set ι} (h : s.InjOn f) :
     (f '' s).Pairwise r ↔ s.Pairwise (r on f) := by
   simp +contextual [h.eq_iff, Set.Pairwise]
 
-lemma _root_.Pairwise.range_pairwise (hr : Pairwise (r on f)) : (Set.range f).Pairwise r :=
+theorem _root_.Pairwise.range_pairwise (hr : Pairwise (r on f)) : (Set.range f).Pairwise r :=
   image_univ ▸ (pairwise_univ.mpr hr).image
 
 end Set
@@ -288,18 +288,18 @@ theorem PairwiseDisjoint.elim (hs : s.PairwiseDisjoint f) {i j : ι} (hi : i ∈
     (h : ¬Disjoint (f i) (f j)) : i = j :=
   hs.eq hi hj h
 
-lemma PairwiseDisjoint.eq_or_disjoint
+theorem PairwiseDisjoint.eq_or_disjoint
     (h : s.PairwiseDisjoint f) {i j : ι} (hi : i ∈ s) (hj : j ∈ s) :
     i = j ∨ Disjoint (f i) (f j) := by
   rw [or_iff_not_imp_right]
   exact h.elim hi hj
 
-lemma pairwiseDisjoint_range_iff {α β : Type*} {f : α → (Set β)} :
+theorem pairwiseDisjoint_range_iff {α β : Type*} {f : α → (Set β)} :
     (range f).PairwiseDisjoint id ↔ ∀ x y, f x ≠ f y → Disjoint (f x) (f y) := by
   aesop (add simp [PairwiseDisjoint, Set.Pairwise])
 
 /-- If the range of `f` is pairwise disjoint, then the image of any set `s` under `f` is as well. -/
-lemma _root_.Pairwise.pairwiseDisjoint (h : Pairwise (Disjoint on f)) (s : Set ι) :
+theorem _root_.Pairwise.pairwiseDisjoint (h : Pairwise (Disjoint on f)) (s : Set ι) :
     s.PairwiseDisjoint f := h.set_pairwise s
 
 end PartialOrderBot
@@ -379,7 +379,7 @@ theorem pairwiseDisjoint_image_left_iff {f : α → β → γ} {s : Set α} {t :
     rintro _ ⟨⟨a, ha, hab⟩, b, hb, rfl⟩
     exact h (congr_arg Prod.snd <| ht (mk_mem_prod ha hx) (mk_mem_prod hb hy) hab)
 
-lemma exists_ne_mem_inter_of_not_pairwiseDisjoint
+theorem exists_ne_mem_inter_of_not_pairwiseDisjoint
     {f : ι → Set α} (h : ¬ s.PairwiseDisjoint f) :
     ∃ i ∈ s, ∃ j ∈ s, i ≠ j ∧ ∃ x : α, x ∈ f i ∩ f j := by
   change ¬ ∀ i, i ∈ s → ∀ j, j ∈ s → i ≠ j → ∀ t, t ≤ f i → t ≤ f j → t ≤ ⊥ at h
@@ -390,7 +390,7 @@ lemma exists_ne_mem_inter_of_not_pairwiseDisjoint
   obtain ⟨x, hx⟩ := ht
   exact ⟨i, hi, j, hj, h_ne, x, hfi hx, hfj hx⟩
 
-lemma exists_lt_mem_inter_of_not_pairwiseDisjoint [LinearOrder ι]
+theorem exists_lt_mem_inter_of_not_pairwiseDisjoint [LinearOrder ι]
     {f : ι → Set α} (h : ¬ s.PairwiseDisjoint f) :
     ∃ i ∈ s, ∃ j ∈ s, i < j ∧ ∃ x, x ∈ f i ∩ f j := by
   obtain ⟨i, hi, j, hj, hne, x, hx₁, hx₂⟩ := exists_ne_mem_inter_of_not_pairwiseDisjoint h
@@ -400,14 +400,14 @@ lemma exists_lt_mem_inter_of_not_pairwiseDisjoint [LinearOrder ι]
 
 end Set
 
-lemma exists_ne_mem_inter_of_not_pairwise_disjoint
+theorem exists_ne_mem_inter_of_not_pairwise_disjoint
     {f : ι → Set α} (h : ¬ Pairwise (Disjoint on f)) :
     ∃ i j : ι, i ≠ j ∧ ∃ x, x ∈ f i ∩ f j := by
   rw [← pairwise_univ] at h
   obtain ⟨i, _hi, j, _hj, h⟩ := exists_ne_mem_inter_of_not_pairwiseDisjoint h
   exact ⟨i, j, h⟩
 
-lemma exists_lt_mem_inter_of_not_pairwise_disjoint [LinearOrder ι]
+theorem exists_lt_mem_inter_of_not_pairwise_disjoint [LinearOrder ι]
     {f : ι → Set α} (h : ¬ Pairwise (Disjoint on f)) :
     ∃ i j : ι, i < j ∧ ∃ x, x ∈ f i ∩ f j := by
   rw [← pairwise_univ] at h
@@ -417,7 +417,7 @@ lemma exists_lt_mem_inter_of_not_pairwise_disjoint [LinearOrder ι]
 theorem pairwise_disjoint_fiber (f : ι → α) : Pairwise (Disjoint on fun a : α => f ⁻¹' {a}) :=
   pairwise_univ.1 <| Set.pairwiseDisjoint_fiber f univ
 
-lemma subsingleton_setOf_mem_iff_pairwise_disjoint {f : ι → Set α} :
+theorem subsingleton_setOf_mem_iff_pairwise_disjoint {f : ι → Set α} :
     (∀ a, {i | a ∈ f i}.Subsingleton) ↔ Pairwise (Disjoint on f) :=
   ⟨fun h _ _ hij ↦ disjoint_left.2 fun a hi hj ↦ hij (h a hi hj),
    fun h _ _ hx _ hy ↦ by_contra fun hne ↦ disjoint_left.1 (h hne) hx hy⟩

@@ -206,8 +206,8 @@ variable [Π i, Zero (β i)] [CommMonoidWithZero γ] [Nontrivial γ] [NoZeroDivi
   [Π i, DecidableEq (β i)] {f : Π₀ i, β i} {g : Π i, β i → γ}
 
 @[simp]
-lemma prod_eq_zero_iff : f.prod g = 0 ↔ ∃ i ∈ f.support, g i (f i) = 0 := Finset.prod_eq_zero_iff
-lemma prod_ne_zero_iff : f.prod g ≠ 0 ↔ ∀ i ∈ f.support, g i (f i) ≠ 0 := Finset.prod_ne_zero_iff
+theorem prod_eq_zero_iff : f.prod g = 0 ↔ ∃ i ∈ f.support, g i (f i) = 0 := Finset.prod_eq_zero_iff
+theorem prod_ne_zero_iff : f.prod g ≠ 0 ↔ ∀ i ∈ f.support, g i (f i) ≠ 0 := Finset.prod_ne_zero_iff
 
 end CommMonoidWithZero
 
@@ -401,7 +401,7 @@ end ProdAndSum
 
 end DFinsupp
 
-/-! ### Product and sum lemmas for bundled morphisms.
+/-! ### Product and sum theorems for bundled morphisms.
 
 In this section, we provide analogues of `AddMonoidHom.map_sum`, `AddMonoidHom.coe_finset_sum`,
 and `AddMonoidHom.finset_sum_apply` for `DFinsupp.sum` and `DFinsupp.sumAddHom` instead of
@@ -434,7 +434,7 @@ theorem dfinsupp_prod_apply [Monoid R] [CommMonoid S] (f : Π₀ i, β i) (g : �
 
 end MonoidHom
 
-/-! The above lemmas, repeated for `DFinsupp.sumAddHom`. -/
+/-! The above theorems, repeated for `DFinsupp.sumAddHom`. -/
 
 
 namespace AddMonoidHom

@@ -59,7 +59,7 @@ theorem coe_sum (s : Finset ι) (f : ι → ℝ≥0) : ∑ i ∈ s, f i = ∑ i 
   map_sum toRealHom _ _
 
 @[simp, norm_cast]
-lemma coe_expect (s : Finset ι) (f : ι → ℝ≥0) : 𝔼 i ∈ s, f i = 𝔼 i ∈ s, (f i : ℝ) :=
+theorem coe_expect (s : Finset ι) (f : ι → ℝ≥0) : 𝔼 i ∈ s, f i = 𝔼 i ∈ s, (f i : ℝ) :=
   map_expect toRealHom ..
 
 theorem _root_.Real.toNNReal_sum_of_nonneg (hf : ∀ i ∈ s, 0 ≤ f i) :
@@ -99,8 +99,8 @@ section Sub
 /-!
 ### Lemmas about subtraction
 
-In this section we provide a few lemmas about subtraction that do not fit well into any other
-typeclass. For lemmas about subtraction and addition see lemmas about `OrderedSub` in the file
+In this section we provide a few theorems about subtraction that do not fit well into any other
+typeclass. For theorems about subtraction and addition see theorems about `OrderedSub` in the file
 `Mathlib.Algebra.Order.Sub.Basic`. See also `mul_tsub` and `tsub_mul`.
 -/
 

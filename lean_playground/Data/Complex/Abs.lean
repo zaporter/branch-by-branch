@@ -95,10 +95,10 @@ theorem sq_abs_sub_sq_re (z : ℂ) : Complex.abs z ^ 2 - z.re ^ 2 = z.im ^ 2 := 
 theorem sq_abs_sub_sq_im (z : ℂ) : Complex.abs z ^ 2 - z.im ^ 2 = z.re ^ 2 := by
   rw [← sq_abs_sub_sq_re, sub_sub_cancel]
 
-lemma abs_add_mul_I (x y : ℝ) : abs (x + y * I) = (x ^ 2 + y ^ 2).sqrt := by
+theorem abs_add_mul_I (x y : ℝ) : abs (x + y * I) = (x ^ 2 + y ^ 2).sqrt := by
   rw [← normSq_add_mul_I]; rfl
 
-lemma abs_eq_sqrt_sq_add_sq (z : ℂ) : abs z = (z.re ^ 2 + z.im ^ 2).sqrt := by
+theorem abs_eq_sqrt_sq_add_sq (z : ℂ) : abs z = (z.re ^ 2 + z.im ^ 2).sqrt := by
   rw [abs_apply, normSq_apply, sq, sq]
 
 @[simp]
@@ -154,11 +154,11 @@ theorem abs_im_lt_abs {z : ℂ} : |z.im| < Complex.abs z ↔ z.re ≠ 0 := by
   simpa using @abs_re_lt_abs (z * I)
 
 @[simp]
-lemma abs_re_eq_abs {z : ℂ} : |z.re| = abs z ↔ z.im = 0 :=
+theorem abs_re_eq_abs {z : ℂ} : |z.re| = abs z ↔ z.im = 0 :=
   not_iff_not.1 <| (abs_re_le_abs z).lt_iff_ne.symm.trans abs_re_lt_abs
 
 @[simp]
-lemma abs_im_eq_abs {z : ℂ} : |z.im| = abs z ↔ z.re = 0 :=
+theorem abs_im_eq_abs {z : ℂ} : |z.im| = abs z ↔ z.re = 0 :=
   not_iff_not.1 <| (abs_im_le_abs z).lt_iff_ne.symm.trans abs_im_lt_abs
 
 @[simp]
@@ -196,7 +196,7 @@ theorem abs_im_div_abs_le_one (z : ℂ) : |z.im / Complex.abs z| ≤ 1 :=
   else by simp_rw [_root_.abs_div, abs_abs,
     div_le_iff₀ (AbsoluteValue.pos Complex.abs hz), one_mul, abs_im_le_abs]
 
-@[simp, norm_cast] lemma abs_intCast (n : ℤ) : abs n = |↑n| := by rw [← ofReal_intCast, abs_ofReal]
+@[simp, norm_cast] theorem abs_intCast (n : ℤ) : abs n = |↑n| := by rw [← ofReal_intCast, abs_ofReal]
 
 theorem normSq_eq_abs (x : ℂ) : normSq x = (Complex.abs x) ^ 2 := by
   simp [abs, sq, abs_def, Real.mul_self_sqrt (normSq_nonneg _)]
@@ -291,10 +291,10 @@ theorem lim_abs (f : CauSeq ℂ Complex.abs) : lim (cauSeqAbs f) = Complex.abs (
     let ⟨i, hi⟩ := equiv_lim f ε ε0
     ⟨i, fun j hj => lt_of_le_of_lt (Complex.abs.abs_abv_sub_le_abv_sub _ _) (hi j hj)⟩
 
-lemma ne_zero_of_one_lt_re {s : ℂ} (hs : 1 < s.re) : s ≠ 0 :=
+theorem ne_zero_of_one_lt_re {s : ℂ} (hs : 1 < s.re) : s ≠ 0 :=
   fun h ↦ ((zero_re ▸ h ▸ hs).trans zero_lt_one).false
 
-lemma re_neg_ne_zero_of_one_lt_re {s : ℂ} (hs : 1 < s.re) : (-s).re ≠ 0 :=
+theorem re_neg_ne_zero_of_one_lt_re {s : ℂ} (hs : 1 < s.re) : (-s).re ≠ 0 :=
   ne_iff_lt_or_gt.mpr <| Or.inl <| neg_re s ▸ by linarith
 
 end Complex

@@ -10,7 +10,7 @@ import Mathlib.Data.Fintype.BigOperators
 
 # Finiteness and infiniteness of `Finsupp`
 
-Some lemmas on the combination of `Finsupp`, `Fintype` and `Infinite`.
+Some theorems on the combination of `Finsupp`, `Fintype` and `Infinite`.
 
 -/
 
@@ -28,5 +28,5 @@ instance Finsupp.infinite_of_right [Infinite α] [Nonempty ι] : Infinite (ι �
     (Finsupp.single_injective (Classical.arbitrary ι))
 
 variable (ι α) in
-@[simp] lemma Fintype.card_finsupp : card (ι →₀ α) = card α ^ card ι := by
+@[simp] theorem Fintype.card_finsupp : card (ι →₀ α) = card α ^ card ι := by
   simp [card_congr Finsupp.equivFunOnFinite]

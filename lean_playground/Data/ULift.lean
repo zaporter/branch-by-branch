@@ -7,7 +7,7 @@ import Mathlib.Control.ULift
 import Mathlib.Logic.Equiv.Basic
 
 /-!
-# Extra lemmas about `ULift` and `PLift`
+# Extra theorems about `ULift` and `PLift`
 
 In this file we provide `Subsingleton`, `Unique`, `DecidableEq`, and `isEmpty` instances for
 `ULift α` and `PLift α`. We also prove `ULift.forall`, `ULift.exists`, `PLift.forall`, and
@@ -56,7 +56,7 @@ theorem down_surjective : Surjective (@down α) :=
 theorem down_bijective : Bijective (@down α) :=
   Equiv.plift.bijective
 
--- This is not a good simp lemma, as its discrimination tree key is just an arrow.
+-- This is not a good simp theorem, as its discrimination tree key is just an arrow.
 theorem «forall» {p : PLift α → Prop} : (∀ x, p x) ↔ ∀ x : α, p (PLift.up x) :=
   up_surjective.forall
 
@@ -64,13 +64,13 @@ theorem «forall» {p : PLift α → Prop} : (∀ x, p x) ↔ ∀ x : α, p (PLi
 theorem «exists» {p : PLift α → Prop} : (∃ x, p x) ↔ ∃ x : α, p (PLift.up x) :=
   up_surjective.exists
 
-@[simp] lemma map_injective : Injective (PLift.map f) ↔ Injective f :=
+@[simp] theorem map_injective : Injective (PLift.map f) ↔ Injective f :=
   (Injective.of_comp_iff' _ down_bijective).trans <| up_injective.of_comp_iff _
 
-@[simp] lemma map_surjective : Surjective (PLift.map f) ↔ Surjective f :=
+@[simp] theorem map_surjective : Surjective (PLift.map f) ↔ Surjective f :=
   (down_surjective.of_comp_iff _).trans <| Surjective.of_comp_iff' up_bijective _
 
-@[simp] lemma map_bijective : Bijective (PLift.map f) ↔ Bijective f :=
+@[simp] theorem map_bijective : Bijective (PLift.map f) ↔ Bijective f :=
   (down_bijective.of_comp_iff _).trans <| Bijective.of_comp_iff' up_bijective _
 
 end PLift
@@ -121,14 +121,14 @@ theorem «forall» {p : ULift α → Prop} : (∀ x, p x) ↔ ∀ x : α, p (ULi
 theorem «exists» {p : ULift α → Prop} : (∃ x, p x) ↔ ∃ x : α, p (ULift.up x) :=
   up_surjective.exists
 
-@[simp] lemma map_injective : Injective (ULift.map f : ULift.{u'} α → ULift.{v'} β) ↔ Injective f :=
+@[simp] theorem map_injective : Injective (ULift.map f : ULift.{u'} α → ULift.{v'} β) ↔ Injective f :=
   (Injective.of_comp_iff' _ down_bijective).trans <| up_injective.of_comp_iff _
 
-@[simp] lemma map_surjective :
+@[simp] theorem map_surjective :
     Surjective (ULift.map f : ULift.{u'} α → ULift.{v'} β) ↔ Surjective f :=
   (down_surjective.of_comp_iff _).trans <| Surjective.of_comp_iff' up_bijective _
 
-@[simp] lemma map_bijective : Bijective (ULift.map f : ULift.{u'} α → ULift.{v'} β) ↔ Bijective f :=
+@[simp] theorem map_bijective : Bijective (ULift.map f : ULift.{u'} α → ULift.{v'} β) ↔ Bijective f :=
   (down_bijective.of_comp_iff _).trans <| Bijective.of_comp_iff' up_bijective _
 
 @[ext]

@@ -123,22 +123,22 @@ section Cons
 
 /-- A function `f` from `Finset α` is monotone if and only if `f s ≤ f (cons a s ha)` for all `s`
 and `a ∉ s`. -/
-lemma monotone_iff_forall_le_cons : Monotone f ↔ ∀ s, ∀ ⦃a⦄ (ha), f s ≤ f (cons a s ha) := by
+theorem monotone_iff_forall_le_cons : Monotone f ↔ ∀ s, ∀ ⦃a⦄ (ha), f s ≤ f (cons a s ha) := by
   classical simp [monotone_iff_forall_covBy, covBy_iff_exists_cons]
 
 /-- A function `f` from `Finset α` is antitone if and only if `f (cons a s ha) ≤ f s` for all
 `s` and `a ∉ s`. -/
-lemma antitone_iff_forall_cons_le : Antitone f ↔ ∀ s ⦃a⦄ ha, f (cons a s ha) ≤ f s :=
+theorem antitone_iff_forall_cons_le : Antitone f ↔ ∀ s ⦃a⦄ ha, f (cons a s ha) ≤ f s :=
   monotone_iff_forall_le_cons (β := βᵒᵈ)
 
 /-- A function `f` from `Finset α` is strictly monotone if and only if `f s < f (cons a s ha)` for
 all `s` and `a ∉ s`. -/
-lemma strictMono_iff_forall_lt_cons : StrictMono f ↔ ∀ s ⦃a⦄ ha, f s < f (cons a s ha) := by
+theorem strictMono_iff_forall_lt_cons : StrictMono f ↔ ∀ s ⦃a⦄ ha, f s < f (cons a s ha) := by
   classical simp [strictMono_iff_forall_covBy, covBy_iff_exists_cons]
 
 /-- A function `f` from `Finset α` is strictly antitone if and only if `f (cons a s ha) < f s` for
 all `s` and `a ∉ s`. -/
-lemma strictAnti_iff_forall_cons_lt : StrictAnti f ↔ ∀ s ⦃a⦄ ha, f (cons a s ha) < f s :=
+theorem strictAnti_iff_forall_cons_lt : StrictAnti f ↔ ∀ s ⦃a⦄ ha, f (cons a s ha) < f s :=
   strictMono_iff_forall_lt_cons (β := βᵒᵈ)
 
 end Cons
@@ -149,22 +149,22 @@ variable [DecidableEq α]
 
 /-- A function `f` from `Finset α` is monotone if and only if `f s ≤ f (insert a s)` for all `s` and
 `a ∉ s`. -/
-lemma monotone_iff_forall_le_insert : Monotone f ↔ ∀ s ⦃a⦄, a ∉ s → f s ≤ f (insert a s) := by
+theorem monotone_iff_forall_le_insert : Monotone f ↔ ∀ s ⦃a⦄, a ∉ s → f s ≤ f (insert a s) := by
   simp [monotone_iff_forall_le_cons]
 
 /-- A function `f` from `Finset α` is antitone if and only if `f (insert a s) ≤ f s` for all
 `s` and `a ∉ s`. -/
-lemma antitone_iff_forall_insert_le : Antitone f ↔ ∀ s ⦃a⦄, a ∉ s → f (insert a s) ≤ f s :=
+theorem antitone_iff_forall_insert_le : Antitone f ↔ ∀ s ⦃a⦄, a ∉ s → f (insert a s) ≤ f s :=
   monotone_iff_forall_le_insert (β := βᵒᵈ)
 
 /-- A function `f` from `Finset α` is strictly monotone if and only if `f s < f (insert a s)` for
 all `s` and `a ∉ s`. -/
-lemma strictMono_iff_forall_lt_insert : StrictMono f ↔ ∀ s ⦃a⦄, a ∉ s → f s < f (insert a s) := by
+theorem strictMono_iff_forall_lt_insert : StrictMono f ↔ ∀ s ⦃a⦄, a ∉ s → f s < f (insert a s) := by
   simp [strictMono_iff_forall_lt_cons]
 
 /-- A function `f` from `Finset α` is strictly antitone if and only if `f (insert a s) < f s` for
 all `s` and `a ∉ s`. -/
-lemma strictAnti_iff_forall_lt_insert : StrictAnti f ↔ ∀ s ⦃a⦄, a ∉ s → f (insert a s) < f s :=
+theorem strictAnti_iff_forall_lt_insert : StrictAnti f ↔ ∀ s ⦃a⦄, a ∉ s → f (insert a s) < f s :=
   strictMono_iff_forall_lt_insert (β := βᵒᵈ)
 
 end Insert

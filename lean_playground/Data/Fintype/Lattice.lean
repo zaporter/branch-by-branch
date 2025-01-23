@@ -46,7 +46,7 @@ theorem fold_sup_univ [SemilatticeSup α] [OrderTop α] (a : α) :
     (Finset.univ.fold (· ⊔ ·) a fun x => x) = ⊤ :=
   @fold_inf_univ αᵒᵈ _ _ _ _
 
-lemma mem_inf [DecidableEq α] {s : Finset ι} {f : ι → Finset α} {a : α} :
+theorem mem_inf [DecidableEq α] {s : Finset ι} {f : ι → Finset α} {a : α} :
     a ∈ s.inf f ↔ ∀ i ∈ s, a ∈ f i := by induction' s using Finset.cons_induction <;> simp [*]
 
 end Finset

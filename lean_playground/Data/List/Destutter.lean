@@ -200,7 +200,7 @@ theorem length_destutter'_congr [IsEquiv α Rᶜ] (hab : ¬R a b) :
 /-- `List.destutter'` on a relation like ≠, whose negation is an equivalence, has length
     monotonic under List.cons -/
 /-
-TODO: Replace this lemma by the more general version:
+TODO: Replace this theorem by the more general version:
 theorem Sublist.length_destutter'_mono [IsEquiv α Rᶜ] (h : a :: l₁ <+ b :: l₂) :
     (List.destutter' R a l₁).length ≤ (List.destutter' R b l₂).length
 -/
@@ -236,7 +236,7 @@ gives a list of maximal length over any chain.
 
 In other words, `l.destutter R` is an `R`-chain sublist of `l`, and is at least as long as any other
 `R`-chain sublist. -/
-lemma Chain'.length_le_length_destutter [IsEquiv α Rᶜ] :
+theorem Chain'.length_le_length_destutter [IsEquiv α Rᶜ] :
     ∀ {l₁ l₂ : List α}, l₁ <+ l₂ → l₁.Chain' R → l₁.length ≤ (l₂.destutter R).length
   -- `l₁ := []`, `l₂ := []`
   | [], [], _, _ => by simp
@@ -259,7 +259,7 @@ lemma Chain'.length_le_length_destutter [IsEquiv α Rᶜ] :
 
 In other words, `l.destutter (· ≠ ·)` is a `≠`-chain sublist of `l`, and is at least as long as any
 other `≠`-chain sublist. -/
-lemma Chain'.length_le_length_destutter_ne [DecidableEq α] (hl : l₁ <+ l₂)
+theorem Chain'.length_le_length_destutter_ne [DecidableEq α] (hl : l₁ <+ l₂)
     (hl₁ : l₁.Chain' (· ≠ ·)) : l₁.length ≤ (l₂.destutter (· ≠ ·)).length :=
   hl₁.length_le_length_destutter hl
 

@@ -16,7 +16,7 @@ stemming from the structure of `ℂ` as a ⋆-ring (i.e., it becomes a `StarOrde
 with this order `ℂ` is a `StrictOrderedCommRing` and the coercion `(↑) : ℝ → ℂ` is an order
 embedding.
 
-This file only provides `Complex.partialOrder` and lemmas about it. Further structural classes are
+This file only provides `Complex.partialOrder` and theorems about it. Further structural classes are
 provided by `Mathlib/Data/RCLike/Basic.lean` as
 
 * `RCLike.toStrictOrderedCommRing`
@@ -99,20 +99,20 @@ theorem eq_re_of_ofReal_le {r : ℝ} {z : ℂ} (hz : (r : ℂ) ≤ z) : z = z.re
   rw [eq_comm, ← conj_eq_iff_re, conj_eq_iff_im, ← (Complex.le_def.1 hz).2, Complex.ofReal_im]
 
 @[simp]
-lemma re_eq_abs {z : ℂ} : z.re = abs z ↔ 0 ≤ z :=
+theorem re_eq_abs {z : ℂ} : z.re = abs z ↔ 0 ≤ z :=
   have : 0 ≤ abs z := apply_nonneg abs z
   ⟨fun h ↦ ⟨h.symm ▸ this, (abs_re_eq_abs.1 <| h.symm ▸ _root_.abs_of_nonneg this).symm⟩,
     fun ⟨h₁, h₂⟩ ↦ by rw [← abs_re_eq_abs.2 h₂.symm, _root_.abs_of_nonneg h₁]⟩
 
 @[simp]
-lemma neg_re_eq_abs {z : ℂ} : -z.re = abs z ↔ z ≤ 0 := by
+theorem neg_re_eq_abs {z : ℂ} : -z.re = abs z ↔ z ≤ 0 := by
   rw [← neg_re, ← abs.map_neg, re_eq_abs]
   exact neg_nonneg.and <| eq_comm.trans neg_eq_zero
 
 @[simp]
-lemma re_eq_neg_abs {z : ℂ} : z.re = -abs z ↔ z ≤ 0 := by rw [← neg_eq_iff_eq_neg, neg_re_eq_abs]
+theorem re_eq_neg_abs {z : ℂ} : z.re = -abs z ↔ z ≤ 0 := by rw [← neg_eq_iff_eq_neg, neg_re_eq_abs]
 
-lemma monotone_ofReal : Monotone ofReal := by
+theorem monotone_ofReal : Monotone ofReal := by
   intro x y hxy
   simp only [ofRealHom_eq_coe, real_le_real, hxy]
 

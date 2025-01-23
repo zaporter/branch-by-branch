@@ -8,7 +8,7 @@ import Mathlib.Data.List.Basic
 /-!
 # insertIdx
 
-Proves various lemmas about `List.insertIdx`.
+Proves various theorems about `List.insertIdx`.
 -/
 
 assert_not_exists Set.range

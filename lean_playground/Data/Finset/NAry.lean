@@ -83,11 +83,11 @@ theorem image_subset_image₂_left (hb : b ∈ t) : s.image (fun a => f a b) ⊆
 theorem image_subset_image₂_right (ha : a ∈ s) : t.image (fun b => f a b) ⊆ image₂ f s t :=
   image_subset_iff.2 fun _ => mem_image₂_of_mem ha
 
-lemma forall_mem_image₂ {p : γ → Prop} :
+theorem forall_mem_image₂ {p : γ → Prop} :
     (∀ z ∈ image₂ f s t, p z) ↔ ∀ x ∈ s, ∀ y ∈ t, p (f x y) := by
   simp_rw [← mem_coe, coe_image₂, forall_mem_image2]
 
-lemma exists_mem_image₂ {p : γ → Prop} :
+theorem exists_mem_image₂ {p : γ → Prop} :
     (∃ z ∈ image₂ f s t, p z) ↔ ∃ x ∈ s, ∃ y ∈ t, p (f x y) := by
   simp_rw [← mem_coe, coe_image₂, exists_mem_image2]
 
@@ -243,10 +243,10 @@ theorem biUnion_image_right : (t.biUnion fun b => s.image fun a => f a b) = imag
 /-!
 ### Algebraic replacement rules
 
-A collection of lemmas to transfer associativity, commutativity, distributivity, ... of operations
+A collection of theorems to transfer associativity, commutativity, distributivity, ... of operations
 to the associativity, commutativity, distributivity, ... of `Finset.image₂` of those operations.
 
-The proof pattern is `image₂_lemma operation_lemma`. For example, `image₂_comm mul_comm` proves that
+The proof pattern is `image₂_theorem operation_theorem`. For example, `image₂_comm mul_comm` proves that
 `image₂ (*) f g = image₂ (*) g f` in a `CommSemigroup`.
 -/
 
@@ -511,16 +511,16 @@ section SemilatticeSup
 variable [SemilatticeSup δ]
 
 @[simp (default + 1)] -- otherwise `simp` doesn't use `forall_mem_image₂`
-lemma sup'_image₂_le {g : γ → δ} {a : δ} (h : (image₂ f s t).Nonempty) :
+theorem sup'_image₂_le {g : γ → δ} {a : δ} (h : (image₂ f s t).Nonempty) :
     sup' (image₂ f s t) h g ≤ a ↔ ∀ x ∈ s, ∀ y ∈ t, g (f x y) ≤ a := by
   rw [sup'_le_iff, forall_mem_image₂]
 
-lemma sup'_image₂_left (g : γ → δ) (h : (image₂ f s t).Nonempty) :
+theorem sup'_image₂_left (g : γ → δ) (h : (image₂ f s t).Nonempty) :
     sup' (image₂ f s t) h g =
       sup' s h.of_image₂_left fun x ↦ sup' t h.of_image₂_right (g <| f x ·) := by
   simp only [image₂, sup'_image, sup'_product_left]; rfl
 
-lemma sup'_image₂_right (g : γ → δ) (h : (image₂ f s t).Nonempty) :
+theorem sup'_image₂_right (g : γ → δ) (h : (image₂ f s t).Nonempty) :
     sup' (image₂ f s t) h g =
       sup' t h.of_image₂_right fun y ↦ sup' s h.of_image₂_left (g <| f · y) := by
   simp only [image₂, sup'_image, sup'_product_right]; rfl
@@ -528,16 +528,16 @@ lemma sup'_image₂_right (g : γ → δ) (h : (image₂ f s t).Nonempty) :
 variable [OrderBot δ]
 
 @[simp (default + 1)] -- otherwise `simp` doesn't use `forall_mem_image₂`
-lemma sup_image₂_le {g : γ → δ} {a : δ} :
+theorem sup_image₂_le {g : γ → δ} {a : δ} :
     sup (image₂ f s t) g ≤ a ↔ ∀ x ∈ s, ∀ y ∈ t, g (f x y) ≤ a := by
   rw [Finset.sup_le_iff, forall_mem_image₂]
 
 variable (s t)
 
-lemma sup_image₂_left (g : γ → δ) : sup (image₂ f s t) g = sup s fun x ↦ sup t (g <| f x ·) := by
+theorem sup_image₂_left (g : γ → δ) : sup (image₂ f s t) g = sup s fun x ↦ sup t (g <| f x ·) := by
   simp only [image₂, sup_image, sup_product_left]; rfl
 
-lemma sup_image₂_right (g : γ → δ) : sup (image₂ f s t) g = sup t fun y ↦ sup s (g <| f · y) := by
+theorem sup_image₂_right (g : γ → δ) : sup (image₂ f s t) g = sup t fun y ↦ sup s (g <| f · y) := by
   simp only [image₂, sup_image, sup_product_right]; rfl
 
 end SemilatticeSup
@@ -547,16 +547,16 @@ section SemilatticeInf
 variable [SemilatticeInf δ]
 
 @[simp (default + 1)] -- otherwise `simp` doesn't use `forall_mem_image₂`
-lemma le_inf'_image₂ {g : γ → δ} {a : δ} (h : (image₂ f s t).Nonempty) :
+theorem le_inf'_image₂ {g : γ → δ} {a : δ} (h : (image₂ f s t).Nonempty) :
     a ≤ inf' (image₂ f s t) h g ↔ ∀ x ∈ s, ∀ y ∈ t, a ≤ g (f x y) := by
   rw [le_inf'_iff, forall_mem_image₂]
 
-lemma inf'_image₂_left (g : γ → δ) (h : (image₂ f s t).Nonempty) :
+theorem inf'_image₂_left (g : γ → δ) (h : (image₂ f s t).Nonempty) :
     inf' (image₂ f s t) h g =
       inf' s h.of_image₂_left fun x ↦ inf' t h.of_image₂_right (g <| f x ·) :=
   sup'_image₂_left (δ := δᵒᵈ) g h
 
-lemma inf'_image₂_right (g : γ → δ) (h : (image₂ f s t).Nonempty) :
+theorem inf'_image₂_right (g : γ → δ) (h : (image₂ f s t).Nonempty) :
     inf' (image₂ f s t) h g =
       inf' t h.of_image₂_right fun y ↦ inf' s h.of_image₂_left (g <| f · y) :=
   sup'_image₂_right (δ := δᵒᵈ) g h
@@ -564,16 +564,16 @@ lemma inf'_image₂_right (g : γ → δ) (h : (image₂ f s t).Nonempty) :
 variable [OrderTop δ]
 
 @[simp (default + 1)] -- otherwise `simp` doesn't use `forall_mem_image₂`
-lemma le_inf_image₂ {g : γ → δ} {a : δ} :
+theorem le_inf_image₂ {g : γ → δ} {a : δ} :
     a ≤ inf (image₂ f s t) g ↔ ∀ x ∈ s, ∀ y ∈ t, a ≤ g (f x y) :=
   sup_image₂_le (δ := δᵒᵈ)
 
 variable (s t)
 
-lemma inf_image₂_left (g : γ → δ) : inf (image₂ f s t) g = inf s fun x ↦ inf t (g ∘ f x) :=
+theorem inf_image₂_left (g : γ → δ) : inf (image₂ f s t) g = inf s fun x ↦ inf t (g ∘ f x) :=
   sup_image₂_left (δ := δᵒᵈ) ..
 
-lemma inf_image₂_right (g : γ → δ) : inf (image₂ f s t) g = inf t fun y ↦ inf s (g <| f · y) :=
+theorem inf_image₂_right (g : γ → δ) : inf (image₂ f s t) g = inf t fun y ↦ inf s (g <| f · y) :=
   sup_image₂_right (δ := δᵒᵈ) ..
 
 end SemilatticeInf
@@ -585,7 +585,7 @@ open Finset
 namespace Fintype
 variable {ι : Type*} {α β γ : ι → Type*} [DecidableEq ι] [Fintype ι] [∀ i, DecidableEq (γ i)]
 
-lemma piFinset_image₂ (f : ∀ i, α i → β i → γ i) (s : ∀ i, Finset (α i)) (t : ∀ i, Finset (β i)) :
+theorem piFinset_image₂ (f : ∀ i, α i → β i → γ i) (s : ∀ i, Finset (α i)) (t : ∀ i, Finset (β i)) :
     piFinset (fun i ↦ image₂ (f i) (s i) (t i)) =
       image₂ (fun a b i ↦ f _ (a i) (b i)) (piFinset s) (piFinset t) := by
   ext; simp only [mem_piFinset, mem_image₂, Classical.skolem, forall_and, funext_iff]

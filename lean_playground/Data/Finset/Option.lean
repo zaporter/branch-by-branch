@@ -16,7 +16,7 @@ In this file we define
 * `Finset.eraseNone`: given `s : Finset (Option α)`, returns `t : Finset α` such that
   `x ∈ t ↔ some x ∈ s`.
 
-Then we prove some basic lemmas about these definitions.
+Then we prove some basic theorems about these definitions.
 
 ## Tags
 
@@ -63,15 +63,15 @@ theorem mem_insertNone {s : Finset α} : ∀ {o : Option α}, o ∈ insertNone s
   | none => iff_of_true (Multiset.mem_cons_self _ _) fun a h => by cases h
   | some a => Multiset.mem_cons.trans <| by simp
 
-lemma forall_mem_insertNone {s : Finset α} {p : Option α → Prop} :
+theorem forall_mem_insertNone {s : Finset α} {p : Option α → Prop} :
     (∀ a ∈ insertNone s, p a) ↔ p none ∧ ∀ a ∈ s, p a := by simp [Option.forall]
 
 theorem some_mem_insertNone {s : Finset α} {a : α} : some a ∈ insertNone s ↔ a ∈ s := by simp
 
-lemma none_mem_insertNone {s : Finset α} : none ∈ insertNone s := by simp
+theorem none_mem_insertNone {s : Finset α} : none ∈ insertNone s := by simp
 
 @[aesop safe apply (rule_sets := [finsetNonempty])]
-lemma insertNone_nonempty {s : Finset α} : insertNone s |>.Nonempty := ⟨none, none_mem_insertNone⟩
+theorem insertNone_nonempty {s : Finset α} : insertNone s |>.Nonempty := ⟨none, none_mem_insertNone⟩
 
 @[simp]
 theorem card_insertNone (s : Finset α) : s.insertNone.card = s.card + 1 := by simp [insertNone]
@@ -86,7 +86,7 @@ def eraseNone : Finset (Option α) →o Finset α :=
 theorem mem_eraseNone {s : Finset (Option α)} {x : α} : x ∈ eraseNone s ↔ some x ∈ s := by
   simp [eraseNone]
 
-lemma forall_mem_eraseNone {s : Finset (Option α)} {p : Option α → Prop} :
+theorem forall_mem_eraseNone {s : Finset (Option α)} {p : Option α → Prop} :
     (∀ a ∈ eraseNone s, p a) ↔ ∀ a : α, (a : Option α) ∈ s → p a := by simp [Option.forall]
 
 theorem eraseNone_eq_biUnion [DecidableEq α] (s : Finset (Option α)) :

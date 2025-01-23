@@ -40,8 +40,8 @@ clear what `0 * ⊤` should be. `mul` is hence left undefined. Similarly `⊤ - 
 so there is no `-` defined on `PartENat`.
 
 Before the `open scoped Classical` line, various proofs are made with decidability assumptions.
-This can cause issues -- see for example the non-simp lemma `toWithTopZero` proved by `rfl`,
-followed by `@[simp] lemma toWithTopZero'` whose proof uses `convert`.
+This can cause issues -- see for example the non-simp theorem `toWithTopZero` proved by `rfl`,
+followed by `@[simp] theorem toWithTopZero'` whose proof uses `convert`.
 
 
 ## Tags
@@ -154,11 +154,11 @@ protected theorem casesOn' {P : PartENat → Prop} :
 protected theorem casesOn {P : PartENat → Prop} : ∀ a : PartENat, P ⊤ → (∀ n : ℕ, P n) → P a := by
   exact PartENat.casesOn'
 
--- not a simp lemma as we will provide a `LinearOrderedAddCommMonoidWithTop` instance later
+-- not a simp theorem as we will provide a `LinearOrderedAddCommMonoidWithTop` instance later
 theorem top_add (x : PartENat) : ⊤ + x = ⊤ :=
   Part.ext' (iff_of_eq (false_and _)) fun h => h.left.elim
 
--- not a simp lemma as we will provide a `LinearOrderedAddCommMonoidWithTop` instance later
+-- not a simp theorem as we will provide a `LinearOrderedAddCommMonoidWithTop` instance later
 theorem add_top (x : PartENat) : x + ⊤ = ⊤ := by rw [add_comm, top_add]
 
 @[simp]
@@ -484,7 +484,7 @@ theorem lt_add_one_iff_lt {x y : PartENat} (hx : x ≠ ⊤) : x < y + 1 ↔ x �
   -- Porting note: was `apply_mod_cast Nat.lt_succ_of_le; apply_mod_cast h`
   norm_cast; apply Nat.lt_succ_of_le; norm_cast at h
 
-lemma lt_coe_succ_iff_le {x : PartENat} {n : ℕ} (hx : x ≠ ⊤) : x < n.succ ↔ x ≤ n := by
+theorem lt_coe_succ_iff_le {x : PartENat} {n : ℕ} (hx : x ≠ ⊤) : x < n.succ ↔ x ≤ n := by
   rw [Nat.succ_eq_add_one n, Nat.cast_add, Nat.cast_one, lt_add_one_iff_lt hx]
 
 theorem add_eq_top_iff {a b : PartENat} : a + b = ⊤ ↔ a = ⊤ ∨ b = ⊤ := by
@@ -554,7 +554,7 @@ theorem toWithTop_ofNat (n : ℕ) [n.AtLeastTwo] {_ : Decidable (OfNat.ofNat n :
 
 -- Porting note: statement changed. Mathlib 3 statement was
 -- ```
--- @[simp] lemma to_with_top_le {x y : part_enat} :
+-- @[simp] theorem to_with_top_le {x y : part_enat} :
 --   Π [decidable x.dom] [decidable y.dom], by exactI to_with_top x ≤ to_with_top y ↔ x ≤ y :=
 -- ```
 -- This used to be really slow to typecheck when the definition of `ENat`
@@ -603,10 +603,10 @@ instance : Coe ℕ∞ PartENat := ⟨ofENat⟩
 example (n : ℕ) : ((n : ℕ∞) : PartENat) = ↑n := rfl
 
 @[simp, norm_cast]
-lemma ofENat_top : ofENat ⊤ = ⊤ := rfl
+theorem ofENat_top : ofENat ⊤ = ⊤ := rfl
 
 @[simp, norm_cast]
-lemma ofENat_coe (n : ℕ) : ofENat n = n := rfl
+theorem ofENat_coe (n : ℕ) : ofENat n = n := rfl
 
 @[simp, norm_cast]
 theorem ofENat_zero : ofENat 0 = 0 := rfl

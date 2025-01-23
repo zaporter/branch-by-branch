@@ -10,7 +10,7 @@ import Mathlib.Algebra.Order.ZeroLEOne
 import Mathlib.Order.Hom.Basic
 
 /-!
-# Cast of natural numbers: lemmas about order
+# Cast of natural numbers: theorems about order
 
 -/
 
@@ -66,7 +66,7 @@ theorem strictMono_cast : StrictMono (Nat.cast : ℕ → α) :=
   mono_cast.strictMono_of_injective cast_injective
 
 @[gcongr]
-lemma _root_.GCongr.natCast_lt_natCast {a b : ℕ} (h : a < b) : (a : α) < b := strictMono_cast h
+theorem _root_.GCongr.natCast_lt_natCast {a b : ℕ} (h : a < b) : (a : α) < b := strictMono_cast h
 
 /-- `Nat.cast : ℕ → α` as an `OrderEmbedding` -/
 @[simps! (config := .asFn)]
@@ -94,7 +94,7 @@ theorem cast_lt_one : (n : α) < 1 ↔ n = 0 := by
 @[simp, norm_cast]
 theorem cast_le_one : (n : α) ≤ 1 ↔ n ≤ 1 := by rw [← cast_one, cast_le]
 
-@[simp] lemma cast_nonpos : (n : α) ≤ 0 ↔ n = 0 := by norm_cast; omega
+@[simp] theorem cast_nonpos : (n : α) ≤ 0 ↔ n = 0 := by norm_cast; omega
 
 section
 variable [m.AtLeastTwo]
@@ -137,7 +137,7 @@ theorem not_ofNat_lt_one : ¬(ofNat(n) : α) < 1 :=
 
 variable [m.AtLeastTwo]
 
--- TODO: These lemmas need to be `@[simp]` for confluence in the presence of `cast_lt`, `cast_le`,
+-- TODO: These theorems need to be `@[simp]` for confluence in the presence of `cast_lt`, `cast_le`,
 -- and `Nat.cast_ofNat`, but their LHSs match literally every inequality, so they're too expensive.
 -- If https://github.com/leanprover/lean4/issues/2867 is fixed in a performant way, these can be made `@[simp]`.
 

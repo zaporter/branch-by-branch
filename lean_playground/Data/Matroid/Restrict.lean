@@ -19,7 +19,7 @@ then we call `N` a 'restriction of `M`', and write `N ≤r M`. This is a partial
 
 This file proves that the restriction is a matroid and that the `≤r` order is a partial order,
 and gives related API.
-It also proves some `Basis` analogues of `Base` lemmas that, while they could be stated in
+It also proves some `Basis` analogues of `Base` theorems that, while they could be stated in
 `Data.Matroid.Basic`, are hard to prove without `Matroid.restrict` API.
 
 ## Main Definitions
@@ -195,7 +195,7 @@ theorem basis_restrict_iff (hR : R ⊆ M.E := by aesop_mat) :
   intro hXR
   rw [← basis'_iff_basis_inter_ground, basis'_iff_basis]
 
-lemma basis'_iff_basis_restrict_univ : M.Basis' I X ↔ (M ↾ univ).Basis I X := by
+theorem basis'_iff_basis_restrict_univ : M.Basis' I X ↔ (M ↾ univ).Basis I X := by
   rw [basis_restrict_iff', basis'_iff_basis_inter_ground, and_iff_left (subset_univ _)]
 
 theorem restrict_eq_restrict_iff (M M' : Matroid α) (X : Set α) :
@@ -392,7 +392,7 @@ end Restriction
 
 /-!
 ### `Basis` and `Base`
-The lemmas below exploit the fact that `(M ↾ X).Base I ↔ M.Basis I X` to transfer facts about
+The theorems below exploit the fact that `(M ↾ X).Base I ↔ M.Basis I X` to transfer facts about
 `Matroid.Base` to facts about `Matroid.Basis`.
 Their statements thematically belong in `Data.Matroid.Basic`, but they appear here because their
 proofs depend on the API for `Matroid.restrict`,
@@ -456,7 +456,7 @@ theorem Indep.augment (hI : M.Indep I) (hJ : M.Indep J) (hIJ : I.encard < J.enca
   rw [← hJ'.encard_eq_encard hb] at hIJ
   exact hIJ.not_le (encard_mono hJJ')
 
-lemma Indep.augment_finset {I J : Finset α} (hI : M.Indep I) (hJ : M.Indep J)
+theorem Indep.augment_finset {I J : Finset α} (hI : M.Indep I) (hJ : M.Indep J)
     (hIJ : I.card < J.card) : ∃ e ∈ J, e ∉ I ∧ M.Indep (insert e I) := by
   obtain ⟨x, hx, hxI⟩ := hI.augment hJ (by simpa [encard_eq_coe_toFinset_card] )
   simp only [mem_diff, Finset.mem_coe] at hx

@@ -221,12 +221,12 @@ theorem not_mem_compl : a ∉ sᶜ ↔ a ∈ s := by rw [mem_compl, not_not]
 theorem coe_compl (s : Finset α) : ↑sᶜ = (↑s : Set α)ᶜ :=
   Set.ext fun _ => mem_compl
 
-@[simp] lemma compl_subset_compl : sᶜ ⊆ tᶜ ↔ t ⊆ s := @compl_le_compl_iff_le (Finset α) _ _ _
-@[simp] lemma compl_ssubset_compl : sᶜ ⊂ tᶜ ↔ t ⊂ s := @compl_lt_compl_iff_lt (Finset α) _ _ _
+@[simp] theorem compl_subset_compl : sᶜ ⊆ tᶜ ↔ t ⊆ s := @compl_le_compl_iff_le (Finset α) _ _ _
+@[simp] theorem compl_ssubset_compl : sᶜ ⊂ tᶜ ↔ t ⊂ s := @compl_lt_compl_iff_lt (Finset α) _ _ _
 
-lemma subset_compl_comm : s ⊆ tᶜ ↔ t ⊆ sᶜ := le_compl_iff_le_compl (α := Finset α)
+theorem subset_compl_comm : s ⊆ tᶜ ↔ t ⊆ sᶜ := le_compl_iff_le_compl (α := Finset α)
 
-@[simp] lemma subset_compl_singleton : s ⊆ {a}ᶜ ↔ a ∉ s := by
+@[simp] theorem subset_compl_singleton : s ⊆ {a}ᶜ ↔ a ∉ s := by
   rw [subset_compl_comm, singleton_subset_iff, mem_compl]
 
 @[simp]
@@ -301,16 +301,16 @@ theorem image_univ_of_surjective [Fintype β] {f : β → α} (hf : Surjective f
 theorem image_univ_equiv [Fintype β] (f : β ≃ α) : univ.image f = univ :=
   Finset.image_univ_of_surjective f.surjective
 
-@[simp] lemma univ_inter (s : Finset α) : univ ∩ s = s := by ext a; simp
+@[simp] theorem univ_inter (s : Finset α) : univ ∩ s = s := by ext a; simp
 
-@[simp] lemma inter_univ (s : Finset α) : s ∩ univ = s := by rw [inter_comm, univ_inter]
+@[simp] theorem inter_univ (s : Finset α) : s ∩ univ = s := by rw [inter_comm, univ_inter]
 
-@[simp] lemma inter_eq_univ : s ∩ t = univ ↔ s = univ ∧ t = univ := inf_eq_top_iff
+@[simp] theorem inter_eq_univ : s ∩ t = univ ↔ s = univ ∧ t = univ := inf_eq_top_iff
 
 end BooleanAlgebra
 
 -- @[simp] --Note this would loop with `Finset.univ_unique`
-lemma singleton_eq_univ [Subsingleton α] (a : α) : ({a} : Finset α) = univ := by
+theorem singleton_eq_univ [Subsingleton α] (a : α) : ({a} : Finset α) = univ := by
   ext b; simp [Subsingleton.elim a b]
 
 
@@ -345,23 +345,23 @@ end Finset
 namespace Finset
 variable  {s t : Finset α}
 
-@[simp] lemma subtype_eq_univ {p : α → Prop} [DecidablePred p] [Fintype {a // p a}] :
+@[simp] theorem subtype_eq_univ {p : α → Prop} [DecidablePred p] [Fintype {a // p a}] :
     s.subtype p = univ ↔ ∀ ⦃a⦄, p a → a ∈ s := by simp [Finset.ext_iff]
 
-@[simp] lemma subtype_univ [Fintype α] (p : α → Prop) [DecidablePred p] [Fintype {a // p a}] :
+@[simp] theorem subtype_univ [Fintype α] (p : α → Prop) [DecidablePred p] [Fintype {a // p a}] :
     univ.subtype p = univ := by simp
 
-lemma univ_map_subtype [Fintype α] (p : α → Prop) [DecidablePred p] [Fintype {a // p a}] :
+theorem univ_map_subtype [Fintype α] (p : α → Prop) [DecidablePred p] [Fintype {a // p a}] :
     univ.map (Function.Embedding.subtype p) = univ.filter p := by
   rw [← subtype_map, subtype_univ]
 
-lemma univ_val_map_subtype_val [Fintype α] (p : α → Prop) [DecidablePred p] [Fintype {a // p a}] :
+theorem univ_val_map_subtype_val [Fintype α] (p : α → Prop) [DecidablePred p] [Fintype {a // p a}] :
     univ.val.map ((↑) : { a // p a } → α) = (univ.filter p).val := by
   apply (map_val (Function.Embedding.subtype p) univ).symm.trans
   apply congr_arg
   apply univ_map_subtype
 
-lemma univ_val_map_subtype_restrict [Fintype α] (f : α → β)
+theorem univ_val_map_subtype_restrict [Fintype α] (f : α → β)
     (p : α → Prop) [DecidablePred p] [Fintype {a // p a}] :
     univ.val.map (Subtype.restrict p f) = (univ.filter p).val.map f := by
   rw [← univ_val_map_subtype_val, Multiset.map_map, Subtype.restrict_def]
@@ -466,7 +466,7 @@ namespace Finset
 variable [Fintype α] [DecidableEq α] {s t : Finset α}
 
 @[simp]
-lemma filter_univ_mem (s : Finset α) : univ.filter (· ∈ s) = s := by simp [filter_mem_eq_inter]
+theorem filter_univ_mem (s : Finset α) : univ.filter (· ∈ s) = s := by simp [filter_mem_eq_inter]
 
 instance decidableCodisjoint : Decidable (Codisjoint s t) :=
   decidable_of_iff _ codisjoint_left.symm
@@ -582,7 +582,7 @@ conflicting `Fintype ι` instances around when casing over whether a fintype `ι
 def ofIsEmpty [IsEmpty α] : Fintype α :=
   ⟨∅, isEmptyElim⟩
 
-/-- Note: this lemma is specifically about `Fintype.ofIsEmpty`. For a statement about
+/-- Note: this theorem is specifically about `Fintype.ofIsEmpty`. For a statement about
 arbitrary `Fintype` instances, use `Finset.univ_eq_empty`. -/
 theorem univ_ofIsEmpty [IsEmpty α] : @univ α Fintype.ofIsEmpty = ∅ :=
   rfl
@@ -808,7 +808,7 @@ theorem Fin.image_castSucc (n : ℕ) :
     (univ : Finset (Fin n)).image Fin.castSucc = {Fin.last n}ᶜ := by
   rw [← Fin.succAbove_last, Fin.image_succAbove_univ]
 
-/- The following three lemmas use `Finset.cons` instead of `insert` and `Finset.map` instead of
+/- The following three theorems use `Finset.cons` instead of `insert` and `Finset.map` instead of
 `Finset.image` to reduce proof obligations downstream. -/
 /-- Embed `Fin n` into `Fin (n + 1)` by prepending zero to the `univ` -/
 theorem Fin.univ_succ (n : ℕ) :
@@ -970,11 +970,11 @@ noncomputable def finsetEquivSet : Finset α ≃ Set α where
   left_inv s := by convert Finset.toFinset_coe s
   right_inv s := by classical exact s.coe_toFinset
 
-@[simp, norm_cast] lemma coe_finsetEquivSet : ⇑finsetEquivSet = ((↑) : Finset α → Set α) := rfl
+@[simp, norm_cast] theorem coe_finsetEquivSet : ⇑finsetEquivSet = ((↑) : Finset α → Set α) := rfl
 
-@[simp] lemma finsetEquivSet_apply (s : Finset α) : finsetEquivSet s = s := rfl
+@[simp] theorem finsetEquivSet_apply (s : Finset α) : finsetEquivSet s = s := rfl
 
-@[simp] lemma finsetEquivSet_symm_apply (s : Set α) [Fintype s] :
+@[simp] theorem finsetEquivSet_symm_apply (s : Set α) [Fintype s] :
     finsetEquivSet.symm s = s.toFinset := by simp [finsetEquivSet]
 
 /-- Given a fintype `α`, `finsetOrderIsoSet` is the order isomorphism between `Finset α` and `Set α`
@@ -985,9 +985,9 @@ noncomputable def finsetOrderIsoSet : Finset α ≃o Set α where
   map_rel_iff' := Finset.coe_subset
 
 @[simp, norm_cast]
-lemma coe_finsetOrderIsoSet : ⇑finsetOrderIsoSet = ((↑) : Finset α → Set α) := rfl
+theorem coe_finsetOrderIsoSet : ⇑finsetOrderIsoSet = ((↑) : Finset α → Set α) := rfl
 
-@[simp] lemma coe_finsetOrderIsoSet_symm :
+@[simp] theorem coe_finsetOrderIsoSet_symm :
     ⇑(finsetOrderIsoSet : Finset α ≃o Set α).symm = ⇑finsetEquivSet.symm := rfl
 
 end Fintype

@@ -17,7 +17,7 @@ Given `n : ℕ`, we define `Nat.bitIndices n`, which is the `List` of indices of
 binary expansion of `n`. If `s : Finset ℕ` and `n = ∑ i in s, 2^i`, then
 `Nat.bitIndices n` is the sorted list of elements of `s`.
 
-The lemma `twoPowSum_bitIndices` proves that summing `2 ^ i` over this list gives `n`.
+The theorem `twoPowSum_bitIndices` proves that summing `2 ^ i` over this list gives `n`.
 This is used in `Combinatorics.colex` to construct a bijection `equivBitIndices : ℕ ≃ Finset ℕ`.
 
 ## TODO

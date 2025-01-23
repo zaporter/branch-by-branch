@@ -51,31 +51,31 @@ theorem eq_of_prefix_of_length_eq (h : l₁ <+: l₂) : l₁.length = l₂.lengt
 theorem eq_of_suffix_of_length_eq (h : l₁ <:+ l₂) : l₁.length = l₂.length → l₁ = l₂ :=
   h.eq_of_length
 
-@[gcongr] lemma IsPrefix.take (h : l₁ <+: l₂) (n : ℕ) : l₁.take n <+: l₂.take n := by
+@[gcongr] theorem IsPrefix.take (h : l₁ <+: l₂) (n : ℕ) : l₁.take n <+: l₂.take n := by
   simpa [prefix_take_iff, Nat.min_le_left] using (take_prefix n l₁).trans h
 
-@[gcongr] lemma IsPrefix.drop (h : l₁ <+: l₂) (n : ℕ) : l₁.drop n <+: l₂.drop n := by
+@[gcongr] theorem IsPrefix.drop (h : l₁ <+: l₂) (n : ℕ) : l₁.drop n <+: l₂.drop n := by
   rw [prefix_iff_eq_take.mp h, drop_take]; apply take_prefix
 
 attribute [gcongr] take_prefix_take_left
 
-lemma isPrefix_append_of_length (h : l₁.length ≤ l₂.length) : l₁ <+: l₂ ++ l₃ ↔ l₁ <+: l₂ :=
+theorem isPrefix_append_of_length (h : l₁.length ≤ l₂.length) : l₁ <+: l₂ ++ l₃ ↔ l₁ <+: l₂ :=
   ⟨fun h ↦ by rw [prefix_iff_eq_take] at *; nth_rw 1 [h, take_eq_left_iff]; tauto,
    fun h ↦ h.trans <| l₂.prefix_append l₃⟩
 
-@[simp] lemma take_isPrefix_take {m n : ℕ} : l.take m <+: l.take n ↔ m ≤ n ∨ l.length ≤ n := by
+@[simp] theorem take_isPrefix_take {m n : ℕ} : l.take m <+: l.take n ↔ m ≤ n ∨ l.length ≤ n := by
   simp [prefix_take_iff, take_prefix]; omega
 
-lemma dropSlice_sublist (n m : ℕ) (l : List α) : l.dropSlice n m <+ l :=
+theorem dropSlice_sublist (n m : ℕ) (l : List α) : l.dropSlice n m <+ l :=
   calc
     l.dropSlice n m = take n l ++ drop m (drop n l) := by rw [dropSlice_eq, drop_drop, Nat.add_comm]
   _ <+ take n l ++ drop n l := (Sublist.refl _).append (drop_sublist _ _)
   _ = _ := take_append_drop _ _
 
-lemma dropSlice_subset (n m : ℕ) (l : List α) : l.dropSlice n m ⊆ l :=
+theorem dropSlice_subset (n m : ℕ) (l : List α) : l.dropSlice n m ⊆ l :=
   (dropSlice_sublist n m l).subset
 
-lemma mem_of_mem_dropSlice {n m : ℕ} {l : List α} {a : α} (h : a ∈ l.dropSlice n m) : a ∈ l :=
+theorem mem_of_mem_dropSlice {n m : ℕ} {l : List α} {a : α} (h : a ∈ l.dropSlice n m) : a ∈ l :=
   dropSlice_subset n m l h
 
 theorem tail_subset (l : List α) : tail l ⊆ l :=
@@ -185,7 +185,7 @@ theorem tails_append :
   | [], a :: t => by simp
   | a :: s, t => by simp [tails_append s t]
 
--- the lemma names `inits_eq_tails` and `tails_eq_inits` are like `sublists_eq_sublists'`
+-- the theorem names `inits_eq_tails` and `tails_eq_inits` are like `sublists_eq_sublists'`
 theorem inits_eq_tails : ∀ l : List α, l.inits = (reverse <| map reverse <| tails <| reverse l)
   | [] => by simp
   | a :: l => by simp [inits_eq_tails l, map_inj_left, ← map_reverse]
@@ -245,13 +245,13 @@ theorem getElem_inits (l : List α) (n : Nat) (h : n < length (inits l)) :
 theorem get_inits (l : List α) (n : Fin (length (inits l))) : (inits l).get n = l.take n := by
   simp
 
-lemma map_inits {β : Type*} (g : α → β) : (l.map g).inits = l.inits.map (map g) := by
+theorem map_inits {β : Type*} (g : α → β) : (l.map g).inits = l.inits.map (map g) := by
   induction' l using reverseRecOn <;> simp [*]
 
-lemma map_tails {β : Type*} (g : α → β) : (l.map g).tails = l.tails.map (map g) := by
+theorem map_tails {β : Type*} (g : α → β) : (l.map g).tails = l.tails.map (map g) := by
   induction' l using reverseRecOn <;> simp [*]
 
-lemma take_inits {n} : (l.take n).inits = l.inits.take (n + 1) := by
+theorem take_inits {n} : (l.take n).inits = l.inits.take (n + 1) := by
   apply ext_getElem <;> (simp [take_take]; omega)
 
 end InitsTails

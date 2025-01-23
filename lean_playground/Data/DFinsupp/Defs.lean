@@ -81,7 +81,7 @@ theorem toFun_eq_coe (f : Π₀ i, β i) : f.toFun = f :=
 theorem ext {f g : Π₀ i, β i} (h : ∀ i, f i = g i) : f = g :=
   DFunLike.ext _ _ h
 
-lemma ne_iff {f g : Π₀ i, β i} : f ≠ g ↔ ∃ i, f i ≠ g i := DFunLike.ne_iff
+theorem ne_iff {f g : Π₀ i, β i} : f ≠ g ↔ ∃ i, f i ≠ g i := DFunLike.ne_iff
 
 instance : Zero (Π₀ i, β i) :=
   ⟨⟨0, Trunc.mk <| ⟨∅, fun _ => Or.inr rfl⟩⟩⟩
@@ -89,9 +89,9 @@ instance : Zero (Π₀ i, β i) :=
 instance : Inhabited (Π₀ i, β i) :=
   ⟨0⟩
 
-@[simp, norm_cast] lemma coe_mk' (f : ∀ i, β i) (s) : ⇑(⟨f, s⟩ : Π₀ i, β i) = f := rfl
+@[simp, norm_cast] theorem coe_mk' (f : ∀ i, β i) (s) : ⇑(⟨f, s⟩ : Π₀ i, β i) = f := rfl
 
-@[simp, norm_cast] lemma coe_zero : ⇑(0 : Π₀ i, β i) = 0 := rfl
+@[simp, norm_cast] theorem coe_zero : ⇑(0 : Π₀ i, β i) = 0 := rfl
 
 theorem zero_apply (i : ι) : (0 : Π₀ i, β i) i = 0 :=
   rfl
@@ -238,7 +238,7 @@ instance [∀ i, AddGroup (β i)] : Neg (Π₀ i, β i) :=
 theorem neg_apply [∀ i, AddGroup (β i)] (g : Π₀ i, β i) (i : ι) : (-g) i = -g i :=
   rfl
 
-@[simp, norm_cast] lemma coe_neg [∀ i, AddGroup (β i)] (g : Π₀ i, β i) : ⇑(-g) = -g := rfl
+@[simp, norm_cast] theorem coe_neg [∀ i, AddGroup (β i)] (g : Π₀ i, β i) : ⇑(-g) = -g := rfl
 
 instance [∀ i, AddGroup (β i)] : Sub (Π₀ i, β i) :=
   ⟨zipWith (fun _ => Sub.sub) fun _ => sub_zero 0⟩
@@ -625,7 +625,7 @@ def update : Π₀ i, β i :=
 
 variable (j : ι)
 
-@[simp, norm_cast] lemma coe_update : (f.update i b : ∀ i : ι, β i) = Function.update f i b := rfl
+@[simp, norm_cast] theorem coe_update : (f.update i b : ∀ i : ι, β i) = Function.update f i b := rfl
 
 @[simp]
 theorem update_self : f.update i (f i) = f := by

@@ -12,7 +12,7 @@ import Mathlib.Algebra.Group.Action.Defs
 
 This instance is not in `Data.ENat.Basic` to avoid dependency on `Finset`s.
 
-We also restate some lemmas about `WithTop` for `ENat` to have versions that use `Nat.cast` instead
+We also restate some theorems about `WithTop` for `ENat` to have versions that use `Nat.cast` instead
 of `WithTop.some`.
 
 ## TODO
@@ -38,34 +38,34 @@ noncomputable instance : CompleteLinearOrder (WithBot ENat) :=
 namespace ENat
 variable {ι : Sort*} {f : ι → ℕ} {s : Set ℕ}
 
-lemma iSup_coe_eq_top : ⨆ i, (f i : ℕ∞) = ⊤ ↔ ¬ BddAbove (range f) := WithTop.iSup_coe_eq_top
-lemma iSup_coe_ne_top : ⨆ i, (f i : ℕ∞) ≠ ⊤ ↔ BddAbove (range f) := iSup_coe_eq_top.not_left
-lemma iSup_coe_lt_top : ⨆ i, (f i : ℕ∞) < ⊤ ↔ BddAbove (range f) := WithTop.iSup_coe_lt_top
-lemma iInf_coe_eq_top : ⨅ i, (f i : ℕ∞) = ⊤ ↔ IsEmpty ι := WithTop.iInf_coe_eq_top
-lemma iInf_coe_ne_top : ⨅ i, (f i : ℕ∞) ≠ ⊤ ↔ Nonempty ι := by
+theorem iSup_coe_eq_top : ⨆ i, (f i : ℕ∞) = ⊤ ↔ ¬ BddAbove (range f) := WithTop.iSup_coe_eq_top
+theorem iSup_coe_ne_top : ⨆ i, (f i : ℕ∞) ≠ ⊤ ↔ BddAbove (range f) := iSup_coe_eq_top.not_left
+theorem iSup_coe_lt_top : ⨆ i, (f i : ℕ∞) < ⊤ ↔ BddAbove (range f) := WithTop.iSup_coe_lt_top
+theorem iInf_coe_eq_top : ⨅ i, (f i : ℕ∞) = ⊤ ↔ IsEmpty ι := WithTop.iInf_coe_eq_top
+theorem iInf_coe_ne_top : ⨅ i, (f i : ℕ∞) ≠ ⊤ ↔ Nonempty ι := by
   rw [Ne, iInf_coe_eq_top, not_isEmpty_iff]
-lemma iInf_coe_lt_top : ⨅ i, (f i : ℕ∞) < ⊤ ↔ Nonempty ι := WithTop.iInf_coe_lt_top
+theorem iInf_coe_lt_top : ⨅ i, (f i : ℕ∞) < ⊤ ↔ Nonempty ι := WithTop.iInf_coe_lt_top
 
-lemma coe_sSup : BddAbove s → ↑(sSup s) = ⨆ a ∈ s, (a : ℕ∞) := WithTop.coe_sSup
+theorem coe_sSup : BddAbove s → ↑(sSup s) = ⨆ a ∈ s, (a : ℕ∞) := WithTop.coe_sSup
 
-lemma coe_sInf (hs : s.Nonempty) : ↑(sInf s) = ⨅ a ∈ s, (a : ℕ∞) :=
+theorem coe_sInf (hs : s.Nonempty) : ↑(sInf s) = ⨅ a ∈ s, (a : ℕ∞) :=
   WithTop.coe_sInf hs (OrderBot.bddBelow s)
 
-lemma coe_iSup : BddAbove (range f) → ↑(⨆ i, f i) = ⨆ i, (f i : ℕ∞) := WithTop.coe_iSup _
+theorem coe_iSup : BddAbove (range f) → ↑(⨆ i, f i) = ⨆ i, (f i : ℕ∞) := WithTop.coe_iSup _
 
-@[norm_cast] lemma coe_iInf [Nonempty ι] : ↑(⨅ i, f i) = ⨅ i, (f i : ℕ∞) :=
+@[norm_cast] theorem coe_iInf [Nonempty ι] : ↑(⨅ i, f i) = ⨅ i, (f i : ℕ∞) :=
   WithTop.coe_iInf (OrderBot.bddBelow _)
 
 @[simp]
-lemma iInf_eq_top_of_isEmpty [IsEmpty ι] : ⨅ i, (f i : ℕ∞) = ⊤ :=
+theorem iInf_eq_top_of_isEmpty [IsEmpty ι] : ⨅ i, (f i : ℕ∞) = ⊤ :=
   iInf_coe_eq_top.mpr ‹_›
 
-lemma iInf_toNat : (⨅ i, (f i : ℕ∞)).toNat = ⨅ i, f i := by
+theorem iInf_toNat : (⨅ i, (f i : ℕ∞)).toNat = ⨅ i, f i := by
   cases isEmpty_or_nonempty ι
   · simp
   · norm_cast
 
-lemma iInf_eq_zero : ⨅ i, (f i : ℕ∞) = 0 ↔ ∃ i, f i = 0 := by
+theorem iInf_eq_zero : ⨅ i, (f i : ℕ∞) = 0 ↔ ∃ i, f i = 0 := by
   cases isEmpty_or_nonempty ι
   · simp
   · norm_cast
@@ -74,20 +74,20 @@ lemma iInf_eq_zero : ⨅ i, (f i : ℕ∞) = 0 ↔ ∃ i, f i = 0 := by
 
 variable {f : ι → ℕ∞} {s : Set ℕ∞}
 
-lemma sSup_eq_zero : sSup s = 0 ↔ ∀ a ∈ s, a = 0 :=
+theorem sSup_eq_zero : sSup s = 0 ↔ ∀ a ∈ s, a = 0 :=
   sSup_eq_bot
 
-lemma sInf_eq_zero : sInf s = 0 ↔ 0 ∈ s := by
+theorem sInf_eq_zero : sInf s = 0 ↔ 0 ∈ s := by
   rw [← lt_one_iff_eq_zero]
   simp only [sInf_lt_iff, lt_one_iff_eq_zero, exists_eq_right]
 
-lemma sSup_eq_zero' : sSup s = 0 ↔ s = ∅ ∨ s = {0} :=
+theorem sSup_eq_zero' : sSup s = 0 ↔ s = ∅ ∨ s = {0} :=
   sSup_eq_bot'
 
-@[simp] lemma iSup_eq_zero : iSup f = 0 ↔ ∀ i, f i = 0 := iSup_eq_bot
-@[simp] lemma iSup_zero : ⨆ _ : ι, (0 : ℕ∞) = 0 := by simp
+@[simp] theorem iSup_eq_zero : iSup f = 0 ↔ ∀ i, f i = 0 := iSup_eq_bot
+@[simp] theorem iSup_zero : ⨆ _ : ι, (0 : ℕ∞) = 0 := by simp
 
-lemma sSup_eq_top_of_infinite (h : s.Infinite) : sSup s = ⊤ := by
+theorem sSup_eq_top_of_infinite (h : s.Infinite) : sSup s = ⊤ := by
   apply (sSup_eq_top ..).mpr
   intro x hx
   cases x with
@@ -102,26 +102,26 @@ lemma sSup_eq_top_of_infinite (h : s.Infinite) : sSup s = ⊤ := by
     use y.toNat
     simp [toNat_le_of_le_coe h, LT.lt.ne_top hxt]
 
-lemma finite_of_sSup_lt_top (h : sSup s < ⊤) : s.Finite := by
+theorem finite_of_sSup_lt_top (h : sSup s < ⊤) : s.Finite := by
   contrapose! h
   simp only [top_le_iff]
   exact sSup_eq_top_of_infinite h
 
-lemma sSup_mem_of_nonempty_of_lt_top [Nonempty s] (hs' : sSup s < ⊤) : sSup s ∈ s :=
+theorem sSup_mem_of_nonempty_of_lt_top [Nonempty s] (hs' : sSup s < ⊤) : sSup s ∈ s :=
   Nonempty.csSup_mem .of_subtype (finite_of_sSup_lt_top hs')
 
-lemma exists_eq_iSup_of_lt_top [Nonempty ι] (h : ⨆ i, f i < ⊤) :
+theorem exists_eq_iSup_of_lt_top [Nonempty ι] (h : ⨆ i, f i < ⊤) :
     ∃ i, f i = ⨆ i, f i :=
   sSup_mem_of_nonempty_of_lt_top h
 
-lemma exists_eq_iSup₂_of_lt_top {ι₁ ι₂ : Type*} {f : ι₁ → ι₂ → ℕ∞} [Nonempty ι₁] [Nonempty ι₂]
+theorem exists_eq_iSup₂_of_lt_top {ι₁ ι₂ : Type*} {f : ι₁ → ι₂ → ℕ∞} [Nonempty ι₁] [Nonempty ι₂]
     (h : ⨆ i, ⨆ j, f i j < ⊤) : ∃ i j, f i j = ⨆ i, ⨆ j, f i j := by
   rw [iSup_prod'] at h ⊢
   exact Prod.exists'.mp (exists_eq_iSup_of_lt_top h)
 
 variable {ι κ : Sort*} {f g : ι → ℕ∞} {s : Set ℕ∞} {a : ℕ∞}
 
-lemma iSup_natCast : ⨆ n : ℕ, (n : ℕ∞) = ⊤ :=
+theorem iSup_natCast : ⨆ n : ℕ, (n : ℕ∞) = ⊤ :=
   (iSup_eq_top _).2 fun _b hb ↦ ENat.exists_nat_gt (lt_top_iff_ne_top.1 hb)
 
 proof_wanted mul_iSup (a : ℕ∞) (f : ι → ℕ∞) : a * ⨆ i, f i = ⨆ i, a * f i
@@ -145,50 +145,50 @@ proof_wanted iInf_mul_of_ne (_ha₀ : a ≠ 0) (_ha : a ≠ ⊤) : (⨅ i, f i) 
 proof_wanted mul_iInf [Nonempty ι] : a * ⨅ i, f i = ⨅ i, a * f i
 proof_wanted iInf_mul [Nonempty ι] : (⨅ i, f i) * a = ⨅ i, f i * a
 
-lemma add_iSup [Nonempty ι] (f : ι → ℕ∞) : a + ⨆ i, f i = ⨆ i, a + f i := by
+theorem add_iSup [Nonempty ι] (f : ι → ℕ∞) : a + ⨆ i, f i = ⨆ i, a + f i := by
   obtain rfl | ha := eq_or_ne a ⊤
   · simp
   refine le_antisymm ?_ <| iSup_le fun i ↦ add_le_add_left (le_iSup ..) _
   refine add_le_of_le_tsub_left_of_le (le_iSup_of_le (Classical.arbitrary _) le_self_add) ?_
   exact iSup_le fun i ↦ ENat.le_sub_of_add_le_left ha <| le_iSup (a + f ·) i
 
-lemma iSup_add [Nonempty ι] (f : ι → ℕ∞) : (⨆ i, f i) + a = ⨆ i, f i + a := by
+theorem iSup_add [Nonempty ι] (f : ι → ℕ∞) : (⨆ i, f i) + a = ⨆ i, f i + a := by
   simp [add_comm, add_iSup]
 
-lemma add_biSup' {p : ι → Prop} (h : ∃ i, p i) (f : ι → ℕ∞) :
+theorem add_biSup' {p : ι → Prop} (h : ∃ i, p i) (f : ι → ℕ∞) :
     a + ⨆ i, ⨆ _ : p i, f i = ⨆ i, ⨆ _ : p i, a + f i := by
   haveI : Nonempty {i // p i} := nonempty_subtype.2 h
   simp only [iSup_subtype', add_iSup]
 
-lemma biSup_add' {p : ι → Prop} (h : ∃ i, p i) (f : ι → ℕ∞) :
+theorem biSup_add' {p : ι → Prop} (h : ∃ i, p i) (f : ι → ℕ∞) :
     (⨆ i, ⨆ _ : p i, f i) + a = ⨆ i, ⨆ _ : p i, f i + a := by simp only [add_comm, add_biSup' h]
 
-lemma add_biSup {ι : Type*} {s : Set ι} (hs : s.Nonempty) (f : ι → ℕ∞) :
+theorem add_biSup {ι : Type*} {s : Set ι} (hs : s.Nonempty) (f : ι → ℕ∞) :
     a + ⨆ i ∈ s, f i = ⨆ i ∈ s, a + f i := add_biSup' hs _
 
-lemma biSup_add {ι : Type*} {s : Set ι} (hs : s.Nonempty) (f : ι → ℕ∞) :
+theorem biSup_add {ι : Type*} {s : Set ι} (hs : s.Nonempty) (f : ι → ℕ∞) :
     (⨆ i ∈ s, f i) + a = ⨆ i ∈ s, f i + a := biSup_add' hs _
 
-lemma add_sSup (hs : s.Nonempty) : a + sSup s = ⨆ b ∈ s, a + b := by
+theorem add_sSup (hs : s.Nonempty) : a + sSup s = ⨆ b ∈ s, a + b := by
   rw [sSup_eq_iSup, add_biSup hs]
 
-lemma sSup_add (hs : s.Nonempty) : sSup s + a = ⨆ b ∈ s, b + a := by
+theorem sSup_add (hs : s.Nonempty) : sSup s + a = ⨆ b ∈ s, b + a := by
   rw [sSup_eq_iSup, biSup_add hs]
 
-lemma iSup_add_iSup_le [Nonempty ι] [Nonempty κ] {g : κ → ℕ∞} (h : ∀ i j, f i + g j ≤ a) :
+theorem iSup_add_iSup_le [Nonempty ι] [Nonempty κ] {g : κ → ℕ∞} (h : ∀ i j, f i + g j ≤ a) :
     iSup f + iSup g ≤ a := by simp_rw [iSup_add, add_iSup]; exact iSup₂_le h
 
-lemma biSup_add_biSup_le' {p : ι → Prop} {q : κ → Prop} (hp : ∃ i, p i) (hq : ∃ j, q j)
+theorem biSup_add_biSup_le' {p : ι → Prop} {q : κ → Prop} (hp : ∃ i, p i) (hq : ∃ j, q j)
     {g : κ → ℕ∞} (h : ∀ i, p i → ∀ j, q j → f i + g j ≤ a) :
     (⨆ i, ⨆ _ : p i, f i) + ⨆ j, ⨆ _ : q j, g j ≤ a := by
   simp_rw [biSup_add' hp, add_biSup' hq]
   exact iSup₂_le fun i hi => iSup₂_le (h i hi)
 
-lemma biSup_add_biSup_le {ι κ : Type*} {s : Set ι} {t : Set κ} (hs : s.Nonempty) (ht : t.Nonempty)
+theorem biSup_add_biSup_le {ι κ : Type*} {s : Set ι} {t : Set κ} (hs : s.Nonempty) (ht : t.Nonempty)
     {f : ι → ℕ∞} {g : κ → ℕ∞} {a : ℕ∞} (h : ∀ i ∈ s, ∀ j ∈ t, f i + g j ≤ a) :
     (⨆ i ∈ s, f i) + ⨆ j ∈ t, g j ≤ a := biSup_add_biSup_le' hs ht h
 
-lemma iSup_add_iSup (h : ∀ i j, ∃ k, f i + g j ≤ f k + g k) : iSup f + iSup g = ⨆ i, f i + g i := by
+theorem iSup_add_iSup (h : ∀ i j, ∃ k, f i + g j ≤ f k + g k) : iSup f + iSup g = ⨆ i, f i + g i := by
   cases isEmpty_or_nonempty ι
   · simp only [iSup_of_empty, bot_eq_zero, zero_add]
   · refine le_antisymm ?_ (iSup_le fun a => add_le_add (le_iSup _ _) (le_iSup _ _))
@@ -196,7 +196,7 @@ lemma iSup_add_iSup (h : ∀ i j, ∃ k, f i + g j ≤ f k + g k) : iSup f + iSu
     rcases h i j with ⟨k, hk⟩
     exact le_iSup_of_le k hk
 
-lemma iSup_add_iSup_of_monotone {ι : Type*} [Preorder ι] [IsDirected ι (· ≤ ·)] {f g : ι → ℕ∞}
+theorem iSup_add_iSup_of_monotone {ι : Type*} [Preorder ι] [IsDirected ι (· ≤ ·)] {f g : ι → ℕ∞}
     (hf : Monotone f) (hg : Monotone g) : iSup f + iSup g = ⨆ a, f a + g a :=
   iSup_add_iSup fun i j ↦ (exists_ge_ge i j).imp fun _k ⟨hi, hj⟩ ↦ by gcongr <;> apply_rules
 
@@ -206,7 +206,7 @@ proof_wanted smul_iSup {R} [SMul R ℕ∞] [IsScalarTower R ℕ∞ ℕ∞] (f : 
 proof_wanted smul_sSup {R} [SMul R ℕ∞] [IsScalarTower R ℕ∞ ℕ∞] (s : Set ℕ∞) (c : R) :
     c • sSup s = ⨆ a ∈ s, c • a
 
-lemma sub_iSup [Nonempty ι] (ha : a ≠ ⊤) : a - ⨆ i, f i = ⨅ i, a - f i := by
+theorem sub_iSup [Nonempty ι] (ha : a ≠ ⊤) : a - ⨆ i, f i = ⨅ i, a - f i := by
   obtain ⟨i, hi⟩ | h := em (∃ i, a < f i)
   · rw [tsub_eq_zero_iff_le.2 <| le_iSup_of_le _ hi.le, (iInf_eq_bot _).2, bot_eq_zero]
     exact fun x hx ↦ ⟨i, by simpa [hi.le, tsub_eq_zero_of_le]⟩

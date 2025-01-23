@@ -35,7 +35,7 @@ namespace Finset
 
 section Sup
 
--- TODO: define with just `[Bot α]` where some lemmas hold without requiring `[OrderBot α]`
+-- TODO: define with just `[Bot α]` where some theorems hold without requiring `[OrderBot α]`
 variable [SemilatticeSup α] [OrderBot α]
 
 /-- Supremum of a finite set: `sup {a, b, c} f = f a ⊔ f b ⊔ f c` -/
@@ -160,7 +160,7 @@ section Prod
 variable {ι κ α β : Type*} [SemilatticeSup α] [SemilatticeSup β] [OrderBot α] [OrderBot β]
   {s : Finset ι} {t : Finset κ}
 
-@[simp] lemma sup_prodMap (hs : s.Nonempty) (ht : t.Nonempty) (f : ι → α) (g : κ → β) :
+@[simp] theorem sup_prodMap (hs : s.Nonempty) (ht : t.Nonempty) (f : ι → α) (g : κ → β) :
     sup (s ×ˢ t) (Prod.map f g) = (sup s f, sup t g) :=
   eq_of_forall_ge_iff fun i ↦ by
     obtain ⟨a, ha⟩ := hs
@@ -276,7 +276,7 @@ theorem sup_eq_sSup_image [CompleteLattice β] (s : Finset α) (f : α → β) :
 
 section Inf
 
--- TODO: define with just `[Top α]` where some lemmas hold without requiring `[OrderTop α]`
+-- TODO: define with just `[Top α]` where some theorems hold without requiring `[OrderTop α]`
 variable [SemilatticeInf α] [OrderTop α]
 
 /-- Infimum of a finite set: `inf {a, b, c} f = f a ⊓ f b ⊓ f c` -/
@@ -386,7 +386,7 @@ section Prod
 variable {ι κ α β : Type*} [SemilatticeInf α] [SemilatticeInf β] [OrderTop α] [OrderTop β]
  {s : Finset ι} {t : Finset κ}
 
-@[simp] lemma inf_prodMap (hs : s.Nonempty) (ht : t.Nonempty) (f : ι → α) (g : κ → β) :
+@[simp] theorem inf_prodMap (hs : s.Nonempty) (ht : t.Nonempty) (f : ι → α) (g : κ → β) :
     inf (s ×ˢ t) (Prod.map f g) = (inf s f, inf t g) :=
   sup_prodMap (α := αᵒᵈ) (β := βᵒᵈ) hs ht _ _
 
@@ -758,7 +758,7 @@ theorem isLUB_sup' {s : Finset α} (hs : s.Nonempty) : IsLUB s (sup' s hs id) :=
 theorem le_sup'_of_le {a : α} {b : β} (hb : b ∈ s) (h : a ≤ f b) : a ≤ s.sup' ⟨b, hb⟩ f :=
   h.trans <| le_sup' _ hb
 
-lemma sup'_eq_of_forall {a : α} (h : ∀ b ∈ s, f b = a) : s.sup' H f = a :=
+theorem sup'_eq_of_forall {a : α} (h : ∀ b ∈ s, f b = a) : s.sup' H f = a :=
   le_antisymm (sup'_le _ _ (fun _ hb ↦ (h _ hb).le))
     (le_sup'_of_le _ H.choose_spec (h _ H.choose_spec).ge)
 
@@ -796,7 +796,7 @@ section Prod
 variable {ι κ α β : Type*} [SemilatticeSup α] [SemilatticeSup β] {s : Finset ι} {t : Finset κ}
 
 /-- See also `Finset.sup'_prodMap`. -/
-lemma prodMk_sup'_sup' (hs : s.Nonempty) (ht : t.Nonempty) (f : ι → α) (g : κ → β) :
+theorem prodMk_sup'_sup' (hs : s.Nonempty) (ht : t.Nonempty) (f : ι → α) (g : κ → β) :
     (sup' s hs f, sup' t ht g) = sup' (s ×ˢ t) (hs.product ht) (Prod.map f g) :=
   eq_of_forall_ge_iff fun i ↦ by
     obtain ⟨a, ha⟩ := hs
@@ -806,7 +806,7 @@ lemma prodMk_sup'_sup' (hs : s.Nonempty) (ht : t.Nonempty) (f : ι → α) (g : 
 
 /-- See also `Finset.prodMk_sup'_sup'`. -/
 -- @[simp] -- TODO: Why does `Prod.map_apply` simplify the LHS?
-lemma sup'_prodMap (hst : (s ×ˢ t).Nonempty) (f : ι → α) (g : κ → β) :
+theorem sup'_prodMap (hst : (s ×ˢ t).Nonempty) (f : ι → α) (g : κ → β) :
     sup' (s ×ˢ t) hst (Prod.map f g) = (sup' s hst.fst f, sup' t hst.snd g) :=
   (prodMk_sup'_sup' _ _ _ _).symm
 
@@ -851,8 +851,8 @@ theorem sup'_image [DecidableEq β] {s : Finset γ} {f : γ → β} (hs : (s.ima
   rw [← WithBot.coe_eq_coe]; simp only [coe_sup', sup_image, WithBot.coe_sup]; rfl
 
 /-- A version of `Finset.sup'_image` with LHS and RHS reversed.
-Also, this lemma assumes that `s` is nonempty instead of assuming that its image is nonempty. -/
-lemma sup'_comp_eq_image [DecidableEq β] {s : Finset γ} {f : γ → β} (hs : s.Nonempty) (g : β → α) :
+Also, this theorem assumes that `s` is nonempty instead of assuming that its image is nonempty. -/
+theorem sup'_comp_eq_image [DecidableEq β] {s : Finset γ} {f : γ → β} (hs : s.Nonempty) (g : β → α) :
     s.sup' hs (g ∘ f) = (s.image f).sup' (hs.image f) g :=
   .symm <| sup'_image _ _
 
@@ -864,8 +864,8 @@ theorem sup'_map {s : Finset γ} {f : γ ↪ β} (g : β → α) (hs : (s.map f)
   rfl
 
 /-- A version of `Finset.sup'_map` with LHS and RHS reversed.
-Also, this lemma assumes that `s` is nonempty instead of assuming that its image is nonempty. -/
-lemma sup'_comp_eq_map {s : Finset γ} {f : γ ↪ β} (g : β → α) (hs : s.Nonempty) :
+Also, this theorem assumes that `s` is nonempty instead of assuming that its image is nonempty. -/
+theorem sup'_comp_eq_map {s : Finset γ} {f : γ ↪ β} (g : β → α) (hs : s.Nonempty) :
     s.sup' hs (g ∘ f) = (s.map f).sup' (map_nonempty.2 hs) g :=
   .symm <| sup'_map _ _
 
@@ -876,7 +876,7 @@ theorem sup'_mono {s₁ s₂ : Finset β} (h : s₁ ⊆ s₂) (h₁ : s₁.Nonem
   Finset.sup'_le h₁ _ (fun _ hb => le_sup' _ (h hb))
 
 @[gcongr]
-lemma sup'_mono_fun {hs : s.Nonempty} {f g : β → α} (h : ∀ b ∈ s, f b ≤ g b) :
+theorem sup'_mono_fun {hs : s.Nonempty} {f g : β → α} (h : ∀ b ∈ s, f b ≤ g b) :
     s.sup' hs f ≤ s.sup' hs g := sup'_le _ _ fun b hb ↦ (h b hb).trans (le_sup' _ hb)
 
 end Sup'
@@ -932,7 +932,7 @@ theorem isGLB_inf' {s : Finset α} (hs : s.Nonempty) : IsGLB s (inf' s hs id) :=
 theorem inf'_le_of_le {a : α} {b : β} (hb : b ∈ s) (h : f b ≤ a) :
     s.inf' ⟨b, hb⟩ f ≤ a := (inf'_le _ hb).trans h
 
-lemma inf'_eq_of_forall {a : α} (h : ∀ b ∈ s, f b = a) : s.inf' H f = a :=
+theorem inf'_eq_of_forall {a : α} (h : ∀ b ∈ s, f b = a) : s.inf' H f = a :=
   sup'_eq_of_forall (α := αᵒᵈ) H f h
 
 @[simp]
@@ -965,13 +965,13 @@ section Prod
 variable {ι κ α β : Type*} [SemilatticeInf α] [SemilatticeInf β] {s : Finset ι} {t : Finset κ}
 
 /-- See also `Finset.inf'_prodMap`. -/
-lemma prodMk_inf'_inf' (hs : s.Nonempty) (ht : t.Nonempty) (f : ι → α) (g : κ → β) :
+theorem prodMk_inf'_inf' (hs : s.Nonempty) (ht : t.Nonempty) (f : ι → α) (g : κ → β) :
     (inf' s hs f, inf' t ht g) = inf' (s ×ˢ t) (hs.product ht) (Prod.map f g) :=
   prodMk_sup'_sup' (α := αᵒᵈ) (β := βᵒᵈ) hs ht _ _
 
 /-- See also `Finset.prodMk_inf'_inf'`. -/
 -- @[simp] -- TODO: Why does `Prod.map_apply` simplify the LHS?
-lemma inf'_prodMap (hst : (s ×ˢ t).Nonempty) (f : ι → α) (g : κ → β) :
+theorem inf'_prodMap (hst : (s ×ˢ t).Nonempty) (f : ι → α) (g : κ → β) :
     inf' (s ×ˢ t) hst (Prod.map f g) = (inf' s hst.fst f, inf' t hst.snd g) :=
   (prodMk_inf'_inf' _ _ _ _).symm
 
@@ -1008,8 +1008,8 @@ theorem inf'_image [DecidableEq β] {s : Finset γ} {f : γ → β} (hs : (s.ima
   @sup'_image αᵒᵈ _ _ _ _ _ _ hs _
 
 /-- A version of `Finset.inf'_image` with LHS and RHS reversed.
-Also, this lemma assumes that `s` is nonempty instead of assuming that its image is nonempty. -/
-lemma inf'_comp_eq_image [DecidableEq β] {s : Finset γ} {f : γ → β} (hs : s.Nonempty) (g : β → α) :
+Also, this theorem assumes that `s` is nonempty instead of assuming that its image is nonempty. -/
+theorem inf'_comp_eq_image [DecidableEq β] {s : Finset γ} {f : γ → β} (hs : s.Nonempty) (g : β → α) :
     s.inf' hs (g ∘ f) = (s.image f).inf' (hs.image f) g :=
   sup'_comp_eq_image (α := αᵒᵈ) hs g
 
@@ -1020,8 +1020,8 @@ theorem inf'_map {s : Finset γ} {f : γ ↪ β} (g : β → α) (hs : (s.map f)
   sup'_map (α := αᵒᵈ) _ hs
 
 /-- A version of `Finset.inf'_map` with LHS and RHS reversed.
-Also, this lemma assumes that `s` is nonempty instead of assuming that its image is nonempty. -/
-lemma inf'_comp_eq_map {s : Finset γ} {f : γ ↪ β} (g : β → α) (hs : s.Nonempty) :
+Also, this theorem assumes that `s` is nonempty instead of assuming that its image is nonempty. -/
+theorem inf'_comp_eq_map {s : Finset γ} {f : γ ↪ β} (g : β → α) (hs : s.Nonempty) :
     s.inf' hs (g ∘ f) = (s.map f).inf' (map_nonempty.2 hs) g :=
   sup'_comp_eq_map (α := αᵒᵈ) g hs
 
@@ -1216,14 +1216,14 @@ namespace Finset
 variable [DecidableEq α] {s : Finset ι} {f : ι → Finset α} {a : α}
 
 set_option linter.docPrime false in
-@[simp] lemma mem_sup' (hs) : a ∈ s.sup' hs f ↔ ∃ i ∈ s, a ∈ f i := by
+@[simp] theorem mem_sup' (hs) : a ∈ s.sup' hs f ↔ ∃ i ∈ s, a ∈ f i := by
   induction' hs using Nonempty.cons_induction <;> simp [*]
 
 set_option linter.docPrime false in
-@[simp] lemma mem_inf' (hs) : a ∈ s.inf' hs f ↔ ∀ i ∈ s, a ∈ f i := by
+@[simp] theorem mem_inf' (hs) : a ∈ s.inf' hs f ↔ ∀ i ∈ s, a ∈ f i := by
   induction' hs using Nonempty.cons_induction <;> simp [*]
 
-@[simp] lemma mem_sup : a ∈ s.sup f ↔ ∃ i ∈ s, a ∈ f i := by
+@[simp] theorem mem_sup : a ∈ s.sup f ↔ ∃ i ∈ s, a ∈ f i := by
   induction' s using cons_induction <;> simp [*]
 
 theorem sup_eq_biUnion {α β} [DecidableEq β] (s : Finset α) (t : α → Finset β) :

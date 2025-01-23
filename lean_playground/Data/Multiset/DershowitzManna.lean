@@ -48,7 +48,7 @@ def IsDershowitzMannaLT (M N : Multiset α) : Prop :=
     ∧ ∀ y ∈ Y, ∃ z ∈ Z, y < z
 
 /-- `IsDershowitzMannaLT` is transitive. -/
-lemma IsDershowitzMannaLT.trans :
+theorem IsDershowitzMannaLT.trans :
     IsDershowitzMannaLT M N → IsDershowitzMannaLT N P → IsDershowitzMannaLT M P := by
   classical
   rintro ⟨X₁, Y₁, Z₁, -, rfl, rfl, hYZ₁⟩ ⟨X₂, Y₂, Z₂, hZ₂, hXZXY, rfl, hYZ₂⟩
@@ -76,12 +76,12 @@ private def OneStep (M N : Multiset α) : Prop :=
     ∧ N = X + {a}
     ∧ ∀ y ∈ Y, y < a
 
-private lemma isDershowitzMannaLT_of_oneStep : OneStep M N → IsDershowitzMannaLT M N := by
+private theorem isDershowitzMannaLT_of_oneStep : OneStep M N → IsDershowitzMannaLT M N := by
   rintro ⟨X, Y, a, M_def, N_def, ys_lt_a⟩
   use X, Y, {a}, by simp, M_def, N_def
   · simpa
 
-private lemma isDershowitzMannaLT_singleton_insert (h : OneStep N (a ::ₘ M)) :
+private theorem isDershowitzMannaLT_singleton_insert (h : OneStep N (a ::ₘ M)) :
     ∃ M', N = a ::ₘ M' ∧ OneStep M' M ∨ N = M + M' ∧ ∀ x ∈ M', x < a := by
   classical
   obtain ⟨X, Y, b, rfl, h0, h2⟩ := h
@@ -98,7 +98,7 @@ private lemma isDershowitzMannaLT_singleton_insert (h : OneStep N (a ::ₘ M)) :
     have : b ∈ a ::ₘ M := by simp [h0]
     simpa [hab.symm] using this
 
-private lemma acc_oneStep_cons_of_acc_lt (ha : Acc LT.lt a) :
+private theorem acc_oneStep_cons_of_acc_lt (ha : Acc LT.lt a) :
     ∀ {M}, Acc OneStep M → Acc OneStep (a ::ₘ M) := by
   induction' ha with a _ ha
   rintro M hM
@@ -117,7 +117,7 @@ private lemma acc_oneStep_cons_of_acc_lt (ha : Acc LT.lt a) :
 
 /-- If all elements of a multiset `M` are accessible with `<`, then the multiset `M` is
 accessible given the `OneStep` relation. -/
-private lemma acc_oneStep_of_acc_lt (hM : ∀ x ∈ M, Acc LT.lt x) : Acc OneStep M := by
+private theorem acc_oneStep_of_acc_lt (hM : ∀ x ∈ M, Acc LT.lt x) : Acc OneStep M := by
   induction M using Multiset.induction_on with
   | empty =>
     constructor
@@ -127,11 +127,11 @@ private lemma acc_oneStep_of_acc_lt (hM : ∀ x ∈ M, Acc LT.lt x) : Acc OneSte
       hM _ <| mem_cons_of_mem hx
 
 /-- Over a well-founded order, `OneStep` is well-founded. -/
-private lemma isDershowitzMannaLT_singleton_wf [WellFoundedLT α] :
+private theorem isDershowitzMannaLT_singleton_wf [WellFoundedLT α] :
     WellFounded (OneStep : Multiset α → Multiset α → Prop) :=
   ⟨fun _M ↦ acc_oneStep_of_acc_lt fun a _ ↦ WellFoundedLT.apply a⟩
 
-private lemma transGen_oneStep_of_isDershowitzMannaLT :
+private theorem transGen_oneStep_of_isDershowitzMannaLT :
     IsDershowitzMannaLT M N → TransGen OneStep M N := by
   classical
   rintro ⟨X, Y, Z, hZ, hM, hN, hYZ⟩
@@ -146,13 +146,13 @@ private lemma transGen_oneStep_of_isDershowitzMannaLT :
   · simp only [sub_filter_eq_filter_not, mem_filter, Y'] at hy
     simpa [hy.2] using hYZ y (by aesop)
 
-private lemma isDershowitzMannaLT_of_transGen_oneStep (hMN : TransGen OneStep M N) :
+private theorem isDershowitzMannaLT_of_transGen_oneStep (hMN : TransGen OneStep M N) :
     IsDershowitzMannaLT M N :=
   hMN.trans_induction_on (by rintro _ _ ⟨X, Y, a, rfl, rfl, hYa⟩; exact ⟨X, Y, {a}, by simpa⟩)
     fun  _ _ ↦ .trans
 
 /-- `TransGen OneStep` and `IsDershowitzMannaLT` are equivalent. -/
-private lemma transGen_oneStep_eq_isDershowitzMannaLT :
+private theorem transGen_oneStep_eq_isDershowitzMannaLT :
     (TransGen OneStep : Multiset α → Multiset α → Prop) = IsDershowitzMannaLT := by
   ext M N
   exact ⟨isDershowitzMannaLT_of_transGen_oneStep, transGen_oneStep_of_isDershowitzMannaLT⟩

@@ -80,7 +80,7 @@ theorem fib_two : fib 2 = 1 :=
 theorem fib_add_two {n : ℕ} : fib (n + 2) = fib n + fib (n + 1) := by
   simp [fib, Function.iterate_succ_apply']
 
-lemma fib_add_one : ∀ {n}, n ≠ 0 → fib (n + 1) = fib (n - 1) + fib n
+theorem fib_add_one : ∀ {n}, n ≠ 0 → fib (n + 1) = fib (n - 1) + fib n
   | _n + 1, _ => fib_add_two
 
 theorem fib_le_fib_succ {n : ℕ} : fib n ≤ fib (n + 1) := by cases n <;> simp [fib_add_two]
@@ -89,12 +89,12 @@ theorem fib_le_fib_succ {n : ℕ} : fib n ≤ fib (n + 1) := by cases n <;> simp
 theorem fib_mono : Monotone fib :=
   monotone_nat_of_le_succ fun _ => fib_le_fib_succ
 
-@[simp] lemma fib_eq_zero : ∀ {n}, fib n = 0 ↔ n = 0
+@[simp] theorem fib_eq_zero : ∀ {n}, fib n = 0 ↔ n = 0
 | 0 => Iff.rfl
 | 1 => Iff.rfl
 | n + 2 => by simp [fib_add_two, fib_eq_zero]
 
-@[simp] lemma fib_pos {n : ℕ} : 0 < fib n ↔ 0 < n := by simp [pos_iff_ne_zero]
+@[simp] theorem fib_pos {n : ℕ} : 0 < fib n ↔ 0 < n := by simp [pos_iff_ne_zero]
 
 theorem fib_add_two_sub_fib_add_one {n : ℕ} : fib (n + 2) - fib (n + 1) = fib n := by
   rw [fib_add_two, add_tsub_cancel_right]
@@ -110,10 +110,10 @@ theorem fib_add_two_strictMono : StrictMono fun n => fib (n + 2) := by
   rw [add_right_comm]
   exact fib_lt_fib_succ (self_le_add_left _ _)
 
-lemma fib_strictMonoOn : StrictMonoOn fib (Set.Ici 2)
+theorem fib_strictMonoOn : StrictMonoOn fib (Set.Ici 2)
   | _m + 2, _, _n + 2, _, hmn => fib_add_two_strictMono <| lt_of_add_lt_add_right hmn
 
-lemma fib_lt_fib {m : ℕ} (hm : 2 ≤ m) : ∀ {n}, fib m < fib n ↔ m < n
+theorem fib_lt_fib {m : ℕ} (hm : 2 ≤ m) : ∀ {n}, fib m < fib n ↔ m < n
   | 0 => by simp [hm]
   | 1 => by simp [hm]
   | n + 2 => fib_strictMonoOn.lt_iff_lt hm <| by simp
@@ -128,7 +128,7 @@ theorem le_fib_self {n : ℕ} (five_le_n : 5 ≤ n) : n ≤ fib n := by
       n ≤ fib n := IH
       _ < fib (n + 1) := fib_lt_fib_succ (le_trans (by decide) five_le_n)
 
-lemma le_fib_add_one : ∀ n, n ≤ fib n + 1
+theorem le_fib_add_one : ∀ n, n ≤ fib n + 1
   | 0 => zero_le_one
   | 1 => one_le_two
   | 2 => le_rfl

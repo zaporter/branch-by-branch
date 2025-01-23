@@ -61,7 +61,7 @@ protected theorem down_up (s : Set α) : SetSemiring.down (Set.up s) = s :=
 protected theorem up_down (s : SetSemiring α) : Set.up (SetSemiring.down s) = s :=
   rfl
 
--- TODO: These lemmas are not tagged `simp` because `Set.le_eq_subset` simplifies the LHS
+-- TODO: These theorems are not tagged `simp` because `Set.le_eq_subset` simplifies the LHS
 -- Porting note (https://github.com/leanprover-community/mathlib4/issues/11036): dot notation no longer works
 theorem up_le_up {s t : Set α} : Set.up s ≤ Set.up t ↔ s ⊆ t :=
   Iff.rfl
@@ -218,17 +218,17 @@ def imageHom [MulOneClass α] [MulOneClass β] (f : α →* β) : SetSemiring α
   map_add' := image_union _
   map_mul' _ _ := image_mul f
 
-lemma imageHom_def [MulOneClass α] [MulOneClass β] (f : α →* β) (s : SetSemiring α) :
+theorem imageHom_def [MulOneClass α] [MulOneClass β] (f : α →* β) (s : SetSemiring α) :
     imageHom f s = up (image f (down s)) :=
   rfl
 
 @[simp]
-lemma down_imageHom [MulOneClass α] [MulOneClass β] (f : α →* β) (s : SetSemiring α) :
+theorem down_imageHom [MulOneClass α] [MulOneClass β] (f : α →* β) (s : SetSemiring α) :
     down (imageHom f s) = f '' down s :=
   rfl
 
 @[simp]
-lemma _root_.Set.up_image [MulOneClass α] [MulOneClass β] (f : α →* β) (s : Set α) :
+theorem _root_.Set.up_image [MulOneClass α] [MulOneClass β] (f : α →* β) (s : Set α) :
     up (f '' s) = imageHom f (up s) :=
   rfl
 

@@ -91,11 +91,11 @@ def curryEquiv (p : Fin n → Type u) : (((i : Fin n) → p i) → τ) ≃ FromT
   left_inv := uncurry_curry
   right_inv := curry_uncurry
 
-lemma curry_two_eq_curry {p : Fin 2 → Type u} {τ : Type u}
+theorem curry_two_eq_curry {p : Fin 2 → Type u} {τ : Type u}
     (f : ((i : Fin 2) → p i) → τ) :
     curry f = Function.curry (f ∘ (piFinTwoEquiv p).symm) := rfl
 
-lemma uncurry_two_eq_uncurry (p : Fin 2 → Type u) (τ : Type u)
+theorem uncurry_two_eq_uncurry (p : Fin 2 → Type u) (τ : Type u)
     (f : Function.FromTypes p τ) :
     uncurry f = Function.uncurry f ∘ piFinTwoEquiv p := rfl
 
@@ -126,11 +126,11 @@ theorem uncurry_curry {n} (f : (Fin n → α) → β) :
 def curryEquiv (n : ℕ) : ((Fin n → α) → β) ≃ OfArity α β n :=
   FromTypes.curryEquiv _
 
-lemma curry_two_eq_curry {α β : Type u} (f : ((i : Fin 2) → α) → β) :
+theorem curry_two_eq_curry {α β : Type u} (f : ((i : Fin 2) → α) → β) :
     curry f = Function.curry (f ∘ (finTwoArrowEquiv α).symm) :=
   FromTypes.curry_two_eq_curry f
 
-lemma uncurry_two_eq_uncurry {α β : Type u} (f : OfArity α β 2) :
+theorem uncurry_two_eq_uncurry {α β : Type u} (f : OfArity α β 2) :
     uncurry f = Function.uncurry f ∘ (finTwoArrowEquiv α) :=
   FromTypes.uncurry_two_eq_uncurry _ _ f
 

@@ -69,7 +69,7 @@ theorem log_of_one_lt_of_le {b n : ℕ} (h : 1 < b) (hn : b ≤ n) : log b n = l
   rw [log]
   exact if_pos ⟨hn, h⟩
 
-@[simp] lemma log_zero_left : ∀ n, log 0 n = 0 := log_of_left_le_one <| Nat.zero_le _
+@[simp] theorem log_zero_left : ∀ n, log 0 n = 0 := log_of_left_le_one <| Nat.zero_le _
 
 @[simp]
 theorem log_zero_right (b : ℕ) : log b 0 = 0 :=
@@ -120,12 +120,12 @@ theorem log_lt_of_lt_pow {b x y : ℕ} (hy : y ≠ 0) : y < b ^ x → log b y < 
 theorem lt_pow_of_log_lt {b x y : ℕ} (hb : 1 < b) : log b y < x → y < b ^ x :=
   lt_imp_lt_of_le_imp_le (le_log_of_pow_le hb)
 
-lemma log_lt_self (b : ℕ) {x : ℕ} (hx : x ≠ 0) : log b x < x :=
+theorem log_lt_self (b : ℕ) {x : ℕ} (hx : x ≠ 0) : log b x < x :=
   match le_or_lt b 1 with
   | .inl h => log_of_left_le_one h x ▸ Nat.pos_iff_ne_zero.2 hx
   | .inr h => log_lt_of_lt_pow hx <| Nat.lt_pow_self h
 
-lemma log_le_self (b x : ℕ) : log b x ≤ x :=
+theorem log_le_self (b x : ℕ) : log b x ≤ x :=
   if hx : x = 0 then by simp [hx]
   else (log_lt_self b hx).le
 
@@ -217,7 +217,7 @@ theorem add_pred_div_lt {b n : ℕ} (hb : 1 < b) (hn : 2 ≤ n) : (n + b - 1) / 
     succ_pred_eq_of_pos (by omega)]
   exact Nat.add_le_mul hn hb
 
-lemma log2_eq_log_two {n : ℕ} : Nat.log2 n = Nat.log 2 n := by
+theorem log2_eq_log_two {n : ℕ} : Nat.log2 n = Nat.log 2 n := by
   rcases eq_or_ne n 0 with rfl | hn
   · rw [log2_zero, log_zero_right]
   apply eq_of_forall_le_iff
@@ -244,9 +244,9 @@ theorem clog_of_left_le_one {b : ℕ} (hb : b ≤ 1) (n : ℕ) : clog b n = 0 :=
 theorem clog_of_right_le_one {n : ℕ} (hn : n ≤ 1) (b : ℕ) : clog b n = 0 := by
   rw [clog, dif_neg fun h : 1 < b ∧ 1 < n => h.2.not_le hn]
 
-@[simp] lemma clog_zero_left (n : ℕ) : clog 0 n = 0 := clog_of_left_le_one (Nat.zero_le _) _
+@[simp] theorem clog_zero_left (n : ℕ) : clog 0 n = 0 := clog_of_left_le_one (Nat.zero_le _) _
 
-@[simp] lemma clog_zero_right (b : ℕ) : clog b 0 = 0 := clog_of_right_le_one (Nat.zero_le _) _
+@[simp] theorem clog_zero_right (b : ℕ) : clog b 0 = 0 := clog_of_right_le_one (Nat.zero_le _) _
 
 @[simp]
 theorem clog_one_left (n : ℕ) : clog 1 n = 0 :=
@@ -333,7 +333,7 @@ theorem log_le_clog (b n : ℕ) : log b n ≤ clog b n := by
 /-! ### Computating the logarithm efficiently -/
 section computation
 
-private lemma logC_aux {m b : ℕ} (hb : 1 < b) (hbm : b ≤ m) : m / (b * b) < m / b := by
+private theorem logC_aux {m b : ℕ} (hb : 1 < b) (hbm : b ≤ m) : m / (b * b) < m / b := by
   have hb' : 0 < b := zero_lt_of_lt hb
   rw [div_lt_iff_lt_mul (Nat.mul_pos hb' hb'), ← Nat.mul_assoc, ← div_lt_iff_lt_mul hb']
   exact (Nat.lt_mul_iff_one_lt_right (Nat.div_pos hbm hb')).2 hb
@@ -382,7 +382,7 @@ Adapted from https://downloads.haskell.org/~ghc/9.0.1/docs/html/libraries/ghc-bi
     have : m / (pw * pw) < m / pw := logC_aux hpw (le_of_not_lt h)
     decreasing_trivial
 
-private lemma logC_step {m pw q e : ℕ} (hpw : 1 < pw) (hqe : logC.step m pw hpw = (q, e)) :
+private theorem logC_step {m pw q e : ℕ} (hpw : 1 < pw) (hqe : logC.step m pw hpw = (q, e)) :
     pw ^ e * q ≤ m ∧ q < pw ∧ (m < pw ^ e * (q + 1)) ∧ (0 < m → 0 < q) := by
   induction pw, hpw using logC.step.induct m generalizing q e with
   | case1 pw hpw hmpw =>
@@ -403,7 +403,7 @@ private lemma logC_step {m pw q e : ℕ} (hpw : 1 < pw) (hqe : logC.step m pw hp
         fun _ => Nat.div_pos (le_of_not_lt hqpw) (by omega)⟩
       exact Nat.mul_le_mul_left _ (Nat.lt_mul_div_succ _ (zero_lt_of_lt hpw))
 
-private lemma logC_spec {b m : ℕ} (hb : 1 < b) (hm : 0 < m) :
+private theorem logC_spec {b m : ℕ} (hb : 1 < b) (hm : 0 < m) :
     b ^ logC b m ≤ m ∧ m < b ^ (logC b m + 1) := by
   rw [logC, dif_pos hb]
   split
@@ -411,10 +411,10 @@ private lemma logC_spec {b m : ℕ} (hb : 1 < b) (hm : 0 < m) :
   obtain ⟨h₁, h₂, h₃, h₄⟩ := logC_step hb heq
   exact ⟨h₁.trans' (Nat.le_mul_of_pos_right _ (h₄ hm)), h₃.trans_le (Nat.mul_le_mul_left _ h₂)⟩
 
-private lemma logC_of_left_le_one {b m : ℕ} (hb : b ≤ 1) : logC b m = 0 := by
+private theorem logC_of_left_le_one {b m : ℕ} (hb : b ≤ 1) : logC b m = 0 := by
   rw [logC, dif_neg hb.not_lt]
 
-private lemma logC_zero {b : ℕ} :
+private theorem logC_zero {b : ℕ} :
     logC b 0 = 0 := by
   rcases le_or_lt b 1 with hb | hb
   case inl => exact logC_of_left_le_one hb
@@ -427,8 +427,8 @@ private lemma logC_zero {b : ℕ} :
 
 /--
 The result of `Nat.log` agrees with the result of `Nat.logC`. The latter will be computed more
-efficiently, but the former is easier to prove things about and has more lemmas.
-This lemma is tagged @[csimp] so that the code generated for `Nat.log` uses `Nat.logC` instead.
+efficiently, but the former is easier to prove things about and has more theorems.
+This theorem is tagged @[csimp] so that the code generated for `Nat.log` uses `Nat.logC` instead.
 -/
 @[csimp] theorem log_eq_logC : log = logC := by
   ext b m

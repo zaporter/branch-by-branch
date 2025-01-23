@@ -84,7 +84,7 @@ theorem length_sigma' (l₁ : List α) (l₂ : ∀ a, List (σ a)) :
   · rfl
   · simp only [map, sigma_cons, length_append, length_map, IH, Nat.sum_cons]
 
-/-! ### Miscellaneous lemmas -/
+/-! ### Miscellaneous theorems -/
 
 @[simp 1100]
 theorem mem_map_swap (x : α) (y : β) (xs : List (α × β)) :

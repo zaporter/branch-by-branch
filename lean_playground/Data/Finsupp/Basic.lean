@@ -11,7 +11,7 @@ import Mathlib.Data.Finsupp.SMulWithZero
 import Mathlib.Data.Rat.BigOperators
 
 /-!
-# Miscellaneous definitions, lemmas, and constructions using finsupp
+# Miscellaneous definitions, theorems, and constructions using finsupp
 
 ## Main declarations
 
@@ -33,10 +33,10 @@ This file is a `noncomputable theory` and uses classical logic throughout.
 
 ## TODO
 
-* This file is currently ~1600 lines long and is quite a miscellany of definitions and lemmas,
+* This file is currently ~1600 lines long and is quite a miscellany of definitions and theorems,
   so it should be divided into smaller pieces.
 
-* Expand the list of definitions and important lemmas to the module docstring.
+* Expand the list of definitions and important theorems to the module docstring.
 
 -/
 
@@ -634,7 +634,7 @@ section Zero
 
 variable [Zero M]
 
-lemma embDomain_comapDomain {f : α ↪ β} {g : β →₀ M} (hg : ↑g.support ⊆ Set.range f) :
+theorem embDomain_comapDomain {f : α ↪ β} {g : β →₀ M} (hg : ↑g.support ⊆ Set.range f) :
     embDomain f (comapDomain f g f.injective.injOn) = g := by
   ext b
   by_cases hb : b ∈ Set.range f
@@ -1139,7 +1139,7 @@ theorem sumElim_inr {α β γ : Type*} [Zero γ] (f : α →₀ γ) (g : β →�
   rfl
 
 @[to_additive]
-lemma prod_sumElim {ι₁ ι₂ α M : Type*} [Zero α] [CommMonoid M]
+theorem prod_sumElim {ι₁ ι₂ α M : Type*} [Zero α] [CommMonoid M]
     (f₁ : ι₁ →₀ α) (f₂ : ι₂ →₀ α) (g : ι₁ ⊕ ι₂ → α → M) :
     (f₁.sumElim f₂).prod g = f₁.prod (g ∘ Sum.inl) * f₂.prod (g ∘ Sum.inr) := by
   simp [Finsupp.prod, Finset.prod_disj_sum]
@@ -1387,7 +1387,7 @@ theorem distribMulActionHom_ext {f g : (α →₀ M) →+[R] N}
     (h : ∀ (a : α) (m : M), f (single a m) = g (single a m)) : f = g :=
   DistribMulActionHom.toAddMonoidHom_injective <| addHom_ext h
 
-/-- See note [partially-applied ext lemmas]. -/
+/-- See note [partially-applied ext theorems]. -/
 @[ext]
 theorem distribMulActionHom_ext' {f g : (α →₀ M) →+[R] N}
     (h : ∀ a : α, f.comp (DistribMulActionHom.single a) = g.comp (DistribMulActionHom.single a)) :
@@ -1554,7 +1554,7 @@ This is the `Finsupp` version of `Sigma.curry`.
 -/
 def split (i : ι) : αs i →₀ M :=
   l.comapDomain (Sigma.mk i) fun _ _ _ _ hx => heq_iff_eq.1 (Sigma.mk.inj_iff.mp hx).2
-  -- Porting note: it seems like Lean 4 never generated the `Sigma.mk.inj` lemma?
+  -- Porting note: it seems like Lean 4 never generated the `Sigma.mk.inj` theorem?
 
 theorem split_apply (i : ι) (x : αs i) : split l i x = l ⟨i, x⟩ := by
   dsimp only [split]

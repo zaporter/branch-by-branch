@@ -95,7 +95,7 @@ theorem val_unit' {n : ZMod 0} : IsUnit n ↔ n.val = 1 := by
   simp only [val]
   rw [Int.isUnit_iff, Int.natAbs_eq_iff, Nat.cast_one]
 
-lemma eq_one_of_isUnit_natCast {n : ℕ} (h : IsUnit (n : ZMod 0)) : n = 1 := by
+theorem eq_one_of_isUnit_natCast {n : ℕ} (h : IsUnit (n : ZMod 0)) : n = 1 := by
   rw [← Nat.mod_zero n, ← val_natCast, val_unit'.mp h]
 
 theorem val_natCast_of_lt {n a : ℕ} (h : a < n) : (a : ZMod n).val = a := by
@@ -115,7 +115,7 @@ instance charP (n : ℕ) : CharP (ZMod n) n where
 theorem addOrderOf_one (n : ℕ) : addOrderOf (1 : ZMod n) = n :=
   CharP.eq _ (CharP.addOrderOf_one _) (ZMod.charP n)
 
-/-- This lemma works in the case in which `ZMod n` is not infinite, i.e. `n ≠ 0`.  The version
+/-- This theorem works in the case in which `ZMod n` is not infinite, i.e. `n ≠ 0`.  The version
 where `a ≠ 0` is `addOrderOf_coe'`. -/
 @[simp]
 theorem addOrderOf_coe (a : ℕ) {n : ℕ} (n0 : n ≠ 0) : addOrderOf (a : ZMod n) = n / n.gcd a := by
@@ -124,7 +124,7 @@ theorem addOrderOf_coe (a : ℕ) {n : ℕ} (n0 : n ≠ 0) : addOrderOf (a : ZMod
       Nat.pos_of_ne_zero n0, Nat.div_self]
   rw [← Nat.smul_one_eq_cast, addOrderOf_nsmul' _ a.succ_ne_zero, ZMod.addOrderOf_one]
 
-/-- This lemma works in the case in which `a ≠ 0`.  The version where
+/-- This theorem works in the case in which `a ≠ 0`.  The version where
  `ZMod n` is not infinite, i.e. `n ≠ 0`, is `addOrderOf_coe`. -/
 @[simp]
 theorem addOrderOf_coe' {a : ℕ} (n : ℕ) (a0 : a ≠ 0) : addOrderOf (a : ZMod n) = n / n.gcd a := by
@@ -238,8 +238,8 @@ theorem intCast_surjective : Function.Surjective ((↑) : ℤ → ZMod n) :=
 @[deprecated (since := "2024-04-17")]
 alias int_cast_surjective := intCast_surjective
 
-lemma «forall» {P : ZMod n → Prop} : (∀ x, P x) ↔ ∀ x : ℤ, P x := intCast_surjective.forall
-lemma «exists» {P : ZMod n → Prop} : (∃ x, P x) ↔ ∃ x : ℤ, P x := intCast_surjective.exists
+theorem «forall» {P : ZMod n → Prop} : (∀ x, P x) ↔ ∀ x : ℤ, P x := intCast_surjective.forall
+theorem «exists» {P : ZMod n → Prop} : (∃ x, P x) ↔ ∃ x : ℤ, P x := intCast_surjective.exists
 
 theorem cast_id : ∀ (n) (i : ZMod n), (ZMod.cast i : ZMod n) = i
   | 0, _ => Int.cast_id
@@ -385,7 +385,7 @@ end CharDvd
 
 section CharEq
 
-/-! Some specialised simp lemmas which apply when `R` has characteristic `n`. -/
+/-! Some specialised simp theorems which apply when `R` has characteristic `n`. -/
 
 
 variable [CharP R n]
@@ -460,7 +460,7 @@ noncomputable def ringEquivOfPrime [Fintype R] {p : ℕ} (hp : p.Prime) (hR : Fi
   ZMod.ringEquiv R hR
 
 @[simp]
-lemma ringEquivOfPrime_eq_ringEquiv [Fintype R] {p : ℕ} [CharP R p] (hp : p.Prime)
+theorem ringEquivOfPrime_eq_ringEquiv [Fintype R] {p : ℕ} [CharP R p] (hp : p.Prime)
     (hR : Fintype.card R = p) : ringEquivOfPrime R hp hR = ringEquiv R hR := rfl
 
 /-- The identity between `ZMod m` and `ZMod n` when `m = n`, as a ring isomorphism. -/
@@ -482,34 +482,34 @@ def ringEquivCongr {m n : ℕ} (h : m = n) : ZMod m ≃+* ZMod n := by
           ext
           rw [Fin.coe_cast, Fin.val_add, Fin.val_add, Fin.coe_cast, Fin.coe_cast, ← h] }
 
-@[simp] lemma ringEquivCongr_refl (a : ℕ) : ringEquivCongr (rfl : a = a) = .refl _ := by
+@[simp] theorem ringEquivCongr_refl (a : ℕ) : ringEquivCongr (rfl : a = a) = .refl _ := by
   cases a <;> rfl
 
-lemma ringEquivCongr_refl_apply {a : ℕ} (x : ZMod a) : ringEquivCongr rfl x = x := by
+theorem ringEquivCongr_refl_apply {a : ℕ} (x : ZMod a) : ringEquivCongr rfl x = x := by
   rw [ringEquivCongr_refl]
   rfl
 
-lemma ringEquivCongr_symm {a b : ℕ} (hab : a = b) :
+theorem ringEquivCongr_symm {a b : ℕ} (hab : a = b) :
     (ringEquivCongr hab).symm = ringEquivCongr hab.symm := by
   subst hab
   cases a <;> rfl
 
-lemma ringEquivCongr_trans {a b c : ℕ} (hab : a = b) (hbc : b = c) :
+theorem ringEquivCongr_trans {a b c : ℕ} (hab : a = b) (hbc : b = c) :
     (ringEquivCongr hab).trans (ringEquivCongr hbc) = ringEquivCongr (hab.trans hbc) := by
   subst hab hbc
   cases a <;> rfl
 
-lemma ringEquivCongr_ringEquivCongr_apply {a b c : ℕ} (hab : a = b) (hbc : b = c) (x : ZMod a) :
+theorem ringEquivCongr_ringEquivCongr_apply {a b c : ℕ} (hab : a = b) (hbc : b = c) (x : ZMod a) :
     ringEquivCongr hbc (ringEquivCongr hab x) = ringEquivCongr (hab.trans hbc) x := by
   rw [← ringEquivCongr_trans hab hbc]
   rfl
 
-lemma ringEquivCongr_val {a b : ℕ} (h : a = b) (x : ZMod a) :
+theorem ringEquivCongr_val {a b : ℕ} (h : a = b) (x : ZMod a) :
     ZMod.val ((ZMod.ringEquivCongr h) x) = ZMod.val x := by
   subst h
   cases a <;> rfl
 
-lemma ringEquivCongr_intCast {a b : ℕ} (h : a = b) (z : ℤ) :
+theorem ringEquivCongr_intCast {a b : ℕ} (h : a = b) (z : ℤ) :
     ZMod.ringEquivCongr h z = z := by
   subst h
   cases a <;> rfl
@@ -588,16 +588,16 @@ theorem coe_intCast (a : ℤ) : cast (a : ZMod n) = a % n := by
 @[deprecated (since := "2024-04-17")]
 alias coe_int_cast := coe_intCast
 
-lemma intCast_cast_add (x y : ZMod n) : (cast (x + y) : ℤ) = (cast x + cast y) % n := by
+theorem intCast_cast_add (x y : ZMod n) : (cast (x + y) : ℤ) = (cast x + cast y) % n := by
   rw [← ZMod.coe_intCast, Int.cast_add, ZMod.intCast_zmod_cast, ZMod.intCast_zmod_cast]
 
-lemma intCast_cast_mul (x y : ZMod n) : (cast (x * y) : ℤ) = cast x * cast y % n := by
+theorem intCast_cast_mul (x y : ZMod n) : (cast (x * y) : ℤ) = cast x * cast y % n := by
   rw [← ZMod.coe_intCast, Int.cast_mul, ZMod.intCast_zmod_cast, ZMod.intCast_zmod_cast]
 
-lemma intCast_cast_sub (x y : ZMod n) : (cast (x - y) : ℤ) = (cast x - cast y) % n := by
+theorem intCast_cast_sub (x y : ZMod n) : (cast (x - y) : ℤ) = (cast x - cast y) % n := by
   rw [← ZMod.coe_intCast, Int.cast_sub, ZMod.intCast_zmod_cast, ZMod.intCast_zmod_cast]
 
-lemma intCast_cast_neg (x : ZMod n) : (cast (-x) : ℤ) = -cast x % n := by
+theorem intCast_cast_neg (x : ZMod n) : (cast (-x) : ℤ) = -cast x % n := by
   rw [← ZMod.coe_intCast, Int.cast_neg, ZMod.intCast_zmod_cast]
 
 @[simp]
@@ -712,7 +712,7 @@ theorem val_one (n : ℕ) [Fact (1 < n)] : (1 : ZMod n).val = 1 := by
   rw [val_one_eq_one_mod]
   exact Nat.mod_eq_of_lt Fact.out
 
-lemma val_one'' : ∀ {n}, n ≠ 1 → (1 : ZMod n).val = 1
+theorem val_one'' : ∀ {n}, n ≠ 1 → (1 : ZMod n).val = 1
   | 0, _ => rfl
   | 1, hn => by cases hn rfl
   | n + 2, _ =>
@@ -812,7 +812,7 @@ theorem mul_inv_eq_gcd {n : ℕ} (a : ZMod n) : a * a⁻¹ = Nat.gcd a.val n := 
         rfl
       _ = Nat.gcd a.val n.succ := by rw [← Nat.gcd_eq_gcd_ab a.val n.succ]; rfl
 
-@[simp] protected lemma inv_one (n : ℕ) : (1⁻¹ : ZMod n) = 1 := by
+@[simp] protected theorem inv_one (n : ℕ) : (1⁻¹ : ZMod n) = 1 := by
   obtain rfl | hn := eq_or_ne n 1
   · exact Subsingleton.elim _ _
   · simpa [ZMod.val_one'' hn] using mul_inv_eq_gcd (1 : ZMod n)
@@ -849,13 +849,13 @@ theorem coe_mul_inv_eq_one {n : ℕ} (x : ℕ) (h : Nat.Coprime x n) :
   rw [Nat.Coprime, Nat.gcd_comm, Nat.gcd_rec] at h
   rw [mul_inv_eq_gcd, val_natCast, h, Nat.cast_one]
 
-lemma mul_val_inv (hmn : m.Coprime n) : (m * (m⁻¹ : ZMod n).val : ZMod n) = 1 := by
+theorem mul_val_inv (hmn : m.Coprime n) : (m * (m⁻¹ : ZMod n).val : ZMod n) = 1 := by
   obtain rfl | hn := eq_or_ne n 0
   · simp [m.coprime_zero_right.1 hmn]
   haveI : NeZero n := ⟨hn⟩
   rw [ZMod.natCast_zmod_val, ZMod.coe_mul_inv_eq_one _ hmn]
 
-lemma val_inv_mul (hmn : m.Coprime n) : ((m⁻¹ : ZMod n).val * m : ZMod n) = 1 := by
+theorem val_inv_mul (hmn : m.Coprime n) : ((m⁻¹ : ZMod n).val * m : ZMod n) = 1 := by
   rw [mul_comm, mul_val_inv hmn]
 
 /-- `unitOfCoprime` makes an element of `(ZMod n)ˣ` given
@@ -878,17 +878,17 @@ theorem val_coe_unit_coprime {n : ℕ} (u : (ZMod n)ˣ) : Nat.Coprime (u : ZMod 
   rw [← natCast_zmod_val ((u * u⁻¹ : Units (ZMod (n + 1))) : ZMod (n + 1))]
   rw [Units.val_mul, val_mul, natCast_mod]
 
-lemma isUnit_iff_coprime (m n : ℕ) : IsUnit (m : ZMod n) ↔ m.Coprime n := by
+theorem isUnit_iff_coprime (m n : ℕ) : IsUnit (m : ZMod n) ↔ m.Coprime n := by
   refine ⟨fun H ↦ ?_, fun H ↦ (unitOfCoprime m H).isUnit⟩
   have H' := val_coe_unit_coprime H.unit
   rw [IsUnit.unit_spec, val_natCast m, Nat.coprime_iff_gcd_eq_one] at H'
   rw [Nat.coprime_iff_gcd_eq_one, Nat.gcd_comm, ← H']
   exact Nat.gcd_rec n m
 
-lemma isUnit_prime_iff_not_dvd {n p : ℕ} (hp : p.Prime) : IsUnit (p : ZMod n) ↔ ¬p ∣ n := by
+theorem isUnit_prime_iff_not_dvd {n p : ℕ} (hp : p.Prime) : IsUnit (p : ZMod n) ↔ ¬p ∣ n := by
   rw [isUnit_iff_coprime, Nat.Prime.coprime_iff_not_dvd hp]
 
-lemma isUnit_prime_of_not_dvd {n p : ℕ} (hp : p.Prime) (h : ¬ p ∣ n) : IsUnit (p : ZMod n) :=
+theorem isUnit_prime_of_not_dvd {n p : ℕ} (hp : p.Prime) (h : ¬ p ∣ n) : IsUnit (p : ZMod n) :=
   (isUnit_prime_iff_not_dvd hp).mpr h
 
 @[simp]
@@ -910,11 +910,11 @@ theorem inv_mul_of_unit {n : ℕ} (a : ZMod n) (h : IsUnit a) : a⁻¹ * a = 1 :
   rw [mul_comm, mul_inv_of_unit a h]
 
 -- TODO: If we changed `⁻¹` so that `ZMod n` is always a `DivisionMonoid`,
--- then we could use the general lemma `inv_eq_of_mul_eq_one`
+-- then we could use the general theorem `inv_eq_of_mul_eq_one`
 protected theorem inv_eq_of_mul_eq_one (n : ℕ) (a b : ZMod n) (h : a * b = 1) : a⁻¹ = b :=
   left_inv_eq_right_inv (inv_mul_of_unit a ⟨⟨a, b, h, mul_comm a b ▸ h⟩, rfl⟩) h
 
-lemma inv_mul_eq_one_of_isUnit {n : ℕ} {a : ZMod n} (ha : IsUnit a) (b : ZMod n) :
+theorem inv_mul_eq_one_of_isUnit {n : ℕ} {a : ZMod n} (ha : IsUnit a) (b : ZMod n) :
     a⁻¹ * b = 1 ↔ a = b := by
   -- ideally, this would be `ha.inv_mul_eq_one`, but `ZMod n` is not a `DivisionMonoid`...
   -- (see the "TODO" above)
@@ -980,7 +980,7 @@ def chineseRemainder {m n : ℕ} (h : m.Coprime n) : ZMod (m * n) ≃+* ZMod m �
     left_inv := inv.1
     right_inv := inv.2 }
 
-lemma subsingleton_iff {n : ℕ} : Subsingleton (ZMod n) ↔ n = 1 := by
+theorem subsingleton_iff {n : ℕ} : Subsingleton (ZMod n) ↔ n = 1 := by
   constructor
   · obtain (_ | _ | n) := n
     · simpa [ZMod] using not_subsingleton _
@@ -989,7 +989,7 @@ lemma subsingleton_iff {n : ℕ} : Subsingleton (ZMod n) ↔ n = 1 := by
   · rintro rfl
     infer_instance
 
-lemma nontrivial_iff {n : ℕ} : Nontrivial (ZMod n) ↔ n ≠ 1 := by
+theorem nontrivial_iff {n : ℕ} : Nontrivial (ZMod n) ↔ n ≠ 1 := by
   rw [← not_subsingleton_iff_nontrivial, subsingleton_iff]
 
 -- todo: this can be made a `Unique` instance.
@@ -1384,11 +1384,11 @@ theorem ringHom_surjective [Ring R] (f : R →+* ZMod n) : Function.Surjective f
   (ringHom_rightInverse f).surjective
 
 @[simp]
-lemma castHom_self : ZMod.castHom dvd_rfl (ZMod n) = RingHom.id (ZMod n) :=
+theorem castHom_self : ZMod.castHom dvd_rfl (ZMod n) = RingHom.id (ZMod n) :=
   Subsingleton.elim _ _
 
 @[simp]
-lemma castHom_comp {m d : ℕ} (hm : n ∣ m) (hd : m ∣ d) :
+theorem castHom_comp {m d : ℕ} (hm : n ∣ m) (hd : m ∣ d) :
     (castHom hm (ZMod n)).comp (castHom hd (ZMod m)) = castHom (dvd_trans hm hd) (ZMod n) :=
   RingHom.ext_zmod _ _
 
@@ -1426,7 +1426,7 @@ theorem lift_comp_coe : ZMod.lift n f ∘ ((↑) : ℤ → _) = f :=
 theorem lift_comp_castAddHom : (ZMod.lift n f).comp (Int.castAddHom (ZMod n)) = f :=
   AddMonoidHom.ext <| lift_castAddHom _ _
 
-lemma lift_injective {f : {f : ℤ →+ A // f n = 0}} :
+theorem lift_injective {f : {f : ℤ →+ A // f n = 0}} :
     Injective (lift n f) ↔ ∀ m, f.1 m = 0 → (m : ZMod n) = 0 := by
   simp only [← AddMonoidHom.ker_eq_bot_iff, eq_bot_iff, SetLike.le_def,
     ZMod.intCast_surjective.forall, ZMod.lift_coe, AddMonoidHom.mem_ker, AddSubgroup.mem_bot]
@@ -1442,7 +1442,7 @@ For `G` a group and `n` a natural number, `G` having torsion dividing `n`
 (`∀ x : G, n • x = 0`) can be derived from `Module R G` where `R` has characteristic dividing `n`.
 
 It is however painful to have the API for such groups `G` stated in this generality, as `R` does not
-appear anywhere in the lemmas' return type. Instead of writing the API in terms of a general `R`, we
+appear anywhere in the theorems' return type. Instead of writing the API in terms of a general `R`, we
 therefore specialise to the canonical ring of order `n`, namely `ZMod n`.
 
 This spelling `Module (ZMod n) G` has the extra advantage of providing the canonical action by
@@ -1456,18 +1456,18 @@ variable {n : ℕ} {S G : Type*} [AddCommGroup G] [SetLike S G] [AddSubgroupClas
 section general
 variable [Module (ZMod n) G] {x : G}
 
-lemma zmod_smul_mem (hx : x ∈ K) : ∀ a : ZMod n, a • x ∈ K := by
+theorem zmod_smul_mem (hx : x ∈ K) : ∀ a : ZMod n, a • x ∈ K := by
   simpa [ZMod.forall, Int.cast_smul_eq_zsmul] using zsmul_mem hx
 
 /-- This cannot be made an instance because of the `[Module (ZMod n) G]` argument and the fact that
 `n` only appears in the second argument of `SMulMemClass`, which is an `OutParam`. -/
-lemma smulMemClass : SMulMemClass S (ZMod n) G where smul_mem _ _ {_x} hx := zmod_smul_mem hx _
+theorem smulMemClass : SMulMemClass S (ZMod n) G where smul_mem _ _ {_x} hx := zmod_smul_mem hx _
 
 namespace AddSubgroupClass
 
 instance instZModSMul : SMul (ZMod n) K where smul a x := ⟨a • x, zmod_smul_mem x.2 _⟩
 
-@[simp, norm_cast] lemma coe_zmod_smul (a : ZMod n) (x : K) : ↑(a • x) = (a • x : G) := rfl
+@[simp, norm_cast] theorem coe_zmod_smul (a : ZMod n) (x : K) : ↑(a • x) = (a • x : G) := rfl
 
 instance instZModModule : Module (ZMod n) K :=
   Subtype.coe_injective.module _ (AddSubmonoidClass.subtype K) coe_zmod_smul
@@ -1476,22 +1476,22 @@ end AddSubgroupClass
 
 variable (n)
 
-lemma ZModModule.char_nsmul_eq_zero (x : G) : n • x = 0 := by
+theorem ZModModule.char_nsmul_eq_zero (x : G) : n • x = 0 := by
   simp [← Nat.cast_smul_eq_nsmul (ZMod n)]
 
 variable (G) in
-lemma ZModModule.char_ne_one [Nontrivial G] : n ≠ 1 := by
+theorem ZModModule.char_ne_one [Nontrivial G] : n ≠ 1 := by
   rintro rfl
   obtain ⟨x, hx⟩ := exists_ne (0 : G)
   exact hx <| by simpa using char_nsmul_eq_zero 1 x
 
 variable (G) in
-lemma ZModModule.two_le_char [NeZero n] [Nontrivial G] : 2 ≤ n := by
+theorem ZModModule.two_le_char [NeZero n] [Nontrivial G] : 2 ≤ n := by
   have := NeZero.ne n
   have := char_ne_one n G
   omega
 
-lemma ZModModule.periodicPts_add_left [NeZero n] (x : G) : periodicPts (x + ·) = .univ :=
+theorem ZModModule.periodicPts_add_left [NeZero n] (x : G) : periodicPts (x + ·) = .univ :=
   Set.eq_univ_of_forall fun y ↦ ⟨n, NeZero.pos n, by
     simpa [char_nsmul_eq_zero, IsPeriodicPt] using isFixedPt_id _⟩
 
@@ -1500,14 +1500,14 @@ end general
 section two
 variable [Module (ZMod 2) G]
 
-lemma ZModModule.add_self (x : G) : x + x = 0 := by
+theorem ZModModule.add_self (x : G) : x + x = 0 := by
   simpa [two_nsmul] using char_nsmul_eq_zero 2 x
 
-lemma ZModModule.neg_eq_self (x : G) : -x = x := by simp [add_self, eq_comm, ← sub_eq_zero]
+theorem ZModModule.neg_eq_self (x : G) : -x = x := by simp [add_self, eq_comm, ← sub_eq_zero]
 
-lemma ZModModule.sub_eq_add (x y : G) : x - y = x + y := by simp [neg_eq_self, sub_eq_add_neg]
+theorem ZModModule.sub_eq_add (x y : G) : x - y = x + y := by simp [neg_eq_self, sub_eq_add_neg]
 
-lemma ZModModule.add_add_add_cancel (x y z : G) : (x + y) + (y + z) = x + z := by
+theorem ZModModule.add_add_add_cancel (x y z : G) : (x + y) + (y + z) = x + z := by
   simpa [sub_eq_add] using sub_add_sub_cancel x y z
 
 end two
@@ -1517,13 +1517,13 @@ section AddGroup
 variable {α : Type*} [AddGroup α] {n : ℕ}
 
 @[simp]
-lemma nsmul_zmod_val_inv_nsmul (hn : (Nat.card α).Coprime n) (a : α) :
+theorem nsmul_zmod_val_inv_nsmul (hn : (Nat.card α).Coprime n) (a : α) :
     n • (n⁻¹ : ZMod (Nat.card α)).val • a = a := by
   rw [← mul_nsmul', ← mod_natCard_nsmul, ← ZMod.val_natCast, Nat.cast_mul,
     ZMod.mul_val_inv hn.symm, ZMod.val_one_eq_one_mod, mod_natCard_nsmul, one_nsmul]
 
 @[simp]
-lemma zmod_val_inv_nsmul_nsmul (hn : (Nat.card α).Coprime n) (a : α) :
+theorem zmod_val_inv_nsmul_nsmul (hn : (Nat.card α).Coprime n) (a : α) :
     (n⁻¹ : ZMod (Nat.card α)).val • n • a = a := by
   rw [nsmul_left_comm, nsmul_zmod_val_inv_nsmul hn]
 
@@ -1534,13 +1534,13 @@ variable {α : Type*} [Group α] {n : ℕ}
 
 -- TODO: Without the `existing`, `to_additive` chokes on `Inv (ZMod n)`.
 @[to_additive (attr := simp) existing nsmul_zmod_val_inv_nsmul]
-lemma pow_zmod_val_inv_pow (hn : (Nat.card α).Coprime n) (a : α) :
+theorem pow_zmod_val_inv_pow (hn : (Nat.card α).Coprime n) (a : α) :
     (a ^ (n⁻¹ : ZMod (Nat.card α)).val) ^ n = a := by
   rw [← pow_mul', ← pow_mod_natCard, ← ZMod.val_natCast, Nat.cast_mul, ZMod.mul_val_inv hn.symm,
     ZMod.val_one_eq_one_mod, pow_mod_natCard, pow_one]
 
 @[to_additive (attr := simp) existing zmod_val_inv_nsmul_nsmul]
-lemma pow_pow_zmod_val_inv (hn : (Nat.card α).Coprime n) (a : α) :
+theorem pow_pow_zmod_val_inv (hn : (Nat.card α).Coprime n) (a : α) :
     (a ^ n) ^ (n⁻¹ : ZMod (Nat.card α)).val = a := by rw [pow_right_comm, pow_zmod_val_inv_pow hn]
 
 end Group
@@ -1549,7 +1549,7 @@ open ZMod
 
 /-- The range of `(m * · + k)` on natural numbers is the set of elements `≥ k` in the
 residue class of `k` mod `m`. -/
-lemma Nat.range_mul_add (m k : ℕ) :
+theorem Nat.range_mul_add (m k : ℕ) :
     Set.range (fun n : ℕ ↦ m * n + k) = {n : ℕ | (n : ZMod m) = k ∧ k ≤ n} := by
   ext n
   simp only [Set.mem_range, Set.mem_setOf_eq]

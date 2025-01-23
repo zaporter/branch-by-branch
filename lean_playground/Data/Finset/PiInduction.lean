@@ -13,7 +13,7 @@ import Mathlib.Data.Fintype.Basic
 In this file we prove a few induction principles for functions `Π i : ι, Finset (α i)` defined on a
 finite type.
 
-* `Finset.induction_on_pi` is a generic lemma that requires only `[Finite ι]`, `[DecidableEq ι]`,
+* `Finset.induction_on_pi` is a generic theorem that requires only `[Finite ι]`, `[DecidableEq ι]`,
   and `[∀ i, DecidableEq (α i)]`; this version can be seen as a direct generalization of
   `Finset.induction_on`.
 
@@ -74,13 +74,13 @@ theorem induction_on_pi {p : (∀ i, Finset (α i)) → Prop} (f : ∀ i, Finset
     h0 step
 
 -- Porting note: this docstring is the exact translation of the one from mathlib3 but
--- the last sentence (here and in the next lemma) does make much sense to me...
+-- the last sentence (here and in the next theorem) does make much sense to me...
 /-- Given a predicate on functions `∀ i, Finset (α i)` defined on a finite type, it is true on all
 maps provided that it is true on `fun _ ↦ ∅` and for any function `g : ∀ i, Finset (α i)`, an index
 `i : ι`, and an element`x : α i` that is strictly greater than all elements of `g i`, `p g` implies
 `p (update g i (insert x (g i)))`.
 
-This lemma requires `LinearOrder` instances on all `α i`. See also `Finset.induction_on_pi` for a
+This theorem requires `LinearOrder` instances on all `α i`. See also `Finset.induction_on_pi` for a
 version that `x ∉ g i` instead of ` does not need `∀ i, LinearOrder (α i)`. -/
 theorem induction_on_pi_max [∀ i, LinearOrder (α i)] {p : (∀ i, Finset (α i)) → Prop}
     (f : ∀ i, Finset (α i)) (h0 : p fun _ ↦ ∅)
@@ -96,7 +96,7 @@ maps provided that it is true on `fun _ ↦ ∅` and for any function `g : ∀ i
 `i : ι`, and an element`x : α i` that is strictly less than all elements of `g i`, `p g` implies
 `p (update g i (insert x (g i)))`.
 
-This lemma requires `LinearOrder` instances on all `α i`. See also `Finset.induction_on_pi` for a
+This theorem requires `LinearOrder` instances on all `α i`. See also `Finset.induction_on_pi` for a
 version that `x ∉ g i` instead of ` does not need `∀ i, LinearOrder (α i)`. -/
 theorem induction_on_pi_min [∀ i, LinearOrder (α i)] {p : (∀ i, Finset (α i)) → Prop}
     (f : ∀ i, Finset (α i)) (h0 : p fun _ ↦ ∅)

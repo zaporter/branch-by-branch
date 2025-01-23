@@ -6,7 +6,7 @@ Authors: Yakov Pechersky, Yury Kudryashov
 import Mathlib.Data.Set.Image
 import Mathlib.Data.List.InsertIdx
 
-/-! # Some lemmas about lists involving sets
+/-! # Some theorems about lists involving sets
 
 Split out from `Data.List.Basic` to reduce its dependencies.
 -/
@@ -19,7 +19,7 @@ namespace List
 
 set_option linter.deprecated false in
 @[simp, deprecated "No deprecation message was provided." (since := "2024-10-17")]
-lemma Nat.sum_eq_listSum (l : List ℕ) : Nat.sum l = l.sum := rfl
+theorem Nat.sum_eq_listSum (l : List ℕ) : Nat.sum l = l.sum := rfl
 
 @[deprecated (since := "2024-08-20")] alias getElem_reverse' := getElem_reverse
 
@@ -86,7 +86,7 @@ theorem foldl_range_eq_of_range_eq {f : α → β → α} {g : α → γ → α}
 
 /-!
   ### MapAccumr and Foldr
-  Some lemmas relation `mapAccumr` and `foldr`
+  Some theorems relation `mapAccumr` and `foldr`
 -/
 section MapAccumr
 

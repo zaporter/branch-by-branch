@@ -96,9 +96,9 @@ theorem map_uncurry (f : α → β → γ) (x : Option (α × β)) :
 /-!
 ### Algebraic replacement rules
 
-A collection of lemmas to transfer associativity, commutativity, distributivity, ... of operations
+A collection of theorems to transfer associativity, commutativity, distributivity, ... of operations
 to the associativity, commutativity, distributivity, ... of `Option.map₂` of those operations.
-The proof pattern is `map₂_lemma operation_lemma`. For example, `map₂_comm mul_comm` proves that
+The proof pattern is `map₂_theorem operation_theorem`. For example, `map₂_comm mul_comm` proves that
 `map₂ (*) a b = map₂ (*) g f` in a `CommSemigroup`.
 -/
 
@@ -180,13 +180,13 @@ theorem map_map₂_right_anticomm {f : α → β' → γ} {g : β → β'} {f' :
 
 /-- If `a` is a left identity for a binary operation `f`, then `some a` is a left identity for
 `Option.map₂ f`. -/
-lemma map₂_left_identity {f : α → β → β} {a : α} (h : ∀ b, f a b = b) (o : Option β) :
+theorem map₂_left_identity {f : α → β → β} {a : α} (h : ∀ b, f a b = b) (o : Option β) :
     map₂ f (some a) o = o := by
   cases o; exacts [rfl, congr_arg some (h _)]
 
 /-- If `b` is a right identity for a binary operation `f`, then `some b` is a right identity for
 `Option.map₂ f`. -/
-lemma map₂_right_identity {f : α → β → α} {b : β} (h : ∀ a, f a b = a) (o : Option α) :
+theorem map₂_right_identity {f : α → β → α} {b : β} (h : ∀ a, f a b = a) (o : Option α) :
     map₂ f o (some b) = o := by
   simp [h, map₂]
 

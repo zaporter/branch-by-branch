@@ -11,7 +11,7 @@ import Mathlib.Tactic.Inhabit
 /-!
 # Extra facts about `Prod`
 
-This file proves various simple lemmas about `Prod`.
+This file proves various simple theorems about `Prod`.
 It also defines better delaborators for product projections.
 -/
 
@@ -21,7 +21,7 @@ variable {α : Type*} {β : Type*} {γ : Type*} {δ : Type*}
 
 namespace Prod
 
-lemma swap_eq_iff_eq_swap {x : α × β} {y : β × α} : x.swap = y ↔ x = y.swap := by aesop
+theorem swap_eq_iff_eq_swap {x : α × β} {y : β × α} : x.swap = y ↔ x = y.swap := by aesop
 
 def mk.injArrow {x₁ : α} {y₁ : β} {x₂ : α} {y₂ : β} :
     (x₁, y₁) = (x₂, y₂) → ∀ ⦃P : Sort*⦄, (x₁ = x₂ → y₁ = y₂ → P) → P :=
@@ -49,8 +49,8 @@ theorem fst_comp_mk (x : α) : Prod.fst ∘ (Prod.mk x : β → α × β) = Func
 
 attribute [mfld_simps] map_apply
 
--- This was previously a `simp` lemma, but no longer is on the basis that it destructures the pair.
---  See `map_apply`, `map_fst`, and `map_snd` for slightly weaker lemmas in the `simp` set.
+-- This was previously a `simp` theorem, but no longer is on the basis that it destructures the pair.
+--  See `map_apply`, `map_fst`, and `map_snd` for slightly weaker theorems in the `simp` set.
 theorem map_apply' (f : α → γ) (g : β → δ) (p : α × β) : map f g p = (f p.1, g p.2) :=
   rfl
 
@@ -74,9 +74,9 @@ theorem mk.inj_right {α β : Type*} (b : β) :
   intro b₁ b₂ h
   simpa only [and_true, eq_self_iff_true, mk.inj_iff] using h
 
-lemma mk_inj_left {a : α} {b₁ b₂ : β} : (a, b₁) = (a, b₂) ↔ b₁ = b₂ := (mk.inj_left _).eq_iff
+theorem mk_inj_left {a : α} {b₁ b₂ : β} : (a, b₁) = (a, b₂) ↔ b₁ = b₂ := (mk.inj_left _).eq_iff
 
-lemma mk_inj_right {a₁ a₂ : α} {b : β} : (a₁, b) = (a₂, b) ↔ a₁ = a₂ := (mk.inj_right _).eq_iff
+theorem mk_inj_right {a₁ a₂ : α} {b : β} : (a₁, b) = (a₂, b) ↔ a₁ = a₂ := (mk.inj_right _).eq_iff
 
 theorem map_def {f : α → γ} {g : β → δ} : Prod.map f g = fun p : α × β ↦ (f p.1, g p.2) :=
   funext fun p ↦ Prod.ext (map_fst f g p) (map_snd f g p)
@@ -134,7 +134,7 @@ theorem snd_eq_iff : ∀ {p : α × β} {x : β}, p.2 = x ↔ p = (p.1, x)
 
 variable {r : α → α → Prop} {s : β → β → Prop} {x y : α × β}
 
-lemma lex_iff : Prod.Lex r s x y ↔ r x.1 y.1 ∨ x.1 = y.1 ∧ s x.2 y.2 := lex_def
+theorem lex_iff : Prod.Lex r s x y ↔ r x.1 y.1 ∨ x.1 = y.1 ∧ s x.2 y.2 := lex_def
 
 instance Lex.decidable [DecidableEq α]
     (r : α → α → Prop) (s : β → β → Prop) [DecidableRel r] [DecidableRel s] :

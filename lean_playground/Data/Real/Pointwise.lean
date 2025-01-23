@@ -14,7 +14,7 @@ import Mathlib.Data.Set.Pointwise.SMul
 This file relates `sInf (a • s)`/`sSup (a • s)` with `a • sInf s`/`a • sSup s` for `s : Set ℝ`.
 
 From these, it relates `⨅ i, a • f i` / `⨆ i, a • f i` with `a • (⨅ i, f i)` / `a • (⨆ i, f i)`,
-and provides lemmas about distributing `*` over `⨅` and `⨆`.
+and provides theorems about distributing `*` over `⨅` and `⨆`.
 
 ## TODO
 

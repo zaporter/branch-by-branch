@@ -46,7 +46,7 @@ instance fintypesUnion [DecidableEq α] {s : Set (Set α)} [Fintype s]
   rw [sUnion_eq_iUnion]
   exact @Set.fintypeiUnion _ _ _ _ _ H
 
-lemma toFinset_iUnion [Fintype β] [DecidableEq α] (f : β → Set α)
+theorem toFinset_iUnion [Fintype β] [DecidableEq α] (f : β → Set α)
     [∀ w, Fintype (f w)] :
     Set.toFinset (⋃ (x : β), f x) =
     Finset.biUnion (Finset.univ : Finset β) (fun x => (f x).toFinset) := by
@@ -153,7 +153,7 @@ theorem Finite.iUnion {ι : Type*} {s : ι → Set α} {t : Set ι} (ht : t.Fini
 
 /-- An indexed union of pairwise disjoint sets is finite iff all sets are finite, and all but
 finitely many are empty. -/
-lemma finite_iUnion_iff {ι : Type*} {s : ι → Set α} (hs : Pairwise fun i j ↦ Disjoint (s i) (s j)) :
+theorem finite_iUnion_iff {ι : Type*} {s : ι → Set α} (hs : Pairwise fun i j ↦ Disjoint (s i) (s j)) :
     (⋃ i, s i).Finite ↔ (∀ i, (s i).Finite) ∧ {i | (s i).Nonempty}.Finite where
   mp h := by
     refine ⟨fun i ↦ h.subset <| subset_iUnion _ _, ?_⟩
@@ -168,14 +168,14 @@ lemma finite_iUnion_iff {ι : Type*} {s : ι → Set α} (hs : Pairwise fun i j 
     exact .of_injective u u_inj
   mpr h := h.2.iUnion (fun _ _ ↦ h.1 _) (by simp [not_nonempty_iff_eq_empty])
 
-@[simp] lemma finite_iUnion_of_subsingleton {ι : Sort*} [Subsingleton ι] {s : ι → Set α} :
+@[simp] theorem finite_iUnion_of_subsingleton {ι : Sort*} [Subsingleton ι] {s : ι → Set α} :
     (⋃ i, s i).Finite ↔ ∀ i, (s i).Finite := by
   rw [← iUnion_plift_down, finite_iUnion_iff _root_.Subsingleton.pairwise]
   simp [PLift.forall, Finite.of_subsingleton]
 
 /-- An indexed union of pairwise disjoint sets is finite iff all sets are finite, and all but
 finitely many are empty. -/
-lemma PairwiseDisjoint.finite_biUnion_iff {f : β → Set α} {s : Set β} (hs : s.PairwiseDisjoint f) :
+theorem PairwiseDisjoint.finite_biUnion_iff {f : β → Set α} {s : Set β} (hs : s.PairwiseDisjoint f) :
     (⋃ i ∈ s, f i).Finite ↔ (∀ i ∈ s, (f i).Finite) ∧ {i ∈ s | (f i).Nonempty}.Finite := by
   rw [finite_iUnion_iff (by aesop (add unfold safe [Pairwise, PairwiseDisjoint, Set.Pairwise]))]
   simp
@@ -204,7 +204,7 @@ with `s`, then `s` is itself finite.
 
 It is useful to give `f` explicitly here so this can be used with `apply`.
 -/
-lemma Finite.of_finite_fibers (f : α → β) {s : Set α} (himage : (f '' s).Finite)
+theorem Finite.of_finite_fibers (f : α → β) {s : Set α} (himage : (f '' s).Finite)
     (hfibers : ∀ x ∈ f '' s, (s ∩ f ⁻¹' {x}).Finite) : s.Finite :=
   (himage.biUnion hfibers).subset fun x ↦ by aesop
 
@@ -257,27 +257,27 @@ theorem Infinite.sUnion {s : Set (Set α)} (hs : s.Infinite) : (⋃₀ s).Infini
 
 /-! ### Order properties -/
 
-lemma map_finite_biSup {F ι : Type*} [CompleteLattice α] [CompleteLattice β] [FunLike F α β]
+theorem map_finite_biSup {F ι : Type*} [CompleteLattice α] [CompleteLattice β] [FunLike F α β]
     [SupBotHomClass F α β] {s : Set ι} (hs : s.Finite) (f : F) (g : ι → α) :
     f (⨆ x ∈ s, g x) = ⨆ x ∈ s, f (g x) := by
   have := map_finset_sup f hs.toFinset g
   simp only [Finset.sup_eq_iSup, hs.mem_toFinset, comp_apply] at this
   exact this
 
-lemma map_finite_biInf {F ι : Type*} [CompleteLattice α] [CompleteLattice β] [FunLike F α β]
+theorem map_finite_biInf {F ι : Type*} [CompleteLattice α] [CompleteLattice β] [FunLike F α β]
     [InfTopHomClass F α β] {s : Set ι} (hs : s.Finite) (f : F) (g : ι → α) :
     f (⨅ x ∈ s, g x) = ⨅ x ∈ s, f (g x) := by
   have := map_finset_inf f hs.toFinset g
   simp only [Finset.inf_eq_iInf, hs.mem_toFinset, comp_apply] at this
   exact this
 
-lemma map_finite_iSup {F ι : Type*} [CompleteLattice α] [CompleteLattice β] [FunLike F α β]
+theorem map_finite_iSup {F ι : Type*} [CompleteLattice α] [CompleteLattice β] [FunLike F α β]
     [SupBotHomClass F α β] [Finite ι] (f : F) (g : ι → α) :
     f (⨆ i, g i) = ⨆ i, f (g i) := by
   rw [← iSup_univ (f := g), ← iSup_univ (f := fun i ↦ f (g i))]
   exact map_finite_biSup finite_univ f g
 
-lemma map_finite_iInf {F ι : Type*} [CompleteLattice α] [CompleteLattice β] [FunLike F α β]
+theorem map_finite_iInf {F ι : Type*} [CompleteLattice α] [CompleteLattice β] [FunLike F α β]
     [InfTopHomClass F α β] [Finite ι] (f : F) (g : ι → α) :
     f (⨅ i, g i) = ⨅ i, f (g i) := by
   rw [← iInf_univ (f := g), ← iInf_univ (f := fun i ↦ f (g i))]
@@ -418,11 +418,11 @@ end Finset
 section LinearOrder
 variable [LinearOrder α] {s : Set α}
 
-lemma Set.finite_diff_iUnion_Ioo (s : Set α) : (s \ ⋃ (x ∈ s) (y ∈ s), Ioo x y).Finite :=
+theorem Set.finite_diff_iUnion_Ioo (s : Set α) : (s \ ⋃ (x ∈ s) (y ∈ s), Ioo x y).Finite :=
   Set.finite_of_forall_not_lt_lt fun _x hx _y hy _z hz hxy hyz => hy.2 <| mem_iUnion₂_of_mem hx.1 <|
     mem_iUnion₂_of_mem hz.1 ⟨hxy, hyz⟩
 
-lemma Set.finite_diff_iUnion_Ioo' (s : Set α) : (s \ ⋃ x : s × s, Ioo x.1 x.2).Finite := by
+theorem Set.finite_diff_iUnion_Ioo' (s : Set α) : (s \ ⋃ x : s × s, Ioo x.1 x.2).Finite := by
   simpa only [iUnion, iSup_prod, iSup_subtype] using s.finite_diff_iUnion_Ioo
 
 theorem DirectedOn.exists_mem_subset_of_finset_subset_biUnion {α ι : Type*} {f : ι → Set α}

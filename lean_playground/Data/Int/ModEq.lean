@@ -167,10 +167,10 @@ protected theorem mul (h₁ : a ≡ b [ZMOD n]) (h₂ : c ≡ d [ZMOD n]) : a * 
   rw [pow_succ, pow_succ]
   exact hd.mul h
 
-lemma of_mul_left (m : ℤ) (h : a ≡ b [ZMOD m * n]) : a ≡ b [ZMOD n] := by
+theorem of_mul_left (m : ℤ) (h : a ≡ b [ZMOD m * n]) : a ≡ b [ZMOD n] := by
   rw [modEq_iff_dvd] at *; exact (dvd_mul_left n m).trans h
 
-lemma of_mul_right (m : ℤ) : a ≡ b [ZMOD n * m] → a ≡ b [ZMOD n] :=
+theorem of_mul_right (m : ℤ) : a ≡ b [ZMOD n * m] → a ≡ b [ZMOD n] :=
   mul_comm m n ▸ of_mul_left _
 
 /-- To cancel a common factor `c` from a `ModEq` we must divide the modulus `m` by `gcd m c`. -/

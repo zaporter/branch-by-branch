@@ -34,7 +34,7 @@ To get a column matrix with exactly one column, `Matrix.col (Fin 1) u` is the ca
 def col (ι : Type*) (w : m → α) : Matrix m ι α :=
   of fun x _ => w x
 
--- TODO: set as an equation lemma for `col`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `col`, see https://github.com/leanprover-community/mathlib4/pull/3024
 @[simp]
 theorem col_apply {ι : Type*} (w : m → α) (i) (j : ι) : col ι w i j = w i :=
   rfl
@@ -49,7 +49,7 @@ def row (ι : Type*) (v : n → α) : Matrix ι n α :=
 
 variable {ι : Type*}
 
--- TODO: set as an equation lemma for `row`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `row`, see https://github.com/leanprover-community/mathlib4/pull/3024
 @[simp]
 theorem row_apply (v : n → α) (i : ι) (j) : row ι v i j = v j :=
   rfl
@@ -333,7 +333,7 @@ theorem submatrix_updateCol_equiv [DecidableEq o] [DecidableEq n] (A : Matrix m 
 @[deprecated (since := "2024-12-11")]
 alias submatrix_updateColumn_equiv := submatrix_updateCol_equiv
 
-/-! `reindex` versions of the above `submatrix` lemmas for convenience. -/
+/-! `reindex` versions of the above `submatrix` theorems for convenience. -/
 
 
 theorem updateRow_reindex [DecidableEq l] [DecidableEq m] (A : Matrix m n α) (i : l) (r : o → α)

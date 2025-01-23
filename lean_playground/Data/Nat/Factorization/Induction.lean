@@ -74,7 +74,7 @@ def recOnMul {P : ℕ → Sort*} (h0 : P 0) (h1 : P 1) (hp : ∀ p, Prime p → 
     | n + 1 => h _ _ (hp'' p n hp') (hp p hp')
   recOnPrimeCoprime h0 hp'' fun a b _ _ _ => h a b
 
-lemma _root_.induction_on_primes {P : ℕ → Prop} (h₀ : P 0) (h₁ : P 1)
+theorem _root_.induction_on_primes {P : ℕ → Prop} (h₀ : P 0) (h₁ : P 1)
     (h : ∀ p a : ℕ, p.Prime → P a → P (p * a)) : ∀ n, P n := by
   refine recOnPrimePow h₀ h₁ ?_
   rintro a p n hp - - ha
@@ -83,7 +83,7 @@ lemma _root_.induction_on_primes {P : ℕ → Prop} (h₀ : P 0) (h₁ : P 1)
   · rw [pow_succ', mul_assoc]
     exact h _ _ hp ih
 
-lemma prime_composite_induction {P : ℕ → Prop} (zero : P 0) (one : P 1)
+theorem prime_composite_induction {P : ℕ → Prop} (zero : P 0) (one : P 1)
     (prime : ∀ p : ℕ, p.Prime → P p) (composite : ∀ a, 2 ≤ a → P a → ∀ b, 2 ≤ b → P b → P (a * b))
     (n : ℕ) : P n := by
   refine induction_on_primes zero one ?_ _

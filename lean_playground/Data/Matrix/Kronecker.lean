@@ -54,7 +54,7 @@ section KroneckerMap
 def kroneckerMap (f : α → β → γ) (A : Matrix l m α) (B : Matrix n p β) : Matrix (l × n) (m × p) γ :=
   of fun (i : l × n) (j : m × p) => f (A i.1 j.1) (B i.2 j.2)
 
--- TODO: set as an equation lemma for `kroneckerMap`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `kroneckerMap`, see https://github.com/leanprover-community/mathlib4/pull/3024
 @[simp]
 theorem kroneckerMap_apply (f : α → β → γ) (A : Matrix l m α) (B : Matrix n p β) (i j) :
     kroneckerMap f A B i j = f (A i.1 j.1) (B i.2 j.2) :=
@@ -253,7 +253,7 @@ def kroneckerBilinear [CommSemiring R] [Semiring α] [Algebra R α] :
     Matrix l m α →ₗ[R] Matrix n p α →ₗ[R] Matrix (l × n) (m × p) α :=
   kroneckerMapBilinear (Algebra.lmul R α)
 
-/-! What follows is a copy, in order, of every `Matrix.kroneckerMap` lemma above that has
+/-! What follows is a copy, in order, of every `Matrix.kroneckerMap` theorem above that has
 hypotheses which can be filled by properties of `*`. -/
 
 
@@ -434,7 +434,7 @@ def kroneckerTMulBilinear :
     Matrix l m α →ₗ[R] Matrix n p β →ₗ[R] Matrix (l × n) (m × p) (α ⊗[R] β) :=
   kroneckerMapBilinear (TensorProduct.mk R α β)
 
-/-! What follows is a copy, in order, of every `Matrix.kroneckerMap` lemma above that has
+/-! What follows is a copy, in order, of every `Matrix.kroneckerMap` theorem above that has
 hypotheses which can be filled by properties of `⊗ₜ`. -/
 
 
@@ -535,7 +535,7 @@ end CommRing
 
 end Algebra
 
--- insert lemmas specific to `kroneckerTMul` below this line
+-- insert theorems specific to `kroneckerTMul` below this line
 end KroneckerTmul
 
 end Matrix

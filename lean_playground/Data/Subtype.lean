@@ -54,7 +54,7 @@ theorem heq_iff_coe_eq (h : ∀ x, p x ↔ q x) {a1 : { x // p x }} {a2 : { x //
     (motive := fun (pp : (α → Prop)) _ ↦ ∀ a2' : {x // pp x}, HEq a1 a2' ↔ (a1 : α) = (a2' : α))
     (fun _ ↦ heq_iff_eq.trans Subtype.ext_iff) (funext <| fun x ↦ propext (h x)) a2
 
-lemma heq_iff_coe_heq {α β : Sort _} {p : α → Prop} {q : β → Prop} {a : {x // p x}}
+theorem heq_iff_coe_heq {α β : Sort _} {p : α → Prop} {q : β → Prop} {a : {x // p x}}
     {b : {y // q y}} (h : α = β) (h' : HEq p q) : HEq a b ↔ HEq (a : α) (b : β) := by
   subst h
   subst h'
@@ -97,7 +97,7 @@ theorem coe_inj {a b : Subtype p} : (a : α) = b ↔ a = b :=
 theorem val_inj {a b : Subtype p} : a.val = b.val ↔ a = b :=
   coe_inj
 
-lemma coe_ne_coe {a b : Subtype p} : (a : α) ≠ b ↔ a ≠ b := coe_injective.ne_iff
+theorem coe_ne_coe {a b : Subtype p} : (a : α) ≠ b ↔ a ≠ b := coe_injective.ne_iff
 
 @[deprecated (since := "2024-04-04")] alias ⟨ne_of_val_ne, _⟩ := coe_ne_coe
 

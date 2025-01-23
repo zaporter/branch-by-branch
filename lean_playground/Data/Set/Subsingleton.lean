@@ -71,10 +71,10 @@ theorem subsingleton_of_univ_subsingleton (h : (univ : Set α).Subsingleton) : S
 theorem subsingleton_univ_iff : (univ : Set α).Subsingleton ↔ Subsingleton α :=
   ⟨subsingleton_of_univ_subsingleton, fun h => @subsingleton_univ _ h⟩
 
-lemma Subsingleton.inter_singleton : (s ∩ {a}).Subsingleton :=
+theorem Subsingleton.inter_singleton : (s ∩ {a}).Subsingleton :=
   Set.subsingleton_of_subset_singleton Set.inter_subset_right
 
-lemma Subsingleton.singleton_inter : ({a} ∩ s).Subsingleton :=
+theorem Subsingleton.singleton_inter : ({a} ∩ s).Subsingleton :=
   Set.subsingleton_of_subset_singleton Set.inter_subset_left
 
 theorem subsingleton_of_subsingleton [Subsingleton α] {s : Set α} : Set.Subsingleton s :=
@@ -261,16 +261,16 @@ alias ⟨_, Subsingleton.not_nontrivial⟩ := not_nontrivial_iff
 
 alias ⟨_, Nontrivial.not_subsingleton⟩ := not_subsingleton_iff
 
-protected lemma subsingleton_or_nontrivial (s : Set α) : s.Subsingleton ∨ s.Nontrivial := by
+protected theorem subsingleton_or_nontrivial (s : Set α) : s.Subsingleton ∨ s.Nontrivial := by
   simp [or_iff_not_imp_right]
 
-lemma eq_singleton_or_nontrivial (ha : a ∈ s) : s = {a} ∨ s.Nontrivial := by
+theorem eq_singleton_or_nontrivial (ha : a ∈ s) : s = {a} ∨ s.Nontrivial := by
   rw [← subsingleton_iff_singleton ha]; exact s.subsingleton_or_nontrivial
 
-lemma nontrivial_iff_ne_singleton (ha : a ∈ s) : s.Nontrivial ↔ s ≠ {a} :=
+theorem nontrivial_iff_ne_singleton (ha : a ∈ s) : s.Nontrivial ↔ s ≠ {a} :=
   ⟨Nontrivial.ne_singleton, (eq_singleton_or_nontrivial ha).resolve_left⟩
 
-lemma Nonempty.exists_eq_singleton_or_nontrivial : s.Nonempty → (∃ a, s = {a}) ∨ s.Nontrivial :=
+theorem Nonempty.exists_eq_singleton_or_nontrivial : s.Nonempty → (∃ a, s = {a}) ∨ s.Nontrivial :=
   fun ⟨a, ha⟩ ↦ (eq_singleton_or_nontrivial ha).imp_left <| Exists.intro a
 
 theorem univ_eq_true_false : univ = ({True, False} : Set Prop) :=

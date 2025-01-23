@@ -128,13 +128,13 @@ def rev {n : Nat} : Fin2 n → Fin2 n
   | .fz   => last
   | .fs i => i.rev.castSucc
 
-@[simp] lemma rev_last {n} : rev (@last n) = fz := by
+@[simp] theorem rev_last {n} : rev (@last n) = fz := by
   induction n <;> simp_all [rev, castSucc, last]
 
-@[simp] lemma rev_castSucc {n} (i : Fin2 n) : rev (castSucc i) = fs (rev i) := by
+@[simp] theorem rev_castSucc {n} (i : Fin2 n) : rev (castSucc i) = fs (rev i) := by
   induction i <;> simp_all [rev, castSucc, last]
 
-@[simp] lemma rev_rev {n} (i : Fin2 n) : i.rev.rev = i := by
+@[simp] theorem rev_rev {n} (i : Fin2 n) : i.rev.rev = i := by
   induction i <;> simp_all [rev]
 
 theorem rev_involutive {n} : Function.Involutive (@rev n) := rev_rev

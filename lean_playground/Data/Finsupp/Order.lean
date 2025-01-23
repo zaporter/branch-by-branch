@@ -38,7 +38,7 @@ section OrderedAddCommMonoid
 variable [OrderedAddCommMonoid β] {f : ι →₀ α} {h₁ h₂ : ι → α → β}
 
 @[gcongr]
-lemma sum_le_sum (h : ∀ i ∈ f.support, h₁ i (f i) ≤ h₂ i (f i)) : f.sum h₁ ≤ f.sum h₂ :=
+theorem sum_le_sum (h : ∀ i ∈ f.support, h₁ i (f i) ≤ h₂ i (f i)) : f.sum h₁ ≤ f.sum h₂ :=
   Finset.sum_le_sum h
 
 end OrderedAddCommMonoid
@@ -49,9 +49,9 @@ variable [LE α] {f g : ι →₀ α}
 instance instLEFinsupp : LE (ι →₀ α) :=
   ⟨fun f g => ∀ i, f i ≤ g i⟩
 
-lemma le_def : f ≤ g ↔ ∀ i, f i ≤ g i := Iff.rfl
+theorem le_def : f ≤ g ↔ ∀ i, f i ≤ g i := Iff.rfl
 
-@[simp, norm_cast] lemma coe_le_coe : ⇑f ≤ g ↔ f ≤ g := Iff.rfl
+@[simp, norm_cast] theorem coe_le_coe : ⇑f ≤ g ↔ f ≤ g := Iff.rfl
 
 /-- The order on `Finsupp`s over a partial order embeds into the order on functions -/
 def orderEmbeddingToFun : (ι →₀ α) ↪o (ι → α) where
@@ -76,26 +76,26 @@ instance preorder : Preorder (ι →₀ α) :=
     le_refl := fun _ _ => le_rfl
     le_trans := fun _ _ _ hfg hgh i => (hfg i).trans (hgh i) }
 
-lemma lt_def : f < g ↔ f ≤ g ∧ ∃ i, f i < g i := Pi.lt_def
-@[simp, norm_cast] lemma coe_lt_coe : ⇑f < g ↔ f < g := Iff.rfl
+theorem lt_def : f < g ↔ f ≤ g ∧ ∃ i, f i < g i := Pi.lt_def
+@[simp, norm_cast] theorem coe_lt_coe : ⇑f < g ↔ f < g := Iff.rfl
 
-lemma coe_mono : Monotone (Finsupp.toFun : (ι →₀ α) → ι → α) := fun _ _ ↦ id
+theorem coe_mono : Monotone (Finsupp.toFun : (ι →₀ α) → ι → α) := fun _ _ ↦ id
 
-lemma coe_strictMono : Monotone (Finsupp.toFun : (ι →₀ α) → ι → α) := fun _ _ ↦ id
+theorem coe_strictMono : Monotone (Finsupp.toFun : (ι →₀ α) → ι → α) := fun _ _ ↦ id
 
-@[simp] lemma single_le_single : single i a ≤ single i b ↔ a ≤ b := by
+@[simp] theorem single_le_single : single i a ≤ single i b ↔ a ≤ b := by
   classical exact Pi.single_le_single
 
-lemma single_mono : Monotone (single i : α → ι →₀ α) := fun _ _ ↦ single_le_single.2
+theorem single_mono : Monotone (single i : α → ι →₀ α) := fun _ _ ↦ single_le_single.2
 
 @[gcongr] protected alias ⟨_, GCongr.single_mono⟩ := single_le_single
 
-@[simp] lemma single_nonneg : 0 ≤ single i a ↔ 0 ≤ a := by classical exact Pi.single_nonneg
-@[simp] lemma single_nonpos : single i a ≤ 0 ↔ a ≤ 0 := by classical exact Pi.single_nonpos
+@[simp] theorem single_nonneg : 0 ≤ single i a ↔ 0 ≤ a := by classical exact Pi.single_nonneg
+@[simp] theorem single_nonpos : single i a ≤ 0 ↔ a ≤ 0 := by classical exact Pi.single_nonpos
 
 variable [OrderedAddCommMonoid β]
 
-lemma sum_le_sum_index [DecidableEq ι] {f₁ f₂ : ι →₀ α} {h : ι → α → β} (hf : f₁ ≤ f₂)
+theorem sum_le_sum_index [DecidableEq ι] {f₁ f₂ : ι →₀ α} {h : ι → α → β} (hf : f₁ ≤ f₂)
     (hh : ∀ i ∈ f₁.support ∪ f₂.support, Monotone (h i))
     (hh₀ : ∀ i ∈ f₁.support ∪ f₂.support, h i 0 = 0) : f₁.sum h ≤ f₂.sum h := by
   classical
@@ -155,14 +155,14 @@ instance orderedAddCommMonoid : OrderedAddCommMonoid (ι →₀ α) :=
   { Finsupp.instAddCommMonoid, Finsupp.partialorder with
     add_le_add_left := fun _a _b h c s => add_le_add_left (h s) (c s) }
 
-lemma mapDomain_mono : Monotone (mapDomain f : (ι →₀ α) → (κ →₀ α)) := by
+theorem mapDomain_mono : Monotone (mapDomain f : (ι →₀ α) → (κ →₀ α)) := by
   classical exact fun g₁ g₂ h ↦ sum_le_sum_index h (fun _ _ ↦ single_mono) (by simp)
 
-@[gcongr] protected lemma GCongr.mapDomain_mono (hg : g₁ ≤ g₂) : g₁.mapDomain f ≤ g₂.mapDomain f :=
+@[gcongr] protected theorem GCongr.mapDomain_mono (hg : g₁ ≤ g₂) : g₁.mapDomain f ≤ g₂.mapDomain f :=
   mapDomain_mono hg
 
-lemma mapDomain_nonneg (hg : 0 ≤ g) : 0 ≤ g.mapDomain f := by simpa using mapDomain_mono hg
-lemma mapDomain_nonpos (hg : g ≤ 0) : g.mapDomain f ≤ 0 := by simpa using mapDomain_mono hg
+theorem mapDomain_nonneg (hg : 0 ≤ g) : 0 ≤ g.mapDomain f := by simpa using mapDomain_mono hg
+theorem mapDomain_nonpos (hg : g ≤ 0) : g.mapDomain f ≤ 0 := by simpa using mapDomain_mono hg
 
 end OrderedAddCommMonoid
 
@@ -231,10 +231,10 @@ theorem le_iff' (f g : ι →₀ α) {s : Finset ι} (hf : f.support ⊆ s) : f 
 theorem le_iff (f g : ι →₀ α) : f ≤ g ↔ ∀ i ∈ f.support, f i ≤ g i :=
   le_iff' f g <| Subset.refl _
 
-lemma support_monotone : Monotone (support (α := ι) (M := α)) :=
+theorem support_monotone : Monotone (support (α := ι) (M := α)) :=
   fun f g h a ha ↦ by rw [mem_support_iff, ← pos_iff_ne_zero] at ha ⊢; exact ha.trans_le (h _)
 
-lemma support_mono (hfg : f ≤ g) : f.support ⊆ g.support := support_monotone hfg
+theorem support_mono (hfg : f ≤ g) : f.support ⊆ g.support := support_monotone hfg
 
 instance decidableLE [DecidableRel (@LE.le α _)] : DecidableRel (@LE.le (ι →₀ α) _) := fun f g =>
   decidable_of_iff _ (le_iff f g).symm
@@ -260,7 +260,7 @@ instance [CovariantClass α α (· + ·) (· ≤ ·)] : CanonicallyOrderedAdd (�
   exists_add_of_le := fun {f g} h => ⟨g - f, ext fun x => (add_tsub_cancel_of_le <| h x).symm⟩
   le_self_add := fun _f _g _x => le_self_add
 
-@[simp, norm_cast] lemma coe_tsub (f g : ι →₀ α) : ⇑(f - g) = f - g := rfl
+@[simp, norm_cast] theorem coe_tsub (f g : ι →₀ α) : ⇑(f - g) = f - g := rfl
 
 theorem tsub_apply (f g : ι →₀ α) (a : ι) : (f - g) a = f a - g a :=
   rfl
@@ -307,7 +307,7 @@ nonrec theorem disjoint_iff {f g : ι →₀ α} : Disjoint f g ↔ Disjoint f.s
 
 end LinearOrder
 
-/-! ### Some lemmas about `ℕ` -/
+/-! ### Some theorems about `ℕ` -/
 
 
 section Nat
@@ -320,7 +320,7 @@ theorem add_sub_single_one {a : ι} {u u' : ι →₀ ℕ} (h : u' a ≠ 0) :
     u + (u' - single a 1) = u + u' - single a 1 :=
   (add_tsub_assoc_of_le (single_le_iff.mpr <| Nat.one_le_iff_ne_zero.mpr h) _).symm
 
-lemma sub_add_single_one_cancel {u : ι →₀ ℕ} {i : ι} (h : u i ≠ 0) :
+theorem sub_add_single_one_cancel {u : ι →₀ ℕ} {i : ι} (h : u i ≠ 0) :
     u - single i 1 + single i 1 = u := by
   rw [sub_single_one_add h, add_tsub_cancel_right]
 

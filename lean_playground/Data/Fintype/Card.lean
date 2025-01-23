@@ -190,7 +190,7 @@ theorem card_eq {α β} [_F : Fintype α] [_G : Fintype β] : card α = card β 
     (truncEquivOfCardEq h).nonempty,
     fun ⟨f⟩ => card_congr f⟩
 
-/-- Note: this lemma is specifically about `Fintype.ofSubsingleton`. For a statement about
+/-- Note: this theorem is specifically about `Fintype.ofSubsingleton`. For a statement about
 arbitrary `Fintype` instances, use either `Fintype.card_le_one_iff_subsingleton` or
 `Fintype.card_unique`. -/
 theorem card_ofSubsingleton (a : α) [Subsingleton α] : @Fintype.card _ (ofSubsingleton a) = 1 :=
@@ -200,7 +200,7 @@ theorem card_ofSubsingleton (a : α) [Subsingleton α] : @Fintype.card _ (ofSubs
 theorem card_unique [Unique α] [h : Fintype α] : Fintype.card α = 1 :=
   Subsingleton.elim (ofSubsingleton default) h ▸ card_ofSubsingleton _
 
-/-- Note: this lemma is specifically about `Fintype.ofIsEmpty`. For a statement about
+/-- Note: this theorem is specifically about `Fintype.ofIsEmpty`. For a statement about
 arbitrary `Fintype` instances, use `Fintype.card_eq_zero`. -/
 theorem card_ofIsEmpty [IsEmpty α] : @Fintype.card α Fintype.ofIsEmpty = 0 :=
   rfl
@@ -341,10 +341,10 @@ theorem Fintype.card_orderDual (α : Type*) [Fintype α] : Fintype.card αᵒᵈ
 theorem Fintype.card_lex (α : Type*) [Fintype α] : Fintype.card (Lex α) = Fintype.card α :=
   rfl
 
-@[simp] lemma Fintype.card_multiplicative (α : Type*) [Fintype α] :
+@[simp] theorem Fintype.card_multiplicative (α : Type*) [Fintype α] :
     card (Multiplicative α) = card α := Finset.card_map _
 
-@[simp] lemma Fintype.card_additive (α : Type*) [Fintype α] : card (Additive α) = card α :=
+@[simp] theorem Fintype.card_additive (α : Type*) [Fintype α] : card (Additive α) = card α :=
   Finset.card_map _
 
 /-- Given that `α ⊕ β` is a fintype, `α` is also a fintype. This is non-computable as it uses
@@ -679,7 +679,7 @@ theorem Finset.card_eq_of_equiv {s : Finset α} {t : Finset β} (i : s ≃ t) : 
   (card_eq_of_equiv_fintype i).trans (Fintype.card_coe _)
 
 /-- We can inflate a set `s` to any bigger size. -/
-lemma Finset.exists_superset_card_eq [Fintype α] {n : ℕ} {s : Finset α} (hsn : #s ≤ n)
+theorem Finset.exists_superset_card_eq [Fintype α] {n : ℕ} {s : Finset α} (hsn : #s ≤ n)
     (hnα : n ≤ Fintype.card α) :
     ∃ t, s ⊆ t ∧ #t = n := by simpa using exists_subsuperset_card_eq s.subset_univ hsn hnα
 

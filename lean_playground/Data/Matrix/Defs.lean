@@ -132,7 +132,7 @@ theorem map_injective {f : α → β} (hf : Function.Injective f) :
 def transpose (M : Matrix m n α) : Matrix n m α :=
   of fun x y => M y x
 
--- TODO: set as an equation lemma for `transpose`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `transpose`, see https://github.com/leanprover-community/mathlib4/pull/3024
 @[simp]
 theorem transpose_apply (M : Matrix m n α) (i j) : transpose M i j = M j i :=
   rfl
@@ -319,12 +319,12 @@ def ofAddEquiv [Add α] : (m → n → α) ≃+ Matrix m n α where
   __ := of
   map_add' _ _ := rfl
 
-@[simp] lemma coe_ofAddEquiv [Add α] :
+@[simp] theorem coe_ofAddEquiv [Add α] :
     ⇑(ofAddEquiv : (m → n → α) ≃+ Matrix m n α) = of := rfl
-@[simp] lemma coe_ofAddEquiv_symm [Add α] :
+@[simp] theorem coe_ofAddEquiv_symm [Add α] :
     ⇑(ofAddEquiv.symm : Matrix m n α ≃+ (m → n → α)) = of.symm := rfl
 
-@[simp] lemma isAddUnit_iff [AddMonoid α] {A : Matrix m n α} :
+@[simp] theorem isAddUnit_iff [AddMonoid α] {A : Matrix m n α} :
     IsAddUnit A ↔ ∀ i j, IsAddUnit (A i j) := by
   simp_rw [isAddUnit_iff_exists, Classical.skolem, forall_and,
     ← Matrix.ext_iff, add_apply, zero_apply]

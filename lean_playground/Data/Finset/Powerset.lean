@@ -94,7 +94,7 @@ theorem powerset_insert [DecidableEq α] (s : Finset α) (a : α) :
   · have : ¬∃ u : Finset α, u ⊆ s ∧ insert a u = t := by simp [Ne.symm (ne_insert_of_not_mem _ _ h)]
     simp [Finset.erase_eq_of_not_mem h, this]
 
-lemma pairwiseDisjoint_pair_insert [DecidableEq α] {a : α} (ha : a ∉ s) :
+theorem pairwiseDisjoint_pair_insert [DecidableEq α] {a : α} (ha : a ∉ s) :
     (s.powerset : Set (Finset α)).PairwiseDisjoint fun t ↦ ({t, insert a t} : Set (Finset α)) := by
   simp_rw [Set.pairwiseDisjoint_iff, mem_coe, mem_powerset]
   rintro i hi j hj
@@ -179,7 +179,7 @@ def powersetCard (n : ℕ) (s : Finset α) : Finset (Finset α) :=
   ⟨((s.1.powersetCard n).pmap Finset.mk) fun _t h => nodup_of_le (mem_powersetCard.1 h).1 s.2,
     s.2.powersetCard.pmap fun _a _ha _b _hb => congr_arg Finset.val⟩
 
-@[simp] lemma mem_powersetCard : s ∈ powersetCard n t ↔ s ⊆ t ∧ card s = n := by
+@[simp] theorem mem_powersetCard : s ∈ powersetCard n t ↔ s ⊆ t ∧ card s = n := by
   cases s; simp [powersetCard, val_le_iff.symm]
 
 @[simp]
@@ -201,7 +201,7 @@ theorem powersetCard_zero (s : Finset α) : s.powersetCard 0 = {∅} := by
       rw [h]
       exact ⟨empty_subset s, rfl⟩⟩
 
-lemma powersetCard_empty_subsingleton (n : ℕ) :
+theorem powersetCard_empty_subsingleton (n : ℕ) :
     (powersetCard n (∅ : Finset α) : Set <| Finset α).Subsingleton := by
   simp [Set.Subsingleton, subset_empty]
 
@@ -215,12 +215,12 @@ theorem powersetCard_one (s : Finset α) :
   eq_of_veq <| Multiset.map_injective val_injective <| by simp [Multiset.powersetCard_one]
 
 @[simp]
-lemma powersetCard_eq_empty : powersetCard n s = ∅ ↔ s.card < n := by
+theorem powersetCard_eq_empty : powersetCard n s = ∅ ↔ s.card < n := by
   refine ⟨?_, fun h ↦ card_eq_zero.1 <| by rw [card_powersetCard, Nat.choose_eq_zero_of_lt h]⟩
   contrapose!
   exact fun h ↦ nonempty_iff_ne_empty.1 <| (exists_subset_card_eq h).imp <| by simp
 
-@[simp] lemma powersetCard_card_add (s : Finset α) (hn : 0 < n) :
+@[simp] theorem powersetCard_card_add (s : Finset α) (hn : 0 < n) :
     s.powersetCard (s.card + n) = ∅ := by simpa
 
 theorem powersetCard_eq_filter {n} {s : Finset α} :
@@ -242,7 +242,7 @@ theorem powersetCard_succ_insert [DecidableEq α] {x : α} {s : Finset α} (h : 
   simp [card_insert_of_not_mem this, Nat.succ_inj']
 
 @[simp]
-lemma powersetCard_nonempty : (powersetCard n s).Nonempty ↔ n ≤ s.card := by
+theorem powersetCard_nonempty : (powersetCard n s).Nonempty ↔ n ≤ s.card := by
   aesop (add simp [Finset.Nonempty, exists_subset_card_eq, card_le_card])
 
 @[aesop safe apply (rule_sets := [finsetNonempty])]

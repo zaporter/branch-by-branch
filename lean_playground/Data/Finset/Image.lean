@@ -180,18 +180,18 @@ theorem filter_map {p : β → Prop} [DecidablePred p] :
     (s.map f).filter p = (s.filter (p ∘ f)).map f :=
   eq_of_veq (Multiset.filter_map _ _ _)
 
-lemma map_filter' (p : α → Prop) [DecidablePred p] (f : α ↪ β) (s : Finset α)
+theorem map_filter' (p : α → Prop) [DecidablePred p] (f : α ↪ β) (s : Finset α)
     [DecidablePred (∃ a, p a ∧ f a = ·)] :
     (s.filter p).map f = (s.map f).filter fun b => ∃ a, p a ∧ f a = b := by
   simp [Function.comp_def, filter_map, f.injective.eq_iff]
 
-lemma filter_attach' [DecidableEq α] (s : Finset α) (p : s → Prop) [DecidablePred p] :
+theorem filter_attach' [DecidableEq α] (s : Finset α) (p : s → Prop) [DecidablePred p] :
     s.attach.filter p =
       (s.filter fun x => ∃ h, p ⟨x, h⟩).attach.map
         ⟨Subtype.map id <| filter_subset _ _, Subtype.map_injective _ injective_id⟩ :=
   eq_of_veq <| Multiset.filter_attach' _ _
 
-lemma filter_attach (p : α → Prop) [DecidablePred p] (s : Finset α) :
+theorem filter_attach (p : α → Prop) [DecidablePred p] (s : Finset α) :
     s.attach.filter (fun a : s ↦ p a) =
       (s.filter p).attach.map ((Embedding.refl _).subtypeMap mem_of_mem_filter) :=
   eq_of_veq <| Multiset.filter_attach _ _
@@ -309,8 +309,8 @@ theorem mem_image : b ∈ s.image f ↔ ∃ a ∈ s, f a = b := by
 theorem mem_image_of_mem (f : α → β) {a} (h : a ∈ s) : f a ∈ s.image f :=
   mem_image.2 ⟨_, h, rfl⟩
 
-lemma forall_mem_image {p : β → Prop} : (∀ y ∈ s.image f, p y) ↔ ∀ ⦃x⦄, x ∈ s → p (f x) := by simp
-lemma exists_mem_image {p : β → Prop} : (∃ y ∈ s.image f, p y) ↔ ∃ x ∈ s, p (f x) := by simp
+theorem forall_mem_image {p : β → Prop} : (∀ y ∈ s.image f, p y) ↔ ∀ ⦃x⦄, x ∈ s → p (f x) := by simp
+theorem exists_mem_image {p : β → Prop} : (∃ y ∈ s.image f, p y) ↔ ∃ x ∈ s, p (f x) := by simp
 
 @[deprecated (since := "2024-11-23")] alias forall_image := forall_mem_image
 
@@ -350,7 +350,7 @@ theorem coe_image : ↑(s.image f) = f '' ↑s :=
   Set.ext <| by simp only [mem_coe, mem_image, Set.mem_image, implies_true]
 
 @[simp]
-lemma image_nonempty : (s.image f).Nonempty ↔ s.Nonempty :=
+theorem image_nonempty : (s.image f).Nonempty ↔ s.Nonempty :=
   mod_cast Set.image_nonempty (f := f) (s := (s : Set α))
 
 @[aesop safe apply (rule_sets := [finsetNonempty])]
@@ -399,17 +399,17 @@ theorem image_subset_iff : s.image f ⊆ t ↔ ∀ x ∈ s, f x ∈ t :=
 
 theorem image_mono (f : α → β) : Monotone (Finset.image f) := fun _ _ => image_subset_image
 
-lemma image_injective (hf : Injective f) : Injective (image f) := by
+theorem image_injective (hf : Injective f) : Injective (image f) := by
   simpa only [funext (map_eq_image _)] using map_injective ⟨f, hf⟩
 
-lemma image_inj {t : Finset α} (hf : Injective f) : s.image f = t.image f ↔ s = t :=
+theorem image_inj {t : Finset α} (hf : Injective f) : s.image f = t.image f ↔ s = t :=
   (image_injective hf).eq_iff
 
 theorem image_subset_image_iff {t : Finset α} (hf : Injective f) :
     s.image f ⊆ t.image f ↔ s ⊆ t :=
   mod_cast Set.image_subset_image_iff hf (s := s) (t := t)
 
-lemma image_ssubset_image {t : Finset α} (hf : Injective f) : s.image f ⊂ t.image f ↔ s ⊂ t := by
+theorem image_ssubset_image {t : Finset α} (hf : Injective f) : s.image f ⊂ t.image f ↔ s ⊂ t := by
   simp_rw [← lt_iff_ssubset]
   exact lt_iff_lt_of_le_iff_le' (image_subset_image_iff hf) (image_subset_image_iff hf)
 
@@ -479,7 +479,7 @@ theorem image_sdiff [DecidableEq α] {f : α → β} (s t : Finset α) (hf : Inj
     (s \ t).image f = s.image f \ t.image f :=
   mod_cast Set.image_diff hf s t
 
-lemma image_sdiff_of_injOn [DecidableEq α] {t : Finset α} (hf : Set.InjOn f s) (hts : t ⊆ s) :
+theorem image_sdiff_of_injOn [DecidableEq α] {t : Finset α} (hf : Set.InjOn f s) (hts : t ⊆ s) :
     (s \ t).image f = s.image f \ t.image f :=
   mod_cast Set.image_diff_of_injOn hf <| coe_subset.2 hts
 

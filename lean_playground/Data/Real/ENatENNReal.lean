@@ -9,7 +9,7 @@ import Mathlib.Data.ENNReal.Basic
 /-!
 # Coercion from `ℕ∞` to `ℝ≥0∞`
 
-In this file we define a coercion from `ℕ∞` to `ℝ≥0∞` and prove some basic lemmas about this map.
+In this file we define a coercion from `ℕ∞` to `ℝ≥0∞` and prove some basic theorems about this map.
 -/
 
 assert_not_exists Finset

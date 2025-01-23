@@ -20,7 +20,7 @@ variable {α : Type*}
 
 section Sup
 
--- can be defined with just `[Bot α]` where some lemmas hold without requiring `[OrderBot α]`
+-- can be defined with just `[Bot α]` where some theorems hold without requiring `[OrderBot α]`
 variable [SemilatticeSup α] [OrderBot α]
 
 /-- Supremum of a multiset: `sup {a, b, c} = a ⊔ b ⊔ c` -/
@@ -91,7 +91,7 @@ end Sup
 
 section Inf
 
--- can be defined with just `[Top α]` where some lemmas hold without requiring `[OrderTop α]`
+-- can be defined with just `[Top α]` where some theorems hold without requiring `[OrderTop α]`
 variable [SemilatticeInf α] [OrderTop α]
 
 /-- Infimum of a multiset: `inf {a, b, c} = a ⊓ b ⊓ c` -/

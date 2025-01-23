@@ -140,7 +140,7 @@ Combinatorial interpretation: `(i + k).choose k` is the number of decompositions
 `(n + k + 1).choose (k + 1)` corresponds to decomposing `[0, n)` into `k + 2` intervals.
 By putting away the last interval (of some length `n - i`),
 we have to decompose the remaining interval `[0, i)` into `k + 1` intervals, hence the sum. -/
-lemma sum_range_add_choose (n k : ℕ) :
+theorem sum_range_add_choose (n k : ℕ) :
     ∑ i ∈ Finset.range (n + 1), (i + k).choose k = (n + k + 1).choose (k + 1) := by
   rw [← sum_Icc_choose, range_eq_Ico]
   convert (sum_map _ (addRightEmbedding k) (·.choose k)).symm using 2

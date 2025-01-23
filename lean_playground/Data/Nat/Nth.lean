@@ -14,7 +14,7 @@ import Mathlib.Order.WellFounded
 # The `n`th Number Satisfying a Predicate
 
 This file defines a function for "what is the `n`th number that satisfies a given predicate `p`",
-and provides lemmas that deal with this function and its connection to `Nat.count`.
+and provides theorems that deal with this function and its connection to `Nat.count`.
 
 ## Main definitions
 
@@ -32,7 +32,7 @@ and provides lemmas that deal with this function and its connection to `Nat.coun
 There has been some discussion on the subject of whether both of `nth` and
 `Nat.Subtype.orderIsoOfNat` should exist. See discussion
 [here](https://github.com/leanprover-community/mathlib/pull/9457#pullrequestreview-767221180).
-Future work should address how lemmas that use these should be written.
+Future work should address how theorems that use these should be written.
 
 -/
 
@@ -237,19 +237,19 @@ theorem nth_eq_zero {n} :
   · rintro (⟨h₀, rfl⟩ | ⟨hf, hle⟩)
     exacts [nth_zero_of_zero h₀, nth_of_card_le hf hle]
 
-lemma lt_card_toFinset_of_nth_ne_zero {n : ℕ} (h : nth p n ≠ 0) (hf : (setOf p).Finite) :
+theorem lt_card_toFinset_of_nth_ne_zero {n : ℕ} (h : nth p n ≠ 0) (hf : (setOf p).Finite) :
     n < #hf.toFinset := by
   simp only [ne_eq, nth_eq_zero, not_or, not_exists, not_le] at h
   exact h.2 hf
 
-lemma nth_mem_of_ne_zero {n : ℕ} (h : nth p n ≠ 0) : p (Nat.nth p n) :=
+theorem nth_mem_of_ne_zero {n : ℕ} (h : nth p n ≠ 0) : p (Nat.nth p n) :=
   nth_mem n (lt_card_toFinset_of_nth_ne_zero h)
 
 theorem nth_eq_zero_mono (h₀ : ¬p 0) {a b : ℕ} (hab : a ≤ b) (ha : nth p a = 0) : nth p b = 0 := by
   simp only [nth_eq_zero, h₀, false_and, false_or] at ha ⊢
   exact ha.imp fun hf hle => hle.trans hab
 
-lemma nth_ne_zero_anti (h₀ : ¬p 0) {a b : ℕ} (hab : a ≤ b) (hb : nth p b ≠ 0) : nth p a ≠ 0 :=
+theorem nth_ne_zero_anti (h₀ : ¬p 0) {a b : ℕ} (hab : a ≤ b) (hb : nth p b ≠ 0) : nth p a ≠ 0 :=
   mt (nth_eq_zero_mono h₀ hab) hb
 
 theorem le_nth_of_lt_nth_succ {k a : ℕ} (h : a < nth p (k + 1)) (ha : p a) : a ≤ nth p k := by
@@ -263,7 +263,7 @@ theorem le_nth_of_lt_nth_succ {k a : ℕ} (h : a < nth p (k + 1)) (ha : p a) : a
   · rcases subset_range_nth ha with ⟨n, rfl⟩
     rwa [nth_lt_nth hf, Nat.lt_succ_iff, ← nth_le_nth hf] at h
 
-lemma nth_mem_anti {a b : ℕ} (hab : a ≤ b) (h : p (nth p b)) : p (nth p a) := by
+theorem nth_mem_anti {a b : ℕ} (hab : a ≤ b) (h : p (nth p b)) : p (nth p a) := by
   by_cases h' : ∀ hf : (setOf p).Finite, a < #hf.toFinset
   · exact nth_mem a h'
   · simp only [not_forall, not_lt] at h'
@@ -275,7 +275,7 @@ lemma nth_mem_anti {a b : ℕ} (hab : a ≤ b) (h : p (nth p b)) : p (nth p a) :
     rw [ha0]
     rwa [hb0] at h
 
-lemma nth_comp_of_strictMono {n : ℕ} {f : ℕ → ℕ} (hf : StrictMono f)
+theorem nth_comp_of_strictMono {n : ℕ} {f : ℕ → ℕ} (hf : StrictMono f)
     (h0 : ∀ k, p k → k ∈ Set.range f) (h : ∀ hfi : (setOf p).Finite, n < hfi.toFinset.card) :
     f (nth (fun i ↦ p (f i)) n) = nth p n := by
   have hs {p' : ℕ → Prop} (h0p' : ∀ k, p' k → k ∈ Set.range f) :
@@ -302,7 +302,7 @@ lemma nth_comp_of_strictMono {n : ℕ} {f : ℕ → ℕ} (hf : StrictMono f)
     · rcases h0 _ (nth_mem _ h) with ⟨t, ht⟩
       exact ⟨t, ht ▸ (nth_mem _ h), fun _ hk ↦ ht ▸ nth_lt_nth' hk h⟩
 
-lemma nth_add {m n : ℕ} (h0 : ∀ k < m, ¬p k) (h : nth p n ≠ 0) :
+theorem nth_add {m n : ℕ} (h0 : ∀ k < m, ¬p k) (h : nth p n ≠ 0) :
     nth (fun i ↦ p (i + m)) n + m = nth p n := by
   refine nth_comp_of_strictMono (strictMono_id.add_const m) (fun k hk ↦ ?_)
     (fun hf ↦ lt_card_toFinset_of_nth_ne_zero h hf)
@@ -310,15 +310,15 @@ lemma nth_add {m n : ℕ} (h0 : ∀ k < m, ¬p k) (h : nth p n ≠ 0) :
   simp_rw [id_eq, Set.mem_range, eq_comm] at hn
   exact h0 _ (not_le.mp fun h ↦ hn (le_iff_exists_add'.mp h)) hk
 
-lemma nth_add_eq_sub {m n : ℕ} (h0 : ∀ k < m, ¬p k) (h : nth p n ≠ 0) :
+theorem nth_add_eq_sub {m n : ℕ} (h0 : ∀ k < m, ¬p k) (h : nth p n ≠ 0) :
     nth (fun i ↦ p (i + m)) n = nth p n - m := by
   rw [← nth_add h0 h, Nat.add_sub_cancel]
 
-lemma nth_add_one {n : ℕ} (h0 : ¬p 0) (h : nth p n ≠ 0) :
+theorem nth_add_one {n : ℕ} (h0 : ¬p 0) (h : nth p n ≠ 0) :
     nth (fun i ↦ p (i + 1)) n + 1 = nth p n :=
   nth_add (fun _ hk ↦ (lt_one_iff.1 hk ▸ h0)) h
 
-lemma nth_add_one_eq_sub {n : ℕ} (h0 : ¬p 0) (h : nth p n ≠ 0) :
+theorem nth_add_one_eq_sub {n : ℕ} (h0 : ¬p 0) (h : nth p n ≠ 0) :
     nth (fun i ↦ p (i + 1)) n = nth p n - 1 :=
   nth_add_eq_sub (fun _ hk ↦ (lt_one_iff.1 hk ▸ h0)) h
 
@@ -380,7 +380,7 @@ theorem surjective_count_of_infinite_setOf (h : {n | p n}.Infinite) :
 theorem count_nth_succ {n : ℕ} (hn : ∀ hf : (setOf p).Finite, n < #hf.toFinset) :
     count p (nth p n + 1) = n + 1 := by rw [count_succ, count_nth hn, if_pos (nth_mem _ hn)]
 
-lemma count_nth_succ_of_infinite (hp : (setOf p).Infinite) (n : ℕ) :
+theorem count_nth_succ_of_infinite (hp : (setOf p).Infinite) (n : ℕ) :
     count p (nth p n + 1) = n + 1 := by
   rw [count_succ, count_nth_of_infinite hp, if_pos (nth_mem_of_infinite hp _)]
 

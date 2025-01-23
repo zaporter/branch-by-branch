@@ -41,20 +41,20 @@ theorem cast_mono : Monotone ((↑) : ℚ → K) :=
 def castOrderEmbedding : ℚ ↪o K :=
   OrderEmbedding.ofStrictMono (↑) cast_strictMono
 
-@[simp, norm_cast] lemma cast_le : (p : K) ≤ q ↔ p ≤ q := castOrderEmbedding.le_iff_le
+@[simp, norm_cast] theorem cast_le : (p : K) ≤ q ↔ p ≤ q := castOrderEmbedding.le_iff_le
 
-@[simp, norm_cast] lemma cast_lt : (p : K) < q ↔ p < q := cast_strictMono.lt_iff_lt
+@[simp, norm_cast] theorem cast_lt : (p : K) < q ↔ p < q := cast_strictMono.lt_iff_lt
 
 @[gcongr] alias ⟨_, _root_.GCongr.ratCast_le_ratCast⟩ := cast_le
 @[gcongr] alias ⟨_, _root_.GCongr.ratCast_lt_ratCast⟩ := cast_lt
 
-@[simp] lemma cast_nonneg : 0 ≤ (q : K) ↔ 0 ≤ q := by norm_cast
+@[simp] theorem cast_nonneg : 0 ≤ (q : K) ↔ 0 ≤ q := by norm_cast
 
-@[simp] lemma cast_nonpos : (q : K) ≤ 0 ↔ q ≤ 0 := by norm_cast
+@[simp] theorem cast_nonpos : (q : K) ≤ 0 ↔ q ≤ 0 := by norm_cast
 
-@[simp] lemma cast_pos : (0 : K) < q ↔ 0 < q := by norm_cast
+@[simp] theorem cast_pos : (0 : K) < q ↔ 0 < q := by norm_cast
 
-@[simp] lemma cast_lt_zero : (q : K) < 0 ↔ q < 0 := by norm_cast
+@[simp] theorem cast_lt_zero : (q : K) < 0 ↔ q < 0 := by norm_cast
 
 @[simp, norm_cast]
 theorem cast_le_natCast {m : ℚ} {n : ℕ} : (m : K) ≤ n ↔ m ≤ (n : ℚ) := by
@@ -89,12 +89,12 @@ theorem intCast_lt_cast {m : ℤ} {n : ℚ} : (m : K) < n ↔ (m : ℚ) < n := b
   rw [← cast_lt (K := K), cast_intCast]
 
 @[simp, norm_cast]
-lemma cast_min (p q : ℚ) : (↑(min p q) : K) = min (p : K) (q : K) := (@cast_mono K _).map_min
+theorem cast_min (p q : ℚ) : (↑(min p q) : K) = min (p : K) (q : K) := (@cast_mono K _).map_min
 
 @[simp, norm_cast]
-lemma cast_max (p q : ℚ) : (↑(max p q) : K) = max (p : K) (q : K) := (@cast_mono K _).map_max
+theorem cast_max (p q : ℚ) : (↑(max p q) : K) = max (p : K) (q : K) := (@cast_mono K _).map_max
 
-@[simp, norm_cast] lemma cast_abs (q : ℚ) : ((|q| : ℚ) : K) = |(q : K)| := by simp [abs_eq_max_neg]
+@[simp, norm_cast] theorem cast_abs (q : ℚ) : ((|q| : ℚ) : K) = |(q : K)| := by simp [abs_eq_max_neg]
 
 open Set
 
@@ -160,30 +160,30 @@ theorem cast_mono : Monotone ((↑) : ℚ≥0 → K) :=
 def castOrderEmbedding : ℚ≥0 ↪o K :=
   OrderEmbedding.ofStrictMono (↑) cast_strictMono
 
-@[simp, norm_cast] lemma cast_le : (p : K) ≤ q ↔ p ≤ q := castOrderEmbedding.le_iff_le
-@[simp, norm_cast] lemma cast_lt : (p : K) < q ↔ p < q := cast_strictMono.lt_iff_lt
-@[simp] lemma cast_nonpos : (q : K) ≤ 0 ↔ q ≤ 0 := by norm_cast
-@[simp] lemma cast_pos : (0 : K) < q ↔ 0 < q := by norm_cast
-@[norm_cast] lemma cast_lt_zero : (q : K) < 0 ↔ q < 0 := by norm_cast
-@[simp] lemma not_cast_lt_zero : ¬(q : K) < 0 := mod_cast not_lt_zero'
-@[simp] lemma cast_le_one : (p : K) ≤ 1 ↔ p ≤ 1 := by norm_cast
-@[simp] lemma one_le_cast : 1 ≤ (p : K) ↔ 1 ≤ p := by norm_cast
-@[simp] lemma cast_lt_one : (p : K) < 1 ↔ p < 1 := by norm_cast
-@[simp] lemma one_lt_cast : 1 < (p : K) ↔ 1 < p := by norm_cast
+@[simp, norm_cast] theorem cast_le : (p : K) ≤ q ↔ p ≤ q := castOrderEmbedding.le_iff_le
+@[simp, norm_cast] theorem cast_lt : (p : K) < q ↔ p < q := cast_strictMono.lt_iff_lt
+@[simp] theorem cast_nonpos : (q : K) ≤ 0 ↔ q ≤ 0 := by norm_cast
+@[simp] theorem cast_pos : (0 : K) < q ↔ 0 < q := by norm_cast
+@[norm_cast] theorem cast_lt_zero : (q : K) < 0 ↔ q < 0 := by norm_cast
+@[simp] theorem not_cast_lt_zero : ¬(q : K) < 0 := mod_cast not_lt_zero'
+@[simp] theorem cast_le_one : (p : K) ≤ 1 ↔ p ≤ 1 := by norm_cast
+@[simp] theorem one_le_cast : 1 ≤ (p : K) ↔ 1 ≤ p := by norm_cast
+@[simp] theorem cast_lt_one : (p : K) < 1 ↔ p < 1 := by norm_cast
+@[simp] theorem one_lt_cast : 1 < (p : K) ↔ 1 < p := by norm_cast
 
 section ofNat
 variable {n : ℕ} [n.AtLeastTwo]
 
-@[simp] lemma cast_le_ofNat : (p : K) ≤ ofNat(n) ↔ p ≤ OfNat.ofNat n := by
+@[simp] theorem cast_le_ofNat : (p : K) ≤ ofNat(n) ↔ p ≤ OfNat.ofNat n := by
   simp [← cast_le (K := K)]
 
-@[simp] lemma ofNat_le_cast : ofNat(n) ≤ (p : K) ↔ OfNat.ofNat n ≤ p := by
+@[simp] theorem ofNat_le_cast : ofNat(n) ≤ (p : K) ↔ OfNat.ofNat n ≤ p := by
   simp [← cast_le (K := K)]
 
-@[simp] lemma cast_lt_ofNat : (p : K) < ofNat(n) ↔ p < OfNat.ofNat n := by
+@[simp] theorem cast_lt_ofNat : (p : K) < ofNat(n) ↔ p < OfNat.ofNat n := by
   simp [← cast_lt (K := K)]
 
-@[simp] lemma ofNat_lt_cast : ofNat(n) < (p : K) ↔ OfNat.ofNat n < p := by
+@[simp] theorem ofNat_lt_cast : ofNat(n) < (p : K) ↔ OfNat.ofNat n < p := by
   simp [← cast_lt (K := K)]
 
 end ofNat
@@ -204,10 +204,10 @@ theorem cast_lt_natCast {m : ℚ≥0} {n : ℕ} : (m : K) < n ↔ m < (n : ℚ�
 theorem natCast_lt_cast {m : ℕ} {n : ℚ≥0} : (m : K) < n ↔ (m : ℚ≥0) < n := by
   rw [← cast_lt (K := K), cast_natCast]
 
-@[simp, norm_cast] lemma cast_min (p q : ℚ≥0) : (↑(min p q) : K) = min (p : K) (q : K) :=
+@[simp, norm_cast] theorem cast_min (p q : ℚ≥0) : (↑(min p q) : K) = min (p : K) (q : K) :=
   (@cast_mono K _).map_min
 
-@[simp, norm_cast] lemma cast_max (p q : ℚ≥0) : (↑(max p q) : K) = max (p : K) (q : K) :=
+@[simp, norm_cast] theorem cast_max (p q : ℚ≥0) : (↑(max p q) : K) = max (p : K) (q : K) :=
   (@cast_mono K _).map_max
 
 open Set

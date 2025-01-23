@@ -6,7 +6,7 @@ Authors: Johannes Hölzl, Mario Carneiro
 import Mathlib.Data.Rat.Cast.CharZero
 import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 
-/-! # Casting lemmas for rational numbers involving sums and products
+/-! # Casting theorems for rational numbers involving sums and products
 -/
 
 variable {ι α : Type*}

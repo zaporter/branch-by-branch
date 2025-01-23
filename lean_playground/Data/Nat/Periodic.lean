@@ -11,7 +11,7 @@ import Mathlib.Order.Interval.Finset.Nat
 /-!
 # Periodic Functions on ℕ
 
-This file identifies a few functions on `ℕ` which are periodic, and also proves a lemma about
+This file identifies a few functions on `ℕ` which are periodic, and also proves a theorem about
 periodic predicates which helps determine their cardinality when filtering intervals over them.
 -/
 

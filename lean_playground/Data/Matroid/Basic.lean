@@ -145,7 +145,7 @@ There are a few design decisions worth discussing.
   On the other hand (especially when duals arise), it is common to complement
   a set `X ⊆ M.E` *within* the ground set, giving `M.E \ X`.
   For this reason, we use the term `compl` in theorem names to refer to taking a set difference
-  with respect to the ground set, rather than a complement within a type. The lemma
+  with respect to the ground set, rather than a complement within a type. The theorem
   `compl_base_dual` is one of the many examples of this.
 
   Finally, in theorem names, matroid predicates that apply to sets
@@ -233,7 +233,7 @@ theorem ground_nonempty (M : Matroid α) [M.Nonempty] : M.E.Nonempty :=
 theorem ground_nonempty_iff (M : Matroid α) : M.E.Nonempty ↔ M.Nonempty :=
   ⟨fun h ↦ ⟨h⟩, fun ⟨h⟩ ↦ h⟩
 
-lemma nonempty_type (M : Matroid α) [h : M.Nonempty] : Nonempty α :=
+theorem nonempty_type (M : Matroid α) [h : M.Nonempty] : Nonempty α :=
   ⟨M.ground_nonempty.some⟩
 
 theorem ground_finite (M : Matroid α) [M.Finite] : M.E.Finite :=
@@ -325,7 +325,7 @@ macro (name := aesop_mat) "aesop_mat" c:Aesop.tactic_clause* : tactic =>
   aesop $c* (config := { terminal := true })
   (rule_sets := [$(Lean.mkIdent `Matroid):ident]))
 
-/- We add a number of trivial lemmas (deliberately specialized to statements in terms of the
+/- We add a number of trivial theorems (deliberately specialized to statements in terms of the
   ground set of a matroid) to the ruleset `Matroid` for `aesop`. -/
 
 variable {X Y : Set α} {e : α}
@@ -638,7 +638,7 @@ theorem Base.exchange_base_of_indep' (hB : M.Base B) (he : e ∈ B) (hf : f ∉ 
   rw [← insert_diff_singleton_comm hfe] at *
   exact hB.exchange_base_of_indep hf hI
 
-lemma insert_base_of_insert_indep {M : Matroid α} {I : Set α} {e f : α}
+theorem insert_base_of_insert_indep {M : Matroid α} {I : Set α} {e f : α}
     (he : e ∉ I) (hf : f ∉ I) (heI : M.Base (insert e I)) (hfI : M.Indep (insert f I)) :
     M.Base (insert f I) := by
   obtain rfl | hef := eq_or_ne e f
@@ -705,7 +705,7 @@ theorem ext_iff_indep {M₁ M₂ : Matroid α} :
 @[deprecated (since := "2024-12-25")] alias eq_iff_indep_iff_indep_forall := ext_iff_indep
 
 /-- If every base of `M₁` is independent in `M₂` and vice versa, then `M₁ = M₂`. -/
-lemma ext_base_indep {M₁ M₂ : Matroid α} (hE : M₁.E = M₂.E) (hM₁ : ∀ ⦃B⦄, M₁.Base B → M₂.Indep B)
+theorem ext_base_indep {M₁ M₂ : Matroid α} (hE : M₁.E = M₂.E) (hM₁ : ∀ ⦃B⦄, M₁.Base B → M₂.Indep B)
     (hM₂ : ∀ ⦃B⦄, M₂.Base B → M₁.Indep B) : M₁ = M₂ := by
   refine ext_indep hE fun I hIE ↦ ⟨fun hI ↦ ?_, fun hI ↦ ?_⟩
   · obtain ⟨B, hB, hIB⟩ := hI.exists_base_superset

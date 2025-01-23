@@ -48,7 +48,7 @@ def factorization (n : ℕ) : ℕ →₀ ℕ where
   mem_support_toFun := by simp [not_or]; aesop
 
 /-- The support of `n.factorization` is exactly `n.primeFactors`. -/
-@[simp] lemma support_factorization (n : ℕ) : (factorization n).support = n.primeFactors := rfl
+@[simp] theorem support_factorization (n : ℕ) : (factorization n).support = n.primeFactors := rfl
 
 theorem factorization_def (n : ℕ) {p : ℕ} (pp : p.Prime) : n.factorization p = padicValNat p n := by
   simpa [factorization] using absurd pp

@@ -7,7 +7,7 @@ import Mathlib.Algebra.GroupWithZero.Commute
 import Mathlib.Algebra.Ring.Commute
 
 /-!
-# Cast of natural numbers: lemmas about `Commute`
+# Cast of natural numbers: theorems about `Commute`
 
 -/
 
@@ -43,15 +43,15 @@ namespace SemiconjBy
 variable [Semiring α] {a x y : α}
 
 @[simp]
-lemma natCast_mul_right (h : SemiconjBy a x y) (n : ℕ) : SemiconjBy a (n * x) (n * y) :=
+theorem natCast_mul_right (h : SemiconjBy a x y) (n : ℕ) : SemiconjBy a (n * x) (n * y) :=
   SemiconjBy.mul_right (Nat.commute_cast _ _) h
 
 @[simp]
-lemma natCast_mul_left (h : SemiconjBy a x y) (n : ℕ) : SemiconjBy (n * a) x y :=
+theorem natCast_mul_left (h : SemiconjBy a x y) (n : ℕ) : SemiconjBy (n * a) x y :=
   SemiconjBy.mul_left (Nat.cast_commute _ _) h
 
 @[simp]
-lemma natCast_mul_natCast_mul (h : SemiconjBy a x y) (m n : ℕ) :
+theorem natCast_mul_natCast_mul (h : SemiconjBy a x y) (m n : ℕ) :
     SemiconjBy (m * a) (n * x) (n * y) :=
   (h.natCast_mul_left m).natCast_mul_right n
 
@@ -60,22 +60,22 @@ end SemiconjBy
 namespace Commute
 variable [Semiring α] {a b : α}
 
-@[simp] lemma natCast_mul_right (h : Commute a b) (n : ℕ) : Commute a (n * b) :=
+@[simp] theorem natCast_mul_right (h : Commute a b) (n : ℕ) : Commute a (n * b) :=
   SemiconjBy.natCast_mul_right h n
 
-@[simp] lemma natCast_mul_left (h : Commute a b) (n : ℕ) : Commute (n * a) b :=
+@[simp] theorem natCast_mul_left (h : Commute a b) (n : ℕ) : Commute (n * a) b :=
   SemiconjBy.natCast_mul_left h n
 
-@[simp] lemma natCast_mul_natCast_mul (h : Commute a b) (m n : ℕ) : Commute (m * a) (n * b) :=
+@[simp] theorem natCast_mul_natCast_mul (h : Commute a b) (m n : ℕ) : Commute (m * a) (n * b) :=
   SemiconjBy.natCast_mul_natCast_mul h m n
 
 variable (a) (m n : ℕ)
 
-lemma self_natCast_mul : Commute a (n * a) := (Commute.refl a).natCast_mul_right n
+theorem self_natCast_mul : Commute a (n * a) := (Commute.refl a).natCast_mul_right n
 
-lemma natCast_mul_self : Commute (n * a) a := (Commute.refl a).natCast_mul_left n
+theorem natCast_mul_self : Commute (n * a) a := (Commute.refl a).natCast_mul_left n
 
-lemma self_natCast_mul_natCast_mul : Commute (m * a) (n * a) :=
+theorem self_natCast_mul_natCast_mul : Commute (m * a) (n * a) :=
   (Commute.refl a).natCast_mul_natCast_mul m n
 
 @[deprecated (since := "2024-05-27")] alias cast_nat_mul_right := natCast_mul_right

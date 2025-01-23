@@ -8,7 +8,7 @@ import Mathlib.Data.List.Basic
 /-!
 # Properties of `List.reduceOption`
 
-In this file we prove basic lemmas about `List.reduceOption`.
+In this file we prove basic theorems about `List.reduceOption`.
 -/
 
 namespace List

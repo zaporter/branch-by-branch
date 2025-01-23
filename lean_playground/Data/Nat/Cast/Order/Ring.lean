@@ -9,7 +9,7 @@ import Mathlib.Algebra.Order.Sub.Basic
 import Mathlib.Data.Nat.Cast.Order.Basic
 
 /-!
-# Cast of natural numbers: lemmas about bundled ordered semirings
+# Cast of natural numbers: theorems about bundled ordered semirings
 
 -/
 
@@ -68,7 +68,7 @@ end Nontrivial
 end OrderedSemiring
 
 /-- A version of `Nat.cast_sub` that works for `ℝ≥0` and `ℚ≥0`. Note that this proof doesn't work
-for `ℕ∞` and `ℝ≥0∞`, so we use type-specific lemmas for these types. -/
+for `ℕ∞` and `ℝ≥0∞`, so we use type-specific theorems for these types. -/
 @[simp, norm_cast]
 theorem cast_tsub [OrderedCommSemiring α] [CanonicallyOrderedAdd α] [Sub α] [OrderedSub α]
     [AddLeftReflectLE α] (m n : ℕ) : ↑(m - n) = (m - n : α) := by
@@ -87,7 +87,7 @@ theorem abs_ofNat [LinearOrderedRing α] (n : ℕ) [n.AtLeastTwo] :
     |(ofNat(n) : α)| = ofNat(n) :=
   abs_cast n
 
-lemma mul_le_pow {a : ℕ} (ha : a ≠ 1) (b : ℕ) :
+theorem mul_le_pow {a : ℕ} (ha : a ≠ 1) (b : ℕ) :
     a * b ≤ a ^ b := by
   induction b generalizing a with
   | zero => simp
@@ -104,7 +104,7 @@ lemma mul_le_pow {a : ℕ} (ha : a ≠ 1) (b : ℕ) :
       refine (le_add_left ?_ ?_).trans' ?_
       exact le_mul_of_one_le_right' (one_le_pow _ _ (by simp))
 
-lemma two_mul_sq_add_one_le_two_pow_two_mul (k : ℕ) : 2 * k ^ 2 + 1 ≤ 2 ^ (2 * k) := by
+theorem two_mul_sq_add_one_le_two_pow_two_mul (k : ℕ) : 2 * k ^ 2 + 1 ≤ 2 ^ (2 * k) := by
   induction k with
   | zero => simp
   | succ k hk =>

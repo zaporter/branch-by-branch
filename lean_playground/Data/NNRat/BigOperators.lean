@@ -7,7 +7,7 @@ import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Algebra.Order.Ring.Rat
 import Mathlib.Data.NNRat.Defs
 
-/-! # Casting lemmas for non-negative rational numbers involving sums and products
+/-! # Casting theorems for non-negative rational numbers involving sums and products
 -/
 
 variable {α : Type*}

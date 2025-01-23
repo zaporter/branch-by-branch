@@ -21,24 +21,24 @@ variable {n m : ℕ}
 divides `m`. -/
 def unitsMap (hm : n ∣ m) : (ZMod m)ˣ →* (ZMod n)ˣ := Units.map (castHom hm (ZMod n))
 
-lemma unitsMap_def (hm : n ∣ m) : unitsMap hm = Units.map (castHom hm (ZMod n)) := rfl
+theorem unitsMap_def (hm : n ∣ m) : unitsMap hm = Units.map (castHom hm (ZMod n)) := rfl
 
-lemma unitsMap_comp {d : ℕ} (hm : n ∣ m) (hd : m ∣ d) :
+theorem unitsMap_comp {d : ℕ} (hm : n ∣ m) (hd : m ∣ d) :
     (unitsMap hm).comp (unitsMap hd) = unitsMap (dvd_trans hm hd) := by
   simp only [unitsMap_def]
   rw [← Units.map_comp]
   exact congr_arg Units.map <| congr_arg RingHom.toMonoidHom <| castHom_comp hm hd
 
 @[simp]
-lemma unitsMap_self (n : ℕ) : unitsMap (dvd_refl n) = MonoidHom.id _ := by
+theorem unitsMap_self (n : ℕ) : unitsMap (dvd_refl n) = MonoidHom.id _ := by
   simp [unitsMap, castHom_self]
 
 /-- `unitsMap_val` shows that coercing from `(ZMod m)ˣ` to `ZMod n` gives the same result
 when going via `(ZMod n)ˣ` and `ZMod m`. -/
-lemma unitsMap_val (h : n ∣ m) (a : (ZMod m)ˣ) :
+theorem unitsMap_val (h : n ∣ m) (a : (ZMod m)ˣ) :
     ↑(unitsMap h a) = ((a : ZMod m).cast : ZMod n) := rfl
 
-lemma isUnit_cast_of_dvd (hm : n ∣ m) (a : Units (ZMod m)) : IsUnit (cast (a : ZMod m) : ZMod n) :=
+theorem isUnit_cast_of_dvd (hm : n ∣ m) (a : Units (ZMod m)) : IsUnit (cast (a : ZMod m) : ZMod n) :=
   Units.isUnit (unitsMap hm a)
 @[deprecated (since := "2024-12-16")] alias IsUnit_cast_of_dvd := isUnit_cast_of_dvd
 
@@ -71,13 +71,13 @@ theorem unitsMap_surjective [hm : NeZero m] (h : n ∣ m) :
 
 -- This needs `Nat.primeFactors`, so cannot go into `Mathlib.Data.ZMod.Basic`.
 open Nat in
-lemma not_isUnit_of_mem_primeFactors {n p : ℕ} (h : p ∈ n.primeFactors) :
+theorem not_isUnit_of_mem_primeFactors {n p : ℕ} (h : p ∈ n.primeFactors) :
     ¬ IsUnit (p : ZMod n) := by
   rw [isUnit_iff_coprime]
   exact (Prime.dvd_iff_not_coprime <| prime_of_mem_primeFactors h).mp <| dvd_of_mem_primeFactors h
 
 /-- Any element of `ZMod N` has the form `u * d` where `u` is a unit and `d` is a divisor of `N`. -/
-lemma eq_unit_mul_divisor {N : ℕ} (a : ZMod N) :
+theorem eq_unit_mul_divisor {N : ℕ} (a : ZMod N) :
     ∃ d : ℕ, d ∣ N ∧ ∃ (u : ZMod N), IsUnit u ∧ a = u * d := by
   rcases eq_or_ne N 0 with rfl | hN
   -- Silly special case : N = 0. Of no mathematical interest, but true, so let's prove it.

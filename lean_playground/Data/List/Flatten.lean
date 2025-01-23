@@ -22,7 +22,7 @@ namespace List
 set_option linter.deprecated false in
 /-- See `List.length_flatten` for the corresponding statement using `List.sum`. -/
 @[deprecated length_flatten (since := "2024-10-17")]
-lemma length_flatten' (L : List (List α)) : length (flatten L) = Nat.sum (map length L) := by
+theorem length_flatten' (L : List (List α)) : length (flatten L) = Nat.sum (map length L) := by
   induction L <;> [rfl; simp only [*, flatten, map, Nat.sum_cons, length_append]]
 
 @[deprecated (since := "2024-10-25")] alias length_join' := length_flatten'
@@ -30,7 +30,7 @@ lemma length_flatten' (L : List (List α)) : length (flatten L) = Nat.sum (map l
 set_option linter.deprecated false in
 /-- See `List.countP_flatten` for the corresponding statement using `List.sum`. -/
 @[deprecated countP_flatten (since := "2024-10-17")]
-lemma countP_flatten' (p : α → Bool) :
+theorem countP_flatten' (p : α → Bool) :
     ∀ L : List (List α), countP p L.flatten = Nat.sum (L.map (countP p))
   | [] => rfl
   | a :: l => by rw [flatten, countP_append, map_cons, Nat.sum_cons, countP_flatten' _ l]
@@ -40,7 +40,7 @@ lemma countP_flatten' (p : α → Bool) :
 set_option linter.deprecated false in
 /-- See `List.count_flatten` for the corresponding statement using `List.sum`. -/
 @[deprecated count_flatten (since := "2024-10-17")]
-lemma count_flatten' [BEq α] (L : List (List α)) (a : α) :
+theorem count_flatten' [BEq α] (L : List (List α)) (a : α) :
     L.flatten.count a = Nat.sum (L.map (count a)) := countP_flatten' _ _
 
 @[deprecated (since := "2024-10-25")] alias count_join' := count_flatten'
@@ -48,7 +48,7 @@ lemma count_flatten' [BEq α] (L : List (List α)) (a : α) :
 set_option linter.deprecated false in
 /-- See `List.length_flatMap` for the corresponding statement using `List.sum`. -/
 @[deprecated "Use `List.length_flatMap`." (since := "2024-10-17")]
-lemma length_flatMap' (l : List α) (f : α → List β) :
+theorem length_flatMap' (l : List α) (f : α → List β) :
     length (l.flatMap f) = Nat.sum (map (length ∘ f) l) := by
   rw [List.flatMap, length_flatten', map_map]
 
@@ -57,7 +57,7 @@ lemma length_flatMap' (l : List α) (f : α → List β) :
 set_option linter.deprecated false in
 /-- See `List.countP_flatMap` for the corresponding statement using `List.sum`. -/
 @[deprecated "Use `List.countP_flatMap`." (since := "2024-10-17")]
-lemma countP_flatMap' (p : β → Bool) (l : List α) (f : α → List β) :
+theorem countP_flatMap' (p : β → Bool) (l : List α) (f : α → List β) :
     countP p (l.flatMap f) = Nat.sum (map (countP p ∘ f) l) := by
   rw [List.flatMap, countP_flatten', map_map]
 
@@ -66,7 +66,7 @@ lemma countP_flatMap' (p : β → Bool) (l : List α) (f : α → List β) :
 set_option linter.deprecated false in
 /-- See `List.count_flatMap` for the corresponding statement using `List.sum`. -/
 @[deprecated "Use `List.count_flatMap`." (since := "2024-10-17")]
-lemma count_flatMap' [BEq β] (l : List α) (f : α → List β) (x : β) :
+theorem count_flatMap' [BEq β] (l : List α) (f : α → List β) (x : β) :
     count x (l.flatMap f) = Nat.sum (map (count x ∘ f) l) := countP_flatMap' _ _ _
 
 @[deprecated (since := "2024-10-16")] alias count_bind' := count_flatMap'

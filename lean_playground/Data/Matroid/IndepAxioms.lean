@@ -19,7 +19,7 @@ axiom that can be dropped in cases where there is some finiteness assumption.
 This file provides several ways to do define a matroid in terms of its independence or base
 predicates, using axiom sets that are appropriate in different settings,
 and often much simpler than the general definition.
-It also contains `simp` lemmas and typeclasses as appropriate.
+It also contains `simp` theorems and typeclasses as appropriate.
 
 All the independence axiom sets need nontriviality (the empty set is independent),
 monotonicity (subsets of independent sets are independent),
@@ -39,7 +39,7 @@ constructs a `Matroid` from an `IndepMatroid`.
 This is convenient because if one wants to define `M : Matroid α` from a known independence
 predicate `Ind`, it is easier to define an `M' : IndepMatroid α` so that `M'.Indep = Ind` and
 then set `M = M'.matroid` than it is to directly define `M` with the base axioms.
-The simp lemma `IndepMatroid.matroid_indep_iff` is important here; it shows that `M.Indep = Ind`,
+The simp theorem `IndepMatroid.matroid_indep_iff` is important here; it shows that `M.Indep = Ind`,
 so the `Matroid` constructed is the right one, and the intermediate `IndepMatroid` can be
 made essentially invisible by the simplifier when working with `M`.
 
@@ -59,7 +59,7 @@ for the inverse of `e`).
 
 * `IndepMatroid.ofFinitary` constructs an `IndepMatroid` whose associated `Matroid` is `Finitary`
   in the special case where independence of a set is determined only by that of its
-  finite subsets. This construction uses Zorn's lemma.
+  finite subsets. This construction uses Zorn's theorem.
 
 * `IndepMatroid.ofFinitaryCardAugment` is a variant of `IndepMatroid.ofFinitary` where the
   augmentation axiom resembles the finite augmentation axiom.

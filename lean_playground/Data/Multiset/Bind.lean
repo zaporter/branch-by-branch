@@ -201,7 +201,7 @@ theorem attach_bind_coe (s : Multiset α) (f : α → Multiset β) :
 variable {f s t}
 
 open scoped Function in -- required for scoped `on` notation
-@[simp] lemma nodup_bind :
+@[simp] theorem nodup_bind :
     Nodup (bind s f) ↔ (∀ a ∈ s, Nodup (f a)) ∧ s.Pairwise (Disjoint on f) := by
   have : ∀ a, ∃ l : List β, f a = l := fun a => Quot.induction_on (f a) fun l => ⟨l, rfl⟩
   choose f' h' using this
@@ -212,7 +212,7 @@ open scoped Function in -- required for scoped `on` notation
     simp [this, List.nodup_flatMap, pairwise_coe_iff_pairwise hd]
 
 @[simp]
-lemma dedup_bind_dedup [DecidableEq α] [DecidableEq β] (s : Multiset α) (f : α → Multiset β) :
+theorem dedup_bind_dedup [DecidableEq α] [DecidableEq β] (s : Multiset α) (f : α → Multiset β) :
     (s.dedup.bind f).dedup = (s.bind f).dedup := by
   ext x
   -- Porting note: was `simp_rw [count_dedup, mem_bind, mem_dedup]`
@@ -277,7 +277,7 @@ theorem card_product : card (s ×ˢ t) = card s * card t := by simp [SProd.sprod
 
 variable {s t}
 
-@[simp] lemma mem_product : ∀ {p : α × β}, p ∈ @product α β s t ↔ p.1 ∈ s ∧ p.2 ∈ t
+@[simp] theorem mem_product : ∀ {p : α × β}, p ∈ @product α β s t ↔ p.1 ∈ s ∧ p.2 ∈ t
   | (a, b) => by simp [product, and_left_comm]
 
 protected theorem Nodup.product : Nodup s → Nodup t → Nodup (s ×ˢ t) :=
@@ -333,7 +333,7 @@ theorem card_sigma : card (s.sigma t) = sum (map (fun a => card (t a)) s) := by
 
 variable {s t}
 
-@[simp] lemma mem_sigma : ∀ {p : Σa, σ a}, p ∈ @Multiset.sigma α σ s t ↔ p.1 ∈ s ∧ p.2 ∈ t p.1
+@[simp] theorem mem_sigma : ∀ {p : Σa, σ a}, p ∈ @Multiset.sigma α σ s t ↔ p.1 ∈ s ∧ p.2 ∈ t p.1
   | ⟨a, b⟩ => by simp [Multiset.sigma, and_assoc, and_left_comm]
 
 protected theorem Nodup.sigma {σ : α → Type*} {t : ∀ a, Multiset (σ a)} :

@@ -71,7 +71,7 @@ instance _root_.Sym2.instFintype [Fintype α] : Fintype (Sym2 α) where
   elems := Finset.univ.sym2
   complete := fun x ↦ by rw [mem_sym2_iff]; exact (fun a _ ↦ mem_univ a)
 
--- Note(kmill): Using a default argument to make this simp lemma more general.
+-- Note(kmill): Using a default argument to make this simp theorem more general.
 @[simp]
 theorem sym2_univ [Fintype α] (inst : Fintype (Sym2 α) := Sym2.instFintype) :
     (univ : Finset α).sym2 = univ := by

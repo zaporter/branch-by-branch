@@ -13,16 +13,16 @@ import Mathlib.Data.Nat.SuccPred
 /-!
 # Definition and basic properties of extended natural numbers
 
-In this file we define `ENat` (notation: `ℕ∞`) to be `WithTop ℕ` and prove some basic lemmas
+In this file we define `ENat` (notation: `ℕ∞`) to be `WithTop ℕ` and prove some basic theorems
 about this type.
 
 ## Implementation details
 
 There are two natural coercions from `ℕ` to `WithTop ℕ = ENat`: `WithTop.some` and `Nat.cast`.  In
 Lean 3, this difference was hidden in typeclass instances. Since these instances were definitionally
-equal, we did not duplicate generic lemmas about `WithTop α` and `WithTop.some` coercion for `ENat`
-and `Nat.cast` coercion. If you need to apply a lemma about `WithTop`, you may either rewrite back
-and forth using `ENat.some_eq_coe`, or restate the lemma for `ENat`.
+equal, we did not duplicate generic theorems about `WithTop α` and `WithTop.some` coercion for `ENat`
+and `Nat.cast` coercion. If you need to apply a theorem about `WithTop`, you may either rewrite back
+and forth using `ENat.some_eq_coe`, or restate the theorem for `ENat`.
 
 ## TODO
 
@@ -79,7 +79,7 @@ theorem coe_add (m n : ℕ) : ↑(m + n) = (m + n : ℕ∞) :=
 theorem coe_sub (m n : ℕ) : ↑(m - n) = (m - n : ℕ∞) :=
   rfl
 
-@[simp] lemma coe_mul (m n : ℕ) : ↑(m * n) = (m * n : ℕ∞) := rfl
+@[simp] theorem coe_mul (m n : ℕ) : ↑(m * n) = (m * n : ℕ∞) := rfl
 
 @[simp] theorem mul_top (hm : m ≠ 0) : m * ⊤ = ⊤ := WithTop.mul_top hm
 @[simp] theorem top_mul (hm : m ≠ 0) : ⊤ * m = ⊤ := WithTop.top_mul hm
@@ -125,9 +125,9 @@ def toNatHom : MonoidWithZeroHom ℕ∞ ℕ where
   map_zero' := rfl
   map_mul' := WithTop.untop'_zero_mul
 
-@[simp, norm_cast] lemma coe_toNatHom : toNatHom = toNat := rfl
+@[simp, norm_cast] theorem coe_toNatHom : toNatHom = toNat := rfl
 
-lemma toNatHom_apply (n : ℕ) : toNatHom n = toNat n := rfl
+theorem toNatHom_apply (n : ℕ) : toNatHom n = toNat n := rfl
 
 @[simp]
 theorem toNat_coe (n : ℕ) : toNat n = n :=
@@ -172,8 +172,8 @@ theorem top_ne_coe (a : ℕ) : ⊤ ≠ (a : ℕ∞) :=
 theorem top_ne_ofNat (a : ℕ) [a.AtLeastTwo] : ⊤ ≠ (ofNat(a) : ℕ∞) :=
   nofun
 
-@[simp] lemma top_ne_zero : (⊤ : ℕ∞) ≠ 0 := nofun
-@[simp] lemma top_ne_one : (⊤ : ℕ∞) ≠ 1 := nofun
+@[simp] theorem top_ne_zero : (⊤ : ℕ∞) ≠ 0 := nofun
+@[simp] theorem top_ne_one : (⊤ : ℕ∞) ≠ 1 := nofun
 
 @[simp]
 theorem coe_ne_top (a : ℕ) : (a : ℕ∞) ≠ ⊤ :=
@@ -183,8 +183,8 @@ theorem coe_ne_top (a : ℕ) : (a : ℕ∞) ≠ ⊤ :=
 theorem ofNat_ne_top (a : ℕ) [a.AtLeastTwo] : (ofNat(a) : ℕ∞) ≠ ⊤ :=
   nofun
 
-@[simp] lemma zero_ne_top : 0 ≠ (⊤ : ℕ∞) := nofun
-@[simp] lemma one_ne_top : 1 ≠ (⊤ : ℕ∞) := nofun
+@[simp] theorem zero_ne_top : 0 ≠ (⊤ : ℕ∞) := nofun
+@[simp] theorem one_ne_top : 1 ≠ (⊤ : ℕ∞) := nofun
 
 @[simp]
 theorem top_sub_coe (a : ℕ) : (⊤ : ℕ∞) - a = ⊤ :=
@@ -231,12 +231,12 @@ theorem toNat_sub {n : ℕ∞} (hn : n ≠ ⊤) (m : ℕ∞) : toNat (m - n) = t
 theorem toNat_eq_iff {m : ℕ∞} {n : ℕ} (hn : n ≠ 0) : toNat m = n ↔ m = n := by
   induction m <;> simp [hn.symm]
 
-lemma toNat_le_of_le_coe {m : ℕ∞} {n : ℕ} (h : m ≤ n) : toNat m ≤ n := by
+theorem toNat_le_of_le_coe {m : ℕ∞} {n : ℕ} (h : m ≤ n) : toNat m ≤ n := by
   lift m to ℕ using ne_top_of_le_ne_top (coe_ne_top n) h
   simpa using h
 
 @[gcongr]
-lemma toNat_le_toNat {m n : ℕ∞} (h : m ≤ n) (hn : n ≠ ⊤) : toNat m ≤ toNat n :=
+theorem toNat_le_toNat {m n : ℕ∞} (h : m ≤ n) (hn : n ≠ ⊤) : toNat m ≤ toNat n :=
   toNat_le_of_le_coe <| h.trans_eq (coe_toNat hn).symm
 
 @[simp]
@@ -257,7 +257,7 @@ theorem one_le_iff_pos : 1 ≤ n ↔ 0 < n :=
 theorem one_le_iff_ne_zero : 1 ≤ n ↔ n ≠ 0 :=
   Order.one_le_iff_pos.trans pos_iff_ne_zero
 
-lemma lt_one_iff_eq_zero : n < 1 ↔ n = 0 :=
+theorem lt_one_iff_eq_zero : n < 1 ↔ n = 0 :=
   not_le.symm.trans one_le_iff_ne_zero.not_left
 
 @[deprecated Order.le_of_lt_add_one (since := "2024-09-04")]
@@ -271,16 +271,16 @@ theorem le_coe_iff {n : ℕ∞} {k : ℕ} : n ≤ ↑k ↔ ∃ (n₀ : ℕ), n =
   WithTop.le_coe_iff
 
 @[simp]
-lemma not_lt_zero (n : ℕ∞) : ¬ n < 0 := by
+theorem not_lt_zero (n : ℕ∞) : ¬ n < 0 := by
   cases n <;> simp
 
 @[simp]
-lemma coe_lt_top (n : ℕ) : (n : ℕ∞) < ⊤ :=
+theorem coe_lt_top (n : ℕ) : (n : ℕ∞) < ⊤ :=
   WithTop.coe_lt_top n
 
-lemma coe_lt_coe {n m : ℕ} : (n : ℕ∞) < (m : ℕ∞) ↔ n < m := by simp
+theorem coe_lt_coe {n m : ℕ} : (n : ℕ∞) < (m : ℕ∞) ↔ n < m := by simp
 
-lemma coe_le_coe {n m : ℕ} : (n : ℕ∞) ≤ (m : ℕ∞) ↔ n ≤ m := by simp
+theorem coe_le_coe {n m : ℕ} : (n : ℕ∞) ≤ (m : ℕ∞) ↔ n ≤ m := by simp
 
 @[elab_as_elim]
 theorem nat_induction {P : ℕ∞ → Prop} (a : ℕ∞) (h0 : P 0) (hsuc : ∀ n : ℕ, P n → P n.succ)
@@ -290,45 +290,45 @@ theorem nat_induction {P : ℕ∞ → Prop} (a : ℕ∞) (h0 : P 0) (hsuc : ∀ 
   · exact htop A
   · exact A _
 
-lemma add_one_pos : 0 < n + 1 :=
+theorem add_one_pos : 0 < n + 1 :=
   succ_def n ▸ Order.bot_lt_succ n
 
-lemma add_lt_add_iff_right {k : ℕ∞} (h : k ≠ ⊤) : n + k < m + k ↔ n < m :=
+theorem add_lt_add_iff_right {k : ℕ∞} (h : k ≠ ⊤) : n + k < m + k ↔ n < m :=
   WithTop.add_lt_add_iff_right h
 
-lemma add_lt_add_iff_left {k : ℕ∞} (h : k ≠ ⊤) : k + n < k + m ↔ n < m :=
+theorem add_lt_add_iff_left {k : ℕ∞} (h : k ≠ ⊤) : k + n < k + m ↔ n < m :=
   WithTop.add_lt_add_iff_left h
 
-protected lemma exists_nat_gt {n : ℕ∞} (hn : n ≠ ⊤) : ∃ m : ℕ, n < m := by
+protected theorem exists_nat_gt {n : ℕ∞} (hn : n ≠ ⊤) : ∃ m : ℕ, n < m := by
   lift n to ℕ using hn
   obtain ⟨m, hm⟩ := exists_gt n
   exact ⟨m, Nat.cast_lt.2 hm⟩
 
-lemma ne_top_iff_exists {x : ℕ∞} : x ≠ ⊤ ↔ ∃ a : ℕ, ↑a = x := WithTop.ne_top_iff_exists
+theorem ne_top_iff_exists {x : ℕ∞} : x ≠ ⊤ ↔ ∃ a : ℕ, ↑a = x := WithTop.ne_top_iff_exists
 
-@[simp] lemma sub_eq_top_iff : a - b = ⊤ ↔ a = ⊤ ∧ b ≠ ⊤ := WithTop.sub_eq_top_iff
-lemma sub_ne_top_iff : a - b ≠ ⊤ ↔ a ≠ ⊤ ∨ b = ⊤ := WithTop.sub_ne_top_iff
+@[simp] theorem sub_eq_top_iff : a - b = ⊤ ↔ a = ⊤ ∧ b ≠ ⊤ := WithTop.sub_eq_top_iff
+theorem sub_ne_top_iff : a - b ≠ ⊤ ↔ a ≠ ⊤ ∨ b = ⊤ := WithTop.sub_ne_top_iff
 
-lemma addLECancellable_of_ne_top : a ≠ ⊤ → AddLECancellable a := WithTop.addLECancellable_of_ne_top
-lemma addLECancellable_of_lt_top : a < ⊤ → AddLECancellable a := WithTop.addLECancellable_of_lt_top
+theorem addLECancellable_of_ne_top : a ≠ ⊤ → AddLECancellable a := WithTop.addLECancellable_of_ne_top
+theorem addLECancellable_of_lt_top : a < ⊤ → AddLECancellable a := WithTop.addLECancellable_of_lt_top
 
-protected lemma le_sub_of_add_le_left (ha : a ≠ ⊤) : a + b ≤ c → b ≤ c - a :=
+protected theorem le_sub_of_add_le_left (ha : a ≠ ⊤) : a + b ≤ c → b ≤ c - a :=
   (addLECancellable_of_ne_top ha).le_tsub_of_add_le_left
 
-protected lemma sub_sub_cancel (h : a ≠ ⊤) (h2 : b ≤ a) : a - (a - b) = b :=
+protected theorem sub_sub_cancel (h : a ≠ ⊤) (h2 : b ≤ a) : a - (a - b) = b :=
   (addLECancellable_of_ne_top <| ne_top_of_le_ne_top h tsub_le_self).tsub_tsub_cancel_of_le h2
 
 section withTop_enat
 
-lemma add_one_natCast_le_withTop_of_lt {m : ℕ} {n : WithTop ℕ∞} (h : m < n) : (m + 1 : ℕ) ≤ n := by
+theorem add_one_natCast_le_withTop_of_lt {m : ℕ} {n : WithTop ℕ∞} (h : m < n) : (m + 1 : ℕ) ≤ n := by
   match n with
   | ⊤ => exact le_top
   | (⊤ : ℕ∞) => exact WithTop.coe_le_coe.2 (OrderTop.le_top _)
   | (n : ℕ) => simpa only [Nat.cast_le, ge_iff_le, Nat.cast_lt] using h
 
-@[simp] lemma coe_top_add_one : ((⊤ : ℕ∞) : WithTop ℕ∞) + 1 = (⊤ : ℕ∞) := rfl
+@[simp] theorem coe_top_add_one : ((⊤ : ℕ∞) : WithTop ℕ∞) + 1 = (⊤ : ℕ∞) := rfl
 
-@[simp] lemma add_one_eq_coe_top_iff {n : WithTop ℕ∞} : n + 1 = (⊤ : ℕ∞) ↔ n = (⊤ : ℕ∞) := by
+@[simp] theorem add_one_eq_coe_top_iff {n : WithTop ℕ∞} : n + 1 = (⊤ : ℕ∞) ↔ n = (⊤ : ℕ∞) := by
   match n with
   | ⊤ => exact Iff.rfl
   | (⊤ : ℕ∞) => simp
@@ -336,19 +336,19 @@ lemma add_one_natCast_le_withTop_of_lt {m : ℕ} {n : WithTop ℕ∞} (h : m < n
     norm_cast
     simp only [coe_ne_top, iff_false, ne_eq]
 
-@[simp] lemma natCast_ne_coe_top (n : ℕ) : (n : WithTop ℕ∞) ≠ (⊤ : ℕ∞) := nofun
+@[simp] theorem natCast_ne_coe_top (n : ℕ) : (n : WithTop ℕ∞) ≠ (⊤ : ℕ∞) := nofun
 
 @[deprecated (since := "2024-10-22")]
 alias nat_ne_coe_top := natCast_ne_coe_top
 
-lemma one_le_iff_ne_zero_withTop {n : WithTop ℕ∞} : 1 ≤ n ↔ n ≠ 0 :=
+theorem one_le_iff_ne_zero_withTop {n : WithTop ℕ∞} : 1 ≤ n ↔ n ≠ 0 :=
   ⟨fun h ↦ (zero_lt_one.trans_le h).ne',
     fun h ↦ add_one_natCast_le_withTop_of_lt (pos_iff_ne_zero.mpr h)⟩
 
-lemma natCast_le_of_coe_top_le_withTop {N : WithTop ℕ∞} (hN : (⊤ : ℕ∞) ≤ N) (n : ℕ) : n ≤ N :=
+theorem natCast_le_of_coe_top_le_withTop {N : WithTop ℕ∞} (hN : (⊤ : ℕ∞) ≤ N) (n : ℕ) : n ≤ N :=
   le_trans (mod_cast le_top) hN
 
-lemma natCast_lt_of_coe_top_le_withTop {N : WithTop ℕ∞} (hN : (⊤ : ℕ∞) ≤ N) (n : ℕ) : n < N :=
+theorem natCast_lt_of_coe_top_le_withTop {N : WithTop ℕ∞} (hN : (⊤ : ℕ∞) ≤ N) (n : ℕ) : n < N :=
   lt_of_lt_of_le (mod_cast lt_add_one n) (natCast_le_of_coe_top_le_withTop hN (n + 1))
 
 end withTop_enat
@@ -376,7 +376,7 @@ theorem map_one (f : ℕ → α) : map f 1 = f 1 := rfl
 theorem map_ofNat (f : ℕ → α) (n : ℕ) [n.AtLeastTwo] : map f ofNat(n) = f n := rfl
 
 @[simp]
-lemma map_eq_top_iff {f : ℕ → α} : map f n = ⊤ ↔ n = ⊤ := WithTop.map_eq_top_iff
+theorem map_eq_top_iff {f : ℕ → α} : map f n = ⊤ ↔ n = ⊤ := WithTop.map_eq_top_iff
 
 @[simp]
 theorem map_natCast_nonneg [AddMonoidWithOne α] [PartialOrder α]
@@ -453,14 +453,14 @@ protected def _root_.RingHom.ENatMap {S : Type*} [OrderedCommSemiring S] [Canoni
 
 end ENat
 
-lemma WithBot.lt_add_one_iff {n : WithBot ℕ∞} {m : ℕ} : n < m + 1 ↔ n ≤ m := by
+theorem WithBot.lt_add_one_iff {n : WithBot ℕ∞} {m : ℕ} : n < m + 1 ↔ n ≤ m := by
   rw [← WithBot.coe_one, ← ENat.coe_one, WithBot.coe_natCast, ← Nat.cast_add, ← WithBot.coe_natCast]
   cases n
   · simp only [bot_le, iff_true, WithBot.bot_lt_coe]
   · rw [WithBot.coe_lt_coe, Nat.cast_add, ENat.coe_one, ENat.lt_add_one_iff (ENat.coe_ne_top _),
       ← WithBot.coe_le_coe, WithBot.coe_natCast]
 
-lemma WithBot.add_one_le_iff {n : ℕ} {m : WithBot ℕ∞} : n + 1 ≤ m ↔ n < m := by
+theorem WithBot.add_one_le_iff {n : ℕ} {m : WithBot ℕ∞} : n + 1 ≤ m ↔ n < m := by
   rw [← WithBot.coe_one, ← ENat.coe_one, WithBot.coe_natCast, ← Nat.cast_add, ← WithBot.coe_natCast]
   cases m
   · simp

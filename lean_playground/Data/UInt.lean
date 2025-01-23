@@ -43,19 +43,19 @@ run_cmd
       instance : SMul ℤ $typeName where
         smul z a := mk ⟨z • a.val⟩
 
-      lemma neg_def (a : $typeName) : -a = ⟨⟨-a.val⟩⟩ := rfl
+      theorem neg_def (a : $typeName) : -a = ⟨⟨-a.val⟩⟩ := rfl
 
-      lemma pow_def (a : $typeName) (n : ℕ) : a ^ n = ⟨⟨a.val ^ n⟩⟩ := rfl
+      theorem pow_def (a : $typeName) (n : ℕ) : a ^ n = ⟨⟨a.val ^ n⟩⟩ := rfl
 
-      lemma nsmul_def (n : ℕ) (a : $typeName) : n • a = ⟨⟨n • a.val⟩⟩ := rfl
+      theorem nsmul_def (n : ℕ) (a : $typeName) : n • a = ⟨⟨n • a.val⟩⟩ := rfl
 
-      lemma zsmul_def (z : ℤ) (a : $typeName) : z • a = ⟨⟨z • a.val⟩⟩ := rfl
+      theorem zsmul_def (z : ℤ) (a : $typeName) : z • a = ⟨⟨z • a.val⟩⟩ := rfl
 
       open $typeName (eq_of_val_eq) in
-      lemma val_injective : Function.Injective val := @eq_of_val_eq
+      theorem val_injective : Function.Injective val := @eq_of_val_eq
 
       open $typeName (eq_of_toBitVec_eq) in
-      lemma toBitVec_injective : Function.Injective toBitVec := @eq_of_toBitVec_eq
+      theorem toBitVec_injective : Function.Injective toBitVec := @eq_of_toBitVec_eq
 
       instance instCommMonoid : CommMonoid $typeName :=
         Function.Injective.commMonoid toBitVec toBitVec_injective
@@ -72,9 +72,9 @@ run_cmd
       local instance instIntCast : IntCast $typeName where
         intCast z := mk z
 
-      lemma natCast_def (n : ℕ) : (n : $typeName) = ⟨n⟩ := rfl
+      theorem natCast_def (n : ℕ) : (n : $typeName) = ⟨n⟩ := rfl
 
-      lemma intCast_def (z : ℤ) : (z : $typeName) = ⟨z⟩ := rfl
+      theorem intCast_def (z : ℤ) : (z : $typeName) = ⟨z⟩ := rfl
 
       local instance instCommRing : CommRing $typeName :=
         Function.Injective.commRing toBitVec toBitVec_injective

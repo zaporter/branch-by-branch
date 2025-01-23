@@ -21,19 +21,19 @@ variable {α : Type*}
 
 namespace List
 
-lemma countP_erase [DecidableEq α] (p : α → Bool) (l : List α) (a : α) :
+theorem countP_erase [DecidableEq α] (p : α → Bool) (l : List α) (a : α) :
     countP p (l.erase a) = countP p l - if a ∈ l ∧ p a then 1 else 0 := by
   rw [countP_eq_length_filter, countP_eq_length_filter, ← erase_filter, length_erase]
   aesop
 
-lemma count_diff [DecidableEq α] (a : α) (l₁ : List α) :
+theorem count_diff [DecidableEq α] (a : α) (l₁ : List α) :
     ∀ l₂, count a (l₁.diff l₂) = count a l₁ - count a l₂
   | [] => rfl
   | b :: l₂ => by
     simp only [diff_cons, count_diff, count_erase, beq_iff_eq, Nat.sub_right_comm, count_cons,
       Nat.sub_add_eq]
 
-lemma countP_diff [DecidableEq α] {l₁ l₂ : List α} (hl : l₂ <+~ l₁) (p : α → Bool) :
+theorem countP_diff [DecidableEq α] {l₁ l₂ : List α} (hl : l₂ <+~ l₁) (p : α → Bool) :
     countP p (l₁.diff l₂) = countP p l₁ - countP p l₂ := by
   refine (Nat.sub_eq_of_eq_add ?_).symm
   rw [← countP_append]

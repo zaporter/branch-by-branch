@@ -10,7 +10,7 @@ import Mathlib.Order.Interval.Finset.Nat
 import Mathlib.Tactic.IntervalCases
 
 /-!
-# Basic lemmas on prime factorizations
+# Basic theorems on prime factorizations
 -/
 
 open Finset List Finsupp
@@ -52,11 +52,11 @@ theorem factorization_eq_zero_iff' (n : ℕ) : n.factorization = 0 ↔ n = 0 ∨
 
 
 /-- A product over `n.factorization` can be written as a product over `n.primeFactors`; -/
-lemma prod_factorization_eq_prod_primeFactors {β : Type*} [CommMonoid β] (f : ℕ → ℕ → β) :
+theorem prod_factorization_eq_prod_primeFactors {β : Type*} [CommMonoid β] (f : ℕ → ℕ → β) :
     n.factorization.prod f = ∏ p ∈ n.primeFactors, f p (n.factorization p) := rfl
 
 /-- A product over `n.primeFactors` can be written as a product over `n.factorization`; -/
-lemma prod_primeFactors_prod_factorization {β : Type*} [CommMonoid β] (f : ℕ → β) :
+theorem prod_primeFactors_prod_factorization {β : Type*} [CommMonoid β] (f : ℕ → β) :
     ∏ p ∈ n.primeFactors, f p = n.factorization.prod (fun p _ ↦ f p) := rfl
 
 /-! ## Lemmas about factorizations of primes and prime powers -/
@@ -404,21 +404,21 @@ theorem factorization_lcm {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) :
 variable (a b)
 
 @[simp]
-lemma factorizationLCMLeft_zero_left : factorizationLCMLeft 0 b = 1 := by
+theorem factorizationLCMLeft_zero_left : factorizationLCMLeft 0 b = 1 := by
   simp [factorizationLCMLeft]
 
 @[simp]
-lemma factorizationLCMLeft_zero_right : factorizationLCMLeft a 0 = 1 := by
+theorem factorizationLCMLeft_zero_right : factorizationLCMLeft a 0 = 1 := by
   simp [factorizationLCMLeft]
 
 @[simp]
-lemma factorizationLCRight_zero_left : factorizationLCMRight 0 b = 1 := by
+theorem factorizationLCRight_zero_left : factorizationLCMRight 0 b = 1 := by
   simp [factorizationLCMRight]
 @[simp]
-lemma factorizationLCMRight_zero_right : factorizationLCMRight a 0 = 1 := by
+theorem factorizationLCMRight_zero_right : factorizationLCMRight a 0 = 1 := by
   simp [factorizationLCMRight]
 
-lemma factorizationLCMLeft_pos :
+theorem factorizationLCMLeft_pos :
     0 < factorizationLCMLeft a b := by
   apply Nat.pos_of_ne_zero
   rw [factorizationLCMLeft, Finsupp.prod_ne_zero_iff]
@@ -428,7 +428,7 @@ lemma factorizationLCMLeft_pos :
     simpa [H.1] using H.2
   · simp only [h, reduceIte, one_ne_zero] at H
 
-lemma factorizationLCMRight_pos :
+theorem factorizationLCMRight_pos :
     0 < factorizationLCMRight a b := by
   apply Nat.pos_of_ne_zero
   rw [factorizationLCMRight, Finsupp.prod_ne_zero_iff]
@@ -438,7 +438,7 @@ lemma factorizationLCMRight_pos :
   · simp only [h, ↓reduceIte, pow_eq_zero_iff', ne_eq] at H
     simpa [H.1] using H.2
 
-lemma coprime_factorizationLCMLeft_factorizationLCMRight :
+theorem coprime_factorizationLCMLeft_factorizationLCMRight :
     (factorizationLCMLeft a b).Coprime (factorizationLCMRight a b) := by
   rw [factorizationLCMLeft, factorizationLCMRight]
   refine coprime_prod_left_iff.mpr fun p hp ↦ coprime_prod_right_iff.mpr fun q hq ↦ ?_
@@ -449,7 +449,7 @@ lemma coprime_factorizationLCMLeft_factorizationLCMRight :
 
 variable {a b}
 
-lemma factorizationLCMLeft_mul_factorizationLCMRight (ha : a ≠ 0) (hb : b ≠ 0) :
+theorem factorizationLCMLeft_mul_factorizationLCMRight (ha : a ≠ 0) (hb : b ≠ 0) :
     (factorizationLCMLeft a b) * (factorizationLCMRight a b) = lcm a b := by
   rw [← factorization_prod_pow_eq_self (lcm_ne_zero ha hb), factorizationLCMLeft,
     factorizationLCMRight, ← prod_mul]
@@ -457,7 +457,7 @@ lemma factorizationLCMLeft_mul_factorizationLCMRight (ha : a ≠ 0) (hb : b ≠ 
 
 variable (a b)
 
-lemma factorizationLCMLeft_dvd_left : factorizationLCMLeft a b ∣ a := by
+theorem factorizationLCMLeft_dvd_left : factorizationLCMLeft a b ∣ a := by
   rcases eq_or_ne a 0 with rfl | ha
   · simp only [dvd_zero]
   rcases eq_or_ne b 0 with rfl | hb
@@ -471,7 +471,7 @@ lemma factorizationLCMLeft_dvd_left : factorizationLCMLeft a b ∣ a := by
     rw [factorization_lcm ha hb]; exact (lt_sup_iff.mpr <| .inl <| Nat.pos_of_ne_zero hp).ne'
   · intros; rw [pow_zero]
 
-lemma factorizationLCMRight_dvd_right : factorizationLCMRight a b ∣ b := by
+theorem factorizationLCMRight_dvd_right : factorizationLCMRight a b ∣ b := by
   rcases eq_or_ne a 0 with rfl | ha
   · simp [factorizationLCMRight]
   rcases eq_or_ne b 0 with rfl | hb
@@ -571,7 +571,7 @@ theorem prod_pow_prime_padicValNat (n : Nat) (hn : n ≠ 0) (m : Nat) (pr : n < 
 /-! ### Lemmas about factorizations of particular functions -/
 
 
--- TODO: Port lemmas from `Data/Nat/Multiplicity` to here, re-written in terms of `factorization`
+-- TODO: Port theorems from `Data/Nat/Multiplicity` to here, re-written in terms of `factorization`
 /-- Exactly `n / p` naturals in `[1, n]` are multiples of `p`.
 See `Nat.card_multiples'` for an alternative spelling of the statement. -/
 theorem card_multiples (n p : ℕ) : #{e ∈ range n | p ∣ e + 1} = n / p := by
@@ -584,7 +584,7 @@ theorem card_multiples (n p : ℕ) : #{e ∈ range n | p ∣ e + 1} = n / p := b
 theorem Ioc_filter_dvd_card_eq_div (n p : ℕ) : #{x ∈ Ioc 0 n | p ∣ x} = n / p := by
   induction' n with n IH
   · simp
-  -- TODO: Golf away `h1` after Yaël PRs a lemma asserting this
+  -- TODO: Golf away `h1` after Yaël PRs a theorem asserting this
   have h1 : Ioc 0 n.succ = insert n.succ (Ioc 0 n) := by
     rcases n.eq_zero_or_pos with (rfl | hn)
     · simp
@@ -594,7 +594,7 @@ theorem Ioc_filter_dvd_card_eq_div (n p : ℕ) : #{x ∈ Ioc 0 n | p ∣ x} = n 
 
 /-- There are exactly `⌊N/n⌋` positive multiples of `n` that are `≤ N`.
 See `Nat.card_multiples` for a "shifted-by-one" version. -/
-lemma card_multiples' (N n : ℕ) : #{k ∈ range N.succ | k ≠ 0 ∧ n ∣ k} = N / n := by
+theorem card_multiples' (N n : ℕ) : #{k ∈ range N.succ | k ≠ 0 ∧ n ∣ k} = N / n := by
   induction N with
     | zero => simp [Finset.filter_false_of_mem]
     | succ N ih =>

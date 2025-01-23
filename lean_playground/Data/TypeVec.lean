@@ -27,7 +27,7 @@ Also, support functions for operating with n-tuples of types, such as:
 * `lastFun f`     - returns the last function of a tuple.
 
 Since e.g. `append1 α.drop α.last` is propositionally equal to `α` but not definitionally equal
-to it, we need support functions and lemmas to mediate between constructions.
+to it, we need support functions and theorems to mediate between constructions.
 -/
 
 universe u v w

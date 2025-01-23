@@ -9,7 +9,7 @@ import Mathlib.Algebra.Order.Monoid.Unbundled.WithTop
 /-!
 # Lemma about the coercion `ℕ → WithBot ℕ`.
 
-An orphaned lemma about casting from `ℕ` to `WithBot ℕ`,
+An orphaned theorem about casting from `ℕ` to `WithBot ℕ`,
 exiled here during the port to minimize imports of `Algebra.Order.Ring.Rat`.
 -/
 

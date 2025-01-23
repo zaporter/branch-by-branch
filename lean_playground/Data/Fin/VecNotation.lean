@@ -20,7 +20,7 @@ In later files we introduce `!![a, b; c, d]` as notation for `Matrix.of ![![a, b
 
 ## Implementation notes
 
-The `simp` lemmas require that one of the arguments is of the form `vecCons _ _`.
+The `simp` theorems require that one of the arguments is of the form `vecCons _ _`.
 This ensures `simp` works with entries only when (some) entries are already given.
 In other words, this notation will only appear in the output of `simp` if it
 already appears in the input.
@@ -176,7 +176,7 @@ theorem vec_single_eq_const (a : α) : ![a] = fun _ => a :=
 
 /-- `![a, b, ...] 1` is equal to `b`.
 
-  The simplifier needs a special lemma for length `≥ 2`, in addition to
+  The simplifier needs a special theorem for length `≥ 2`, in addition to
   `cons_val_succ`, because `1 : Fin 1 = 0 : Fin 1`.
 -/
 @[simp]
@@ -188,12 +188,12 @@ theorem cons_val_two (x : α) (u : Fin m.succ.succ → α) : vecCons x u 2 = vec
   rfl
 
 @[simp]
-lemma cons_val_three (x : α) (u : Fin m.succ.succ.succ → α) :
+theorem cons_val_three (x : α) (u : Fin m.succ.succ.succ → α) :
     vecCons x u 3 = vecHead (vecTail (vecTail u)) :=
   rfl
 
 @[simp]
-lemma cons_val_four (x : α) (u : Fin m.succ.succ.succ.succ → α) :
+theorem cons_val_four (x : α) (u : Fin m.succ.succ.succ.succ → α) :
     vecCons x u 4 = vecHead (vecTail (vecTail (vecTail u))) :=
   rfl
 
@@ -227,7 +227,7 @@ protected instance _root_.PiFin.toExpr [ToLevel.{u}] [ToExpr α] (n : ℕ) : ToE
 --   | n + 1, v => ``(vecCons $(v 0) $(_root_.pi_fin.to_pexpr <| vecTail v))
 
 /-! ### `bit0` and `bit1` indices
-The following definitions and `simp` lemmas are used to allow
+The following definitions and `simp` theorems are used to allow
 numeral-indexed element of a vector given with matrix notation to
 be extracted by `simp` in Lean 3 (even when the numeral is larger than the
 number of elements in the vector, which is taken modulo that number
@@ -240,7 +240,7 @@ addition on `Fin n`).
 one of length `o = m + n`. This is a variant of `Fin.append` with an additional `ho` argument,
 which provides control of definitional equality for the vector length.
 
-This turns out to be helpful when providing simp lemmas to reduce `![a, b, c] n`, and also means
+This turns out to be helpful when providing simp theorems to reduce `![a, b, c] n`, and also means
 that `vecAppend ho u v 0` is valid. `Fin.append u v 0` is not valid in this case because there is
 no `Zero (Fin (m + n))` instance. -/
 def vecAppend {α : Type*} {o : ℕ} (ho : o = m + n) (u : Fin m → α) (v : Fin n → α) : Fin o → α :=
@@ -255,7 +255,7 @@ theorem vecAppend_eq_ite {α : Type*} {o : ℕ} (ho : o = m + n) (u : Fin m → 
   simp only [eq_rec_constant]
   rfl
 
--- Porting note: proof was `rfl`, so this is no longer a `dsimp`-lemma
+-- Porting note: proof was `rfl`, so this is no longer a `dsimp`-theorem
 -- Could become one again with change to `Nat.ble`:
 -- https://github.com/leanprover-community/mathlib4/pull/1741/files/#r1083902351
 @[simp]
@@ -355,7 +355,7 @@ theorem cons_vecAlt0 (h : m + 1 + 1 = n + 1 + (n + 1)) (x y : α) (u : Fin m →
       cons_vecAppend, Nat.add_eq, vecAlt0]
 
 -- Although proved by simp, extracting element 8 of a five-element
--- vector does not work by simp unless this lemma is present.
+-- vector does not work by simp unless this theorem is present.
 @[simp]
 theorem empty_vecAlt0 (α) {h} : vecAlt0 h (![] : Fin 0 → α) = ![] := by
   simp [eq_iff_true_of_subsingleton]
@@ -370,14 +370,14 @@ theorem cons_vecAlt1 (h : m + 1 + 1 = n + 1 + (n + 1)) (x y : α) (u : Fin m →
   · simp [vecAlt1, Nat.add_right_comm, ← Nat.add_assoc]
 
 -- Although proved by simp, extracting element 9 of a five-element
--- vector does not work by simp unless this lemma is present.
+-- vector does not work by simp unless this theorem is present.
 @[simp]
 theorem empty_vecAlt1 (α) {h} : vecAlt1 h (![] : Fin 0 → α) = ![] := by
   simp [eq_iff_true_of_subsingleton]
 
 end Val
 
-lemma const_fin1_eq (x : α) : (fun _ : Fin 1 => x) = ![x] :=
+theorem const_fin1_eq (x : α) : (fun _ : Fin 1 => x) = ![x] :=
   (cons_fin_one x _).symm
 
 end Matrix

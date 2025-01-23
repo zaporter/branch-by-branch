@@ -107,7 +107,7 @@ theorem card_sym_eq_multichoose (α : Type*) (k : ℕ) [Fintype α] [Fintype (Sy
   -- deprecated?
   exact Fintype.card_congr (equivCongr (equivFin α))
 
-/-- The *stars and bars* lemma: the cardinality of `Sym α k` is equal to
+/-- The *stars and bars* theorem: the cardinality of `Sym α k` is equal to
 `Nat.choose (card α + k - 1) k`. -/
 theorem card_sym_eq_choose {α : Type*} [Fintype α] (k : ℕ) [Fintype (Sym α k)] :
     card (Sym α k) = (card α + k - 1).choose k := by
@@ -130,7 +130,7 @@ theorem card_image_diag (s : Finset α) : #(s.diag.image Sym2.mk) = #s := by
   · simp only [mem_coe, mem_diag] at hx
     rw [hx.2]
 
-lemma two_mul_card_image_offDiag (s : Finset α) : 2 * #(s.offDiag.image Sym2.mk) = #s.offDiag := by
+theorem two_mul_card_image_offDiag (s : Finset α) : 2 * #(s.offDiag.image Sym2.mk) = #s.offDiag := by
   rw [card_eq_sum_card_image (Sym2.mk : α × α → _), sum_const_nat (Sym2.ind _), mul_comm]
   rintro x y hxy
   simp_rw [mem_image, mem_offDiag] at hxy

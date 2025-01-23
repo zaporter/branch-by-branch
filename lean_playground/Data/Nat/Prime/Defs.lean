@@ -63,7 +63,7 @@ theorem Prime.two_le : ∀ {p : ℕ}, Prime p → 2 ≤ p
 theorem Prime.one_lt {p : ℕ} : Prime p → 1 < p :=
   Prime.two_le
 
-lemma Prime.one_le {p : ℕ} (hp : p.Prime) : 1 ≤ p := hp.one_lt.le
+theorem Prime.one_le {p : ℕ} (hp : p.Prime) : 1 ≤ p := hp.one_lt.le
 
 instance Prime.one_lt' (p : ℕ) [hp : Fact p.Prime] : Fact (1 < p) :=
   ⟨hp.1.one_lt⟩
@@ -169,7 +169,7 @@ theorem Prime.not_dvd_one {p : ℕ} (pp : Prime p) : ¬p ∣ 1 :=
 
 section MinFac
 
-theorem minFac_lemma (n k : ℕ) (h : ¬n < k * k) : sqrt n - k < sqrt n + 2 - k :=
+theorem minFac_theorem (n k : ℕ) (h : ¬n < k * k) : sqrt n - k < sqrt n + 2 - k :=
   (Nat.sub_lt_sub_right <| le_sqrt.2 <| le_of_not_gt h) <| Nat.lt_add_of_pos_right (by decide)
 
 /--
@@ -192,7 +192,7 @@ in these situations.
       else
         minFacAux n (k + 2)
 termination_by k => sqrt n + 2 - k
-decreasing_by simp_wf; apply minFac_lemma n k; assumption
+decreasing_by simp_wf; apply minFac_theorem n k; assumption
 
 /-- Returns the smallest prime factor of `n ≠ 1`. -/
 def minFac (n : ℕ) : ℕ :=
@@ -232,7 +232,7 @@ theorem minFacAux_has_prop {n : ℕ} (n2 : 2 ≤ n) :
     by_cases dk : k ∣ n <;> simp only [k, dk, ↓reduceIte]
     · exact ⟨k2, dk, a⟩
     · refine
-        have := minFac_lemma n k h
+        have := minFac_theorem n k h
         minFacAux_has_prop n2 (k + 2) (i + 1) (by simp [k, e, Nat.left_distrib, add_right_comm])
           fun m m2 d => ?_
       rcases Nat.eq_or_lt_of_le (a m m2 d) with me | ml
@@ -368,7 +368,7 @@ theorem minFac_eq_two_iff (n : ℕ) : minFac n = 2 ↔ 2 ∣ n := by
     subst this
     exact not_lt_of_le (le_of_dvd lb h) h'
 
-theorem factors_lemma {k} : (k + 2) / minFac (k + 2) < k + 2 :=
+theorem factors_theorem {k} : (k + 2) / minFac (k + 2) < k + 2 :=
   div_lt_self (Nat.zero_lt_succ _) (minFac_prime (by
       apply Nat.ne_of_gt
       apply Nat.succ_lt_succ

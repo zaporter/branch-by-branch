@@ -8,7 +8,7 @@ import Mathlib.Data.Fintype.Card
 /-!
 # Lemmas about `Finite` and `Set`s
 
-In this file we prove two lemmas about `Finite` and `Set`s.
+In this file we prove two theorems about `Finite` and `Set`s.
 
 ## Tags
 

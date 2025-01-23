@@ -68,17 +68,17 @@ def num (q : ℚ≥0) : ℕ := (q : ℚ).num.natAbs
 /-- The denominator of a nonnegative rational. -/
 def den (q : ℚ≥0) : ℕ := (q : ℚ).den
 
-@[simp] lemma num_mk (q : ℚ) (hq : 0 ≤ q) : num ⟨q, hq⟩ = q.num.natAbs := rfl
-@[simp] lemma den_mk (q : ℚ) (hq : 0 ≤ q) : den ⟨q, hq⟩ = q.den := rfl
+@[simp] theorem num_mk (q : ℚ) (hq : 0 ≤ q) : num ⟨q, hq⟩ = q.num.natAbs := rfl
+@[simp] theorem den_mk (q : ℚ) (hq : 0 ≤ q) : den ⟨q, hq⟩ = q.den := rfl
 
-@[norm_cast] lemma cast_id (n : ℚ≥0) : NNRat.cast n = n := rfl
-@[simp] lemma cast_eq_id : NNRat.cast = id := rfl
+@[norm_cast] theorem cast_id (n : ℚ≥0) : NNRat.cast n = n := rfl
+@[simp] theorem cast_eq_id : NNRat.cast = id := rfl
 
 end NNRat
 
 namespace Rat
 
-@[norm_cast] lemma cast_id (n : ℚ) : Rat.cast n = n := rfl
-@[simp] lemma cast_eq_id : Rat.cast = id := rfl
+@[norm_cast] theorem cast_id (n : ℚ) : Rat.cast n = n := rfl
+@[simp] theorem cast_eq_id : Rat.cast = id := rfl
 
 end Rat

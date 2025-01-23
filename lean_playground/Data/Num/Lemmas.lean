@@ -111,7 +111,7 @@ theorem to_nat_pos : ∀ n : PosNum, 0 < (n : ℕ)
     add_pos h h
   | bit1 _p => Nat.succ_pos _
 
-theorem cmp_to_nat_lemma {m n : PosNum} : (m : ℕ) < n → (bit1 m : ℕ) < bit0 n :=
+theorem cmp_to_nat_theorem {m n : PosNum} : (m : ℕ) < n → (bit1 m : ℕ) < bit0 n :=
   show (m : ℕ) < n → (m + m + 1 + 1 : ℕ) ≤ n + n by
     intro h; rw [Nat.add_right_comm m m 1, add_assoc]; exact Nat.add_le_add h h
 
@@ -141,11 +141,11 @@ theorem cmp_to_nat : ∀ m n, (Ordering.casesOn (cmp m n) ((m : ℕ) < n) (m = n
     · exact Nat.le_succ_of_le (Nat.add_lt_add this this)
     · rw [this]
       apply Nat.lt_succ_self
-    · exact cmp_to_nat_lemma this
+    · exact cmp_to_nat_theorem this
   | bit1 a, bit0 b => by
     dsimp [cmp]
     have := cmp_to_nat a b; revert this; cases cmp a b <;> dsimp <;> intro this
-    · exact cmp_to_nat_lemma this
+    · exact cmp_to_nat_theorem this
     · rw [this]
       apply Nat.lt_succ_self
     · exact Nat.le_succ_of_le (Nat.add_lt_add this this)
@@ -308,7 +308,7 @@ theorem of_to_nat' : ∀ n : Num, Num.ofNat' (n : ℕ) = n
   | 0 => ofNat'_zero
   | pos p => p.of_to_nat'
 
-lemma toNat_injective : Injective (castNum : Num → ℕ) := LeftInverse.injective of_to_nat'
+theorem toNat_injective : Injective (castNum : Num → ℕ) := LeftInverse.injective of_to_nat'
 
 @[norm_cast]
 theorem to_nat_inj {m n : Num} : (m : ℕ) = n ↔ m = n := toNat_injective.eq_iff

@@ -29,7 +29,7 @@ We conclude that all intervals with distinct endpoints have cardinality continuu
 * `Cardinal.mk_real : #ℝ = 𝔠`: the reals have cardinality continuum.
 * `Cardinal.not_countable_real`: the universal set of real numbers is not countable.
   We can use this same proof to show that all the other sets in this file are not countable.
-* 8 lemmas of the form `mk_Ixy_real` for `x,y ∈ {i,o,c}` state that intervals on the reals
+* 8 theorems of the form `mk_Ixy_real` for `x,y ∈ {i,o,c}` state that intervals on the reals
   have cardinality continuum.
 
 ## Notation

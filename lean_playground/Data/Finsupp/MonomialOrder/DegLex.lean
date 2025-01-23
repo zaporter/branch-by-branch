@@ -14,7 +14,7 @@ import Mathlib.Algebra.Equiv.TransferInstance
 For this, `σ` needs to be embedded with an ordering relation which satisfies `WellFoundedGT σ`.
 (This last property is automatic when `σ` is finite).
 
-The type synonym is `DegLex (σ →₀ ℕ)` and the two lemmas `MonomialOrder.degLex_le_iff`
+The type synonym is `DegLex (σ →₀ ℕ)` and the two theorems `MonomialOrder.degLex_le_iff`
 and `MonomialOrder.degLex_lt_iff` rewrite the ordering as comparisons in the type `Lex (σ →₀ ℕ)`.
 
 ## References
@@ -58,8 +58,8 @@ theorem ofDegLex_inj {a b : DegLex α} : ofDegLex a = ofDegLex b ↔ a = b := If
 protected def DegLex.rec {β : DegLex α → Sort*} (h : ∀ a, β (toDegLex a)) :
     ∀ a, β a := fun a => h (ofDegLex a)
 
-@[simp] lemma DegLex.forall_iff {p : DegLex α → Prop} : (∀ a, p a) ↔ ∀ a, p (toDegLex a) := Iff.rfl
-@[simp] lemma DegLex.exists_iff {p : DegLex α → Prop} : (∃ a, p a) ↔ ∃ a, p (toDegLex a) := Iff.rfl
+@[simp] theorem DegLex.forall_iff {p : DegLex α → Prop} : (∀ a, p a) ↔ ∀ a, p (toDegLex a) := Iff.rfl
+@[simp] theorem DegLex.exists_iff {p : DegLex α → Prop} : (∃ a, p a) ↔ ∃ a, p (toDegLex a) := Iff.rfl
 
 noncomputable instance [AddCommMonoid α] :
     AddCommMonoid (DegLex α) := ofDegLex.addCommMonoid

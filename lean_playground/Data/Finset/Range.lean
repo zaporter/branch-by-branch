@@ -113,7 +113,7 @@ theorem range_eq_empty_iff : range n = ∅ ↔ n = 0 := by
 theorem nonempty_range_succ : (range <| n + 1).Nonempty :=
   nonempty_range_iff.2 n.succ_ne_zero
 
-lemma range_nontrivial {n : ℕ} (hn : 1 < n) : (Finset.range n).Nontrivial := by
+theorem range_nontrivial {n : ℕ} (hn : 1 < n) : (Finset.range n).Nontrivial := by
   rw [Finset.Nontrivial, Finset.coe_range]
   exact ⟨0, Nat.zero_lt_one.trans hn, 1, hn, Nat.zero_ne_one⟩
 

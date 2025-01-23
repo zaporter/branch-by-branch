@@ -85,7 +85,7 @@ theorem rank_of_isUnit [StrongRankCondition R] [DecidableEq n] (A : Matrix n n R
 
 /-- Right multiplying by an invertible matrix does not change the rank -/
 @[simp]
-lemma rank_mul_eq_left_of_isUnit_det [DecidableEq n]
+theorem rank_mul_eq_left_of_isUnit_det [DecidableEq n]
     (A : Matrix n n R) (B : Matrix m n R) (hA : IsUnit A.det) :
     (B * A).rank = B.rank := by
   suffices Function.Surjective A.mulVecLin by
@@ -96,7 +96,7 @@ lemma rank_mul_eq_left_of_isUnit_det [DecidableEq n]
 
 /-- Left multiplying by an invertible matrix does not change the rank -/
 @[simp]
-lemma rank_mul_eq_right_of_isUnit_det [Fintype m] [DecidableEq m]
+theorem rank_mul_eq_right_of_isUnit_det [Fintype m] [DecidableEq m]
     (A : Matrix m m R) (B : Matrix m n R) (hA : IsUnit A.det) :
     (A * B).rank = B.rank := by
   let b : Basis m R (m → R) := Pi.basisFun R m
@@ -175,13 +175,13 @@ end Field
 
 /-! ### Lemmas about transpose and conjugate transpose
 
-This section contains lemmas about the rank of `Matrix.transpose` and `Matrix.conjTranspose`.
+This section contains theorems about the rank of `Matrix.transpose` and `Matrix.conjTranspose`.
 
 Unfortunately the proofs are essentially duplicated between the two; `ℚ` is a linearly-ordered ring
 but can't be a star-ordered ring, while `ℂ` is star-ordered (with `open ComplexOrder`) but
 not linearly ordered. For now we don't prove the transpose case for `ℂ`.
 
-TODO: the lemmas `Matrix.rank_transpose` and `Matrix.rank_conjTranspose` current follow a short
+TODO: the theorems `Matrix.rank_transpose` and `Matrix.rank_conjTranspose` current follow a short
 proof that is a simple consequence of `Matrix.rank_transpose_mul_self` and
 `Matrix.rank_conjTranspose_mul_self`. This proof pulls in unnecessary assumptions on `R`, and should
 be replaced with a proof that uses Gaussian reduction or argues via linear combinations.
@@ -269,7 +269,7 @@ theorem _root_.LinearIndependent.rank_matrix [Field R] [Fintype m]
     {M : Matrix m n R} (h : LinearIndependent R M) : M.rank = Fintype.card m := by
   rw [M.rank_eq_finrank_span_row, linearIndependent_iff_card_eq_finrank_span.mp h, Set.finrank]
 
-lemma rank_add_rank_le_card_of_mul_eq_zero [Field R] [Finite l] [Fintype m]
+theorem rank_add_rank_le_card_of_mul_eq_zero [Field R] [Finite l] [Fintype m]
     {A : Matrix l m R} {B : Matrix m n R} (hAB : A * B = 0) :
     A.rank + B.rank ≤ Fintype.card m := by
   classical

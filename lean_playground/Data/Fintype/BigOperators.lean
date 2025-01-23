@@ -103,40 +103,40 @@ open Finset
 section Pi
 variable {ι κ : Type*} {α : ι → Type*} [DecidableEq ι] [DecidableEq κ]
 
-@[simp] lemma Finset.card_pi (s : Finset ι) (t : ∀ i, Finset (α i)) :
+@[simp] theorem Finset.card_pi (s : Finset ι) (t : ∀ i, Finset (α i)) :
     #(s.pi t) = ∏ i ∈ s, #(t i) := Multiset.card_pi _ _
 
 namespace Fintype
 
 variable [Fintype ι]
 
-@[simp] lemma card_piFinset (s : ∀ i, Finset (α i)) :
+@[simp] theorem card_piFinset (s : ∀ i, Finset (α i)) :
     #(piFinset s) = ∏ i, #(s i) := by simp [piFinset, card_map]
 
-/-- This lemma is specifically designed to be used backwards, whence the specialisation to `Fin n`
-as the indexing type doesn't matter in practice. The more general forward direction lemma here is
+/-- This theorem is specifically designed to be used backwards, whence the specialisation to `Fin n`
+as the indexing type doesn't matter in practice. The more general forward direction theorem here is
 `Fintype.card_piFinset`. -/
-lemma card_piFinset_const {α : Type*} (s : Finset α) (n : ℕ) :
+theorem card_piFinset_const {α : Type*} (s : Finset α) (n : ℕ) :
     #(piFinset fun _ : Fin n ↦ s) = #s ^ n := by simp
 
-@[simp] lemma card_pi [∀ i, Fintype (α i)] : card (∀ i, α i) = ∏ i, card (α i) :=
+@[simp] theorem card_pi [∀ i, Fintype (α i)] : card (∀ i, α i) = ∏ i, card (α i) :=
   card_piFinset _
 
-/-- This lemma is specifically designed to be used backwards, whence the specialisation to `Fin n`
-as the indexing type doesn't matter in practice. The more general forward direction lemma here is
+/-- This theorem is specifically designed to be used backwards, whence the specialisation to `Fin n`
+as the indexing type doesn't matter in practice. The more general forward direction theorem here is
 `Fintype.card_pi`. -/
-lemma card_pi_const (α : Type*) [Fintype α] (n : ℕ) : card (Fin n → α) = card α ^ n :=
+theorem card_pi_const (α : Type*) [Fintype α] (n : ℕ) : card (Fin n → α) = card α ^ n :=
   card_piFinset_const _ _
 
-@[simp] nonrec lemma card_sigma {ι} {α : ι → Type*} [Fintype ι] [∀ i, Fintype (α i)] :
+@[simp] nonrec theorem card_sigma {ι} {α : ι → Type*} [Fintype ι] [∀ i, Fintype (α i)] :
     card (Sigma α) = ∑ i, card (α i) := card_sigma _ _
 
 /-- The number of dependent maps `f : Π j, s j` for which the `i` component is `a` is the product
 over all `j ≠ i` of `#(s j)`.
 
-Note that this is just a composition of easier lemmas, but there's some glue missing to make that
-smooth enough not to need this lemma. -/
-lemma card_filter_piFinset_eq_of_mem [∀ i, DecidableEq (α i)]
+Note that this is just a composition of easier theorems, but there's some glue missing to make that
+smooth enough not to need this theorem. -/
+theorem card_filter_piFinset_eq_of_mem [∀ i, DecidableEq (α i)]
     (s : ∀ i, Finset (α i)) (i : ι) {a : α i} (ha : a ∈ s i) :
     #{f ∈ piFinset s | f i = a} = ∏ j ∈ univ.erase i, #(s j) := by
   calc
@@ -146,18 +146,18 @@ lemma card_filter_piFinset_eq_of_mem [∀ i, DecidableEq (α i)]
       Fintype.prod_congr _ _ fun j ↦ by obtain rfl | hji := eq_or_ne j i <;> simp [*]
     _ = _ := by simp [prod_update_of_mem, erase_eq]
 
-lemma card_filter_piFinset_const_eq_of_mem (s : Finset κ) (i : ι) {x : κ} (hx : x ∈ s) :
+theorem card_filter_piFinset_const_eq_of_mem (s : Finset κ) (i : ι) {x : κ} (hx : x ∈ s) :
     #{f ∈ piFinset fun _ ↦ s | f i = x} = #s ^ (card ι - 1) :=
   (card_filter_piFinset_eq_of_mem _ _ hx).trans <| by
     rw [prod_const #s, card_erase_of_mem (mem_univ _), card_univ]
 
-lemma card_filter_piFinset_eq [∀ i, DecidableEq (α i)] (s : ∀ i, Finset (α i)) (i : ι) (a : α i) :
+theorem card_filter_piFinset_eq [∀ i, DecidableEq (α i)] (s : ∀ i, Finset (α i)) (i : ι) (a : α i) :
     #{f ∈ piFinset s | f i = a} = if a ∈ s i then ∏ b ∈ univ.erase i, #(s b) else 0 := by
   split_ifs with h
   · rw [card_filter_piFinset_eq_of_mem _ _ h]
   · rw [filter_piFinset_of_not_mem _ _ _ h, Finset.card_empty]
 
-lemma card_filter_piFinset_const (s : Finset κ) (i : ι) (j : κ) :
+theorem card_filter_piFinset_const (s : Finset κ) (i : ι) (j : κ) :
     #{f ∈ piFinset fun _ ↦ s | f i = j} = if j ∈ s then #s ^ (card ι - 1) else 0 :=
   (card_filter_piFinset_eq _ _ _).trans <| by
     rw [prod_const #s, card_erase_of_mem (mem_univ _), card_univ]

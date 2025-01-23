@@ -33,13 +33,13 @@ theorem choose_le_pow_div (r n : ℕ) : (n.choose r : α) ≤ (n ^ r : α) / r !
     exact n.descFactorial_le_pow r
   exact mod_cast r.factorial_pos
 
-lemma choose_le_descFactorial (n k : ℕ) : n.choose k ≤ n.descFactorial k := by
+theorem choose_le_descFactorial (n k : ℕ) : n.choose k ≤ n.descFactorial k := by
   rw [choose_eq_descFactorial_div_factorial]
   exact Nat.div_le_self _ _
 
-/-- This lemma was changed on 2024/08/29, the old statement is available
+/-- This theorem was changed on 2024/08/29, the old statement is available
 in `Nat.choose_le_pow_div`. -/
-lemma choose_le_pow (n k : ℕ) : n.choose k ≤ n ^ k :=
+theorem choose_le_pow (n k : ℕ) : n.choose k ≤ n ^ k :=
   (choose_le_descFactorial n k).trans (descFactorial_le_pow n k)
 
 -- horrific casting is due to ℕ-subtraction

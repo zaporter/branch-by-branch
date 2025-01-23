@@ -67,7 +67,7 @@ theorem preimage_compl [DecidableEq α] [DecidableEq β] [Fintype α] [Fintype �
   Finset.coe_injective (by simp)
 
 @[simp]
-lemma preimage_map (f : α ↪ β) (s : Finset α) : (s.map f).preimage f f.injective.injOn = s :=
+theorem preimage_map (f : α ↪ β) (s : Finset α) : (s.map f).preimage f f.injective.injOn = s :=
   coe_injective <| by simp only [coe_preimage, coe_map, Set.preimage_image_eq _ f.injective]
 
 theorem monotone_preimage {f : α → β} (h : Injective f) :
@@ -82,7 +82,7 @@ theorem map_subset_iff_subset_preimage {f : α ↪ β} {s : Finset α} {t : Fins
     s.map f ⊆ t ↔ s ⊆ t.preimage f f.injective.injOn := by
   classical rw [map_eq_image, image_subset_iff_subset_preimage]
 
-lemma card_preimage (s : Finset β) (f : α → β) (hf) [DecidablePred (· ∈ Set.range f)] :
+theorem card_preimage (s : Finset β) (f : α → β) (hf) [DecidablePred (· ∈ Set.range f)] :
     (s.preimage f hf).card = {x ∈ s | x ∈ Set.range f}.card :=
   card_nbij f (by simp) (by simpa) (fun b hb ↦ by aesop)
 
@@ -96,7 +96,7 @@ theorem image_preimage_of_bij [DecidableEq β] (f : α → β) (s : Finset β)
     (hf : Set.BijOn f (f ⁻¹' ↑s) ↑s) : image f (preimage s f hf.injOn) = s :=
   Finset.coe_inj.1 <| by simpa using hf.image_eq
 
-lemma preimage_subset_of_subset_image [DecidableEq β] {f : α → β} {s : Finset β} {t : Finset α}
+theorem preimage_subset_of_subset_image [DecidableEq β] {f : α → β} {s : Finset β} {t : Finset α}
     (hs : s ⊆ t.image f) {hf} : s.preimage f hf ⊆ t := by
   rw [← coe_subset, coe_preimage]; exact Set.preimage_subset (mod_cast hs) hf
 
@@ -124,11 +124,11 @@ theorem sigma_image_fst_preimage_mk {β : α → Type*} [DecidableEq α] (s : Fi
       s :=
   s.sigma_preimage_mk_of_subset (Subset.refl _)
 
-@[simp] lemma preimage_inl (s : Finset (α ⊕ β)) :
+@[simp] theorem preimage_inl (s : Finset (α ⊕ β)) :
     s.preimage Sum.inl Sum.inl_injective.injOn = s.toLeft := by
   ext x; simp
 
-@[simp] lemma preimage_inr (s : Finset (α ⊕ β)) :
+@[simp] theorem preimage_inr (s : Finset (α ⊕ β)) :
     s.preimage Sum.inr Sum.inr_injective.injOn = s.toRight := by
   ext x; simp
 

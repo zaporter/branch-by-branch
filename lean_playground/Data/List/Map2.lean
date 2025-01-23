@@ -9,8 +9,8 @@ import Mathlib.Tactic.Common
 /-!
 # Map₂ Lemmas
 
-This file contains additional lemmas about a number of list functions related to combining zipping
-Lists together. In particular, we include lemmas about:
+This file contains additional theorems about a number of list functions related to combining zipping
+Lists together. In particular, we include theorems about:
 
 * `map₂Left'`
 * `map₂Right'`

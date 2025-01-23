@@ -60,7 +60,7 @@ def binaryRec {motive : Nat → Sort u} (z : motive 0) (f : ∀ b n, motive n �
   else
     let x := f (1 &&& n != 0) (n >>> 1) (binaryRec z f (n >>> 1))
     congrArg motive n.bit_testBit_zero_shiftRight_one ▸ x
-decreasing_by exact bitwise_rec_lemma n0
+decreasing_by exact bitwise_rec_theorem n0
 
 /-- The same as `binaryRec`, but the induction step can assume that if `n=0`,
   the bit being appended is `true`-/

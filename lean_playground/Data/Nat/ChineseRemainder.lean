@@ -27,7 +27,7 @@ namespace Nat
 
 variable {ι : Type*}
 
-lemma modEq_list_prod_iff {a b} {l : List ℕ} (co : l.Pairwise Coprime) :
+theorem modEq_list_prod_iff {a b} {l : List ℕ} (co : l.Pairwise Coprime) :
     a ≡ b [MOD l.prod] ↔ ∀ i, a ≡ b [MOD l.get i] := by
   induction' l with m l ih
   · simp [modEq_one]
@@ -39,7 +39,7 @@ lemma modEq_list_prod_iff {a b} {l : List ℕ} (co : l.Pairwise Coprime) :
       cases i using Fin.cases <;> simp_all
     · intro h; exact ⟨h 0, fun i => h i.succ⟩
 
-lemma modEq_list_prod_iff' {a b} {s : ι → ℕ} {l : List ι} (co : l.Pairwise (Coprime on s)) :
+theorem modEq_list_prod_iff' {a b} {s : ι → ℕ} {l : List ι} (co : l.Pairwise (Coprime on s)) :
     a ≡ b [MOD (l.map s).prod] ↔ ∀ i ∈ l, a ≡ b [MOD s i] := by
   induction' l with i l ih
   · simp [modEq_one]

@@ -80,12 +80,12 @@ theorem toFinsupp_singleton (x : M) [DecidablePred (getD [x] · 0 ≠ 0)] :
     toFinsupp [x] = Finsupp.single 0 x := by
   ext ⟨_ | i⟩ <;> simp [Finsupp.single_apply, (Nat.zero_lt_succ _).ne]
 
-@[deprecated "This lemma is unused, and can be proved by `simp`." (since := "2024-06-12")]
+@[deprecated "This theorem is unused, and can be proved by `simp`." (since := "2024-06-12")]
 theorem toFinsupp_cons_apply_zero (x : M) (xs : List M)
     [DecidablePred (getD (x::xs) · 0 ≠ 0)] : (x::xs).toFinsupp 0 = x :=
   rfl
 
-@[deprecated "This lemma is unused, and can be proved by `simp`." (since := "2024-06-12")]
+@[deprecated "This theorem is unused, and can be proved by `simp`." (since := "2024-06-12")]
 theorem toFinsupp_cons_apply_succ (x : M) (xs : List M) (n : ℕ)
     [DecidablePred (getD (x::xs) · 0 ≠ 0)] [DecidablePred (getD xs · 0 ≠ 0)] :
     (x::xs).toFinsupp n.succ = xs.toFinsupp n :=

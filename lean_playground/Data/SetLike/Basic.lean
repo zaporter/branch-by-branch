@@ -24,7 +24,7 @@ is injective.
 In general, a type `A` is `SetLike` with elements of type `B` if it
 has an injective map to `Set B`.  This module provides standard
 boilerplate for every `SetLike`: a `coe_sort`, a `coe` to set, a
-`PartialOrder`, and various extensionality and simp lemmas.
+`PartialOrder`, and various extensionality and simp theorems.
 
 A typical subobject should be declared as:
 ```
@@ -39,7 +39,7 @@ variable {X : Type*} [ObjectTypeclass X] {x : X}
 instance : SetLike (MySubobject X) X :=
   ⟨MySubobject.carrier, fun p q h => by cases p; cases q; congr!⟩
 
-@[simp] lemma mem_carrier {p : MySubobject X} : x ∈ p.carrier ↔ x ∈ (p : Set X) := Iff.rfl
+@[simp] theorem mem_carrier {p : MySubobject X} : x ∈ p.carrier ↔ x ∈ (p : Set X) := Iff.rfl
 
 @[ext] theorem ext {p q : MySubobject X} (h : ∀ x, x ∈ p ↔ x ∈ q) : p = q := SetLike.ext h
 
@@ -49,10 +49,10 @@ protected def copy (p : MySubobject X) (s : Set X) (hs : s = ↑p) : MySubobject
   { carrier := s
     op_mem' := hs.symm ▸ p.op_mem' }
 
-@[simp] lemma coe_copy (p : MySubobject X) (s : Set X) (hs : s = ↑p) :
+@[simp] theorem coe_copy (p : MySubobject X) (s : Set X) (hs : s = ↑p) :
   (p.copy s hs : Set X) = s := rfl
 
-lemma copy_eq (p : MySubobject X) (s : Set X) (hs : s = ↑p) : p.copy s hs = p :=
+theorem copy_eq (p : MySubobject X) (s : Set X) (hs : s = ↑p) : p.copy s hs = p :=
   SetLike.coe_injective hs
 
 end MySubobject
@@ -76,9 +76,9 @@ subobjects
 This has the effect of giving terms of `A` elements of type `B` (through a `Membership`
 instance) and a compatible coercion to `Type*` as a subtype.
 
-Note: if `SetLike.coe` is a projection, implementers should create a simp lemma such as
+Note: if `SetLike.coe` is a projection, implementers should create a simp theorem such as
 ```
-@[simp] lemma mem_carrier {p : MySubobject X} : x ∈ p.carrier ↔ x ∈ (p : Set X) := Iff.rfl
+@[simp] theorem mem_carrier {p : MySubobject X} : x ∈ p.carrier ↔ x ∈ (p : Set X) := Iff.rfl
 ```
 to normalize terms.
 
@@ -149,7 +149,7 @@ theorem coe_injective : Function.Injective (SetLike.coe : A → Set B) := fun _ 
 theorem coe_set_eq : (p : Set B) = q ↔ p = q :=
   coe_injective.eq_iff
 
-@[norm_cast] lemma coe_ne_coe : (p : Set B) ≠ q ↔ p ≠ q := coe_injective.ne_iff
+@[norm_cast] theorem coe_ne_coe : (p : Set B) ≠ q ↔ p ≠ q := coe_injective.ne_iff
 
 theorem ext' (h : (p : Set B) = q) : p = q :=
   coe_injective h
@@ -157,7 +157,7 @@ theorem ext' (h : (p : Set B) = q) : p = q :=
 theorem ext'_iff : p = q ↔ (p : Set B) = q :=
   coe_set_eq.symm
 
-/-- Note: implementers of `SetLike` must copy this lemma in order to tag it with `@[ext]`. -/
+/-- Note: implementers of `SetLike` must copy this theorem in order to tag it with `@[ext]`. -/
 theorem ext (h : ∀ x, x ∈ p ↔ x ∈ q) : p = q :=
   coe_injective <| Set.ext h
 
@@ -179,12 +179,12 @@ theorem coe_mem (x : p) : (x : B) ∈ p :=
   x.2
 
 @[aesop 5% apply (rule_sets := [SetLike])]
-lemma mem_of_subset {s : Set B} (hp : s ⊆ p) {x : B} (hx : x ∈ s) : x ∈ p := hp hx
+theorem mem_of_subset {s : Set B} (hp : s ⊆ p) {x : B} (hx : x ∈ s) : x ∈ p := hp hx
 
 @[simp]
 protected theorem eta (x : p) (hx : (x : B) ∈ p) : (⟨x, hx⟩ : p) = x := rfl
 
-@[simp] lemma setOf_mem_eq (a : A) : {b | b ∈ a} = a := rfl
+@[simp] theorem setOf_mem_eq (a : A) : {b | b ∈ a} = a := rfl
 
 instance (priority := 100) instPartialOrder : PartialOrder A :=
   { PartialOrder.lift (SetLike.coe : A → Set B) coe_injective with
@@ -193,8 +193,8 @@ instance (priority := 100) instPartialOrder : PartialOrder A :=
 theorem le_def {S T : A} : S ≤ T ↔ ∀ ⦃x : B⦄, x ∈ S → x ∈ T :=
   Iff.rfl
 
-@[simp, norm_cast] lemma coe_subset_coe {S T : A} : (S : Set B) ⊆ T ↔ S ≤ T := .rfl
-@[simp, norm_cast] lemma coe_ssubset_coe {S T : A} : (S : Set B) ⊂ T ↔ S < T := .rfl
+@[simp, norm_cast] theorem coe_subset_coe {S T : A} : (S : Set B) ⊆ T ↔ S ≤ T := .rfl
+@[simp, norm_cast] theorem coe_ssubset_coe {S T : A} : (S : Set B) ⊂ T ↔ S < T := .rfl
 
 @[gcongr] protected alias ⟨_, GCongr.coe_subset_coe⟩ := coe_subset_coe
 @[gcongr] protected alias ⟨_, GCongr.coe_ssubset_coe⟩ := coe_ssubset_coe

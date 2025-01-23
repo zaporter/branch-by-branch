@@ -7,7 +7,7 @@ import Mathlib.Data.Fin.Basic
 /-!
 # Reverse on `Fin n`
 
-This file contains lemmas about `Fin.rev : Fin n → Fin n` which maps `i` to `n - 1 - i`.
+This file contains theorems about `Fin.rev : Fin n → Fin n` which maps `i` to `n - 1 - i`.
 
 ## Definitions
 
@@ -78,7 +78,7 @@ theorem rev_castPred {i : Fin (n + 1)}
     rev (castPred i h) = pred (rev i) h' := by
   rw [← succ_inj, succ_pred, ← rev_castSucc, castSucc_castPred]
 
-lemma succAbove_rev_left (p : Fin (n + 1)) (i : Fin n) :
+theorem succAbove_rev_left (p : Fin (n + 1)) (i : Fin n) :
     p.rev.succAbove i = (p.succAbove i.rev).rev := by
   obtain h | h := (rev p).succ_le_or_le_castSucc i
   · rw [succAbove_of_succ_le _ _ h,
@@ -86,15 +86,15 @@ lemma succAbove_rev_left (p : Fin (n + 1)) (i : Fin n) :
   · rw [succAbove_of_le_castSucc _ _ h,
       succAbove_of_succ_le _ _ (rev_castSucc _ ▸ (rev_le_iff.mpr h)), rev_castSucc, rev_rev]
 
-lemma succAbove_rev_right (p : Fin (n + 1)) (i : Fin n) :
+theorem succAbove_rev_right (p : Fin (n + 1)) (i : Fin n) :
     p.succAbove i.rev = (p.rev.succAbove i).rev := by rw [succAbove_rev_left, rev_rev]
 
 /-- `rev` commutes with `succAbove`. -/
-lemma rev_succAbove (p : Fin (n + 1)) (i : Fin n) :
+theorem rev_succAbove (p : Fin (n + 1)) (i : Fin n) :
     rev (succAbove p i) = succAbove (rev p) (rev i) := by
   rw [succAbove_rev_left, rev_rev]
 
-lemma predAbove_rev_left (p : Fin n) (i : Fin (n + 1)) :
+theorem predAbove_rev_left (p : Fin n) (i : Fin (n + 1)) :
     p.rev.predAbove i = (p.predAbove i.rev).rev := by
   obtain h | h := (rev i).succ_le_or_le_castSucc p
   · rw [predAbove_of_succ_le _ _ h, rev_pred,
@@ -102,11 +102,11 @@ lemma predAbove_rev_left (p : Fin n) (i : Fin (n + 1)) :
   · rw [predAbove_of_le_castSucc _ _ h, rev_castPred,
       predAbove_of_succ_le _ _ (rev_castSucc _ ▸ (rev_le_iff.mpr h)), pred_inj, rev_rev]
 
-lemma predAbove_rev_right (p : Fin n) (i : Fin (n + 1)) :
+theorem predAbove_rev_right (p : Fin n) (i : Fin (n + 1)) :
     p.predAbove i.rev = (p.rev.predAbove i).rev := by rw [predAbove_rev_left, rev_rev]
 
 /-- `rev` commutes with `predAbove`. -/
-lemma rev_predAbove {n : ℕ} (p : Fin n) (i : Fin (n + 1)) :
+theorem rev_predAbove {n : ℕ} (p : Fin n) (i : Fin (n + 1)) :
     (predAbove p i).rev = predAbove p.rev i.rev := by rw [predAbove_rev_left, rev_rev]
 
 end Fin

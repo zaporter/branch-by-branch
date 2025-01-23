@@ -101,7 +101,7 @@ theorem map_permutationsAux2 (t : α) (ts : List α) (ys : List α) (f : List α
   · rfl
   simp
 
-/-- An expository lemma to show how all of `ts`, `r`, and `f` can be eliminated from
+/-- An expository theorem to show how all of `ts`, `r`, and `f` can be eliminated from
 `permutationsAux2`.
 
 `(permutationsAux2 t [] [] ys id).2`, which appears on the RHS, is a list whose elements are
@@ -277,7 +277,7 @@ theorem length_permutationsAux :
 theorem length_permutations (l : List α) : length (permutations l) = (length l)! :=
   length_permutationsAux l []
 
-theorem mem_permutations_of_perm_lemma {is l : List α}
+theorem mem_permutations_of_perm_theorem {is l : List α}
     (H : l ~ [] ++ is → (∃ (ts' : _) (_ : ts' ~ []), l = ts' ++ is) ∨ l ∈ permutationsAux is []) :
     l ~ is → l ∈ permutations is := by simpa [permutations, perm_nil] using H
 
@@ -297,12 +297,12 @@ theorem mem_permutationsAux_of_perm :
     have p := (perm_middle.symm.trans p').cons_inv
     cases' l₂ with a l₂'
     · exact Or.inl ⟨l₁, by simpa using p⟩
-    · exact Or.inr (Or.inr ⟨l₁, a :: l₂', mem_permutations_of_perm_lemma (IH2 _) p, by simp⟩)
+    · exact Or.inr (Or.inr ⟨l₁, a :: l₂', mem_permutations_of_perm_theorem (IH2 _) p, by simp⟩)
   · exact Or.inr (Or.inl m)
 
 @[simp]
 theorem mem_permutations {s t : List α} : s ∈ permutations t ↔ s ~ t :=
-  ⟨perm_of_mem_permutations, mem_permutations_of_perm_lemma mem_permutationsAux_of_perm⟩
+  ⟨perm_of_mem_permutations, mem_permutations_of_perm_theorem mem_permutationsAux_of_perm⟩
 
 -- Porting note: temporary theorem to solve diamond issue
 private theorem DecEq_eq [DecidableEq α] :
@@ -507,7 +507,7 @@ theorem nodup_permutations (s : List α) (hs : Nodup s) : Nodup s.permutations :
         rw [← hx, getElem_insertIdx_of_lt ht]
         exact getElem_mem _
 
-lemma permutations_take_two (x y : α) (s : List α) :
+theorem permutations_take_two (x y : α) (s : List α) :
     (x :: y :: s).permutations.take 2 = [x :: y :: s, y :: x :: s] := by
   induction s <;> simp [permutations, permutationsAux.rec]
 

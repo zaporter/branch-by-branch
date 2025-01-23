@@ -25,21 +25,21 @@ theorem Fintype.card_finset [Fintype α] : Fintype.card (Finset α) = 2 ^ Fintyp
 namespace Finset
 variable [Fintype α] {s : Finset α} {k : ℕ}
 
-@[simp] lemma powerset_univ : (univ : Finset α).powerset = univ :=
+@[simp] theorem powerset_univ : (univ : Finset α).powerset = univ :=
   coe_injective <| by simp [-coe_eq_univ]
 
-lemma filter_subset_univ [DecidableEq α] (s : Finset α) :
+theorem filter_subset_univ [DecidableEq α] (s : Finset α) :
     ({t | t ⊆ s} : Finset _) = powerset s := by ext; simp
 
-@[simp] lemma powerset_eq_univ : s.powerset = univ ↔ s = univ := by
+@[simp] theorem powerset_eq_univ : s.powerset = univ ↔ s = univ := by
   rw [← Finset.powerset_univ, powerset_inj]
 
-lemma mem_powersetCard_univ : s ∈ powersetCard k (univ : Finset α) ↔ #s = k :=
+theorem mem_powersetCard_univ : s ∈ powersetCard k (univ : Finset α) ↔ #s = k :=
   mem_powersetCard.trans <| and_iff_right <| subset_univ _
 
 variable (α)
 
-@[simp] lemma univ_filter_card_eq (k : ℕ) :
+@[simp] theorem univ_filter_card_eq (k : ℕ) :
    ({s | #s = k} : Finset (Finset α)) = univ.powersetCard k := by ext; simp
 
 end Finset

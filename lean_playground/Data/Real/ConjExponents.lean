@@ -23,7 +23,7 @@ analysis, especially when dealing with `L^p` spaces.
 
 ## TODO
 
-* Eradicate the `1 / p` spelling in lemmas.
+* Eradicate the `1 / p` spelling in theorems.
 * Do we want an `ℝ≥0∞` version?
 -/
 
@@ -66,9 +66,9 @@ theorem sub_one_pos : 0 < p - 1 := sub_pos.2 h.one_lt
 
 theorem sub_one_ne_zero : p - 1 ≠ 0 := ne_of_gt h.sub_one_pos
 
-protected lemma inv_pos : 0 < p⁻¹ := inv_pos.2 h.pos
-protected lemma inv_nonneg : 0 ≤ p⁻¹ := h.inv_pos.le
-protected lemma inv_ne_zero : p⁻¹ ≠ 0 := h.inv_pos.ne'
+protected theorem inv_pos : 0 < p⁻¹ := inv_pos.2 h.pos
+protected theorem inv_nonneg : 0 ≤ p⁻¹ := h.inv_pos.le
+protected theorem inv_ne_zero : p⁻¹ ≠ 0 := h.inv_pos.ne'
 
 theorem one_div_pos : 0 < 1 / p := _root_.one_div_pos.2 h.pos
 
@@ -81,10 +81,10 @@ theorem conj_eq : q = p / (p - 1) := by
   rw [← eq_sub_iff_add_eq', inv_eq_iff_eq_inv] at this
   field_simp [this, h.ne_zero]
 
-lemma conjExponent_eq : conjExponent p = q := h.conj_eq.symm
+theorem conjExponent_eq : conjExponent p = q := h.conj_eq.symm
 
-lemma one_sub_inv : 1 - p⁻¹ = q⁻¹ := sub_eq_of_eq_add' h.inv_add_inv_conj.symm
-lemma inv_sub_one : p⁻¹ - 1 = -q⁻¹ := by rw [← h.inv_add_inv_conj, sub_add_cancel_left]
+theorem one_sub_inv : 1 - p⁻¹ = q⁻¹ := sub_eq_of_eq_add' h.inv_add_inv_conj.symm
+theorem inv_sub_one : p⁻¹ - 1 = -q⁻¹ := by rw [← h.inv_add_inv_conj, sub_add_cancel_left]
 
 theorem sub_one_mul_conj : (p - 1) * q = p :=
   mul_comm q (p - 1) ▸ (eq_div_iff h.sub_one_ne_zero).1 h.conj_eq
@@ -92,7 +92,7 @@ theorem sub_one_mul_conj : (p - 1) * q = p :=
 theorem mul_eq_add : p * q = p + q := by
   simpa only [sub_mul, sub_eq_iff_eq_add, one_mul] using h.sub_one_mul_conj
 
-@[symm] protected lemma symm : q.IsConjExponent p where
+@[symm] protected theorem symm : q.IsConjExponent p where
   one_lt := by simpa only [h.conj_eq] using (one_lt_div h.sub_one_pos).mpr (sub_one_lt p)
   inv_add_inv_conj := by simpa [add_comm] using h.inv_add_inv_conj
 
@@ -107,26 +107,26 @@ theorem inv_add_inv_conj_ennreal : (ENNReal.ofReal p)⁻¹ + (ENNReal.ofReal q)�
 
 end
 
-protected lemma inv_inv (ha : 0 < a) (hb : 0 < b) (hab : a + b = 1) : a⁻¹.IsConjExponent b⁻¹ :=
+protected theorem inv_inv (ha : 0 < a) (hb : 0 < b) (hab : a + b = 1) : a⁻¹.IsConjExponent b⁻¹ :=
   ⟨(one_lt_inv₀ ha).2 <| by linarith, by simpa only [inv_inv]⟩
 
-lemma inv_one_sub_inv (ha₀ : 0 < a) (ha₁ : a < 1) : a⁻¹.IsConjExponent (1 - a)⁻¹ :=
+theorem inv_one_sub_inv (ha₀ : 0 < a) (ha₁ : a < 1) : a⁻¹.IsConjExponent (1 - a)⁻¹ :=
   .inv_inv ha₀ (sub_pos_of_lt ha₁) <| add_tsub_cancel_of_le ha₁.le
 
-lemma one_sub_inv_inv (ha₀ : 0 < a) (ha₁ : a < 1) : (1 - a)⁻¹.IsConjExponent a⁻¹ :=
+theorem one_sub_inv_inv (ha₀ : 0 < a) (ha₁ : a < 1) : (1 - a)⁻¹.IsConjExponent a⁻¹ :=
   (inv_one_sub_inv ha₀ ha₁).symm
 
 end IsConjExponent
 
-lemma isConjExponent_comm : p.IsConjExponent q ↔ q.IsConjExponent p := ⟨.symm, .symm⟩
+theorem isConjExponent_comm : p.IsConjExponent q ↔ q.IsConjExponent p := ⟨.symm, .symm⟩
 
-lemma isConjExponent_iff_eq_conjExponent (hp : 1 < p) : p.IsConjExponent q ↔ q = p / (p - 1) :=
+theorem isConjExponent_iff_eq_conjExponent (hp : 1 < p) : p.IsConjExponent q ↔ q = p / (p - 1) :=
   ⟨IsConjExponent.conj_eq, fun h ↦ ⟨hp, by field_simp [h]⟩⟩
 
-lemma IsConjExponent.conjExponent (h : 1 < p) : p.IsConjExponent (conjExponent p) :=
+theorem IsConjExponent.conjExponent (h : 1 < p) : p.IsConjExponent (conjExponent p) :=
   (isConjExponent_iff_eq_conjExponent h).2 rfl
 
-lemma isConjExponent_one_div (ha : 0 < a) (hb : 0 < b) (hab : a + b = 1) :
+theorem isConjExponent_one_div (ha : 0 < a) (hb : 0 < b) (hab : a + b = 1) :
     (1 / a).IsConjExponent (1 / b) := by simpa using IsConjExponent.inv_inv ha hb hab
 
 end Real
@@ -146,7 +146,7 @@ noncomputable def conjExponent (p : ℝ≥0) : ℝ≥0 := p / (p - 1)
 
 variable {a b p q : ℝ≥0} (h : p.IsConjExponent q)
 
-@[simp, norm_cast] lemma isConjExponent_coe : (p : ℝ).IsConjExponent q ↔ p.IsConjExponent q := by
+@[simp, norm_cast] theorem isConjExponent_coe : (p : ℝ).IsConjExponent q ↔ p.IsConjExponent q := by
   simp [Real.isConjExponent_iff, isConjExponent_iff]; norm_cast; simp
 
 alias ⟨_, IsConjExponent.coe⟩ := isConjExponent_coe
@@ -161,67 +161,67 @@ ones. -/
 section
 include h
 
-lemma one_le : 1 ≤ p := h.one_lt.le
-lemma pos : 0 < p := zero_lt_one.trans h.one_lt
-lemma ne_zero : p ≠ 0 := h.pos.ne'
+theorem one_le : 1 ≤ p := h.one_lt.le
+theorem pos : 0 < p := zero_lt_one.trans h.one_lt
+theorem ne_zero : p ≠ 0 := h.pos.ne'
 
-lemma sub_one_pos : 0 < p - 1 := tsub_pos_of_lt h.one_lt
-lemma sub_one_ne_zero : p - 1 ≠ 0 := h.sub_one_pos.ne'
+theorem sub_one_pos : 0 < p - 1 := tsub_pos_of_lt h.one_lt
+theorem sub_one_ne_zero : p - 1 ≠ 0 := h.sub_one_pos.ne'
 
-lemma inv_pos : 0 < p⁻¹ := _root_.inv_pos.2 h.pos
-lemma inv_ne_zero : p⁻¹ ≠ 0 := h.inv_pos.ne'
+theorem inv_pos : 0 < p⁻¹ := _root_.inv_pos.2 h.pos
+theorem inv_ne_zero : p⁻¹ ≠ 0 := h.inv_pos.ne'
 
-lemma one_sub_inv : 1 - p⁻¹ = q⁻¹ := tsub_eq_of_eq_add_rev h.inv_add_inv_conj.symm
+theorem one_sub_inv : 1 - p⁻¹ = q⁻¹ := tsub_eq_of_eq_add_rev h.inv_add_inv_conj.symm
 
-lemma conj_eq : q = p / (p - 1) := by
+theorem conj_eq : q = p / (p - 1) := by
   simpa only [← coe_one, ← NNReal.coe_sub h.one_le, ← NNReal.coe_div, coe_inj] using h.coe.conj_eq
 
-lemma conjExponent_eq : conjExponent p = q := h.conj_eq.symm
+theorem conjExponent_eq : conjExponent p = q := h.conj_eq.symm
 
-lemma sub_one_mul_conj : (p - 1) * q = p :=
+theorem sub_one_mul_conj : (p - 1) * q = p :=
   mul_comm q (p - 1) ▸ (eq_div_iff h.sub_one_ne_zero).1 h.conj_eq
 
-lemma mul_eq_add : p * q = p + q := by
+theorem mul_eq_add : p * q = p + q := by
   simpa only [← NNReal.coe_mul, ← NNReal.coe_add, NNReal.coe_inj] using h.coe.mul_eq_add
 
 @[symm]
-protected lemma symm : q.IsConjExponent p where
+protected theorem symm : q.IsConjExponent p where
   one_lt := by
     rw [h.conj_eq]
     exact (one_lt_div h.sub_one_pos).mpr (tsub_lt_self h.pos zero_lt_one)
   inv_add_inv_conj := by simpa [add_comm] using h.inv_add_inv_conj
 
-lemma div_conj_eq_sub_one : p / q = p - 1 := by field_simp [h.symm.ne_zero]; rw [h.sub_one_mul_conj]
+theorem div_conj_eq_sub_one : p / q = p - 1 := by field_simp [h.symm.ne_zero]; rw [h.sub_one_mul_conj]
 
-lemma inv_add_inv_conj_ennreal : (p⁻¹ + q⁻¹ : ℝ≥0∞) = 1 := by norm_cast; exact h.inv_add_inv_conj
+theorem inv_add_inv_conj_ennreal : (p⁻¹ + q⁻¹ : ℝ≥0∞) = 1 := by norm_cast; exact h.inv_add_inv_conj
 
 end
 
-protected lemma inv_inv (ha : a ≠ 0) (hb : b ≠ 0) (hab : a + b = 1) :
+protected theorem inv_inv (ha : a ≠ 0) (hb : b ≠ 0) (hab : a + b = 1) :
     a⁻¹.IsConjExponent b⁻¹ :=
   ⟨(one_lt_inv₀ ha.bot_lt).2 <| by rw [← hab]; exact lt_add_of_pos_right _ hb.bot_lt, by
     simpa only [inv_inv] using hab⟩
 
-lemma inv_one_sub_inv (ha₀ : a ≠ 0) (ha₁ : a < 1) : a⁻¹.IsConjExponent (1 - a)⁻¹ :=
+theorem inv_one_sub_inv (ha₀ : a ≠ 0) (ha₁ : a < 1) : a⁻¹.IsConjExponent (1 - a)⁻¹ :=
   .inv_inv ha₀ (tsub_pos_of_lt ha₁).ne' <| add_tsub_cancel_of_le ha₁.le
 
-lemma one_sub_inv_inv (ha₀ : a ≠ 0) (ha₁ : a < 1) : (1 - a)⁻¹.IsConjExponent a⁻¹ :=
+theorem one_sub_inv_inv (ha₀ : a ≠ 0) (ha₁ : a < 1) : (1 - a)⁻¹.IsConjExponent a⁻¹ :=
   (inv_one_sub_inv ha₀ ha₁).symm
 
 end IsConjExponent
 
-lemma isConjExponent_comm : p.IsConjExponent q ↔ q.IsConjExponent p := ⟨.symm, .symm⟩
+theorem isConjExponent_comm : p.IsConjExponent q ↔ q.IsConjExponent p := ⟨.symm, .symm⟩
 
-lemma isConjExponent_iff_eq_conjExponent (h : 1 < p) : p.IsConjExponent q ↔ q = p / (p - 1) := by
+theorem isConjExponent_iff_eq_conjExponent (h : 1 < p) : p.IsConjExponent q ↔ q = p / (p - 1) := by
   rw [← isConjExponent_coe, Real.isConjExponent_iff_eq_conjExponent (mod_cast h), ← coe_inj,
     NNReal.coe_div, NNReal.coe_sub h.le, coe_one]
 
-protected lemma IsConjExponent.conjExponent (h : 1 < p) : p.IsConjExponent (conjExponent p) :=
+protected theorem IsConjExponent.conjExponent (h : 1 < p) : p.IsConjExponent (conjExponent p) :=
   (isConjExponent_iff_eq_conjExponent h).2 rfl
 
 end NNReal
 
-protected lemma Real.IsConjExponent.toNNReal {p q : ℝ} (hpq : p.IsConjExponent q) :
+protected theorem Real.IsConjExponent.toNNReal {p q : ℝ} (hpq : p.IsConjExponent q) :
     p.toNNReal.IsConjExponent q.toNNReal where
   one_lt := by simpa using hpq.one_lt
   inv_add_inv_conj := by rw [← toNNReal_inv, ← toNNReal_inv, ← toNNReal_add hpq.inv_nonneg
@@ -239,7 +239,7 @@ structure IsConjExponent (p q : ℝ≥0∞) : Prop where
 /-- The conjugate exponent of `p` is `q = 1 + (p - 1)⁻¹`, so that `1/p + 1/q = 1`. -/
 noncomputable def conjExponent (p : ℝ≥0∞) : ℝ≥0∞ := 1 + (p - 1)⁻¹
 
-lemma coe_conjExponent {p : ℝ≥0} (hp : 1 < p) : p.conjExponent = conjExponent p := by
+theorem coe_conjExponent {p : ℝ≥0} (hp : 1 < p) : p.conjExponent = conjExponent p := by
   rw [NNReal.conjExponent, conjExponent]
   norm_cast
   rw [← coe_inv (tsub_pos_of_lt hp).ne']
@@ -249,7 +249,7 @@ lemma coe_conjExponent {p : ℝ≥0} (hp : 1 < p) : p.conjExponent = conjExponen
 
 variable {a b p q : ℝ≥0∞} (h : p.IsConjExponent q)
 
-@[simp, norm_cast] lemma isConjExponent_coe {p q : ℝ≥0} :
+@[simp, norm_cast] theorem isConjExponent_coe {p q : ℝ≥0} :
     IsConjExponent p q ↔ p.IsConjExponent q := by
   simp only [isConjExponent_iff, NNReal.isConjExponent_iff]
   refine ⟨fun h ↦ ⟨?_, ?_⟩, ?_⟩
@@ -266,7 +266,7 @@ alias ⟨_, _root_.NNReal.IsConjExponent.coe_ennreal⟩ := isConjExponent_coe
 
 namespace IsConjExponent
 
-protected lemma conjExponent (hp : 1 ≤ p) : p.IsConjExponent (conjExponent p) := by
+protected theorem conjExponent (hp : 1 ≤ p) : p.IsConjExponent (conjExponent p) := by
   have : p ≠ 0 := (zero_lt_one.trans_le hp).ne'
   rw [isConjExponent_iff, conjExponent, add_comm]
   refine (AddLECancellable.eq_tsub_iff_add_eq_of_le (α := ℝ≥0∞) (by simpa) (by simpa)).1 ?_
@@ -286,27 +286,27 @@ section
 include h
 
 @[symm]
-protected lemma symm : q.IsConjExponent p where
+protected theorem symm : q.IsConjExponent p where
   inv_add_inv_conj := by simpa [add_comm] using h.inv_add_inv_conj
 
-lemma one_le : 1 ≤ p := ENNReal.inv_le_one.1 <| by
+theorem one_le : 1 ≤ p := ENNReal.inv_le_one.1 <| by
   rw [← add_zero p⁻¹, ← h.inv_add_inv_conj]; gcongr; positivity
 
-lemma pos : 0 < p := zero_lt_one.trans_le h.one_le
-lemma ne_zero : p ≠ 0 := h.pos.ne'
+theorem pos : 0 < p := zero_lt_one.trans_le h.one_le
+theorem ne_zero : p ≠ 0 := h.pos.ne'
 
-lemma one_sub_inv : 1 - p⁻¹ = q⁻¹ :=
+theorem one_sub_inv : 1 - p⁻¹ = q⁻¹ :=
   ENNReal.sub_eq_of_eq_add_rev' one_ne_top h.inv_add_inv_conj.symm
 
-lemma conjExponent_eq : conjExponent p = q := by
+theorem conjExponent_eq : conjExponent p = q := by
   have hp : 1 ≤ p := h.one_le
   have : p⁻¹ ≠ ∞ := by simpa using h.ne_zero
   simpa [ENNReal.add_right_inj, *] using
     (IsConjExponent.conjExponent hp).inv_add_inv_conj.trans h.inv_add_inv_conj.symm
 
-lemma conj_eq : q = 1 + (p - 1)⁻¹ := h.conjExponent_eq.symm
+theorem conj_eq : q = 1 + (p - 1)⁻¹ := h.conjExponent_eq.symm
 
-lemma mul_eq_add : p * q = p + q := by
+theorem mul_eq_add : p * q = p + q := by
   obtain rfl | hp := eq_or_ne p ∞
   · simp [h.symm.ne_zero]
   obtain rfl | hq := eq_or_ne q ∞
@@ -315,7 +315,7 @@ lemma mul_eq_add : p * q = p + q := by
     ENNReal.mul_inv_cancel h.ne_zero hp, one_mul, mul_assoc,
     ENNReal.mul_inv_cancel h.symm.ne_zero hq, mul_one, add_comm]
 
-lemma div_conj_eq_sub_one : p / q = p - 1 := by
+theorem div_conj_eq_sub_one : p / q = p - 1 := by
   obtain rfl | hq := eq_or_ne q ∞
   · simp [h.symm.conj_eq, tsub_eq_zero_of_le]
   refine ENNReal.eq_sub_of_add_eq one_ne_top ?_
@@ -324,22 +324,22 @@ lemma div_conj_eq_sub_one : p / q = p - 1 := by
 
 end
 
-protected lemma inv_inv (hab : a + b = 1) : a⁻¹.IsConjExponent b⁻¹ where
+protected theorem inv_inv (hab : a + b = 1) : a⁻¹.IsConjExponent b⁻¹ where
   inv_add_inv_conj := by simpa only [inv_inv] using hab
 
-lemma inv_one_sub_inv (ha : a ≤ 1) : a⁻¹.IsConjExponent (1 - a)⁻¹ :=
+theorem inv_one_sub_inv (ha : a ≤ 1) : a⁻¹.IsConjExponent (1 - a)⁻¹ :=
   .inv_inv <| add_tsub_cancel_of_le ha
 
-lemma one_sub_inv_inv (ha : a ≤ 1) : (1 - a)⁻¹.IsConjExponent a⁻¹ := (inv_one_sub_inv ha).symm
+theorem one_sub_inv_inv (ha : a ≤ 1) : (1 - a)⁻¹.IsConjExponent a⁻¹ := (inv_one_sub_inv ha).symm
 
-lemma top_one : IsConjExponent ∞ 1 := ⟨by simp⟩
-lemma one_top : IsConjExponent 1 ∞ := ⟨by simp⟩
+theorem top_one : IsConjExponent ∞ 1 := ⟨by simp⟩
+theorem one_top : IsConjExponent 1 ∞ := ⟨by simp⟩
 
 end IsConjExponent
 
-lemma isConjExponent_comm : p.IsConjExponent q ↔ q.IsConjExponent p := ⟨.symm, .symm⟩
+theorem isConjExponent_comm : p.IsConjExponent q ↔ q.IsConjExponent p := ⟨.symm, .symm⟩
 
-lemma isConjExponent_iff_eq_conjExponent (hp : 1 ≤ p) : p.IsConjExponent q ↔ q = 1 + (p - 1)⁻¹ :=
+theorem isConjExponent_iff_eq_conjExponent (hp : 1 ≤ p) : p.IsConjExponent q ↔ q = 1 + (p - 1)⁻¹ :=
   ⟨fun h ↦ h.conj_eq, by rintro rfl; exact .conjExponent hp⟩
 
 end ENNReal

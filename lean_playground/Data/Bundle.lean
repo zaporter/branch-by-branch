@@ -26,7 +26,7 @@ general, the constructions of fiber bundles we will make will be of this form.
 
 - We use a custom structure for the total space of a bundle instead of using a type synonym for the
   canonical disjoint union `Σ x, E x` because the total space usually has a different topology and
-  Lean 4 `simp` fails to apply lemmas about `Σ x, E x` to elements of the total space.
+  Lean 4 `simp` fails to apply theorems about `Σ x, E x` to elements of the total space.
 
 - The definition of `Bundle.TotalSpace` has an unused argument `F`. The reason is that in some
   constructions (e.g., `Bundle.ContinuousLinearMap.vectorBundle`) we need access to the atlas of

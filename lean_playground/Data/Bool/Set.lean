@@ -8,7 +8,7 @@ import Mathlib.Data.Set.Image
 /-!
 # Booleans and set operations
 
-This file contains two trivial lemmas about `Bool`, `Set.univ`, and `Set.range`.
+This file contains two trivial theorems about `Bool`, `Set.univ`, and `Set.range`.
 -/
 
 

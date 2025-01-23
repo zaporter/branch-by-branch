@@ -27,7 +27,7 @@ variable {α : Type u} {β : Type v} {γ : Type w}
 -- so that `norm_cast` has something to index on.
 -- It is currently an abbreviation so that instance coming from `Subtype` are available.
 -- If you're interested in making it a `def`, as it probably should be,
--- you'll then need to create additional instances (and possibly prove lemmas about them).
+-- you'll then need to create additional instances (and possibly prove theorems about them).
 -- The first error should appear below at `monotoneOn_iff_monotone`.
 /-- Given the set `s`, `Elem s` is the `Type` of element of `s`. -/
 @[coe, reducible] def Elem (s : Set α) : Type u := {x // x ∈ s}

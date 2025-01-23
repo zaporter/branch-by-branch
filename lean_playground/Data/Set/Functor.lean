@@ -76,7 +76,7 @@ instance : Alternative Set :=
     orElse := fun s t => s ∪ (t ())
     failure := ∅ }
 
-/-! ### Monadic coercion lemmas -/
+/-! ### Monadic coercion theorems -/
 
 variable {β : Set α} {γ : Set β}
 

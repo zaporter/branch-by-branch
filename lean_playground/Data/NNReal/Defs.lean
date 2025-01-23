@@ -85,7 +85,7 @@ noncomputable instance : LinearOrderedCommGroupWithZero ℝ≥0 :=
 
 instance : Coe ℝ≥0 ℝ := ⟨toReal⟩
 
--- Simp lemma to put back `n.val` into the normal form given by the coercion.
+-- Simp theorem to put back `n.val` into the normal form given by the coercion.
 @[simp]
 theorem val_eq_coe (n : ℝ≥0) : n.val = n :=
   rfl
@@ -148,16 +148,16 @@ example : Nontrivial ℝ≥0 := by infer_instance
 
 protected theorem coe_injective : Injective ((↑) : ℝ≥0 → ℝ) := Subtype.coe_injective
 
-@[simp, norm_cast] lemma coe_inj {r₁ r₂ : ℝ≥0} : (r₁ : ℝ) = r₂ ↔ r₁ = r₂ :=
+@[simp, norm_cast] theorem coe_inj {r₁ r₂ : ℝ≥0} : (r₁ : ℝ) = r₂ ↔ r₁ = r₂ :=
   NNReal.coe_injective.eq_iff
 
 
-@[simp, norm_cast] lemma coe_zero : ((0 : ℝ≥0) : ℝ) = 0 := rfl
+@[simp, norm_cast] theorem coe_zero : ((0 : ℝ≥0) : ℝ) = 0 := rfl
 
-@[simp, norm_cast] lemma coe_one : ((1 : ℝ≥0) : ℝ) = 1 := rfl
+@[simp, norm_cast] theorem coe_one : ((1 : ℝ≥0) : ℝ) = 1 := rfl
 
-@[simp] lemma mk_zero : (⟨0, le_rfl⟩ : ℝ≥0) = 0 := rfl
-@[simp] lemma mk_one : (⟨1, zero_le_one⟩ : ℝ≥0) = 1 := rfl
+@[simp] theorem mk_zero : (⟨0, le_rfl⟩ : ℝ≥0) = 0 := rfl
+@[simp] theorem mk_one : (⟨1, zero_le_one⟩ : ℝ≥0) = 1 := rfl
 
 @[simp, norm_cast]
 protected theorem coe_add (r₁ r₂ : ℝ≥0) : ((r₁ + r₂ : ℝ≥0) : ℝ) = r₁ + r₂ :=
@@ -183,13 +183,13 @@ protected theorem coe_sub {r₁ r₂ : ℝ≥0} (h : r₂ ≤ r₁) : ((r₁ - r
 
 variable {r r₁ r₂ : ℝ≥0} {x y : ℝ}
 
-@[simp, norm_cast] lemma coe_eq_zero : (r : ℝ) = 0 ↔ r = 0 := by rw [← coe_zero, coe_inj]
+@[simp, norm_cast] theorem coe_eq_zero : (r : ℝ) = 0 ↔ r = 0 := by rw [← coe_zero, coe_inj]
 
-@[simp, norm_cast] lemma coe_eq_one : (r : ℝ) = 1 ↔ r = 1 := by rw [← coe_one, coe_inj]
+@[simp, norm_cast] theorem coe_eq_one : (r : ℝ) = 1 ↔ r = 1 := by rw [← coe_one, coe_inj]
 
-@[norm_cast] lemma coe_ne_zero : (r : ℝ) ≠ 0 ↔ r ≠ 0 := coe_eq_zero.not
+@[norm_cast] theorem coe_ne_zero : (r : ℝ) ≠ 0 ↔ r ≠ 0 := coe_eq_zero.not
 
-@[norm_cast] lemma coe_ne_one : (r : ℝ) ≠ 1 ↔ r ≠ 1 := coe_eq_one.not
+@[norm_cast] theorem coe_ne_one : (r : ℝ) ≠ 1 ↔ r ≠ 1 := coe_eq_one.not
 
 example : CommSemiring ℝ≥0 := by infer_instance
 
@@ -260,8 +260,8 @@ theorem coe_zpow (r : ℝ≥0) (n : ℤ) : ((r ^ n : ℝ≥0) : ℝ) = (r : ℝ)
 
 variable {ι : Type*} {f : ι → ℝ}
 
-@[simp, norm_cast] lemma coe_nsmul (r : ℝ≥0) (n : ℕ) : ↑(n • r) = n • (r : ℝ) := rfl
-@[simp, norm_cast] lemma coe_nnqsmul (q : ℚ≥0) (x : ℝ≥0) : ↑(q • x) = (q • x : ℝ) := rfl
+@[simp, norm_cast] theorem coe_nsmul (r : ℝ≥0) (n : ℕ) : ↑(n • r) = n • (r : ℝ) := rfl
+@[simp, norm_cast] theorem coe_nnqsmul (q : ℚ≥0) (x : ℝ≥0) : ↑(q • x) = (q • x : ℝ) := rfl
 
 @[simp, norm_cast]
 protected theorem coe_natCast (n : ℕ) : (↑(↑n : ℝ≥0) : ℝ) = n :=
@@ -280,26 +280,26 @@ protected theorem coe_ofScientific (m : ℕ) (s : Bool) (e : ℕ) :
   rfl
 
 @[simp, norm_cast]
-lemma algebraMap_eq_coe : (algebraMap ℝ≥0 ℝ : ℝ≥0 → ℝ) = (↑) := rfl
+theorem algebraMap_eq_coe : (algebraMap ℝ≥0 ℝ : ℝ≥0 → ℝ) = (↑) := rfl
 
 noncomputable example : LinearOrder ℝ≥0 := by infer_instance
 
-@[simp, norm_cast] lemma coe_le_coe : (r₁ : ℝ) ≤ r₂ ↔ r₁ ≤ r₂ := Iff.rfl
+@[simp, norm_cast] theorem coe_le_coe : (r₁ : ℝ) ≤ r₂ ↔ r₁ ≤ r₂ := Iff.rfl
 
-@[simp, norm_cast] lemma coe_lt_coe : (r₁ : ℝ) < r₂ ↔ r₁ < r₂ := Iff.rfl
+@[simp, norm_cast] theorem coe_lt_coe : (r₁ : ℝ) < r₂ ↔ r₁ < r₂ := Iff.rfl
 
 @[bound] private alias ⟨_, Bound.coe_lt_coe_of_lt⟩ := coe_lt_coe
 
-@[simp, norm_cast] lemma coe_pos : (0 : ℝ) < r ↔ 0 < r := Iff.rfl
+@[simp, norm_cast] theorem coe_pos : (0 : ℝ) < r ↔ 0 < r := Iff.rfl
 
 @[bound] private alias ⟨_, Bound.coe_pos_of_pos⟩ := coe_pos
 
-@[simp, norm_cast] lemma one_le_coe : 1 ≤ (r : ℝ) ↔ 1 ≤ r := by rw [← coe_le_coe, coe_one]
-@[simp, norm_cast] lemma one_lt_coe : 1 < (r : ℝ) ↔ 1 < r := by rw [← coe_lt_coe, coe_one]
-@[simp, norm_cast] lemma coe_le_one : (r : ℝ) ≤ 1 ↔ r ≤ 1 := by rw [← coe_le_coe, coe_one]
-@[simp, norm_cast] lemma coe_lt_one : (r : ℝ) < 1 ↔ r < 1 := by rw [← coe_lt_coe, coe_one]
+@[simp, norm_cast] theorem one_le_coe : 1 ≤ (r : ℝ) ↔ 1 ≤ r := by rw [← coe_le_coe, coe_one]
+@[simp, norm_cast] theorem one_lt_coe : 1 < (r : ℝ) ↔ 1 < r := by rw [← coe_lt_coe, coe_one]
+@[simp, norm_cast] theorem coe_le_one : (r : ℝ) ≤ 1 ↔ r ≤ 1 := by rw [← coe_le_coe, coe_one]
+@[simp, norm_cast] theorem coe_lt_one : (r : ℝ) < 1 ↔ r < 1 := by rw [← coe_lt_coe, coe_one]
 
-@[mono] lemma coe_mono : Monotone ((↑) : ℝ≥0 → ℝ) := fun _ _ => NNReal.coe_le_coe.2
+@[mono] theorem coe_mono : Monotone ((↑) : ℝ≥0 → ℝ) := fun _ _ => NNReal.coe_le_coe.2
 
 /-- Alias for the use of `gcongr` -/
 @[gcongr] alias ⟨_, GCongr.toReal_le_toReal⟩ := coe_le_coe
@@ -513,22 +513,22 @@ theorem toNNReal_eq_zero {r : ℝ} : Real.toNNReal r = 0 ↔ r ≤ 0 := by
 theorem toNNReal_of_nonpos {r : ℝ} : r ≤ 0 → Real.toNNReal r = 0 :=
   toNNReal_eq_zero.2
 
-lemma toNNReal_eq_iff_eq_coe {r : ℝ} {p : ℝ≥0} (hp : p ≠ 0) : r.toNNReal = p ↔ r = p :=
+theorem toNNReal_eq_iff_eq_coe {r : ℝ} {p : ℝ≥0} (hp : p ≠ 0) : r.toNNReal = p ↔ r = p :=
   ⟨fun h ↦ h ▸ (coe_toNNReal _ <| not_lt.1 fun hlt ↦ hp <| h ▸ toNNReal_of_nonpos hlt.le).symm,
     fun h ↦ h.symm ▸ toNNReal_coe⟩
 
 @[simp]
-lemma toNNReal_eq_one {r : ℝ} : r.toNNReal = 1 ↔ r = 1 := toNNReal_eq_iff_eq_coe one_ne_zero
+theorem toNNReal_eq_one {r : ℝ} : r.toNNReal = 1 ↔ r = 1 := toNNReal_eq_iff_eq_coe one_ne_zero
 
 @[simp]
-lemma toNNReal_eq_natCast {r : ℝ} {n : ℕ} (hn : n ≠ 0) : r.toNNReal = n ↔ r = n :=
+theorem toNNReal_eq_natCast {r : ℝ} {n : ℕ} (hn : n ≠ 0) : r.toNNReal = n ↔ r = n :=
   mod_cast toNNReal_eq_iff_eq_coe <| Nat.cast_ne_zero.2 hn
 
 @[deprecated (since := "2024-04-17")]
 alias toNNReal_eq_nat_cast := toNNReal_eq_natCast
 
 @[simp]
-lemma toNNReal_eq_ofNat {r : ℝ} {n : ℕ} [n.AtLeastTwo] :
+theorem toNNReal_eq_ofNat {r : ℝ} {n : ℕ} [n.AtLeastTwo] :
     r.toNNReal = ofNat(n) ↔ r = OfNat.ofNat n :=
   toNNReal_eq_natCast (NeZero.ne n)
 
@@ -537,34 +537,34 @@ theorem toNNReal_le_toNNReal_iff {r p : ℝ} (hp : 0 ≤ p) :
     toNNReal r ≤ toNNReal p ↔ r ≤ p := by simp [← NNReal.coe_le_coe, hp]
 
 @[simp]
-lemma toNNReal_le_one {r : ℝ} : r.toNNReal ≤ 1 ↔ r ≤ 1 := by
+theorem toNNReal_le_one {r : ℝ} : r.toNNReal ≤ 1 ↔ r ≤ 1 := by
   simpa using toNNReal_le_toNNReal_iff zero_le_one
 
 @[simp]
-lemma one_lt_toNNReal {r : ℝ} : 1 < r.toNNReal ↔ 1 < r := by
+theorem one_lt_toNNReal {r : ℝ} : 1 < r.toNNReal ↔ 1 < r := by
   simpa only [not_le] using toNNReal_le_one.not
 
 @[simp]
-lemma toNNReal_le_natCast {r : ℝ} {n : ℕ} : r.toNNReal ≤ n ↔ r ≤ n := by
+theorem toNNReal_le_natCast {r : ℝ} {n : ℕ} : r.toNNReal ≤ n ↔ r ≤ n := by
   simpa using toNNReal_le_toNNReal_iff n.cast_nonneg
 
 @[deprecated (since := "2024-04-17")]
 alias toNNReal_le_nat_cast := toNNReal_le_natCast
 
 @[simp]
-lemma natCast_lt_toNNReal {r : ℝ} {n : ℕ} : n < r.toNNReal ↔ n < r := by
+theorem natCast_lt_toNNReal {r : ℝ} {n : ℕ} : n < r.toNNReal ↔ n < r := by
   simpa only [not_le] using toNNReal_le_natCast.not
 
 @[deprecated (since := "2024-04-17")]
 alias nat_cast_lt_toNNReal := natCast_lt_toNNReal
 
 @[simp]
-lemma toNNReal_le_ofNat {r : ℝ} {n : ℕ} [n.AtLeastTwo] :
+theorem toNNReal_le_ofNat {r : ℝ} {n : ℕ} [n.AtLeastTwo] :
     r.toNNReal ≤ ofNat(n) ↔ r ≤ n :=
   toNNReal_le_natCast
 
 @[simp]
-lemma ofNat_lt_toNNReal {r : ℝ} {n : ℕ} [n.AtLeastTwo] :
+theorem ofNat_lt_toNNReal {r : ℝ} {n : ℕ} [n.AtLeastTwo] :
     ofNat(n) < r.toNNReal ↔ n < r :=
   natCast_lt_toNNReal
 
@@ -587,50 +587,50 @@ theorem toNNReal_lt_toNNReal_iff_of_nonneg {r p : ℝ} (hr : 0 ≤ r) :
     Real.toNNReal r < Real.toNNReal p ↔ r < p :=
   toNNReal_lt_toNNReal_iff'.trans ⟨And.left, fun h => ⟨h, lt_of_le_of_lt hr h⟩⟩
 
-lemma toNNReal_le_toNNReal_iff' {r p : ℝ} : r.toNNReal ≤ p.toNNReal ↔ r ≤ p ∨ r ≤ 0 := by
+theorem toNNReal_le_toNNReal_iff' {r p : ℝ} : r.toNNReal ≤ p.toNNReal ↔ r ≤ p ∨ r ≤ 0 := by
   simp_rw [← not_lt, toNNReal_lt_toNNReal_iff', not_and_or]
 
-lemma toNNReal_le_toNNReal_iff_of_pos {r p : ℝ} (hr : 0 < r) : r.toNNReal ≤ p.toNNReal ↔ r ≤ p := by
+theorem toNNReal_le_toNNReal_iff_of_pos {r p : ℝ} (hr : 0 < r) : r.toNNReal ≤ p.toNNReal ↔ r ≤ p := by
   simp [toNNReal_le_toNNReal_iff', hr.not_le]
 
 @[simp]
-lemma one_le_toNNReal {r : ℝ} : 1 ≤ r.toNNReal ↔ 1 ≤ r := by
+theorem one_le_toNNReal {r : ℝ} : 1 ≤ r.toNNReal ↔ 1 ≤ r := by
   simpa using toNNReal_le_toNNReal_iff_of_pos one_pos
 
 @[simp]
-lemma toNNReal_lt_one {r : ℝ} : r.toNNReal < 1 ↔ r < 1 := by simp only [← not_le, one_le_toNNReal]
+theorem toNNReal_lt_one {r : ℝ} : r.toNNReal < 1 ↔ r < 1 := by simp only [← not_le, one_le_toNNReal]
 
 @[simp]
-lemma natCastle_toNNReal' {n : ℕ} {r : ℝ} : ↑n ≤ r.toNNReal ↔ n ≤ r ∨ n = 0 := by
+theorem natCastle_toNNReal' {n : ℕ} {r : ℝ} : ↑n ≤ r.toNNReal ↔ n ≤ r ∨ n = 0 := by
   simpa [n.cast_nonneg.le_iff_eq] using toNNReal_le_toNNReal_iff' (r := n)
 
 @[deprecated (since := "2024-04-17")]
 alias nat_cast_le_toNNReal' := natCastle_toNNReal'
 
 @[simp]
-lemma toNNReal_lt_natCast' {n : ℕ} {r : ℝ} : r.toNNReal < n ↔ r < n ∧ n ≠ 0 := by
+theorem toNNReal_lt_natCast' {n : ℕ} {r : ℝ} : r.toNNReal < n ↔ r < n ∧ n ≠ 0 := by
   simpa [pos_iff_ne_zero] using toNNReal_lt_toNNReal_iff' (r := r) (p := n)
 
 @[deprecated (since := "2024-04-17")]
 alias toNNReal_lt_nat_cast' := toNNReal_lt_natCast'
 
-lemma natCast_le_toNNReal {n : ℕ} {r : ℝ} (hn : n ≠ 0) : ↑n ≤ r.toNNReal ↔ n ≤ r := by simp [hn]
+theorem natCast_le_toNNReal {n : ℕ} {r : ℝ} (hn : n ≠ 0) : ↑n ≤ r.toNNReal ↔ n ≤ r := by simp [hn]
 
 @[deprecated (since := "2024-04-17")]
 alias nat_cast_le_toNNReal := natCast_le_toNNReal
 
-lemma toNNReal_lt_natCast {r : ℝ} {n : ℕ} (hn : n ≠ 0) : r.toNNReal < n ↔ r < n := by simp [hn]
+theorem toNNReal_lt_natCast {r : ℝ} {n : ℕ} (hn : n ≠ 0) : r.toNNReal < n ↔ r < n := by simp [hn]
 
 @[deprecated (since := "2024-04-17")]
 alias toNNReal_lt_nat_cast := toNNReal_lt_natCast
 
 @[simp]
-lemma toNNReal_lt_ofNat {r : ℝ} {n : ℕ} [n.AtLeastTwo] :
+theorem toNNReal_lt_ofNat {r : ℝ} {n : ℕ} [n.AtLeastTwo] :
     r.toNNReal < ofNat(n) ↔ r < OfNat.ofNat n :=
   toNNReal_lt_natCast (NeZero.ne n)
 
 @[simp]
-lemma ofNat_le_toNNReal {n : ℕ} {r : ℝ} [n.AtLeastTwo] :
+theorem ofNat_le_toNNReal {n : ℕ} {r : ℝ} [n.AtLeastTwo] :
     ofNat(n) ≤ r.toNNReal ↔ OfNat.ofNat n ≤ r :=
   natCast_le_toNNReal (NeZero.ne n)
 
@@ -713,8 +713,8 @@ section Sub
 /-!
 ### Lemmas about subtraction
 
-In this section we provide a few lemmas about subtraction that do not fit well into any other
-typeclass. For lemmas about subtraction and addition see lemmas about `OrderedSub` in the file
+In this section we provide a few theorems about subtraction that do not fit well into any other
+typeclass. For theorems about subtraction and addition see theorems about `OrderedSub` in the file
 `Mathlib.Algebra.Order.Sub.Basic`. See also `mul_tsub` and `tsub_mul`.
 -/
 
@@ -754,11 +754,11 @@ theorem le_div_iff_mul_le {a b r : ℝ≥0} (hr : r ≠ 0) : a ≤ b / r ↔ a *
   le_div_iff₀ (pos_iff_ne_zero.2 hr)
 
 @[deprecated div_le_iff₀ (since := "2024-08-21")]
-protected lemma div_le_iff {a b r : ℝ≥0} (hr : r ≠ 0) : a / r ≤ b ↔ a ≤ b * r :=
+protected theorem div_le_iff {a b r : ℝ≥0} (hr : r ≠ 0) : a / r ≤ b ↔ a ≤ b * r :=
   div_le_iff₀ (pos_iff_ne_zero.2 hr)
 
 @[deprecated div_le_iff₀' (since := "2024-08-21")]
-protected lemma div_le_iff' {a b r : ℝ≥0} (hr : r ≠ 0) : a / r ≤ b ↔ a ≤ r * b :=
+protected theorem div_le_iff' {a b r : ℝ≥0} (hr : r ≠ 0) : a / r ≤ b ↔ a ≤ r * b :=
   div_le_iff₀' (pos_iff_ne_zero.2 hr)
 
 theorem div_le_of_le_mul {a b c : ℝ≥0} (h : a ≤ b * c) : a / c ≤ b :=
@@ -768,7 +768,7 @@ theorem div_le_of_le_mul' {a b c : ℝ≥0} (h : a ≤ b * c) : a / b ≤ c :=
   div_le_of_le_mul <| mul_comm b c ▸ h
 
 @[deprecated le_div_iff₀ (since := "2024-08-21")]
-protected lemma le_div_iff {a b r : ℝ≥0} (hr : r ≠ 0) : a ≤ b / r ↔ a * r ≤ b :=
+protected theorem le_div_iff {a b r : ℝ≥0} (hr : r ≠ 0) : a ≤ b / r ↔ a * r ≤ b :=
   le_div_iff₀ hr.bot_lt
 
 @[deprecated le_div_iff₀' (since := "2024-10-02")]
@@ -867,7 +867,7 @@ theorem iSup_empty [IsEmpty ι] (f : ι → ℝ≥0) : ⨆ i, f i = 0 := ciSup_o
 theorem iInf_empty [IsEmpty ι] (f : ι → ℝ≥0) : ⨅ i, f i = 0 := by
   rw [_root_.iInf_of_isEmpty, sInf_empty]
 
-@[simp] lemma iSup_eq_zero (hf : BddAbove (range f)) : ⨆ i, f i = 0 ↔ ∀ i, f i = 0 := by
+@[simp] theorem iSup_eq_zero (hf : BddAbove (range f)) : ⨆ i, f i = 0 ↔ ∀ i, f i = 0 := by
   cases isEmpty_or_nonempty ι
   · simp
   · simp [← bot_eq_zero', ← le_bot_iff, ciSup_le_iff hf]
@@ -937,7 +937,7 @@ theorem nnabs_coe (x : ℝ≥0) : nnabs x = x := by simp
 theorem coe_toNNReal_le (x : ℝ) : (toNNReal x : ℝ) ≤ |x| :=
   max_le (le_abs_self _) (abs_nonneg _)
 
-@[simp] lemma toNNReal_abs (x : ℝ) : |x|.toNNReal = nnabs x := NNReal.coe_injective <| by simp
+@[simp] theorem toNNReal_abs (x : ℝ) : |x|.toNNReal = nnabs x := NNReal.coe_injective <| by simp
 
 theorem cast_natAbs_eq_nnabs_cast (n : ℤ) : (n.natAbs : ℝ≥0) = nnabs n := by
   ext

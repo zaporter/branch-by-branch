@@ -11,7 +11,7 @@ import Mathlib.Data.Set.Function
 /-!
 # iterate
 
-Proves various lemmas about `List.iterate`.
+Proves various theorems about `List.iterate`.
 -/
 
 variable {α : Type*}

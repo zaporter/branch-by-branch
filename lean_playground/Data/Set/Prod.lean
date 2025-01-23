@@ -90,7 +90,7 @@ theorem univ_prod {t : Set β} : (univ : Set α) ×ˢ t = Prod.snd ⁻¹' t := b
 
 theorem prod_univ {s : Set α} : s ×ˢ (univ : Set β) = Prod.fst ⁻¹' s := by simp [prod_eq]
 
-@[simp] lemma prod_eq_univ [Nonempty α] [Nonempty β] : s ×ˢ t = univ ↔ s = univ ∧ t = univ := by
+@[simp] theorem prod_eq_univ [Nonempty α] [Nonempty β] : s ×ˢ t = univ ↔ s = univ ∧ t = univ := by
   simp [eq_univ_iff_forall, forall_and]
 
 @[simp]
@@ -128,7 +128,7 @@ theorem prod_inter_prod : s₁ ×ˢ t₁ ∩ s₂ ×ˢ t₂ = (s₁ ∩ s₂) ×
   ext ⟨x, y⟩
   simp [and_assoc, and_left_comm]
 
-lemma compl_prod_eq_union {α β : Type*} (s : Set α) (t : Set β) :
+theorem compl_prod_eq_union {α β : Type*} (s : Set α) (t : Set β) :
     (s ×ˢ t)ᶜ = (sᶜ ×ˢ univ) ∪ (univ ×ˢ tᶜ) := by
   ext p
   simp only [mem_compl_iff, mem_prod, not_and, mem_union, mem_univ, and_true, true_and]
@@ -301,7 +301,7 @@ theorem fst_image_prod (s : Set β) {t : Set α} (ht : t.Nonempty) : Prod.fst ''
     let ⟨x, hx⟩ := ht
     ⟨(y, x), ⟨hy, hx⟩, rfl⟩
 
-lemma mapsTo_fst_prod {s : Set α} {t : Set β} : MapsTo Prod.fst (s ×ˢ t) s :=
+theorem mapsTo_fst_prod {s : Set α} {t : Set β} : MapsTo Prod.fst (s ×ˢ t) s :=
   fun _ hx ↦ (mem_prod.1 hx).1
 
 theorem prod_subset_preimage_snd (s : Set α) (t : Set β) : s ×ˢ t ⊆ Prod.snd ⁻¹' t :=
@@ -315,7 +315,7 @@ theorem snd_image_prod {s : Set α} (hs : s.Nonempty) (t : Set β) : Prod.snd ''
     let ⟨x, x_in⟩ := hs
     ⟨(x, y), ⟨x_in, y_in⟩, rfl⟩
 
-lemma mapsTo_snd_prod {s : Set α} {t : Set β} : MapsTo Prod.snd (s ×ˢ t) t :=
+theorem mapsTo_snd_prod {s : Set α} {t : Set β} : MapsTo Prod.snd (s ×ˢ t) t :=
   fun _ hx ↦ (mem_prod.1 hx).2
 
 theorem prod_diff_prod : s ×ˢ t \ s₁ ×ˢ t₁ = s ×ˢ (t \ t₁) ∪ (s \ s₁) ×ˢ t := by
@@ -393,7 +393,7 @@ end Prod
 
 /-! ### Diagonal
 
-In this section we prove some lemmas about the diagonal set `{p | p.1 = p.2}` and the diagonal map
+In this section we prove some theorems about the diagonal set `{p | p.1 = p.2}` and the diagonal map
 `fun x ↦ (x, x)`.
 -/
 
@@ -402,7 +402,7 @@ section Diagonal
 
 variable {α : Type*} {s t : Set α}
 
-lemma diagonal_nonempty [Nonempty α] : (diagonal α).Nonempty :=
+theorem diagonal_nonempty [Nonempty α] : (diagonal α).Nonempty :=
   Nonempty.elim ‹_› fun x => ⟨_, mem_diagonal x⟩
 
 instance decidableMemDiagonal [h : DecidableEq α] (x : α × α) : Decidable (x ∈ diagonal α) :=
@@ -471,7 +471,7 @@ def Function.Pullback.fst {f : X → Y} {g : Z → Y} (p : f.Pullback g) : X := 
 def Function.Pullback.snd {f : X → Y} {g : Z → Y} (p : f.Pullback g) : Z := p.val.2
 
 open Function.Pullback in
-lemma Function.pullback_comm_sq (f : X → Y) (g : Z → Y) :
+theorem Function.pullback_comm_sq (f : X → Y) (g : Z → Y) :
     f ∘ @fst X Y Z f g = g ∘ @snd X Y Z f g := funext fun p ↦ p.2
 
 /-- The diagonal map $\Delta: X \to X \times_Y X$. -/
@@ -786,7 +786,7 @@ theorem subset_eval_image_pi (ht : (s.pi t).Nonempty) (i : ι) : t i ⊆ eval i 
 theorem eval_image_pi (hs : i ∈ s) (ht : (s.pi t).Nonempty) : eval i '' s.pi t = t i :=
   (eval_image_pi_subset hs).antisymm (subset_eval_image_pi ht i)
 
-lemma eval_image_pi_of_not_mem [Decidable (s.pi t).Nonempty] (hi : i ∉ s) :
+theorem eval_image_pi_of_not_mem [Decidable (s.pi t).Nonempty] (hi : i ∉ s) :
     eval i '' s.pi t = if (s.pi t).Nonempty then univ else ∅ := by
   classical
   ext xᵢ

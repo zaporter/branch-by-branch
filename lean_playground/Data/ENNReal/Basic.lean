@@ -177,11 +177,11 @@ instance canLift : CanLift ℝ≥0∞ ℝ≥0 ofNNReal (· ≠ ∞) := WithTop.c
 
 @[simp] theorem some_eq_coe' (a : ℝ≥0) : (WithTop.some a : ℝ≥0∞) = (↑a : ℝ≥0∞) := rfl
 
-lemma coe_injective : Injective ((↑) : ℝ≥0 → ℝ≥0∞) := WithTop.coe_injective
+theorem coe_injective : Injective ((↑) : ℝ≥0 → ℝ≥0∞) := WithTop.coe_injective
 
-@[simp, norm_cast] lemma coe_inj : (p : ℝ≥0∞) = q ↔ p = q := coe_injective.eq_iff
+@[simp, norm_cast] theorem coe_inj : (p : ℝ≥0∞) = q ↔ p = q := coe_injective.eq_iff
 
-lemma coe_ne_coe : (p : ℝ≥0∞) ≠ q ↔ p ≠ q := coe_inj.not
+theorem coe_ne_coe : (p : ℝ≥0∞) ≠ q ↔ p ≠ q := coe_inj.not
 
 theorem range_coe' : range ofNNReal = Iio ∞ := WithTop.range_coe
 theorem range_coe : range ofNNReal = {∞}ᶜ := (isCompl_range_some_none ℝ≥0).symm.compl_eq.symm
@@ -201,7 +201,7 @@ protected def toReal (a : ℝ≥0∞) : Real := a.toNNReal
 /-- `ofReal x` returns `x` if it is nonnegative, `0` otherwise. -/
 protected def ofReal (r : Real) : ℝ≥0∞ := r.toNNReal
 
-@[simp, norm_cast] lemma toNNReal_coe (r : ℝ≥0) : (r : ℝ≥0∞).toNNReal = r := rfl
+@[simp, norm_cast] theorem toNNReal_coe (r : ℝ≥0) : (r : ℝ≥0∞).toNNReal = r := rfl
 
 @[simp]
 theorem coe_toNNReal : ∀ {a : ℝ≥0∞}, a ≠ ∞ → ↑a.toNNReal = a
@@ -362,20 +362,20 @@ theorem coe_strictMono : StrictMono ofNNReal := fun _ _ => coe_lt_coe.2
 
 theorem coe_ne_zero : (r : ℝ≥0∞) ≠ 0 ↔ r ≠ 0 := coe_eq_zero.not
 
-lemma coe_ne_one : (r : ℝ≥0∞) ≠ 1 ↔ r ≠ 1 := coe_eq_one.not
+theorem coe_ne_one : (r : ℝ≥0∞) ≠ 1 ↔ r ≠ 1 := coe_eq_one.not
 
-@[simp, norm_cast] lemma coe_add (x y : ℝ≥0) : (↑(x + y) : ℝ≥0∞) = x + y := rfl
+@[simp, norm_cast] theorem coe_add (x y : ℝ≥0) : (↑(x + y) : ℝ≥0∞) = x + y := rfl
 
-@[simp, norm_cast] lemma coe_mul (x y : ℝ≥0) : (↑(x * y) : ℝ≥0∞) = x * y := rfl
+@[simp, norm_cast] theorem coe_mul (x y : ℝ≥0) : (↑(x * y) : ℝ≥0∞) = x * y := rfl
 
-@[norm_cast] lemma coe_nsmul (n : ℕ) (x : ℝ≥0) : (↑(n • x) : ℝ≥0∞) = n • x := rfl
+@[norm_cast] theorem coe_nsmul (n : ℕ) (x : ℝ≥0) : (↑(n • x) : ℝ≥0∞) = n • x := rfl
 
-@[simp, norm_cast] lemma coe_pow (x : ℝ≥0) (n : ℕ) : (↑(x ^ n) : ℝ≥0∞) = x ^ n := rfl
+@[simp, norm_cast] theorem coe_pow (x : ℝ≥0) (n : ℕ) : (↑(x ^ n) : ℝ≥0∞) = x ^ n := rfl
 
 @[simp, norm_cast]
 theorem coe_ofNat (n : ℕ) [n.AtLeastTwo] : ((ofNat(n) : ℝ≥0) : ℝ≥0∞) = ofNat(n) := rfl
 
--- Porting note (https://github.com/leanprover-community/mathlib4/issues/11215): TODO: add lemmas about `OfNat.ofNat` and `<`/`≤`
+-- Porting note (https://github.com/leanprover-community/mathlib4/issues/11215): TODO: add theorems about `OfNat.ofNat` and `<`/`≤`
 
 theorem coe_two : ((2 : ℝ≥0) : ℝ≥0∞) = 2 := rfl
 
@@ -474,7 +474,7 @@ theorem one_lt_coe_iff : 1 < (↑p : ℝ≥0∞) ↔ 1 < p := coe_lt_coe
 @[simp, norm_cast]
 theorem coe_natCast (n : ℕ) : ((n : ℝ≥0) : ℝ≥0∞) = n := rfl
 
-@[simp, norm_cast] lemma ofReal_natCast (n : ℕ) : ENNReal.ofReal n = n := by simp [ENNReal.ofReal]
+@[simp, norm_cast] theorem ofReal_natCast (n : ℕ) : ENNReal.ofReal n = n := by simp [ENNReal.ofReal]
 
 @[simp] theorem ofReal_ofNat (n : ℕ) [n.AtLeastTwo] : ENNReal.ofReal ofNat(n) = ofNat(n) :=
   ofReal_natCast n
@@ -485,10 +485,10 @@ theorem natCast_ne_top (n : ℕ) : (n : ℝ≥0∞) ≠ ∞ := WithTop.natCast_n
 @[simp] theorem natCast_lt_top (n : ℕ) : (n : ℝ≥0∞) < ∞ := WithTop.natCast_lt_top n
 
 @[simp, aesop (rule_sets := [finiteness]) safe apply]
-lemma ofNat_ne_top {n : ℕ} [Nat.AtLeastTwo n] : ofNat(n) ≠ ∞ := natCast_ne_top n
+theorem ofNat_ne_top {n : ℕ} [Nat.AtLeastTwo n] : ofNat(n) ≠ ∞ := natCast_ne_top n
 
 @[simp]
-lemma ofNat_lt_top {n : ℕ} [Nat.AtLeastTwo n] : ofNat(n) < ∞ := natCast_lt_top n
+theorem ofNat_lt_top {n : ℕ} [Nat.AtLeastTwo n] : ofNat(n) < ∞ := natCast_lt_top n
 
 @[simp] theorem top_ne_natCast (n : ℕ) : ∞ ≠ n := WithTop.top_ne_natCast n
 
@@ -650,17 +650,17 @@ theorem coe_mem_upperBounds {s : Set ℝ≥0} :
     ↑r ∈ upperBounds (ofNNReal '' s) ↔ r ∈ upperBounds s := by
   simp +contextual [upperBounds, forall_mem_image, -mem_image, *]
 
-lemma iSup_coe_eq_top : ⨆ i, (f i : ℝ≥0∞) = ⊤ ↔ ¬ BddAbove (range f) := WithTop.iSup_coe_eq_top
-lemma iSup_coe_lt_top : ⨆ i, (f i : ℝ≥0∞) < ⊤ ↔ BddAbove (range f) := WithTop.iSup_coe_lt_top
-lemma iInf_coe_eq_top : ⨅ i, (f i : ℝ≥0∞) = ⊤ ↔ IsEmpty ι := WithTop.iInf_coe_eq_top
-lemma iInf_coe_lt_top : ⨅ i, (f i : ℝ≥0∞) < ⊤ ↔ Nonempty ι := WithTop.iInf_coe_lt_top
+theorem iSup_coe_eq_top : ⨆ i, (f i : ℝ≥0∞) = ⊤ ↔ ¬ BddAbove (range f) := WithTop.iSup_coe_eq_top
+theorem iSup_coe_lt_top : ⨆ i, (f i : ℝ≥0∞) < ⊤ ↔ BddAbove (range f) := WithTop.iSup_coe_lt_top
+theorem iInf_coe_eq_top : ⨅ i, (f i : ℝ≥0∞) = ⊤ ↔ IsEmpty ι := WithTop.iInf_coe_eq_top
+theorem iInf_coe_lt_top : ⨅ i, (f i : ℝ≥0∞) < ⊤ ↔ Nonempty ι := WithTop.iInf_coe_lt_top
 
 end CompleteLattice
 
 section Bit
 
--- Porting note: removed lemmas about `bit0` and `bit1`
--- TODO: add lemmas about `OfNat.ofNat`
+-- Porting note: removed theorems about `bit0` and `bit1`
+-- TODO: add theorems about `OfNat.ofNat`
 
 end Bit
 

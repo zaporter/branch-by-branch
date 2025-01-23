@@ -13,7 +13,7 @@ mathlib4/topic/porting.20.60.2Earray.60.20files.20whose.20PR's.20were.20closed.3
 will wait until Batteries has finalized `DArray` and `Array'` types so we can translates
 apples to apples.
 
-`align` for lemmas about lean3/mathlib3 versions of d_array and array with mathport output
+`align` for theorems about lean3/mathlib3 versions of d_array and array with mathport output
 -/
 
 universe u v w

@@ -143,7 +143,7 @@ theorem not_lt_one (n : ℕ+) : ¬n < 1 :=
 instance : Inhabited ℕ+ :=
   ⟨1⟩
 
--- Some lemmas that rewrite `PNat.mk n h`, for `n` an explicit numeral, into explicit numerals.
+-- Some theorems that rewrite `PNat.mk n h`, for `n` an explicit numeral, into explicit numerals.
 @[simp]
 theorem mk_one {h} : (⟨1, h⟩ : ℕ+) = (1 : ℕ+) :=
   rfl

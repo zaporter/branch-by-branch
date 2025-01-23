@@ -43,7 +43,7 @@ theorem coe_def : (fun a ↦ ↑a : α → Option α) = some :=
 theorem mem_map {f : α → β} {y : β} {o : Option α} : y ∈ o.map f ↔ ∃ x ∈ o, f x = y := by simp
 
 -- The simpNF linter says that the LHS can be simplified via `Option.mem_def`.
--- However this is a higher priority lemma.
+-- However this is a higher priority theorem.
 -- https://github.com/leanprover/std4/issues/207
 @[simp 1100, nolint simpNF]
 theorem mem_map_of_injective {f : α → β} (H : Function.Injective f) {a : α} {o : Option α} :
@@ -260,7 +260,7 @@ theorem casesOn'_coe (x : β) (f : α → β) (a : α) : casesOn' (a : Option α
 theorem casesOn'_none_coe (f : Option α → β) (o : Option α) :
     casesOn' o (f none) (f ∘ (fun a ↦ ↑a)) = f o := by cases o <;> rfl
 
-lemma casesOn'_eq_elim (b : β) (f : α → β) (a : Option α) :
+theorem casesOn'_eq_elim (b : β) (f : α → β) (a : Option α) :
     Option.casesOn' a b f = Option.elim a b f := by cases a <;> rfl
 
 -- porting note: workaround for https://github.com/leanprover/lean4/issues/2049
@@ -310,31 +310,31 @@ theorem elim_apply {f : γ → α → β} {x : α → β} {i : Option γ} {y : �
     i.elim x f y = i.elim (x y) fun j => f j y := by rw [elim_comp fun f : α → β => f y]
 
 @[simp]
-lemma bnot_isSome (a : Option α) : (! a.isSome) = a.isNone := by
+theorem bnot_isSome (a : Option α) : (! a.isSome) = a.isNone := by
   cases a <;> simp
 
 @[simp]
-lemma bnot_comp_isSome : (! ·) ∘ @Option.isSome α = Option.isNone := by
+theorem bnot_comp_isSome : (! ·) ∘ @Option.isSome α = Option.isNone := by
   funext
   simp
 
 @[simp]
-lemma bnot_isNone (a : Option α) : (! a.isNone) = a.isSome := by
+theorem bnot_isNone (a : Option α) : (! a.isNone) = a.isSome := by
   cases a <;> simp
 
 @[simp]
-lemma bnot_comp_isNone : (! ·) ∘ @Option.isNone α = Option.isSome := by
+theorem bnot_comp_isNone : (! ·) ∘ @Option.isNone α = Option.isSome := by
   funext x
   simp
 
 @[simp]
-lemma isNone_eq_false_iff (a : Option α) : Option.isNone a = false ↔ Option.isSome a := by
+theorem isNone_eq_false_iff (a : Option α) : Option.isNone a = false ↔ Option.isSome a := by
   cases a <;> simp
 
-lemma eq_none_or_eq_some (a : Option α) : a = none ∨ ∃ x, a = some x :=
+theorem eq_none_or_eq_some (a : Option α) : a = none ∨ ∃ x, a = some x :=
   Option.exists.mp exists_eq'
 
-lemma forall_some_ne_iff_eq_none {o : Option α} : (∀ (x : α), some x ≠ o) ↔ o = none := by
+theorem forall_some_ne_iff_eq_none {o : Option α} : (∀ (x : α), some x ≠ o) ↔ o = none := by
   apply not_iff_not.1
   simpa only [not_forall, not_not] using Option.ne_none_iff_exists.symm
 

@@ -86,7 +86,7 @@ theorem ppred_eq_pred {n} (h : 0 < n) : ppred n = some (pred n) :=
 theorem psub_eq_sub {m n} (h : n ≤ m) : psub m n = some (m - n) :=
   psub_eq_some.2 <| Nat.sub_add_cancel h
 
--- Porting note: we only have the simp lemma `Option.bind_some` which uses `Option.bind` not `>>=`
+-- Porting note: we only have the simp theorem `Option.bind_some` which uses `Option.bind` not `>>=`
 theorem psub_add (m n k) :
     psub m (n + k) = (do psub (← psub m n) k) := by
     induction k with

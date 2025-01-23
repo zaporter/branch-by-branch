@@ -260,24 +260,24 @@ theorem fromBlocks_diagonal (d₁ : l → α) (d₂ : m → α) :
   rcases i with ⟨⟩ <;> rcases j with ⟨⟩ <;> simp [diagonal]
 
 @[simp]
-lemma toBlocks₁₁_diagonal (v : l ⊕ m → α) :
+theorem toBlocks₁₁_diagonal (v : l ⊕ m → α) :
     toBlocks₁₁ (diagonal v) = diagonal (fun i => v (Sum.inl i)) := by
   unfold toBlocks₁₁
   funext i j
   simp only [ne_eq, Sum.inl.injEq, of_apply, diagonal_apply]
 
 @[simp]
-lemma toBlocks₂₂_diagonal (v : l ⊕ m → α) :
+theorem toBlocks₂₂_diagonal (v : l ⊕ m → α) :
     toBlocks₂₂ (diagonal v) = diagonal (fun i => v (Sum.inr i)) := by
   unfold toBlocks₂₂
   funext i j
   simp only [ne_eq, Sum.inr.injEq, of_apply, diagonal_apply]
 
 @[simp]
-lemma toBlocks₁₂_diagonal (v : l ⊕ m → α) : toBlocks₁₂ (diagonal v) = 0 := rfl
+theorem toBlocks₁₂_diagonal (v : l ⊕ m → α) : toBlocks₁₂ (diagonal v) = 0 := rfl
 
 @[simp]
-lemma toBlocks₂₁_diagonal (v : l ⊕ m → α) : toBlocks₂₁ (diagonal v) = 0 := rfl
+theorem toBlocks₂₁_diagonal (v : l ⊕ m → α) : toBlocks₂₁ (diagonal v) = 0 := rfl
 
 end Zero
 
@@ -319,7 +319,7 @@ See also `Matrix.blockDiagonal'` if the matrices may not have the same size ever
 def blockDiagonal (M : o → Matrix m n α) : Matrix (m × o) (n × o) α :=
   of <| (fun ⟨i, k⟩ ⟨j, k'⟩ => if k = k' then M k i j else 0 : m × o → n × o → α)
 
--- TODO: set as an equation lemma for `blockDiagonal`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `blockDiagonal`, see https://github.com/leanprover-community/mathlib4/pull/3024
 theorem blockDiagonal_apply' (M : o → Matrix m n α) (i k j k') :
     blockDiagonal M ⟨i, k⟩ ⟨j, k'⟩ = if k = k' then M k i j else 0 :=
   rfl
@@ -456,7 +456,7 @@ This is the block form of `Matrix.diag`, and the left-inverse of `Matrix.blockDi
 def blockDiag (M : Matrix (m × o) (n × o) α) (k : o) : Matrix m n α :=
   of fun i j => M (i, k) (j, k)
 
--- TODO: set as an equation lemma for `blockDiag`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `blockDiag`, see https://github.com/leanprover-community/mathlib4/pull/3024
 theorem blockDiag_apply (M : Matrix (m × o) (n × o) α) (k : o) (i j) :
     blockDiag M k i j = M (i, k) (j, k) :=
   rfl
@@ -565,7 +565,7 @@ def blockDiagonal' (M : ∀ i, Matrix (m' i) (n' i) α) : Matrix (Σi, m' i) (Σ
     (fun ⟨k, i⟩ ⟨k', j⟩ => if h : k = k' then M k i (cast (congr_arg n' h.symm) j) else 0 :
       (Σi, m' i) → (Σi, n' i) → α)
 
--- TODO: set as an equation lemma for `blockDiagonal'`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `blockDiagonal'`, see https://github.com/leanprover-community/mathlib4/pull/3024
 theorem blockDiagonal'_apply' (M : ∀ i, Matrix (m' i) (n' i) α) (k i k' j) :
     blockDiagonal' M ⟨k, i⟩ ⟨k', j⟩ =
       if h : k = k' then M k i (cast (congr_arg n' h.symm) j) else 0 :=
@@ -717,7 +717,7 @@ This is the block form of `Matrix.diag`, and the left-inverse of `Matrix.blockDi
 def blockDiag' (M : Matrix (Σi, m' i) (Σi, n' i) α) (k : o) : Matrix (m' k) (n' k) α :=
   of fun i j => M ⟨k, i⟩ ⟨k, j⟩
 
--- TODO: set as an equation lemma for `blockDiag'`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `blockDiag'`, see https://github.com/leanprover-community/mathlib4/pull/3024
 theorem blockDiag'_apply (M : Matrix (Σi, m' i) (Σi, n' i) α) (k : o) (i j) :
     blockDiag' M k i j = M ⟨k, i⟩ ⟨k, j⟩ :=
   rfl
@@ -839,12 +839,12 @@ section Maps
 
 variable {R α β ι : Type*}
 
-lemma Matrix.map_toSquareBlock
+theorem Matrix.map_toSquareBlock
     (f : α → β) {M : Matrix m m α} {ι} {b : m → ι} {i : ι} :
     (M.map f).toSquareBlock b i = (M.toSquareBlock b i).map f :=
   submatrix_map _ _ _ _
 
-lemma Matrix.comp_toSquareBlock {b : m → α}
+theorem Matrix.comp_toSquareBlock {b : m → α}
     (M : Matrix m m (Matrix n n R)) (a : α) :
     letI equiv := Equiv.prodSubtypeFstEquivSubtypeProd.symm
     (M.comp m m n n R).toSquareBlock (fun i ↦ b i.1) a =
@@ -853,7 +853,7 @@ lemma Matrix.comp_toSquareBlock {b : m → α}
 
 variable [Zero R] [DecidableEq m]
 
-lemma Matrix.comp_diagonal (d) :
+theorem Matrix.comp_diagonal (d) :
     comp m m n n R (diagonal d) =
       (blockDiagonal d).reindex (.prodComm ..) (.prodComm ..) := by
   ext

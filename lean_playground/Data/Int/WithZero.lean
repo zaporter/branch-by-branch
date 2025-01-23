@@ -8,7 +8,7 @@ import Mathlib.Data.NNReal.Defs
 /-!
 # WithZero
 
-In this file we provide some basic API lemmas for the `WithZero` construction and we define
+In this file we provide some basic API theorems for the `WithZero` construction and we define
 the morphism `WithZeroMultInt.toNNReal`.
 
 ## Main Definitions

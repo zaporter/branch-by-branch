@@ -202,7 +202,7 @@ theorem exp_sum {α : Type*} (s : Finset α) (f : α → ℂ) :
     exp (∑ x ∈ s, f x) = ∏ x ∈ s, exp (f x) :=
   map_prod (β := Multiplicative ℂ) expMonoidHom f s
 
-lemma exp_nsmul (x : ℂ) (n : ℕ) : exp (n • x) = exp x ^ n :=
+theorem exp_nsmul (x : ℂ) (n : ℕ) : exp (n • x) = exp x ^ n :=
   @MonoidHom.map_pow (Multiplicative ℂ) ℂ _ _  expMonoidHom _ _
 
 theorem exp_nat_mul (x : ℂ) : ∀ n : ℕ, exp (n * x) = exp x ^ n
@@ -703,7 +703,7 @@ theorem exp_sum {α : Type*} (s : Finset α) (f : α → ℝ) :
     exp (∑ x ∈ s, f x) = ∏ x ∈ s, exp (f x) :=
   map_prod (β := Multiplicative ℝ) expMonoidHom f s
 
-lemma exp_nsmul (x : ℝ) (n : ℕ) : exp (n • x) = exp x ^ n :=
+theorem exp_nsmul (x : ℝ) (n : ℕ) : exp (n • x) = exp x ^ n :=
   @MonoidHom.map_pow (Multiplicative ℝ) ℝ _ _  expMonoidHom _ _
 
 nonrec theorem exp_nat_mul (x : ℝ) (n : ℕ) : exp (n * x) = exp x ^ n :=
@@ -832,7 +832,7 @@ theorem cos_sq' : cos x ^ 2 = 1 - sin x ^ 2 := by rw [← sin_sq_add_cos_sq x, a
 theorem sin_sq : sin x ^ 2 = 1 - cos x ^ 2 :=
   eq_sub_iff_add_eq.2 <| sin_sq_add_cos_sq _
 
-lemma sin_sq_eq_half_sub : sin x ^ 2 = 1 / 2 - cos (2 * x) / 2 := by
+theorem sin_sq_eq_half_sub : sin x ^ 2 = 1 / 2 - cos (2 * x) / 2 := by
   rw [sin_sq, cos_sq, ← sub_sub, sub_half]
 
 theorem abs_sin_eq_sqrt_one_sub_cos_sq (x : ℝ) : |sin x| = √(1 - cos x ^ 2) := by
@@ -966,7 +966,7 @@ theorem sum_le_exp_of_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) : ∑ i ∈ rang
       positivity
     _ = exp x := by rw [exp, Complex.exp, ← cauSeqRe, lim_re]
 
-lemma pow_div_factorial_le_exp (hx : 0 ≤ x) (n : ℕ) : x ^ n / n ! ≤ exp x :=
+theorem pow_div_factorial_le_exp (hx : 0 ≤ x) (n : ℕ) : x ^ n / n ! ≤ exp x :=
   calc
     x ^ n / n ! ≤ ∑ k ∈ range (n + 1), x ^ k / k ! :=
         single_le_sum (f := fun k ↦ x ^ k / k !) (fun k _ ↦ by positivity) (self_mem_range_succ n)
@@ -998,13 +998,13 @@ theorem exp_pos (x : ℝ) : 0 < exp x :=
     exact inv_pos.2 (lt_of_lt_of_le zero_lt_one (one_le_exp (neg_nonneg.2 h)))
 
 @[bound]
-lemma exp_nonneg (x : ℝ) : 0 ≤ exp x := x.exp_pos.le
+theorem exp_nonneg (x : ℝ) : 0 ≤ exp x := x.exp_pos.le
 
 @[simp]
 theorem abs_exp (x : ℝ) : |exp x| = exp x :=
   abs_of_pos (exp_pos _)
 
-lemma exp_abs_le (x : ℝ) : exp |x| ≤ exp x + exp (-x) := by
+theorem exp_abs_le (x : ℝ) : exp |x| ≤ exp x + exp (-x) := by
   cases le_total x 0 <;> simp [abs_of_nonpos, _root_.abs_of_nonneg, exp_nonneg, *]
 
 @[mono]
@@ -1175,7 +1175,7 @@ theorem abs_exp_sub_one_sub_id_le {x : ℂ} (hx : abs x ≤ 1) : abs (exp x - 1 
     _ ≤ abs x ^ 2 * 1 := by gcongr; norm_num [Nat.factorial]
     _ = abs x ^ 2 := by rw [mul_one]
 
-lemma abs_exp_sub_sum_le_exp_abs_sub_sum (x : ℂ) (n : ℕ) :
+theorem abs_exp_sub_sum_le_exp_abs_sub_sum (x : ℂ) (n : ℕ) :
     abs (exp x - ∑ m ∈ range n, x ^ m / m.factorial)
       ≤ Real.exp (abs x) - ∑ m ∈ range n, (abs x) ^ m / m.factorial := by
   rw [← CauSeq.lim_const (abv := Complex.abs) (∑ m ∈ range n, _), Complex.exp, sub_eq_add_neg,
@@ -1192,10 +1192,10 @@ lemma abs_exp_sub_sum_le_exp_abs_sub_sum (x : ℂ) (n : ℕ) :
     gcongr
     exact Real.sum_le_exp_of_nonneg (by exact AbsoluteValue.nonneg abs x) _
 
-lemma abs_exp_le_exp_abs (x : ℂ) : abs (exp x) ≤ Real.exp (abs x) := by
+theorem abs_exp_le_exp_abs (x : ℂ) : abs (exp x) ≤ Real.exp (abs x) := by
   convert abs_exp_sub_sum_le_exp_abs_sub_sum x 0 using 1 <;> simp
 
-lemma abs_exp_sub_sum_le_abs_mul_exp (x : ℂ) (n : ℕ) :
+theorem abs_exp_sub_sum_le_abs_mul_exp (x : ℂ) (n : ℕ) :
     abs (exp x - ∑ m ∈ range n, x ^ m / m.factorial) ≤ abs x ^ n * Real.exp (abs x) := by
   rw [← CauSeq.lim_const (abv := Complex.abs) (∑ m ∈ range n, _), Complex.exp, sub_eq_add_neg,
     ← CauSeq.lim_neg, CauSeq.lim_add, ← lim_abs]
@@ -1493,10 +1493,10 @@ theorem add_one_le_exp (x : ℝ) : x + 1 ≤ Real.exp x := by
   · simp
   · exact (add_one_lt_exp hx).le
 
-lemma one_sub_lt_exp_neg {x : ℝ} (hx : x ≠ 0) : 1 - x < exp (-x) :=
+theorem one_sub_lt_exp_neg {x : ℝ} (hx : x ≠ 0) : 1 - x < exp (-x) :=
   (sub_eq_neg_add _ _).trans_lt <| add_one_lt_exp <| neg_ne_zero.2 hx
 
-lemma one_sub_le_exp_neg (x : ℝ) : 1 - x ≤ exp (-x) :=
+theorem one_sub_le_exp_neg (x : ℝ) : 1 - x ≤ exp (-x) :=
   (sub_eq_neg_add _ _).trans_le <| add_one_le_exp _
 
 theorem one_sub_div_pow_le_exp_neg {n : ℕ} {t : ℝ} (ht' : t ≤ n) : (1 - t / n) ^ n ≤ exp (-t) := by
@@ -1510,7 +1510,7 @@ theorem one_sub_div_pow_le_exp_neg {n : ℕ} {t : ℝ} (ht' : t ≤ n) : (1 - t 
       · exact one_sub_le_exp_neg _
     _ = rexp (-t) := by rw [← Real.exp_nat_mul, mul_neg, mul_comm, div_mul_cancel₀]; positivity
 
-lemma le_inv_mul_exp (x : ℝ) {c : ℝ} (hc : 0 < c) : x ≤ c⁻¹ * exp (c * x) := by
+theorem le_inv_mul_exp (x : ℝ) {c : ℝ} (hc : 0 < c) : x ≤ c⁻¹ * exp (c * x) := by
     rw [le_inv_mul_iff₀ hc]
     calc c * x
     _ ≤ c * x + 1 := le_add_of_nonneg_right zero_le_one

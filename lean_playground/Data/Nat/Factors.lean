@@ -37,7 +37,7 @@ def primeFactorsList : ℕ → List ℕ
   | k + 2 =>
     let m := minFac (k + 2)
     m :: primeFactorsList ((k + 2) / m)
-decreasing_by exact factors_lemma
+decreasing_by exact factors_theorem
 
 @[deprecated (since := "2024-06-14")] alias factors := primeFactorsList
 
@@ -57,7 +57,7 @@ theorem prime_of_mem_primeFactorsList {n : ℕ} : ∀ {p : ℕ}, p ∈ primeFact
   | k + 2 =>
       intro p h
       let m := minFac (k + 2)
-      have : (k + 2) / m < (k + 2) := factors_lemma
+      have : (k + 2) / m < (k + 2) := factors_theorem
       have h₁ : p = m ∨ p ∈ primeFactorsList ((k + 2) / m) :=
         List.mem_cons.1 (by rwa [primeFactorsList] at h)
       exact Or.casesOn h₁ (fun h₂ => h₂.symm ▸ minFac_prime (by simp)) prime_of_mem_primeFactorsList
@@ -70,7 +70,7 @@ theorem prod_primeFactorsList : ∀ {n}, n ≠ 0 → List.prod (primeFactorsList
   | 1 => by simp
   | k + 2 => fun _ =>
     let m := minFac (k + 2)
-    have : (k + 2) / m < (k + 2) := factors_lemma
+    have : (k + 2) / m < (k + 2) := factors_theorem
     show (primeFactorsList (k + 2)).prod = (k + 2) by
       have h₁ : (k + 2) / m ≠ 0 := fun h => by
         have : (k + 2) = 0 * m := (Nat.div_eq_iff_eq_mul_left (minFac_pos _) (minFac_dvd _)).1 h
@@ -93,7 +93,7 @@ theorem primeFactorsList_chain {n : ℕ} :
   | k + 2 =>
       intro a h
       let m := minFac (k + 2)
-      have : (k + 2) / m < (k + 2) := factors_lemma
+      have : (k + 2) / m < (k + 2) := factors_theorem
       rw [primeFactorsList]
       refine List.Chain.cons ((le_minFac.2 h).resolve_left (by simp)) (primeFactorsList_chain ?_)
       exact fun p pp d => minFac_le_of_dvd pp.two_le (d.trans <| div_dvd_of_dvd <| minFac_dvd _)
@@ -149,7 +149,7 @@ theorem mem_primeFactorsList {n p} (hn : n ≠ 0) : p ∈ primeFactorsList n ↔
   ⟨fun h => ⟨prime_of_mem_primeFactorsList h, dvd_of_mem_primeFactorsList h⟩, fun ⟨hprime, hdvd⟩ =>
     (mem_primeFactorsList_iff_dvd hn hprime).mpr hdvd⟩
 
-@[simp] lemma mem_primeFactorsList' {n p} : p ∈ n.primeFactorsList ↔ p.Prime ∧ p ∣ n ∧ n ≠ 0 := by
+@[simp] theorem mem_primeFactorsList' {n p} : p ∈ n.primeFactorsList ↔ p.Prime ∧ p ∣ n ∧ n ≠ 0 := by
   cases n <;> simp [mem_primeFactorsList, *]
 
 theorem le_of_mem_primeFactorsList {n p : ℕ} (h : p ∈ n.primeFactorsList) : p ≤ n := by

@@ -34,20 +34,20 @@ instance instHasAntidiagonal : HasAntidiagonal ℕ where
   mem_antidiagonal {n} {xy} := by
     rw [mem_def, Multiset.Nat.mem_antidiagonal]
 
-lemma antidiagonal_eq_map (n : ℕ) :
+theorem antidiagonal_eq_map (n : ℕ) :
     antidiagonal n = (range (n + 1)).map ⟨fun i ↦ (i, n - i), fun _ _ h ↦ (Prod.ext_iff.1 h).1⟩ :=
   rfl
 
-lemma antidiagonal_eq_map' (n : ℕ) :
+theorem antidiagonal_eq_map' (n : ℕ) :
     antidiagonal n =
       (range (n + 1)).map ⟨fun i ↦ (n - i, i), fun _ _ h ↦ (Prod.ext_iff.1 h).2⟩ := by
   rw [← map_swap_antidiagonal, antidiagonal_eq_map, map_map]; rfl
 
-lemma antidiagonal_eq_image (n : ℕ) :
+theorem antidiagonal_eq_image (n : ℕ) :
     antidiagonal n = (range (n + 1)).image fun i ↦ (i, n - i) := by
   simp only [antidiagonal_eq_map, map_eq_image, Function.Embedding.coeFn_mk]
 
-lemma antidiagonal_eq_image' (n : ℕ) :
+theorem antidiagonal_eq_image' (n : ℕ) :
     antidiagonal n = (range (n + 1)).image fun i ↦ (n - i, i) := by
   simp only [antidiagonal_eq_map', map_eq_image, Function.Embedding.coeFn_mk]
 
@@ -97,7 +97,7 @@ theorem antidiagonal.fst_lt {n : ℕ} {kl : ℕ × ℕ} (hlk : kl ∈ antidiagon
 theorem antidiagonal.snd_lt {n : ℕ} {kl : ℕ × ℕ} (hlk : kl ∈ antidiagonal n) : kl.2 < n + 1 :=
   Nat.lt_succ_of_le <| antidiagonal.snd_le hlk
 
-@[simp] lemma antidiagonal_filter_snd_le_of_le {n k : ℕ} (h : k ≤ n) :
+@[simp] theorem antidiagonal_filter_snd_le_of_le {n k : ℕ} (h : k ≤ n) :
     (antidiagonal n).filter (fun a ↦ a.snd ≤ k) = (antidiagonal k).map
       (Embedding.prodMap ⟨_, add_left_injective (n - k)⟩ (Embedding.refl ℕ)) := by
   ext ⟨i, j⟩
@@ -110,7 +110,7 @@ theorem antidiagonal.snd_lt {n : ℕ} {kl : ℕ × ℕ} (hlk : kl ∈ antidiagon
     rw [add_assoc, add_comm, add_assoc, add_comm j l, hl]
     exact Nat.sub_add_cancel h
 
-@[simp] lemma antidiagonal_filter_fst_le_of_le {n k : ℕ} (h : k ≤ n) :
+@[simp] theorem antidiagonal_filter_fst_le_of_le {n k : ℕ} (h : k ≤ n) :
     (antidiagonal n).filter (fun a ↦ a.fst ≤ k) = (antidiagonal k).map
       (Embedding.prodMap (Embedding.refl ℕ) ⟨_, add_left_injective (n - k)⟩) := by
   have aux₁ : fun a ↦ a.fst ≤ k = (fun a ↦ a.snd ≤ k) ∘ (Equiv.prodComm ℕ ℕ).symm := rfl
@@ -122,7 +122,7 @@ theorem antidiagonal.snd_lt {n : ℕ} {kl : ℕ × ℕ} (hlk : kl ∈ antidiagon
   ext ⟨i, j⟩
   simpa using aux₂ i j
 
-@[simp] lemma antidiagonal_filter_le_fst_of_le {n k : ℕ} (h : k ≤ n) :
+@[simp] theorem antidiagonal_filter_le_fst_of_le {n k : ℕ} (h : k ≤ n) :
     (antidiagonal n).filter (fun a ↦ k ≤ a.fst) = (antidiagonal (n - k)).map
       (Embedding.prodMap ⟨_, add_left_injective k⟩ (Embedding.refl ℕ)) := by
   ext ⟨i, j⟩
@@ -134,7 +134,7 @@ theorem antidiagonal.snd_lt {n : ℕ} {kl : ℕ × ℕ} (hlk : kl ∈ antidiagon
     rw [add_right_comm, hl]
     exact tsub_add_cancel_of_le h
 
-@[simp] lemma antidiagonal_filter_le_snd_of_le {n k : ℕ} (h : k ≤ n) :
+@[simp] theorem antidiagonal_filter_le_snd_of_le {n k : ℕ} (h : k ≤ n) :
     (antidiagonal n).filter (fun a ↦ k ≤ a.snd) = (antidiagonal (n - k)).map
       (Embedding.prodMap (Embedding.refl ℕ) ⟨_, add_left_injective k⟩) := by
   have aux₁ : fun a ↦ k ≤ a.snd = (fun a ↦ k ≤ a.fst) ∘ (Equiv.prodComm ℕ ℕ).symm := rfl

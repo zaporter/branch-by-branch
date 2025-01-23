@@ -17,7 +17,7 @@ This allows "proof by reflection", where we prove `f = ![f 0, f 1]` by defining
 `f = etaExpand f`.
 
 The definitions in this file should normally not be used directly; the intent is for the
-corresponding `*_eq` lemmas to be used in a place where they are definitionally unfolded.
+corresponding `*_eq` theorems to be used in a place where they are definitionally unfolded.
 
 ## Main definitions
 

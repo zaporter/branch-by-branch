@@ -134,7 +134,7 @@ theorem singleton_inter_of_not_mem {a : α} {s : Finset α} (H : a ∉ s) : {a} 
   eq_empty_of_forall_not_mem <| by
     simp only [mem_inter, mem_singleton]; rintro x ⟨rfl, h⟩; exact H h
 
-lemma singleton_inter {a : α} {s : Finset α} :
+theorem singleton_inter {a : α} {s : Finset α} :
     {a} ∩ s = if a ∈ s then {a} else ∅ := by
   split_ifs with h <;> simp [h]
 
@@ -146,12 +146,12 @@ theorem inter_singleton_of_mem {a : α} {s : Finset α} (h : a ∈ s) : s ∩ {a
 theorem inter_singleton_of_not_mem {a : α} {s : Finset α} (h : a ∉ s) : s ∩ {a} = ∅ := by
   rw [inter_comm, singleton_inter_of_not_mem h]
 
-lemma inter_singleton {a : α} {s : Finset α} :
+theorem inter_singleton {a : α} {s : Finset α} :
     s ∩ {a} = if a ∈ s then {a} else ∅ := by
   split_ifs with h <;> simp [h]
 
-@[simp] lemma union_eq_empty : s ∪ t = ∅ ↔ s = ∅ ∧ t = ∅ := sup_eq_bot_iff
-@[simp] lemma union_nonempty : (s ∪ t).Nonempty ↔ s.Nonempty ∨ t.Nonempty :=
+@[simp] theorem union_eq_empty : s ∪ t = ∅ ↔ s = ∅ ∧ t = ∅ := sup_eq_bot_iff
+@[simp] theorem union_nonempty : (s ∪ t).Nonempty ↔ s.Nonempty ∨ t.Nonempty :=
   mod_cast Set.union_nonempty (α := α) (s := s) (t := t)
 
 theorem insert_union_comm (s t : Finset α) (a : α) : insert a s ∪ t = s ∪ insert a t := by

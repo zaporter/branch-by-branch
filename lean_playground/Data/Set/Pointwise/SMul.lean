@@ -43,10 +43,10 @@ section Mul
 
 variable [Mul α] {s t u : Set α} {a : α}
 
-@[to_additive] lemma smul_set_subset_mul : a ∈ s → a • t ⊆ s * t := image_subset_image2_right
+@[to_additive] theorem smul_set_subset_mul : a ∈ s → a • t ⊆ s * t := image_subset_image2_right
 
 open scoped RightActions in
-@[to_additive] lemma op_smul_set_subset_mul : a ∈ t → s <• a ⊆ s * t := image_subset_image2_left
+@[to_additive] theorem op_smul_set_subset_mul : a ∈ t → s <• a ⊆ s * t := image_subset_image2_left
 
 @[to_additive]
 theorem image_op_smul : (op '' s) • t = t * s := by
@@ -65,18 +65,18 @@ theorem mul_subset_iff_left : s * t ⊆ u ↔ ∀ a ∈ s, a • t ⊆ u :=
 theorem mul_subset_iff_right : s * t ⊆ u ↔ ∀ b ∈ t, op b • s ⊆ u :=
   image2_subset_iff_right
 
-@[to_additive] lemma pair_mul (a b : α) (s : Set α) : {a, b} * s = a • s ∪ b • s := by
+@[to_additive] theorem pair_mul (a b : α) (s : Set α) : {a, b} * s = a • s ∪ b • s := by
   rw [insert_eq, union_mul, singleton_mul, singleton_mul]; rfl
 
 open scoped RightActions
-@[to_additive] lemma mul_pair (s : Set α) (a b : α) : s * {a, b} = s <• a ∪ s <• b := by
+@[to_additive] theorem mul_pair (s : Set α) (a b : α) : s * {a, b} = s <• a ∪ s <• b := by
   rw [insert_eq, mul_union, mul_singleton, mul_singleton]; rfl
 
 end Mul
 
 variable {s s₁ s₂ : Set α} {t t₁ t₂ : Set β} {a : α} {b : β}
 
-@[to_additive] lemma range_mul [Mul α] {ι : Sort*} (a : α) (f : ι → α) :
+@[to_additive] theorem range_mul [Mul α] {ι : Sort*} (a : α) (f : ι → α) :
     range (fun i ↦ a * f i) = a • range f := range_smul a f
 
 @[to_additive]
@@ -204,7 +204,7 @@ theorem image_smul_distrib [MulOneClass α] [MulOneClass β] [FunLike F α β] [
 
 open scoped RightActions in
 @[to_additive]
-lemma image_op_smul_distrib [MulOneClass α] [MulOneClass β] [FunLike F α β] [MonoidHomClass F α β]
+theorem image_op_smul_distrib [MulOneClass α] [MulOneClass β] [FunLike F α β] [MonoidHomClass F α β]
     (f : F) (a : α) (s : Set α) : f '' (s <• a) = f '' s <• f a := image_comm fun _ ↦ map_mul _ _ _
 
 section SMul
@@ -318,7 +318,7 @@ theorem mem_inv_smul_set_iff : x ∈ a⁻¹ • A ↔ a • x ∈ A := by
   simp only [← image_smul, mem_image, inv_smul_eq_iff, exists_eq_right]
 
 @[to_additive (attr := simp)]
-lemma mem_smul_set_inv {s : Set α} : a ∈ b • s⁻¹ ↔ b ∈ a • s := by
+theorem mem_smul_set_inv {s : Set α} : a ∈ b • s⁻¹ ↔ b ∈ a • s := by
   simp [mem_smul_set_iff_inv_smul_mem]
 
 @[to_additive]
@@ -412,23 +412,23 @@ theorem iUnion_smul_eq_setOf_exists {s : Set β} : ⋃ g : α, g • s = { a | �
   simp_rw [← iUnion_setOf, ← iUnion_inv_smul, ← preimage_smul, preimage]
 
 @[to_additive (attr := simp)]
-lemma inv_smul_set_distrib (a : α) (s : Set α) : (a • s)⁻¹ = op a⁻¹ • s⁻¹ := by
+theorem inv_smul_set_distrib (a : α) (s : Set α) : (a • s)⁻¹ = op a⁻¹ • s⁻¹ := by
   ext; simp [mem_smul_set_iff_inv_smul_mem]
 
 @[to_additive (attr := simp)]
-lemma inv_op_smul_set_distrib (a : α) (s : Set α) : (op a • s)⁻¹ = a⁻¹ • s⁻¹ := by
+theorem inv_op_smul_set_distrib (a : α) (s : Set α) : (op a • s)⁻¹ = a⁻¹ • s⁻¹ := by
   ext; simp [mem_smul_set_iff_inv_smul_mem]
 
 @[to_additive (attr := simp)]
-lemma disjoint_smul_set : Disjoint (a • s) (a • t) ↔ Disjoint s t :=
+theorem disjoint_smul_set : Disjoint (a • s) (a • t) ↔ Disjoint s t :=
   disjoint_image_iff <| MulAction.injective _
 
 @[to_additive]
-lemma disjoint_smul_set_left : Disjoint (a • s) t ↔ Disjoint s (a⁻¹ • t) := by
+theorem disjoint_smul_set_left : Disjoint (a • s) t ↔ Disjoint s (a⁻¹ • t) := by
   simpa using disjoint_smul_set (a := a) (t := a⁻¹ • t)
 
 @[to_additive]
-lemma disjoint_smul_set_right : Disjoint s (a • t) ↔ Disjoint (a⁻¹ • s) t := by
+theorem disjoint_smul_set_right : Disjoint s (a • t) ↔ Disjoint (a⁻¹ • s) t := by
   simpa using disjoint_smul_set (a := a) (s := a⁻¹ • s)
 
 @[to_additive] alias smul_set_disjoint_iff := disjoint_smul_set
@@ -448,7 +448,7 @@ This is useful to show that the intersection of approximate subgroups is an appr
 `(-s + s) ∩ (-t + t)`.
 
 This is useful to show that the intersection of approximate subgroups is an approximate subgroup."]
-lemma exists_smul_inter_smul_subset_smul_inv_mul_inter_inv_mul (s t : Set α) (a b : α) :
+theorem exists_smul_inter_smul_subset_smul_inv_mul_inter_inv_mul (s t : Set α) (a b : α) :
     ∃ z : α, a • s ∩ b • t ⊆ z • ((s⁻¹ * s) ∩ (t⁻¹ * t)) := by
   obtain hAB | ⟨z, hzA, hzB⟩ := (a • s ∩ b • t).eq_empty_or_nonempty
   · exact ⟨1, by simp [hAB]⟩
@@ -463,7 +463,7 @@ end Group
 section Monoid
 variable [Monoid α] [MulAction α β] {s : Set β} {a : α} {b : β}
 
-@[simp] lemma mem_invOf_smul_set [Invertible a] : b ∈ ⅟a • s ↔ a • b ∈ s :=
+@[simp] theorem mem_invOf_smul_set [Invertible a] : b ∈ ⅟a • s ↔ a • b ∈ s :=
   mem_inv_smul_set_iff (a := unitOfInvertible a)
 
 end Monoid
@@ -472,14 +472,14 @@ section Group
 variable [Group α] [CommGroup β] [FunLike F α β] [MonoidHomClass F α β]
 
 @[to_additive]
-lemma smul_graphOn (x : α × β) (s : Set α) (f : F) :
+theorem smul_graphOn (x : α × β) (s : Set α) (f : F) :
     x • s.graphOn f = (x.1 • s).graphOn fun a ↦ x.2 / f x.1 * f a := by
   ext ⟨a, b⟩
   simp [mem_smul_set_iff_inv_smul_mem, Prod.ext_iff, and_comm (a := _ = a), inv_mul_eq_iff_eq_mul,
     mul_left_comm _ _⁻¹, eq_inv_mul_iff_mul_eq, ← mul_div_right_comm, div_eq_iff_eq_mul, mul_comm b]
 
 @[to_additive]
-lemma smul_graphOn_univ (x : α × β) (f : F) :
+theorem smul_graphOn_univ (x : α × β) (f : F) :
     x • univ.graphOn f = univ.graphOn fun a ↦ x.2 / f x.1 * f a := by simp [smul_graphOn]
 
 end Group
@@ -487,7 +487,7 @@ end Group
 section CommGroup
 variable [CommGroup α]
 
-@[to_additive] lemma smul_div_smul_comm (a : α) (s : Set α) (b : α) (t : Set α) :
+@[to_additive] theorem smul_div_smul_comm (a : α) (s : Set α) (b : α) (t : Set α) :
     a • s / b • t = (a / b) • (s / t) := by
   simp_rw [← image_smul, smul_eq_mul, ← singleton_mul, mul_div_mul_comm _ s,
     singleton_div_singleton]
@@ -544,14 +544,14 @@ theorem smul_univ₀ {s : Set α} (hs : ¬s ⊆ 0) : s • (univ : Set β) = uni
 theorem smul_univ₀' {s : Set α} (hs : s.Nontrivial) : s • (univ : Set β) = univ :=
   smul_univ₀ hs.not_subset_singleton
 
-@[simp] protected lemma inv_zero : (0 : Set α)⁻¹ = 0 := by ext; simp
+@[simp] protected theorem inv_zero : (0 : Set α)⁻¹ = 0 := by ext; simp
 
-@[simp] lemma inv_smul_set_distrib₀ (a : α) (s : Set α) : (a • s)⁻¹ = op a⁻¹ • s⁻¹ := by
+@[simp] theorem inv_smul_set_distrib₀ (a : α) (s : Set α) : (a • s)⁻¹ = op a⁻¹ • s⁻¹ := by
   obtain rfl | ha := eq_or_ne a 0
   · obtain rfl | hs := s.eq_empty_or_nonempty <;> simp [*]
   · ext; simp [mem_smul_set_iff_inv_smul_mem₀, *]
 
-@[simp] lemma inv_op_smul_set_distrib₀ (a : α) (s : Set α) : (op a • s)⁻¹ = a⁻¹ • s⁻¹ := by
+@[simp] theorem inv_op_smul_set_distrib₀ (a : α) (s : Set α) : (op a • s)⁻¹ = a⁻¹ • s⁻¹ := by
   obtain rfl | ha := eq_or_ne a 0
   · obtain rfl | hs := s.eq_empty_or_nonempty <;> simp [*]
   · ext; simp [mem_smul_set_iff_inv_smul_mem₀, *]

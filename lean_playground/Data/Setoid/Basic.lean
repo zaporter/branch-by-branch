@@ -123,11 +123,11 @@ protected def prod (r : Setoid α) (s : Setoid β) :
     ⟨fun x => ⟨r.refl' x.1, s.refl' x.2⟩, fun h => ⟨r.symm' h.1, s.symm' h.2⟩,
       fun h₁ h₂ => ⟨r.trans' h₁.1 h₂.1, s.trans' h₁.2 h₂.2⟩⟩
 
-lemma prod_apply {r : Setoid α} {s : Setoid β} {x₁ x₂ : α} {y₁ y₂ : β} :
+theorem prod_apply {r : Setoid α} {s : Setoid β} {x₁ x₂ : α} {y₁ y₂ : β} :
     @Setoid.r _ (r.prod s) (x₁, y₁) (x₂, y₂) ↔ (@Setoid.r _ r x₁ x₂ ∧ @Setoid.r _ s y₁ y₂) :=
   Iff.rfl
 
-lemma piSetoid_apply {ι : Sort*} {α : ι → Sort*} {r : ∀ i, Setoid (α i)} {x y : ∀ i, α i} :
+theorem piSetoid_apply {ι : Sort*} {α : ι → Sort*} {r : ∀ i, Setoid (α i)} {x y : ∀ i, α i} :
     @Setoid.r _ (@piSetoid _ _ r) x y ↔ ∀ i, @Setoid.r _ (r i) (x i) (y i) :=
   Iff.rfl
 
@@ -229,14 +229,14 @@ theorem eq_top_iff {s : Setoid α} : s = (⊤ : Setoid α) ↔ ∀ x y : α, s x
   rw [_root_.eq_top_iff, Setoid.le_def, Setoid.top_def]
   simp only [Pi.top_apply, Prop.top_eq_true, forall_true_left]
 
-lemma sInf_equiv {S : Set (Setoid α)} {x y : α} :
+theorem sInf_equiv {S : Set (Setoid α)} {x y : α} :
     letI := sInf S
     x ≈ y ↔ ∀ s ∈ S, s x y := Iff.rfl
 
-lemma sInf_iff {S : Set (Setoid α)} {x y : α} :
+theorem sInf_iff {S : Set (Setoid α)} {x y : α} :
     sInf S x y ↔ ∀ s ∈ S, s x y := Iff.rfl
 
-lemma quotient_mk_sInf_eq {S : Set (Setoid α)} {x y : α} :
+theorem quotient_mk_sInf_eq {S : Set (Setoid α)} {x y : α} :
     Quotient.mk (sInf S) x = Quotient.mk (sInf S) y ↔ ∀ s ∈ S, s x y := by
   simp [sInf_iff]
 

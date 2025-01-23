@@ -298,7 +298,7 @@ theorem fixInduction_spec {C : α → Sort*} {f : α →. β ⊕ α} {b : β} {a
   induction ‹Acc _ _›
   rfl
 
-/-- Another induction lemma for `b ∈ f.fix a` which allows one to prove a predicate `P` holds for
+/-- Another induction theorem for `b ∈ f.fix a` which allows one to prove a predicate `P` holds for
 `a` given that `f a` inherits `P` from `a` and `P` holds for preimages of `b`.
 -/
 @[elab_as_elim]

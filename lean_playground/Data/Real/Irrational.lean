@@ -473,7 +473,7 @@ variable {q : ℚ} {m : ℤ} {n : ℕ} {x : ℝ}
 open Irrational
 
 /-!
-### Simplification lemmas about operations
+### Simplification theorems about operations
 -/
 
 

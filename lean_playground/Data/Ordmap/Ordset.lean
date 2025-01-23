@@ -55,7 +55,7 @@ because there is a decent amount of slop in the actual data structure invariants
 theorem will go through with multiple choices of assumption.
 
 **Note:** This file is incomplete, in the sense that the intent is to have verified
-versions and lemmas about all the definitions in `Ordnode.lean`, but at the moment only
+versions and theorems about all the definitions in `Ordnode.lean`, but at the moment only
 a few operations are verified (the hard part should be out of the way, but still).
 Contributors are encouraged to pick this up and finish the job, if it appeals to you.
 
@@ -225,7 +225,7 @@ def rotateL : Ordnode α → α → Ordnode α → Ordnode α
   | l, x, node _ m y r => if size m < ratio * size r then node3L l x m y r else node4L l x m y r
   | l, x, nil => node' l x nil
 
--- Porting note (https://github.com/leanprover-community/mathlib4/pull/11467): during the port we marked these lemmas with `@[eqns]`
+-- Porting note (https://github.com/leanprover-community/mathlib4/pull/11467): during the port we marked these theorems with `@[eqns]`
 -- to emulate the old Lean 3 behaviour.
 
 theorem rotateL_node (l : Ordnode α) (x : α) (sz : ℕ) (m : Ordnode α) (y : α) (r : Ordnode α) :
@@ -243,7 +243,7 @@ def rotateR : Ordnode α → α → Ordnode α → Ordnode α
   | node _ l x m, y, r => if size m < ratio * size l then node3R l x m y r else node4R l x m y r
   | nil, y, r => node' nil y r
 
--- Porting note (https://github.com/leanprover-community/mathlib4/pull/11467): during the port we marked these lemmas with `@[eqns]`
+-- Porting note (https://github.com/leanprover-community/mathlib4/pull/11467): during the port we marked these theorems with `@[eqns]`
 -- to emulate the old Lean 3 behaviour.
 
 theorem rotateR_node (sz : ℕ) (l : Ordnode α) (x : α) (m : Ordnode α) (y : α) (r : Ordnode α) :
@@ -982,18 +982,18 @@ theorem Valid'.node3R {l} {x : α} {m} {y : α} {r o₁ o₂} (hl : Valid' o₁ 
     (H2 : BalancedSz (size m) (size r)) : Valid' o₁ (@node3R α l x m y r) o₂ :=
   hl.node' (hm.node' hr H2) H1
 
-theorem Valid'.node4L_lemma₁ {a b c d : ℕ} (lr₂ : 3 * (b + c + 1 + d) ≤ 16 * a + 9)
+theorem Valid'.node4L_theorem₁ {a b c d : ℕ} (lr₂ : 3 * (b + c + 1 + d) ≤ 16 * a + 9)
     (mr₂ : b + c + 1 ≤ 3 * d) (mm₁ : b ≤ 3 * c) : b < 3 * a + 1 := by omega
 
-theorem Valid'.node4L_lemma₂ {b c d : ℕ} (mr₂ : b + c + 1 ≤ 3 * d) : c ≤ 3 * d := by omega
+theorem Valid'.node4L_theorem₂ {b c d : ℕ} (mr₂ : b + c + 1 ≤ 3 * d) : c ≤ 3 * d := by omega
 
-theorem Valid'.node4L_lemma₃ {b c d : ℕ} (mr₁ : 2 * d ≤ b + c + 1) (mm₁ : b ≤ 3 * c) :
+theorem Valid'.node4L_theorem₃ {b c d : ℕ} (mr₁ : 2 * d ≤ b + c + 1) (mm₁ : b ≤ 3 * c) :
     d ≤ 3 * c := by omega
 
-theorem Valid'.node4L_lemma₄ {a b c d : ℕ} (lr₁ : 3 * a ≤ b + c + 1 + d) (mr₂ : b + c + 1 ≤ 3 * d)
+theorem Valid'.node4L_theorem₄ {a b c d : ℕ} (lr₁ : 3 * a ≤ b + c + 1 + d) (mr₂ : b + c + 1 ≤ 3 * d)
     (mm₁ : b ≤ 3 * c) : a + b + 1 ≤ 3 * (c + d + 1) := by omega
 
-theorem Valid'.node4L_lemma₅ {a b c d : ℕ} (lr₂ : 3 * (b + c + 1 + d) ≤ 16 * a + 9)
+theorem Valid'.node4L_theorem₅ {a b c d : ℕ} (lr₂ : 3 * (b + c + 1 + d) ≤ 16 * a + 9)
     (mr₁ : 2 * d ≤ b + c + 1) (mm₂ : c ≤ 3 * b) : c + d + 1 ≤ 3 * (a + b + 1) := by omega
 
 theorem Valid'.node4L {l} {x : α} {m} {y : α} {r o₁ o₂} (hl : Valid' o₁ l x) (hm : Valid' x m y)
@@ -1047,22 +1047,22 @@ theorem Valid'.node4L {l} {x : α} {m} {y : α} {r o₁ o₂} (hl : Valid' o₁ 
       rw [two_mul, Nat.succ_le_iff]
       refine add_lt_add_of_lt_of_le ?_ mm₂
       simpa using (mul_lt_mul_right ml0).2 (by decide : 1 < 3)
-    · exact Nat.le_of_lt_succ (Valid'.node4L_lemma₁ lr₂ mr₂ mm₁)
-    · exact Valid'.node4L_lemma₂ mr₂
-    · exact Valid'.node4L_lemma₃ mr₁ mm₁
-    · exact Valid'.node4L_lemma₄ lr₁ mr₂ mm₁
-    · exact Valid'.node4L_lemma₅ lr₂ mr₁ mm₂
+    · exact Nat.le_of_lt_succ (Valid'.node4L_theorem₁ lr₂ mr₂ mm₁)
+    · exact Valid'.node4L_theorem₂ mr₂
+    · exact Valid'.node4L_theorem₃ mr₁ mm₁
+    · exact Valid'.node4L_theorem₄ lr₁ mr₂ mm₁
+    · exact Valid'.node4L_theorem₅ lr₂ mr₁ mm₂
 
-theorem Valid'.rotateL_lemma₁ {a b c : ℕ} (H2 : 3 * a ≤ b + c) (hb₂ : c ≤ 3 * b) : a ≤ 3 * b := by
+theorem Valid'.rotateL_theorem₁ {a b c : ℕ} (H2 : 3 * a ≤ b + c) (hb₂ : c ≤ 3 * b) : a ≤ 3 * b := by
   omega
 
-theorem Valid'.rotateL_lemma₂ {a b c : ℕ} (H3 : 2 * (b + c) ≤ 9 * a + 3) (h : b < 2 * c) :
+theorem Valid'.rotateL_theorem₂ {a b c : ℕ} (H3 : 2 * (b + c) ≤ 9 * a + 3) (h : b < 2 * c) :
     b < 3 * a + 1 := by omega
 
-theorem Valid'.rotateL_lemma₃ {a b c : ℕ} (H2 : 3 * a ≤ b + c) (h : b < 2 * c) : a + b < 3 * c := by
+theorem Valid'.rotateL_theorem₃ {a b c : ℕ} (H2 : 3 * a ≤ b + c) (h : b < 2 * c) : a + b < 3 * c := by
   omega
 
-theorem Valid'.rotateL_lemma₄ {a b : ℕ} (H3 : 2 * b ≤ 9 * a + 3) : 3 * b ≤ 16 * a + 9 := by
+theorem Valid'.rotateL_theorem₄ {a b : ℕ} (H3 : 2 * b ≤ 9 * a + 3) : 3 * b ≤ 16 * a + 9 := by
   omega
 
 theorem Valid'.rotateL {l} {x : α} {r o₁ o₂} (hl : Valid' o₁ l x) (hr : Valid' x r o₂)
@@ -1101,9 +1101,9 @@ theorem Valid'.rotateL {l} {x : α} {r o₁ o₂} (hl : Valid' o₁ l x) (hr : V
     replace H3 := H3p l0
     rcases hr.3.1.resolve_left (hlp l0) with ⟨_, hb₂⟩
     refine ⟨Or.inr ⟨?_, ?_⟩, Or.inr ⟨?_, ?_⟩⟩
-    · exact Valid'.rotateL_lemma₁ H2 hb₂
-    · exact Nat.le_of_lt_succ (Valid'.rotateL_lemma₂ H3 h)
-    · exact Valid'.rotateL_lemma₃ H2 h
+    · exact Valid'.rotateL_theorem₁ H2 hb₂
+    · exact Nat.le_of_lt_succ (Valid'.rotateL_theorem₂ H3 h)
+    · exact Valid'.rotateL_theorem₃ H2 h
     · exact
         le_trans hb₂
           (Nat.mul_le_mul_left _ <| le_trans (Nat.le_add_left _ _) (Nat.le_add_right _ _))
@@ -1122,7 +1122,7 @@ theorem Valid'.rotateL {l} {x : α} {r o₁ o₂} (hl : Valid' o₁ l x) (hr : V
         exact Or.inl ⟨l0, le_antisymm (balancedSz_zero.1 this) rl0, rr0.symm ▸ zero_le_one⟩
       exact Or.inl ⟨l0, le_antisymm (ablem rr0 <| by rwa [add_comm]) rl0, ablem rl0 H3⟩
     exact
-      Or.inr ⟨l0, not_lt.1 h, H2, Valid'.rotateL_lemma₄ (H3p l0), (hr.3.1.resolve_left (hlp l0)).1⟩
+      Or.inr ⟨l0, not_lt.1 h, H2, Valid'.rotateL_theorem₄ (H3p l0), (hr.3.1.resolve_left (hlp l0)).1⟩
 
 theorem Valid'.rotateR {l} {x : α} {r o₁ o₂} (hl : Valid' o₁ l x) (hr : Valid' x r o₂)
     (H1 : ¬size l + size r ≤ 1) (H2 : delta * size r < size l)
@@ -1143,7 +1143,7 @@ theorem Valid'.balance'_aux {l} {x : α} {r o₁ o₂} (hl : Valid' o₁ l x) (h
   · exact hl.rotateR hr h h_2 H₂
   · exact hl.node' hr (Or.inr ⟨not_lt.1 h_2, not_lt.1 h_1⟩)
 
-theorem Valid'.balance'_lemma {α l l' r r'} (H1 : BalancedSz l' r')
+theorem Valid'.balance'_theorem {α l l' r r'} (H1 : BalancedSz l' r')
     (H2 : Nat.dist (@size α l) l' ≤ 1 ∧ size r = r' ∨ Nat.dist (size r) r' ≤ 1 ∧ size l = l') :
     2 * @size α r ≤ 9 * size l + 5 ∨ size r ≤ 3 := by
   suffices @size α r ≤ 3 * (size l + 1) by omega
@@ -1163,7 +1163,7 @@ theorem Valid'.balance' {l} {x : α} {r o₁ o₂} (hl : Valid' o₁ l x) (hr : 
           (Nat.dist (size l) l' ≤ 1 ∧ size r = r' ∨ Nat.dist (size r) r' ≤ 1 ∧ size l = l')) :
     Valid' o₁ (@balance' α l x r) o₂ :=
   let ⟨_, _, H1, H2⟩ := H
-  Valid'.balance'_aux hl hr (Valid'.balance'_lemma H1 H2) (Valid'.balance'_lemma H1.symm H2.symm)
+  Valid'.balance'_aux hl hr (Valid'.balance'_theorem H1 H2) (Valid'.balance'_theorem H1.symm H2.symm)
 
 theorem Valid'.balance {l} {x : α} {r o₁ o₂} (hl : Valid' o₁ l x) (hr : Valid' x r o₂)
     (H : ∃ l' r', BalancedSz l' r' ∧
@@ -1269,7 +1269,7 @@ theorem Valid'.glue {l} {x : α} {r o₁ o₂} (hl : Valid' o₁ l x) (hr : Vali
       Valid' o₁ (@glue α l r) o₂ ∧ size (@glue α l r) = size l + size r :=
   Valid'.glue_aux (hl.trans_right hr.1) (hr.trans_left hl.1) (hl.1.to_sep hr.1)
 
-theorem Valid'.merge_lemma {a b c : ℕ} (h₁ : 3 * a < b + c + 1) (h₂ : b ≤ 3 * c) :
+theorem Valid'.merge_theorem {a b c : ℕ} (h₁ : 3 * a < b + c + 1) (h₂ : b ≤ 3 * c) :
     2 * (a + b) ≤ 9 * c + 5 := by omega
 
 theorem Valid'.merge_aux₁ {o₁ o₂ ls ll lx lr rs rl rx rr t}
@@ -1282,7 +1282,7 @@ theorem Valid'.merge_aux₁ {o₁ o₂ ls ll lx lr rs rl rx rr t}
   suffices H₂ : _ by
     suffices H₁ : _ by
       refine ⟨Valid'.balanceL_aux v hr.right H₁ H₂ ?_, ?_⟩
-      · rw [e]; exact Or.inl (Valid'.merge_lemma h hr₁)
+      · rw [e]; exact Or.inl (Valid'.merge_theorem h hr₁)
       · rw [balanceL_eq_balance v.2 hr.2.2.2 H₁ H₂, balance_eq_balance' v.3 hr.3.2.2 v.2 hr.2.2.2,
           size_balance' v.2 hr.2.2.2, e, hl.2.1, hr.2.1]
         abel

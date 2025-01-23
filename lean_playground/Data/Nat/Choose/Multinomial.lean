@@ -15,7 +15,7 @@ import Mathlib.Data.Finsupp.Multiset
 /-!
 # Multinomial
 
-This file defines the multinomial coefficient and several small lemma's for manipulating it.
+This file defines the multinomial coefficient and several small theorem's for manipulating it.
 
 ## Main declarations
 
@@ -49,13 +49,13 @@ theorem multinomial_pos : 0 < multinomial s f :=
 theorem multinomial_spec : (∏ i ∈ s, (f i)!) * multinomial s f = (∑ i ∈ s, f i)! :=
   Nat.mul_div_cancel' (prod_factorial_dvd_factorial_sum s f)
 
-@[simp] lemma multinomial_empty : multinomial ∅ f = 1 := by simp [multinomial]
+@[simp] theorem multinomial_empty : multinomial ∅ f = 1 := by simp [multinomial]
 
 @[deprecated (since := "2024-06-01")] alias multinomial_nil := multinomial_empty
 
 variable {s f}
 
-lemma multinomial_cons (ha : a ∉ s) (f : α → ℕ) :
+theorem multinomial_cons (ha : a ∉ s) (f : α → ℕ) :
     multinomial (s.cons a ha) f = (f a + ∑ i ∈ s, f i).choose (f a) * multinomial s f := by
   rw [multinomial, Nat.div_eq_iff_eq_mul_left _ (prod_factorial_dvd_factorial_sum _ _), prod_cons,
     multinomial, mul_assoc, mul_left_comm _ (f a)!,
@@ -63,11 +63,11 @@ lemma multinomial_cons (ha : a ∉ s) (f : α → ℕ) :
     Nat.add_choose_mul_factorial_mul_factorial, Finset.sum_cons]
   positivity
 
-lemma multinomial_insert [DecidableEq α] (ha : a ∉ s) (f : α → ℕ) :
+theorem multinomial_insert [DecidableEq α] (ha : a ∉ s) (f : α → ℕ) :
     multinomial (insert a s) f = (f a + ∑ i ∈ s, f i).choose (f a) * multinomial s f := by
   rw [← cons_eq_insert _ _ ha, multinomial_cons]
 
-@[simp] lemma multinomial_singleton (a : α) (f : α → ℕ) : multinomial {a} f = 1 := by
+@[simp] theorem multinomial_singleton (a : α) (f : α → ℕ) : multinomial {a} f = 1 := by
   rw [← cons_empty, multinomial_cons]; simp
 
 @[simp]
@@ -87,7 +87,7 @@ theorem multinomial_congr {f g : α → ℕ} (h : ∀ a ∈ s, f a = g a) :
 /-! ### Connection to binomial coefficients
 
 When `Nat.multinomial` is applied to a `Finset` of two elements `{a, b}`, the
-result a binomial coefficient. We use `binomial` in the names of lemmas that
+result a binomial coefficient. We use `binomial` in the names of theorems that
 involves `Nat.multinomial {a, b}`.
 -/
 
@@ -211,7 +211,7 @@ open scoped Function -- required for scoped `on` notation
 
 -- TODO: Can we prove one of the following two from the other one?
 /-- The **multinomial theorem**. -/
-lemma sum_pow_eq_sum_piAntidiag_of_commute (s : Finset α) (f : α → R)
+theorem sum_pow_eq_sum_piAntidiag_of_commute (s : Finset α) (f : α → R)
     (hc : (s : Set α).Pairwise (Commute on f)) (n : ℕ) :
     (∑ i in s, f i) ^ n = ∑ k in piAntidiag s n, multinomial s k *
       s.noncommProd (fun i ↦ f i ^ k i) (hc.mono' fun _ _ h ↦ h.pow_pow ..) := by
@@ -294,7 +294,7 @@ end Semiring
 section CommSemiring
 variable [CommSemiring R] {f : α → R} {s : Finset α}
 
-lemma sum_pow_eq_sum_piAntidiag (s : Finset α) (f : α → R) (n : ℕ) :
+theorem sum_pow_eq_sum_piAntidiag (s : Finset α) (f : α → R) (n : ℕ) :
     (∑ i in s, f i) ^ n = ∑ k in piAntidiag s n, multinomial s k * ∏ i in s, f i ^ k i := by
   simp_rw [← noncommProd_eq_prod]
   rw [← sum_pow_eq_sum_piAntidiag_of_commute _ _ fun _ _ _ _ _ ↦ Commute.all ..]
@@ -311,7 +311,7 @@ end Finset
 namespace Nat
 variable {ι : Type*} {s : Finset ι} {f : ι → ℕ}
 
-lemma multinomial_two_mul_le_mul_multinomial :
+theorem multinomial_two_mul_le_mul_multinomial :
     multinomial s (fun i ↦ 2 * f i) ≤ ((∑ i in s, f i) ^ ∑ i in s, f i) * multinomial s f := by
   rw [multinomial, multinomial, ← mul_sum,
     ← Nat.mul_div_assoc _ (prod_factorial_dvd_factorial_sum ..)]

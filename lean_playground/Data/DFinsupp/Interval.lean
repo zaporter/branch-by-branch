@@ -157,16 +157,16 @@ variable (f g : Π₀ i, α i)
 
 theorem Icc_eq : Icc f g = (f.support ∪ g.support).dfinsupp (f.rangeIcc g) := rfl
 
-lemma card_Icc : #(Icc f g) = ∏ i ∈ f.support ∪ g.support, #(Icc (f i) (g i)) :=
+theorem card_Icc : #(Icc f g) = ∏ i ∈ f.support ∪ g.support, #(Icc (f i) (g i)) :=
   card_dfinsupp _ _
 
-lemma card_Ico : #(Ico f g) = (∏ i ∈ f.support ∪ g.support, #(Icc (f i) (g i))) - 1 := by
+theorem card_Ico : #(Ico f g) = (∏ i ∈ f.support ∪ g.support, #(Icc (f i) (g i))) - 1 := by
   rw [card_Ico_eq_card_Icc_sub_one, card_Icc]
 
-lemma card_Ioc : #(Ioc f g) = (∏ i ∈ f.support ∪ g.support, #(Icc (f i) (g i))) - 1 := by
+theorem card_Ioc : #(Ioc f g) = (∏ i ∈ f.support ∪ g.support, #(Icc (f i) (g i))) - 1 := by
   rw [card_Ioc_eq_card_Icc_sub_one, card_Icc]
 
-lemma card_Ioo : #(Ioo f g) = (∏ i ∈ f.support ∪ g.support, #(Icc (f i) (g i))) - 2 := by
+theorem card_Ioo : #(Ioo f g) = (∏ i ∈ f.support ∪ g.support, #(Icc (f i) (g i))) - 2 := by
   rw [card_Ioo_eq_card_Icc_sub_two, card_Icc]
 
 end PartialOrder
@@ -175,7 +175,7 @@ section Lattice
 variable [DecidableEq ι] [∀ i, DecidableEq (α i)] [∀ i, Lattice (α i)] [∀ i, Zero (α i)]
   [∀ i, LocallyFiniteOrder (α i)] (f g : Π₀ i, α i)
 
-lemma card_uIcc : #(uIcc f g) = ∏ i ∈ f.support ∪ g.support, #(uIcc (f i) (g i)) := by
+theorem card_uIcc : #(uIcc f g) = ∏ i ∈ f.support ∪ g.support, #(uIcc (f i) (g i)) := by
   rw [← support_inf_union_support_sup]; exact card_Icc _ _
 
 end Lattice
@@ -187,11 +187,11 @@ variable [∀ i, AddCommMonoid (α i)] [∀ i, PartialOrder (α i)] [∀ i, Cano
   [∀ i, LocallyFiniteOrder (α i)]
 variable (f : Π₀ i, α i)
 
-lemma card_Iic : #(Iic f) = ∏ i ∈ f.support, #(Iic (f i)) := by
+theorem card_Iic : #(Iic f) = ∏ i ∈ f.support, #(Iic (f i)) := by
   simp_rw [Iic_eq_Icc, card_Icc, DFinsupp.bot_eq_zero, support_zero, empty_union, zero_apply,
     bot_eq_zero]
 
-lemma card_Iio : #(Iio f) = (∏ i ∈ f.support, #(Iic (f i))) - 1 := by
+theorem card_Iio : #(Iio f) = (∏ i ∈ f.support, #(Iic (f i))) - 1 := by
   rw [card_Iio_eq_card_Iic_sub_one, card_Iic]
 
 end CanonicallyOrdered

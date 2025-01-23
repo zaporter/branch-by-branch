@@ -9,7 +9,7 @@ import Mathlib.Data.List.Defs
 /-!
 # Lemmas about `List`s and `Set.range`
 
-In this file we prove lemmas about range of some operations on lists.
+In this file we prove theorems about range of some operations on lists.
 -/
 
 

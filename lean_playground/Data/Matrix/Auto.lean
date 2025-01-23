@@ -6,9 +6,9 @@ Authors: Eric Wieser
 import Mathlib.Algebra.Expr
 import Mathlib.Data.Matrix.Reflection
 
-/-! # Automatically generated lemmas for working with concrete matrices
+/-! # Automatically generated theorems for working with concrete matrices
 
-In Mathlib3, this file contained "magic" lemmas which autogenerate to the correct size of matrix.
+In Mathlib3, this file contained "magic" theorems which autogenerate to the correct size of matrix.
 For instance, `Matrix.of_mul_of_fin` could be used as:
 ```lean
 example {α} [AddCommMonoid α] [Mul α] (a₁₁ a₁₂ a₂₁ a₂₂ b₁₁ b₁₂ b₂₁ b₂₂ : α) :
@@ -19,6 +19,6 @@ example {α} [AddCommMonoid α] [Mul α] (a₁₁ a₁₂ a₂₁ a₂₂ b₁�
   rw [of_mul_of_fin]
 ```
 
-Porting note: these magic lemmas have been skipped for now, though the plumbing lemmas in
+Porting note: these magic theorems have been skipped for now, though the plumbing theorems in
 `Mathlib.Data.Matrix.Reflection` are still available
 -/

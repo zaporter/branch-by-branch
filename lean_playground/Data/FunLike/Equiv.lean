@@ -44,7 +44,7 @@ end MyIso
 ```
 
 This file will then provide a `CoeFun` instance and various
-extensionality and simp lemmas.
+extensionality and simp theorems.
 
 ## Isomorphism classes extending `EquivLike`
 
@@ -85,7 +85,7 @@ class CoolerIsoClass (F : Type*) (A B : outParam Type*) [CoolClass A] [CoolClass
     extends MyIsoClass F A B where
   (map_cool : ∀ (f : F), f CoolClass.cool = CoolClass.cool)
 
-@[simp] lemma map_cool {F A B : Type*} [CoolClass A] [CoolClass B]
+@[simp] theorem map_cool {F A B : Type*} [CoolClass A] [CoolClass B]
     [EquivLike F A B] [CoolerIsoClass F A B] (f : F) :
     f CoolClass.cool = CoolClass.cool :=
   CoolerIsoClass.map_cool _
@@ -113,8 +113,8 @@ end CoolerIso
 Then any declaration taking a specific type of morphisms as parameter can instead take the
 class you just defined:
 ```
--- Compare with: lemma do_something (f : MyIso A B) : sorry := sorry
-lemma do_something {F : Type*} [EquivLike F A B] [MyIsoClass F A B] (f : F) : sorry := sorry
+-- Compare with: theorem do_something (f : MyIso A B) : sorry := sorry
+theorem do_something {F : Type*} [EquivLike F A B] [MyIsoClass F A B] (f : F) : sorry := sorry
 ```
 
 This means anything set up for `MyIso`s will automatically work for `CoolerIsoClass`es,
@@ -186,7 +186,7 @@ theorem surjective_comp (e : E) (f : β → γ) : Function.Surjective (f ∘ e) 
 theorem bijective_comp (e : E) (f : β → γ) : Function.Bijective (f ∘ e) ↔ Function.Bijective f :=
   (EquivLike.bijective e).of_comp_iff f
 
-/-- This lemma is only supposed to be used in the generic context, when working with instances
+/-- This theorem is only supposed to be used in the generic context, when working with instances
 of classes extending `EquivLike`.
 For concrete isomorphism types such as `Equiv`, you should use `Equiv.symm_apply_apply`
 or its equivalent.
@@ -196,7 +196,7 @@ TODO: define a generic form of `Equiv.symm`. -/
 theorem inv_apply_apply (e : E) (a : α) : EquivLike.inv e (e a) = a :=
   left_inv _ _
 
-/-- This lemma is only supposed to be used in the generic context, when working with instances
+/-- This theorem is only supposed to be used in the generic context, when working with instances
 of classes extending `EquivLike`.
 For concrete isomorphism types such as `Equiv`, you should use `Equiv.apply_symm_apply`
 or its equivalent.
@@ -206,7 +206,7 @@ TODO: define a generic form of `Equiv.symm`. -/
 theorem apply_inv_apply (e : E) (b : β) : e (EquivLike.inv e b) = b :=
   right_inv _ _
 
-lemma inv_apply_eq_iff_eq_apply {e : E} {b : β} {a : α} : (EquivLike.inv e b) = a ↔ b = e a := by
+theorem inv_apply_eq_iff_eq_apply {e : E} {b : β} {a : α} : (EquivLike.inv e b) = a ↔ b = e a := by
   constructor <;> rintro ⟨_, rfl⟩ <;> simp
 
 theorem comp_injective (f : α → β) (e : F) : Function.Injective (e ∘ f) ↔ Function.Injective f :=
@@ -221,7 +221,7 @@ theorem comp_bijective (f : α → β) (e : F) : Function.Bijective (e ∘ f) �
   (EquivLike.bijective e).of_comp_iff' f
 
 /-- This is not an instance to avoid slowing down every single `Subsingleton` typeclass search. -/
-lemma subsingleton_dom [FunLike F β γ] [Subsingleton β] : Subsingleton F :=
+theorem subsingleton_dom [FunLike F β γ] [Subsingleton β] : Subsingleton F :=
   ⟨fun f g ↦ DFunLike.ext f g fun _ ↦ (right_inv f).injective <| Subsingleton.elim _ _⟩
 
 end EquivLike

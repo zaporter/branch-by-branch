@@ -83,7 +83,7 @@ theorem preimage_diff (f : α → β) (s t : Set β) : f ⁻¹' (s \ t) = f ⁻�
 
 open scoped symmDiff in
 @[simp]
-lemma preimage_symmDiff {f : α → β} (s t : Set β) : f ⁻¹' (s ∆ t) = (f ⁻¹' s) ∆ (f ⁻¹' t) :=
+theorem preimage_symmDiff {f : α → β} (s t : Set β) : f ⁻¹' (s ∆ t) = (f ⁻¹' s) ∆ (f ⁻¹' t) :=
   rfl
 
 @[simp]
@@ -122,7 +122,7 @@ theorem preimage_const (b : β) (s : Set β) [Decidable (b ∈ s)] :
 
 /-- If preimage of each singleton under `f : α → β` is either empty or the whole type,
 then `f` is a constant. -/
-lemma exists_eq_const_of_preimage_singleton [Nonempty β] {f : α → β}
+theorem exists_eq_const_of_preimage_singleton [Nonempty β] {f : α → β}
     (hf : ∀ b : β, f ⁻¹' {b} = ∅ ∨ f ⁻¹' {b} = univ) : ∃ b, f = const α b := by
   rcases em (∃ b, f ⁻¹' {b} = univ) with ⟨b, hb⟩ | hf'
   · exact ⟨b, funext fun x ↦ eq_univ_iff_forall.1 hb x⟩
@@ -169,7 +169,7 @@ theorem preimage_subtype_coe_eq_compl {s u v : Set α} (hsuv : s ⊆ u ∪ v)
   · intro hx
     exact Or.elim (hsuv x_in_s) id fun hx' => hx.elim hx'
 
-lemma preimage_subset {s t} (hs : s ⊆ f '' t) (hf : Set.InjOn f (f ⁻¹' s)) : f ⁻¹' s ⊆ t := by
+theorem preimage_subset {s t} (hs : s ⊆ f '' t) (hf : Set.InjOn f (f ⁻¹' s)) : f ⁻¹' s ⊆ t := by
   rintro a ha
   obtain ⟨b, hb, hba⟩ := hs ha
   rwa [hf ha _ hba.symm]
@@ -193,7 +193,7 @@ theorem _root_.Function.Injective.mem_set_image {f : α → β} (hf : Injective 
     f a ∈ f '' s ↔ a ∈ s :=
   ⟨fun ⟨_, hb, Eq⟩ => hf Eq ▸ hb, mem_image_of_mem f⟩
 
-lemma preimage_subset_of_surjOn {t : Set β} (hf : Injective f) (h : SurjOn f s t) :
+theorem preimage_subset_of_surjOn {t : Set β} (hf : Injective f) (h : SurjOn f s t) :
     f ⁻¹' t ⊆ s := fun _ hx ↦
   hf.mem_set_image.1 <| h hx
 
@@ -214,7 +214,7 @@ theorem image_congr' {f g : α → β} {s : Set α} (h : ∀ x : α, f x = g x) 
   image_congr fun x _ => h x
 
 @[gcongr]
-lemma image_mono (h : s ⊆ t) : f '' s ⊆ f '' t := by
+theorem image_mono (h : s ⊆ t) : f '' s ⊆ f '' t := by
   rintro - ⟨a, ha, rfl⟩; exact mem_image_of_mem f (h ha)
 
 theorem image_comp (f : β → γ) (g : α → β) (a : Set α) : f ∘ g '' a = f '' (g '' a) := by aesop
@@ -245,7 +245,7 @@ theorem image_subset {a b : Set α} (f : α → β) (h : a ⊆ b) : f '' a ⊆ f
   exact fun x => fun ⟨w, h1, h2⟩ => ⟨w, h h1, h2⟩
 
 /-- `Set.image` is monotone. See `Set.image_subset` for the statement in terms of `⊆`. -/
-lemma monotone_image {f : α → β} : Monotone (image f) := fun _ _ => image_subset _
+theorem monotone_image {f : α → β} : Monotone (image f) := fun _ _ => image_subset _
 
 theorem image_union (f : α → β) (s t : Set α) : f '' (s ∪ t) = f '' s ∪ f '' t :=
   ext fun x =>
@@ -313,7 +313,7 @@ theorem image_id' (s : Set α) : (fun x => x) '' s = s := by
 
 theorem image_id (s : Set α) : id '' s = s := by simp
 
-lemma image_iterate_eq {f : α → α} {n : ℕ} : image (f^[n]) = (image f)^[n] := by
+theorem image_iterate_eq {f : α → α} {n : ℕ} : image (f^[n]) = (image f)^[n] := by
   induction n with
   | zero => simp
   | succ n ih => rw [iterate_succ', iterate_succ', ← ih, image_comp_eq]
@@ -480,11 +480,11 @@ theorem subset_image_iff {t : Set β} :
   rwa [image_preimage_inter, inter_eq_left]
 
 @[simp]
-lemma exists_subset_image_iff {p : Set β → Prop} : (∃ t ⊆ f '' s, p t) ↔ ∃ t ⊆ s, p (f '' t) := by
+theorem exists_subset_image_iff {p : Set β → Prop} : (∃ t ⊆ f '' s, p t) ↔ ∃ t ⊆ s, p (f '' t) := by
   simp [subset_image_iff]
 
 @[simp]
-lemma forall_subset_image_iff {p : Set β → Prop} : (∀ t ⊆ f '' s, p t) ↔ ∀ t ⊆ s, p (f '' t) := by
+theorem forall_subset_image_iff {p : Set β → Prop} : (∀ t ⊆ f '' s, p t) ↔ ∀ t ⊆ s, p (f '' t) := by
   simp [subset_image_iff]
 
 theorem image_subset_image_iff {f : α → β} (hf : Injective f) : f '' s ⊆ f '' t ↔ s ⊆ t := by
@@ -589,11 +589,11 @@ theorem image_univ {f : α → β} : f '' univ = range f := by
   ext
   simp [image, range]
 
-lemma image_compl_eq_range_diff_image {f : α → β} (hf : Injective f) (s : Set α) :
+theorem image_compl_eq_range_diff_image {f : α → β} (hf : Injective f) (s : Set α) :
     f '' sᶜ = range f \ f '' s := by rw [← image_univ, ← image_diff hf, compl_eq_univ_diff]
 
 /-- Alias of `Set.image_compl_eq_range_sdiff_image`. -/
-lemma range_diff_image {f : α → β} (hf : Injective f) (s : Set α) : range f \ f '' s = f '' sᶜ := by
+theorem range_diff_image {f : α → β} (hf : Injective f) (s : Set α) : range f \ f '' s = f '' sᶜ := by
   rw [image_compl_eq_range_diff_image hf]
 
 @[simp]
@@ -826,7 +826,7 @@ theorem range_quotient_lift [s : Setoid ι] (hf) :
 theorem range_quotient_mk' {s : Setoid α} : range (Quotient.mk' : α → Quotient s) = univ :=
   range_quot_mk _
 
-lemma Quotient.range_mk'' {sa : Setoid α} : range (Quotient.mk'' (s₁ := sa)) = univ :=
+theorem Quotient.range_mk'' {sa : Setoid α} : range (Quotient.mk'' (s₁ := sa)) = univ :=
   range_quotient_mk
 
 @[simp]
@@ -1081,7 +1081,7 @@ theorem Injective.image_injective (hf : Injective f) : Injective (image f) := by
   intro s t h
   rw [← preimage_image_eq s hf, ← preimage_image_eq t hf, h]
 
-lemma Injective.image_strictMono (inj : Function.Injective f) : StrictMono (image f) :=
+theorem Injective.image_strictMono (inj : Function.Injective f) : StrictMono (image f) :=
   monotone_image.strictMono_of_injective inj.image_injective
 
 theorem Surjective.preimage_subset_preimage_iff {s t : Set β} (hf : Surjective f) :
@@ -1129,7 +1129,7 @@ namespace EquivLike
 
 variable {ι ι' : Sort*} {E : Type*} [EquivLike E ι ι']
 
-@[simp] lemma range_comp {α : Type*} (f : ι' → α) (e : E) : range (f ∘ e) = range f :=
+@[simp] theorem range_comp {α : Type*} (f : ι' → α) (e : E) : range (f ∘ e) = range f :=
   (EquivLike.surjective _).range_comp _
 
 end EquivLike
@@ -1162,7 +1162,7 @@ theorem range_coe {s : Set α} : range ((↑) : s → α) = s := by
 theorem range_val {s : Set α} : range (Subtype.val : s → α) = s :=
   range_coe
 
-/-- We make this the simp lemma instead of `range_coe`. The reason is that if we write
+/-- We make this the simp theorem instead of `range_coe`. The reason is that if we write
   for `s : Set α` the function `(↑) : s → α`, then the inferred implicit arguments of `(↑)` are
   `↑α (fun x ↦ x ∈ s)`. -/
 @[simp]
@@ -1208,7 +1208,7 @@ theorem preimage_val_eq_preimage_val_iff (s t u : Set α) :
     (Subtype.val : s → α) ⁻¹' t = Subtype.val ⁻¹' u ↔ s ∩ t = s ∩ u :=
   preimage_coe_eq_preimage_coe_iff
 
-lemma preimage_val_subset_preimage_val_iff (s t u : Set α) :
+theorem preimage_val_subset_preimage_val_iff (s t u : Set α) :
     (Subtype.val ⁻¹' t : Set s) ⊆ Subtype.val ⁻¹' u ↔ s ∩ t ⊆ s ∩ u := by
   constructor
   · rw [← image_preimage_coe, ← image_preimage_coe]
@@ -1275,7 +1275,7 @@ namespace Set
 
 open Function
 
-/-! ### Injectivity and surjectivity lemmas for image and preimage -/
+/-! ### Injectivity and surjectivity theorems for image and preimage -/
 
 
 section ImagePreimage
@@ -1319,7 +1319,7 @@ end ImagePreimage
 
 end Set
 
-/-! ### Disjoint lemmas for image and preimage -/
+/-! ### Disjoint theorems for image and preimage -/
 
 section Disjoint
 variable {α β γ : Type*} {f : α → β} {s t : Set α}
@@ -1328,12 +1328,12 @@ theorem Disjoint.preimage (f : α → β) {s t : Set β} (h : Disjoint s t) :
     Disjoint (f ⁻¹' s) (f ⁻¹' t) :=
   disjoint_iff_inf_le.mpr fun _ hx => h.le_bot hx
 
-lemma Codisjoint.preimage (f : α → β) {s t : Set β} (h : Codisjoint s t) :
+theorem Codisjoint.preimage (f : α → β) {s t : Set β} (h : Codisjoint s t) :
     Codisjoint (f ⁻¹' s) (f ⁻¹' t) := by
   simp only [codisjoint_iff_le_sup, Set.sup_eq_union, top_le_iff, ← Set.preimage_union] at h ⊢
   rw [h]; rfl
 
-lemma IsCompl.preimage (f : α → β) {s t : Set β} (h : IsCompl s t) :
+theorem IsCompl.preimage (f : α → β) {s t : Set β} (h : IsCompl s t) :
     IsCompl (f ⁻¹' s) (f ⁻¹' t) :=
   ⟨h.1.preimage f, h.2.preimage f⟩
 
@@ -1386,10 +1386,10 @@ section Sigma
 
 variable {α : Type*} {β : α → Type*} {i j : α} {s : Set (β i)}
 
-lemma sigma_mk_preimage_image' (h : i ≠ j) : Sigma.mk j ⁻¹' (Sigma.mk i '' s) = ∅ := by
+theorem sigma_mk_preimage_image' (h : i ≠ j) : Sigma.mk j ⁻¹' (Sigma.mk i '' s) = ∅ := by
   simp [image, h]
 
-lemma sigma_mk_preimage_image_eq_self : Sigma.mk i ⁻¹' (Sigma.mk i '' s) = s := by
+theorem sigma_mk_preimage_image_eq_self : Sigma.mk i ⁻¹' (Sigma.mk i '' s) = s := by
   simp [image]
 
 end Sigma

@@ -44,7 +44,7 @@ Note that bundled versions exist as:
 def diagonal [Zero α] (d : n → α) : Matrix n n α :=
   of fun i j => if i = j then d i else 0
 
--- TODO: set as an equation lemma for `diagonal`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `diagonal`, see https://github.com/leanprover-community/mathlib4/pull/3024
 theorem diagonal_apply [Zero α] (d : n → α) (i j) : diagonal d i j = if i = j then d i else 0 :=
   rfl
 
@@ -345,7 +345,7 @@ theorem submatrix_one [Zero α] [One α] [DecidableEq m] [DecidableEq l] (e : l 
 theorem diag_submatrix (A : Matrix m m α) (e : l → m) : diag (A.submatrix e e) = A.diag ∘ e :=
   rfl
 
-/-! `simp` lemmas for `Matrix.submatrix`s interaction with `Matrix.diagonal`, `1`, and `Matrix.mul`
+/-! `simp` theorems for `Matrix.submatrix`s interaction with `Matrix.diagonal`, `1`, and `Matrix.mul`
 for when the mappings are bundled. -/
 
 

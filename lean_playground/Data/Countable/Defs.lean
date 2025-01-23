@@ -37,7 +37,7 @@ class Countable (α : Sort u) : Prop where
   /-- A type `α` is countable if there exists an injective map `α → ℕ`. -/
   exists_injective_nat' : ∃ f : α → ℕ, Injective f
 
-lemma Countable.exists_injective_nat (α : Sort u) [Countable α] : ∃ f : α → ℕ, Injective f :=
+theorem Countable.exists_injective_nat (α : Sort u) [Countable α] : ∃ f : α → ℕ, Injective f :=
   Countable.exists_injective_nat'
 
 instance : Countable ℕ :=
@@ -121,16 +121,16 @@ class Uncountable (α : Sort*) : Prop where
   /-- A type `α` is uncountable if it is not countable. -/
   not_countable : ¬Countable α
 
-lemma not_uncountable_iff : ¬Uncountable α ↔ Countable α := by
+theorem not_uncountable_iff : ¬Uncountable α ↔ Countable α := by
   rw [uncountable_iff_not_countable, not_not]
 
-lemma not_countable_iff : ¬Countable α ↔ Uncountable α := (uncountable_iff_not_countable α).symm
+theorem not_countable_iff : ¬Countable α ↔ Uncountable α := (uncountable_iff_not_countable α).symm
 
 @[simp]
-lemma not_uncountable [Countable α] : ¬Uncountable α := not_uncountable_iff.2 ‹_›
+theorem not_uncountable [Countable α] : ¬Uncountable α := not_uncountable_iff.2 ‹_›
 
 @[simp]
-lemma not_countable [Uncountable α] : ¬Countable α := Uncountable.not_countable
+theorem not_countable [Uncountable α] : ¬Countable α := Uncountable.not_countable
 
 protected theorem Function.Injective.uncountable [Uncountable α] {f : α → β} (hf : Injective f) :
     Uncountable β :=
@@ -139,10 +139,10 @@ protected theorem Function.Injective.uncountable [Uncountable α] {f : α → β
 protected theorem Function.Surjective.uncountable [Uncountable β] {f : α → β} (hf : Surjective f) :
     Uncountable α := (injective_surjInv hf).uncountable
 
-lemma not_injective_uncountable_countable [Uncountable α] [Countable β] (f : α → β) :
+theorem not_injective_uncountable_countable [Uncountable α] [Countable β] (f : α → β) :
     ¬Injective f := fun hf ↦ not_countable hf.countable
 
-lemma not_surjective_countable_uncountable [Countable α] [Uncountable β] (f : α → β) :
+theorem not_surjective_countable_uncountable [Countable α] [Uncountable β] (f : α → β) :
     ¬Surjective f := fun hf ↦
   not_countable hf.countable
 

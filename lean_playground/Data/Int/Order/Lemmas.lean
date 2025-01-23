@@ -6,7 +6,7 @@ Authors: Jeremy Avigad
 import Mathlib.Algebra.Order.Ring.Abs
 
 /-!
-# Further lemmas about the integers
+# Further theorems about the integers
 
 The distinction between this file and `Data.Int.Order.Basic` is not particularly clear.
 They are separated by now to minimize the porting requirements for tactics during the transition to

@@ -9,7 +9,7 @@ import Mathlib.Order.RelClasses
 # Lexicographic order on a sigma type
 
 This defines the lexicographical order of two arbitrary relations on a sigma type and proves some
-lemmas about `PSigma.Lex`, which is defined in core Lean.
+theorems about `PSigma.Lex`, which is defined in core Lean.
 
 Given a relation in the index type and a relation on each summand, the lexicographical order on the
 sigma type relates `a` and `b` if their summands are related or they are in the same summand and

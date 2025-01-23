@@ -86,14 +86,14 @@ theorem pi_empty {t : ∀ a : α, Finset (β a)} : pi (∅ : Finset α) t = sing
   rfl
 
 @[simp]
-lemma pi_nonempty : (s.pi t).Nonempty ↔ ∀ a ∈ s, (t a).Nonempty := by
+theorem pi_nonempty : (s.pi t).Nonempty ↔ ∀ a ∈ s, (t a).Nonempty := by
   simp [Finset.Nonempty, Classical.skolem]
 
 @[aesop safe apply (rule_sets := [finsetNonempty])]
 alias ⟨_, pi_nonempty_of_forall_nonempty⟩ := pi_nonempty
 
 @[simp]
-lemma pi_eq_empty : s.pi t = ∅ ↔ ∃ a ∈ s, t a = ∅ := by
+theorem pi_eq_empty : s.pi t = ∅ ↔ ∃ a ∈ s, t a = ∅ := by
   simp [← not_nonempty_iff_eq_empty]
 
 @[simp]
@@ -148,9 +148,9 @@ variable {ι : Type*} [DecidableEq (ι → α)] {s : Finset α} {f : ι → α}
 constant functions valued in `s`. -/
 def piDiag (s : Finset α) (ι : Type*) [DecidableEq (ι → α)] : Finset (ι → α) := s.image (const ι)
 
-@[simp] lemma mem_piDiag : f ∈ s.piDiag ι ↔ ∃ a ∈ s, const ι a = f := mem_image
+@[simp] theorem mem_piDiag : f ∈ s.piDiag ι ↔ ∃ a ∈ s, const ι a = f := mem_image
 
-@[simp] lemma card_piDiag (s : Finset α) (ι : Type*) [DecidableEq (ι → α)] [Nonempty ι] :
+@[simp] theorem card_piDiag (s : Finset α) (ι : Type*) [DecidableEq (ι → α)] [Nonempty ι] :
     (s.piDiag ι).card = s.card := by rw [piDiag, card_image_of_injective _ const_injective]
 
 /-! ### Restriction -/

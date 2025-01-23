@@ -112,10 +112,10 @@ theorem coe_eq_singleton {s : Finset α} {a : α} : (s : Set α) = {a} ↔ s = {
   rw [← coe_singleton, coe_inj]
 
 @[norm_cast]
-lemma coe_subset_singleton : (s : Set α) ⊆ {a} ↔ s ⊆ {a} := by rw [← coe_subset, coe_singleton]
+theorem coe_subset_singleton : (s : Set α) ⊆ {a} ↔ s ⊆ {a} := by rw [← coe_subset, coe_singleton]
 
 @[norm_cast]
-lemma singleton_subset_coe : {a} ⊆ (s : Set α) ↔ {a} ⊆ s := by rw [← coe_subset, coe_singleton]
+theorem singleton_subset_coe : {a} ⊆ (s : Set α) ↔ {a} ⊆ s := by rw [← coe_subset, coe_singleton]
 
 theorem eq_singleton_iff_unique_mem {s : Finset α} {a : α} : s = {a} ↔ a ∈ s ∧ ∀ x ∈ s, x = a := by
   constructor <;> intro t
@@ -175,7 +175,7 @@ theorem eq_empty_of_ssubset_singleton {s : Finset α} {x : α} (hs : s ⊂ {x}) 
 /-- A finset is nontrivial if it has at least two elements. -/
 protected abbrev Nontrivial (s : Finset α) : Prop := (s : Set α).Nontrivial
 
-nonrec lemma Nontrivial.nonempty (hs : s.Nontrivial) : s.Nonempty := hs.nonempty
+nonrec theorem Nontrivial.nonempty (hs : s.Nontrivial) : s.Nonempty := hs.nonempty
 
 @[simp]
 theorem not_nontrivial_empty : ¬ (∅ : Finset α).Nontrivial := by simp [Finset.Nontrivial]
@@ -186,7 +186,7 @@ theorem not_nontrivial_singleton : ¬ ({a} : Finset α).Nontrivial := by simp [F
 theorem Nontrivial.ne_singleton (hs : s.Nontrivial) : s ≠ {a} := by
   rintro rfl; exact not_nontrivial_singleton hs
 
-nonrec lemma Nontrivial.exists_ne (hs : s.Nontrivial) (a : α) : ∃ b ∈ s, b ≠ a := hs.exists_ne _
+nonrec theorem Nontrivial.exists_ne (hs : s.Nontrivial) (a : α) : ∃ b ∈ s, b ≠ a := hs.exists_ne _
 
 theorem eq_singleton_or_nontrivial (ha : a ∈ s) : s = {a} ∨ s.Nontrivial := by
   rw [← coe_eq_singleton]; exact Set.eq_singleton_or_nontrivial ha
@@ -197,11 +197,11 @@ theorem nontrivial_iff_ne_singleton (ha : a ∈ s) : s.Nontrivial ↔ s ≠ {a} 
 theorem Nonempty.exists_eq_singleton_or_nontrivial : s.Nonempty → (∃ a, s = {a}) ∨ s.Nontrivial :=
   fun ⟨a, ha⟩ => (eq_singleton_or_nontrivial ha).imp_left <| Exists.intro a
 
-@[simp, norm_cast] lemma nontrivial_coe : (s : Set α).Nontrivial ↔ s.Nontrivial := .rfl
+@[simp, norm_cast] theorem nontrivial_coe : (s : Set α).Nontrivial ↔ s.Nontrivial := .rfl
 
 alias ⟨Nontrivial.of_coe, Nontrivial.coe⟩ := nontrivial_coe
 
-lemma Nontrivial.not_subset_singleton (hs : s.Nontrivial) : ¬s ⊆ {a} :=
+theorem Nontrivial.not_subset_singleton (hs : s.Nontrivial) : ¬s ⊆ {a} :=
   mod_cast hs.coe.not_subset_singleton
 
 instance instNontrivial [Nonempty α] : Nontrivial (Finset α) :=
@@ -216,7 +216,7 @@ instance (i : α) : Unique ({i} : Finset α) where
   uniq j := Subtype.ext <| mem_singleton.mp j.2
 
 @[simp]
-lemma default_singleton (i : α) : ((default : ({i} : Finset α)) : α) = i := rfl
+theorem default_singleton (i : α) : ((default : ({i} : Finset α)) : α) = i := rfl
 
 instance Nontrivial.instDecidablePred [DecidableEq α] :
     DecidablePred (Finset.Nontrivial (α := α)) :=
@@ -387,7 +387,7 @@ theorem eq_of_mem_insert_of_not_mem (ha : b ∈ insert a s) (hb : b ∉ s) : b =
   (mem_insert.1 ha).resolve_right hb
 
 /-- A version of `LawfulSingleton.insert_emptyc_eq` that works with `dsimp`. -/
-@[simp] lemma insert_empty : insert a (∅ : Finset α) = {a} := rfl
+@[simp] theorem insert_empty : insert a (∅ : Finset α) = {a} := rfl
 
 @[simp]
 theorem cons_eq_insert (a s h) : @cons α a s h = insert a s :=
@@ -465,7 +465,7 @@ theorem insert_subset (ha : a ∈ t) (hs : s ⊆ t) : insert a s ⊆ t :=
 theorem insert_subset_insert (a : α) {s t : Finset α} (h : s ⊆ t) : insert a s ⊆ insert a t :=
   insert_subset_iff.2 ⟨mem_insert_self _ _, Subset.trans h (subset_insert _ _)⟩
 
-@[simp] lemma insert_subset_insert_iff (ha : a ∉ s) : insert a s ⊆ insert a t ↔ s ⊆ t := by
+@[simp] theorem insert_subset_insert_iff (ha : a ∉ s) : insert a s ⊆ insert a t ↔ s ⊆ t := by
   simp_rw [← coe_subset]; simp [-coe_subset, ha]
 
 theorem insert_inj (ha : a ∉ s) : insert a s = insert b s ↔ a = b :=
@@ -539,7 +539,7 @@ theorem Nonempty.cons_induction {α : Type*} {p : ∀ s : Finset α, s.Nonempty 
     · exact cons a t ha ht (h ht)
 
 -- We use a fresh `α` here to exclude the unneeded `DecidableEq α` instance from the section.
-lemma Nonempty.exists_cons_eq {α} {s : Finset α} (hs : s.Nonempty) : ∃ t a ha, cons a t ha = s :=
+theorem Nonempty.exists_cons_eq {α} {s : Finset α} (hs : s.Nonempty) : ∃ t a ha, cons a t ha = s :=
   hs.cons_induction (fun a ↦ ⟨∅, a, _, cons_empty _⟩) fun _ _ _ _ _ ↦ ⟨_, _, _, rfl⟩
 
 /-- Inserting an element to a finite set is equivalent to the option type. -/

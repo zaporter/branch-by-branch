@@ -34,7 +34,7 @@ def doubleFactorial : ℕ → ℕ
 -- This notation is `\!!` not two !'s
 @[inherit_doc] scoped notation:10000 n "‼" => Nat.doubleFactorial n
 
-lemma doubleFactorial_pos : ∀ n, 0 < n‼
+theorem doubleFactorial_pos : ∀ n, 0 < n‼
   | 0 | 1 => zero_lt_one
   | _n + 2 => mul_pos (succ_pos _) (doubleFactorial_pos _)
 
@@ -49,7 +49,7 @@ theorem factorial_eq_mul_doubleFactorial : ∀ n : ℕ, (n + 1)! = (n + 1)‼ * 
     rw [doubleFactorial_add_two, factorial, factorial_eq_mul_doubleFactorial _, mul_comm _ k‼,
       mul_assoc]
 
-lemma doubleFactorial_le_factorial : ∀ n, n‼ ≤ n !
+theorem doubleFactorial_le_factorial : ∀ n, n‼ ≤ n !
   | 0 => le_rfl
   | n + 1 => by
     rw [factorial_eq_mul_doubleFactorial]; exact Nat.le_mul_of_pos_right _ n.doubleFactorial_pos

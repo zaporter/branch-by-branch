@@ -166,7 +166,7 @@ protected alias Matrix.dotProduct_comp_equiv_symm := dotProduct_comp_equiv_symm
 /-- Permuting vectors on both sides of a dot product is a no-op. -/
 @[simp]
 theorem comp_equiv_dotProduct_comp_equiv (e : m ≃ n) : x ∘ e ⬝ᵥ y ∘ e = x ⬝ᵥ y := by
-  -- Porting note: was `simp only` with all three lemmas
+  -- Porting note: was `simp only` with all three theorems
   rw [← dotProduct_comp_equiv_symm]; simp only [Function.comp_def, Equiv.apply_symm_apply]
 
 @[deprecated (since := "2024-12-12")]
@@ -266,7 +266,7 @@ theorem dotProduct_neg : v ⬝ᵥ -w = -(v ⬝ᵥ w) := by simp [dotProduct]
 
 @[deprecated (since := "2024-12-12")] protected alias Matrix.dotProduct_neg := dotProduct_neg
 
-lemma neg_dotProduct_neg : -v ⬝ᵥ -w = v ⬝ᵥ w := by
+theorem neg_dotProduct_neg : -v ⬝ᵥ -w = v ⬝ᵥ w := by
   rw [neg_dotProduct, dotProduct_neg, neg_neg]
 
 @[deprecated (since := "2024-12-12")]
@@ -590,7 +590,7 @@ namespace Matrix
 def vecMulVec [Mul α] (w : m → α) (v : n → α) : Matrix m n α :=
   of fun x y => w x * v y
 
--- TODO: set as an equation lemma for `vecMulVec`, see https://github.com/leanprover-community/mathlib4/pull/3024
+-- TODO: set as an equation theorem for `vecMulVec`, see https://github.com/leanprover-community/mathlib4/pull/3024
 theorem vecMulVec_apply [Mul α] (w : m → α) (v : n → α) (i j) : vecMulVec w v i j = w i * v j :=
   rfl
 
@@ -842,7 +842,7 @@ theorem vecMul_neg [Fintype m] (v : m → α) (A : Matrix m n α) : v ᵥ* (-A) 
   ext
   apply dotProduct_neg
 
-lemma neg_vecMul_neg [Fintype m] (v : m → α) (A : Matrix m n α) : (-v) ᵥ* (-A) = v ᵥ* A := by
+theorem neg_vecMul_neg [Fintype m] (v : m → α) (A : Matrix m n α) : (-v) ᵥ* (-A) = v ᵥ* A := by
   rw [vecMul_neg, neg_vecMul, neg_neg]
 
 theorem neg_mulVec [Fintype n] (v : n → α) (A : Matrix m n α) : (-A) *ᵥ v = - (A *ᵥ v) := by
@@ -853,7 +853,7 @@ theorem mulVec_neg [Fintype n] (v : n → α) (A : Matrix m n α) : A *ᵥ (-v) 
   ext
   apply dotProduct_neg
 
-lemma neg_mulVec_neg [Fintype n] (v : n → α) (A : Matrix m n α) : (-A) *ᵥ (-v) = A *ᵥ v := by
+theorem neg_mulVec_neg [Fintype n] (v : n → α) (A : Matrix m n α) : (-A) *ᵥ (-v) = A *ᵥ v := by
   rw [mulVec_neg, neg_mulVec, neg_neg]
 
 theorem mulVec_sub [Fintype n] (A : Matrix m n α) (x y : n → α) :
@@ -898,13 +898,13 @@ section Semiring
 
 variable [Semiring R]
 
-lemma mulVec_injective_of_isUnit [Fintype m] [DecidableEq m] {A : Matrix m m R}
+theorem mulVec_injective_of_isUnit [Fintype m] [DecidableEq m] {A : Matrix m m R}
     (ha : IsUnit A) : Function.Injective A.mulVec := by
   obtain ⟨B, hBl, hBr⟩ := isUnit_iff_exists.mp ha
   intro x y hxy
   simpa [hBr] using congrArg B.mulVec hxy
 
-lemma vecMul_injective_of_isUnit [Fintype m] [DecidableEq m] {A : Matrix m m R}
+theorem vecMul_injective_of_isUnit [Fintype m] [DecidableEq m] {A : Matrix m m R}
     (ha : IsUnit A) : Function.Injective A.vecMul := by
   obtain ⟨B, hBl, hBr⟩ := isUnit_iff_exists.mp ha
   intro x y hxy
@@ -959,7 +959,7 @@ theorem submatrix_mul [Fintype n] [Fintype o] [Mul α] [AddCommMonoid α] {p q :
     (M * N).submatrix e₁ e₃ = M.submatrix e₁ e₂ * N.submatrix e₂ e₃ :=
   ext fun _ _ => (he₂.sum_comp _).symm
 
-/-! `simp` lemmas for `Matrix.submatrix`s interaction with `Matrix.diagonal`, `1`, and `Matrix.mul`
+/-! `simp` theorems for `Matrix.submatrix`s interaction with `Matrix.diagonal`, `1`, and `Matrix.mul`
 for when the mappings are bundled. -/
 
 @[simp]

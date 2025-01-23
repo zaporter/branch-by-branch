@@ -40,9 +40,9 @@ instance : SMul ℕ (BitVec w) := ⟨fun x y => ofFin <| x • y.toFin⟩
 instance : SMul ℤ (BitVec w) := ⟨fun x y => ofFin <| x • y.toFin⟩
 instance : Pow (BitVec w) ℕ  := ⟨fun x n => ofFin <| x.toFin ^ n⟩
 
-lemma toFin_nsmul (n : ℕ) (x : BitVec w)  : toFin (n • x) = n • x.toFin := rfl
-lemma toFin_zsmul (z : ℤ) (x : BitVec w)  : toFin (z • x) = z • x.toFin := rfl
-lemma toFin_pow (x : BitVec w) (n : ℕ)    : toFin (x ^ n) = x.toFin ^ n := rfl
+theorem toFin_nsmul (n : ℕ) (x : BitVec w)  : toFin (n • x) = n • x.toFin := rfl
+theorem toFin_zsmul (z : ℤ) (x : BitVec w)  : toFin (z • x) = z • x.toFin := rfl
+theorem toFin_pow (x : BitVec w) (n : ℕ)    : toFin (x ^ n) = x.toFin ^ n := rfl
 
 /-!
 ## Ring
@@ -59,13 +59,13 @@ instance : CommSemiring (BitVec w) :=
     (fun _ => rfl) /- toFin_natCast -/
 -- The statement in the new API would be: `n#(k.succ) = ((n / 2)#k).concat (n % 2 != 0)`
 
-@[simp] lemma ofFin_neg {x : Fin (2 ^ w)} : ofFin (-x) = -(ofFin x) := by
+@[simp] theorem ofFin_neg {x : Fin (2 ^ w)} : ofFin (-x) = -(ofFin x) := by
   rfl
 
-@[simp] lemma ofFin_natCast (n : ℕ) : ofFin (n : Fin (2^w)) = n := by
+@[simp] theorem ofFin_natCast (n : ℕ) : ofFin (n : Fin (2^w)) = n := by
   rfl
 
-lemma toFin_natCast (n : ℕ) : toFin (n : BitVec w) = n := by
+theorem toFin_natCast (n : ℕ) : toFin (n : BitVec w) = n := by
   rfl
 
 theorem ofFin_intCast (z : ℤ) : ofFin (z : Fin (2^w)) = ↑z := by

@@ -73,13 +73,13 @@ theorem _root_.Function.eq_of_sigmaMk_comp {γ : Type*} [Nonempty γ]
   obtain rfl : a = b := congr_arg Sigma.fst (congr_fun h i)
   simpa [funext_iff] using h
 
-/-- A specialized ext lemma for equality of sigma types over an indexed subtype. -/
+/-- A specialized ext theorem for equality of sigma types over an indexed subtype. -/
 @[ext]
 theorem subtype_ext {β : Type*} {p : α → β → Prop} :
     ∀ {x₀ x₁ : Σa, Subtype (p a)}, x₀.fst = x₁.fst → (x₀.snd : β) = x₁.snd → x₀ = x₁
   | ⟨_, _, _⟩, ⟨_, _, _⟩, rfl, rfl => rfl
 
--- This is not a good simp lemma, as its discrimination tree key is just an arrow.
+-- This is not a good simp theorem, as its discrimination tree key is just an arrow.
 theorem «forall» {p : (Σa, β a) → Prop} : (∀ x, p x) ↔ ∀ a b, p ⟨a, b⟩ :=
   ⟨fun h a b ↦ h ⟨a, b⟩, fun h ⟨a, b⟩ ↦ h a b⟩
 
@@ -87,10 +87,10 @@ theorem «forall» {p : (Σa, β a) → Prop} : (∀ x, p x) ↔ ∀ a b, p ⟨a
 theorem «exists» {p : (Σa, β a) → Prop} : (∃ x, p x) ↔ ∃ a b, p ⟨a, b⟩ :=
   ⟨fun ⟨⟨a, b⟩, h⟩ ↦ ⟨a, b, h⟩, fun ⟨a, b, h⟩ ↦ ⟨⟨a, b⟩, h⟩⟩
 
-lemma exists' {p : ∀ a, β a → Prop} : (∃ a b, p a b) ↔ ∃ x : Σ a, β a, p x.1 x.2 :=
+theorem exists' {p : ∀ a, β a → Prop} : (∃ a b, p a b) ↔ ∃ x : Σ a, β a, p x.1 x.2 :=
   (Sigma.exists (p := fun x ↦ p x.1 x.2)).symm
 
-lemma forall' {p : ∀ a, β a → Prop} : (∀ a b, p a b) ↔ ∀ x : Σ a, β a, p x.1 x.2 :=
+theorem forall' {p : ∀ a, β a → Prop} : (∀ a b, p a b) ↔ ∀ x : Σ a, β a, p x.1 x.2 :=
   (Sigma.forall (p := fun x ↦ p x.1 x.2)).symm
 
 theorem _root_.sigma_mk_injective {i : α} : Injective (@Sigma.mk α β i)
@@ -113,7 +113,7 @@ theorem fst_injective_iff : Injective (fst : (Σ a, β a) → α) ↔ ∀ a, Sub
 def map (f₁ : α₁ → α₂) (f₂ : ∀ a, β₁ a → β₂ (f₁ a)) (x : Sigma β₁) : Sigma β₂ :=
   ⟨f₁ x.1, f₂ x.1 x.2⟩
 
-lemma map_mk (f₁ : α₁ → α₂) (f₂ : ∀ a, β₁ a → β₂ (f₁ a)) (x : α₁) (y : β₁ x) :
+theorem map_mk (f₁ : α₁ → α₂) (f₂ : ∀ a, β₁ a → β₂ (f₁ a)) (x : α₁) (y : β₁ x) :
     map f₁ f₂ ⟨x, y⟩ = ⟨f₁ x, f₂ x y⟩ := rfl
 end Sigma
 
@@ -243,14 +243,14 @@ protected theorem eq {α : Sort*} {β : α → Sort*} : ∀ {p₁ p₂ : Σ' a, 
     (Eq.recOn h₁ p₁.2 : β p₂.1) = p₂.2 → p₁ = p₂
   | ⟨_, _⟩, _, rfl, rfl => rfl
 
--- This should not be a simp lemma, since its discrimination tree key would just be `→`.
+-- This should not be a simp theorem, since its discrimination tree key would just be `→`.
 theorem «forall» {p : (Σ'a, β a) → Prop} : (∀ x, p x) ↔ ∀ a b, p ⟨a, b⟩ :=
   ⟨fun h a b ↦ h ⟨a, b⟩, fun h ⟨a, b⟩ ↦ h a b⟩
 
-@[simp] lemma «exists» {p : (Σ' a, β a) → Prop} : (∃ x, p x) ↔ ∃ a b, p ⟨a, b⟩ :=
+@[simp] theorem «exists» {p : (Σ' a, β a) → Prop} : (∃ x, p x) ↔ ∃ a b, p ⟨a, b⟩ :=
   ⟨fun ⟨⟨a, b⟩, h⟩ ↦ ⟨a, b, h⟩, fun ⟨a, b, h⟩ ↦ ⟨⟨a, b⟩, h⟩⟩
 
-/-- A specialized ext lemma for equality of `PSigma` types over an indexed subtype. -/
+/-- A specialized ext theorem for equality of `PSigma` types over an indexed subtype. -/
 @[ext]
 theorem subtype_ext {β : Sort*} {p : α → β → Prop} :
     ∀ {x₀ x₁ : Σ'a, Subtype (p a)}, x₀.fst = x₁.fst → (x₀.snd : β) = x₁.snd → x₀ = x₁
