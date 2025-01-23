@@ -1,4 +1,3 @@
-import LeanPlayground
 import Std
 import Init.Data.Nat.Basic
 
@@ -18,5 +17,6 @@ example : 0 + m = m := by exact?
 
 --theorem mathd_algebra_455 (x : Real) (hO : 2 * (2 * (2 * (2 * x))) = 48) : x = 3 := sorry
 
+def hello := "hji"
 def main : IO Unit :=
   IO.println s!"Hello, {hello}!"

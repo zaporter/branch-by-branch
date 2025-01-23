@@ -1,0 +1,10 @@
+name = "lean_corelib"
+version = "0.1.0"
+defaultTargets = ["lean_corelib"]
+
+[[lean_lib]]
+name = "Corelib"
+
+[[lean_exe]]
+name = "lean_corelib"
+root = "Main"
