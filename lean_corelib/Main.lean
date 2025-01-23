@@ -1,4 +1,5 @@
 import Std
+import Corelib
 import Init.Data.Nat.Basic
 
 open Nat

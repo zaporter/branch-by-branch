@@ -7,13 +7,22 @@
 in
   pkgs.mkShell {
     nativeBuildInputs = with pkgs; [
+      gcc
+      libgcc
+      gnumake
+      cmake
       unstable.lean4
       unstable.elan
-      stdenv.cc.cc.lib # for python libstdc++6.so
+      # for lean
+      unstable.stdenv.cc.cc.lib
+
       viddy # fancy watch
       redis
       python310Packages.huggingface-hub
     ];
     shellHook = ''
+      # Nix can be so painful at times....
+      # lean 4.15.0 requires CXXABI_1.3.15
+      export LD_LIBRARY_PATH=${unstable.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH
     '';
   }

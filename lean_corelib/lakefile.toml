@@ -2,9 +2,21 @@ name = "lean_corelib"
 version = "0.1.0"
 defaultTargets = ["lean_corelib"]
 
+[[require]]
+name = "Cli"
+scope = "leanprover"
+rev = "385d01ecdfffb9b8a387e4013c6d4b6c313cf24d"
+
 [[lean_lib]]
 name = "Corelib"
 
 [[lean_exe]]
 name = "lean_corelib"
 root = "Main"
+
+[[lean_exe]]
+name="mk_all"
+srcDir="scripts/mk_all"
+
+[package.lean_corelib]
+moreLinkArgs = ["-lstdc++", "-lgcc_s", "-lc"]
