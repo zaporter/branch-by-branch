@@ -7,7 +7,9 @@
 in
   pkgs.mkShell {
     nativeBuildInputs = with pkgs; [
-    stdenv.cc.cc.lib # for python libstdc++6.so
+      unstable.lean4
+      unstable.elan
+      stdenv.cc.cc.lib # for python libstdc++6.so
       viddy # fancy watch
       redis
       python310Packages.huggingface-hub
