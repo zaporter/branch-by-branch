@@ -107,15 +107,13 @@ type SchedulingParams struct {
 }
 
 func NewEngine(ctx context.Context, job EngineJobName, rdb *redis.Client, schedulingParams SchedulingParams) *Engine {
-	logger := zerolog.Ctx(ctx)
-	logger.UpdateContext(func(c zerolog.Context) zerolog.Context {
-		return c.Str("job", string(job))
-	})
+	parentLogger := zerolog.Ctx(ctx)
+	logger := parentLogger.With().Str("job", string(job)).Logger()
 
 	return &Engine{
 		job:              job,
 		rdb:              rdb,
-		logger:           logger,
+		logger:           &logger,
 		wg:               &sync.WaitGroup{},
 		shouldStopChan:   make(chan bool),
 		taskInput:        make(chan EngineTaskMsg, schedulingParams.InputChanSize),

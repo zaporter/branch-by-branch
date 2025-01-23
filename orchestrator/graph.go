@@ -1,5 +1,7 @@
 package main
 
+import "errors"
+
 type NodeState string
 
 const (
@@ -36,23 +38,82 @@ const (
 type GraphState string
 
 const (
-	GraphStateInProgress NodeState = "graph_in_progress"
-	GraphStateSuccess    NodeState = "graph_success"
-	GraphStateFailed     NodeState = "graph_failed"
+	GraphStateInProgress GraphState = "graph_in_progress"
+	GraphStateSuccess    GraphState = "graph_success"
+	GraphStateFailed     GraphState = "graph_failed"
 )
 
+type CommitGraphLocator struct {
+	BranchName BranchName
+	ProblemID  ProblemID
+}
+
+type NodeLocator struct {
+	BranchName BranchName
+	ProblemID  ProblemID
+	NodeID     NodeID
+}
+
+type NodeTree struct {
+	BranchTarget    *RepoGraphBranchTarget
+	CommitGraph     *CommitGraph
+	CommitGraphNode *CommitGraphNode
+}
+
 type RepoGraph struct {
-	BranchTargets []RepoGraphBranchTarget `json:"branch_targets"`
+	BranchTargets map[BranchName]RepoGraphBranchTarget `json:"branch_targets"`
+}
+
+func (rg *RepoGraph) GetTreeAtLocator(locator NodeLocator) (NodeTree, error) {
+	branchTarget, ok := rg.BranchTargets[locator.BranchName]
+	if !ok {
+		return NodeTree{}, errors.New("branch target not found")
+	}
+	subgraph, ok := branchTarget.Subgraphs[locator.ProblemID]
+	if !ok {
+		return NodeTree{}, errors.New("subgraph not found")
+	}
+	node, ok := subgraph.Nodes[locator.NodeID]
+	if !ok {
+		return NodeTree{}, errors.New("node not found")
+	}
+	return NodeTree{
+		BranchTarget:    &branchTarget,
+		CommitGraph:     &subgraph,
+		CommitGraphNode: &node,
+	}, nil
+}
+
+type CommitGraphTree struct {
+	BranchTarget *RepoGraphBranchTarget
+	CommitGraph  *CommitGraph
+}
+
+func (rg *RepoGraph) GetTreeAtCommitGraphLocator(locator CommitGraphLocator) (CommitGraphTree, error) {
+	branchTarget, ok := rg.BranchTargets[locator.BranchName]
+	if !ok {
+		return CommitGraphTree{}, errors.New("branch target not found")
+	}
+	subgraph, ok := branchTarget.Subgraphs[locator.ProblemID]
+	if !ok {
+		return CommitGraphTree{}, errors.New("subgraph not found")
+	}
+	return CommitGraphTree{
+		BranchTarget: &branchTarget,
+		CommitGraph:  &subgraph,
+	}, nil
 }
 
 // weighting algo is ((n_succ)/(n_fail+1))/(n_attempt^(\lambda+1))
 type RepoGraphBranchTarget struct {
-	BranchName BranchName    `json:"branch_name"`
-	Subgraphs  []CommitGraph `json:"subgraphs"`
+	BranchName BranchName                `json:"branch_name"`
+	Subgraphs  map[ProblemID]CommitGraph `json:"subgraphs"`
 }
 
 type CommitGraph struct {
-	ProblemID string                     `json:"problem_id"`
+	// problem_id is a unique identifier for the graph because
+	// we will never start a new graph at the same target on the same problem
+	ProblemID ProblemID                  `json:"problem_id"`
 	RootNode  NodeID                     `json:"root_node"`
 	Nodes     map[NodeID]CommitGraphNode `json:"nodes"`
 	State     GraphState                 `json:"state"`
@@ -89,4 +150,65 @@ type ProblemI interface {
 	ID() string
 	ProblemGoal() string
 	SetupOnBranch(branch string) error
+}
+
+func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *InferenceTaskResponse) error {
+	tree, err := rg.GetTreeAtLocator(locator)
+	if err != nil {
+		return err
+	}
+	node := tree.CommitGraphNode
+	node.State = NodeStateDone
+	// if we have children, we are (by definition) non-terminal
+	node.Result = NodeResultNone
+	for _, seq := range result.ReturnSequences {
+		newNode := CommitGraphNode{
+			ID:              NewNodeID(),
+			Depth:           node.Depth + 1,
+			Parent:          &node.ID,
+			Children:        []NodeID{},
+			State:           NodeStateAwaitingActionEvaluation,
+			Result:          NodeResultNone,
+			InferenceOutput: seq,
+			ActionOutputs:   []ActionOutput{},
+		}
+		tree.CommitGraph.Nodes[newNode.ID] = newNode
+		node.Children = append(node.Children, newNode.ID)
+	}
+	return nil
+}
+
+func (rg *RepoGraph) UnfinishedGraphs() []CommitGraphLocator {
+	unfinishedGraphs := []CommitGraphLocator{}
+	for branchName, branchTarget := range rg.BranchTargets {
+		for problemID, subgraph := range branchTarget.Subgraphs {
+			if subgraph.State == GraphStateInProgress {
+				unfinishedGraphs = append(unfinishedGraphs, CommitGraphLocator{BranchName: branchName, ProblemID: problemID})
+			}
+		}
+	}
+	return unfinishedGraphs
+}
+
+// Traverse all the branch targets, usiing weighting, select a problem, select a branch
+// Create a new CommitGraph, set the root node, and return the locator
+// returns false if no new graphs can be spawned
+func (rg *RepoGraph) SpawnNewGraph() (*CommitGraphLocator, bool) {
+	//TODO
+	return nil, false
+}
+
+func (cg *CommitGraph) AllNodesInState(state NodeState) []CommitGraphNode {
+	nodes := []CommitGraphNode{}
+	for _, node := range cg.Nodes {
+		if node.State == state {
+			nodes = append(nodes, node)
+		}
+	}
+	return nodes
+}
+
+func (node *CommitGraphNode) GetPrompt() string {
+	// TODO
+	return "What is the weather in San Francisco?"
 }

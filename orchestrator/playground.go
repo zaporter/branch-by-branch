@@ -31,6 +31,40 @@ func createTestDeferCli() *cli.Command {
 	}
 }
 
+func createTestGoRoutineCli() *cli.Command {
+	action := func(c context.Context, _ *cli.Command) error {
+		logger := zerolog.Ctx(c)
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		type testStruct struct {
+			Value int
+		}
+		input := make(chan testStruct, 1)
+		i := 0
+		var toInsert *testStruct
+		for {
+			select {
+			case <-ticker.C:
+				logger.Info().Msg("tick")
+				if i == 10 {
+					return nil
+				}
+				i++
+				if i == 5 {
+					toInsert = &testStruct{Value: i}
+				}
+				//damn
+			case input <- *toInsert:
+				logger.Info().Msgf("input: %d", i)
+			}
+		}
+	}
+	return &cli.Command{
+		Name:   "test-goroutine",
+		Action: action,
+	}
+}
+
 func playgroundEngineStartupTestCli() *cli.Command {
 	action := func(c context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(c)
@@ -166,6 +200,7 @@ func createPlaygroundCli() *cli.Command {
 		Usage: "playground",
 		Commands: []*cli.Command{
 			createTestDeferCli(),
+			createTestGoRoutineCli(),
 			playgroundEngineStartupTestCli(),
 			playgroundEngineSimpleInferenceTestCli(),
 		},
