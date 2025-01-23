@@ -1,79 +1,92 @@
 package main
 
-type Goal string
+type NodeState string
 
-// IDEA:
-// I suggest that instead of having one large graph (like sudoku),
-// that I should lean into smaller graphs (the odds of state-equivalence are much lower)
-// This means that the graph can more clearly branch off from some commit.
-// Then we generate a tree from there
-
-type (
-	TaskList struct {
-		Tasks []Task
-	}
-	Task struct {
-		ID       string
-		AddProof *struct {
-			ProofText string
-		}
-		Format *struct{}
-	}
+const (
+	// Needs to be scheduled to go through action-execution.go
+	// From here, the node will either go to:
+	// - awaiting_inference (if no filesystem changes were made)
+	// - awaiting_compilation (if we need to run the compiler (new branch or filesystem changes))
+	NodeStateAwaitingActionEvaluation NodeState = "node_awaiting_action_evaluation"
+	// Will be queued to be compiled
+	NodeStateAwaitingCompilation NodeState = "node_awaiting_compilation"
+	// Will be queued to have inference run (producing children)
+	NodeStateAwaitingInference NodeState = "node_awaiting_inference"
+	// All nodes will rest here until the graph is finished
+	// At that point, a reward can be calculated for each child
+	// NodeResult should be calculated at this point (it may remain none for non-terminal nodes)
+	NodeStateDone NodeState = "node_state_done"
 )
 
-type (
-	Graph struct {
-	}
+type NodeResult string
 
-	Node struct {
-		ID string
-		// Branches are read-only after creation
-		// So read-only nodes can share a branch
-		GitBranch string
-	}
-	PerformedAction struct {
-		ID string
-	}
+const (
+	// non-terminal node or in-progress
+	NodeResultNone NodeResult = "node_result_none"
+	// 🤙
+	NodeResultSuccess NodeResult = "node_result_success"
+	// bad action syntax -> instant failure
+	NodeResultSyntaxFailure NodeResult = "node_result_syntax_failure"
+	// max depth exceeded
+	NodeResultDepthExhaustionFailure NodeResult = "node_result_depth_exhaustion"
+	// max context length exceeded
+	NodeResultContextExhaustionFailure NodeResult = "node_result_context_exhaustion"
 )
 
-type (
-	TrainableDatapoint struct {
-		Prompt string
-		Result string
-		Reward float64
-	}
+type GraphState string
+
+const (
+	GraphStateInProgress NodeState = "graph_in_progress"
+	GraphStateSuccess    NodeState = "graph_success"
+	GraphStateFailed     NodeState = "graph_failed"
 )
 
-type PromptOpts struct {
-	ActionResult string
+type RepoGraph struct {
+	BranchTargets []RepoGraphBranchTarget `json:"branch_targets"`
 }
 
-/*
-return "A conversation between User and Assistant. The user asks a question, and the Assistant solves it." +
-	"The assistant first thinks about the reasoning process in the mind and then provides the user" +
-	"with the answer. The reasoning process and answer are enclosed within <think> </think> and" +
-	"<answer> </answer> tags, respectively, i.e., <think> reasoning process here </think>" +
-	"<answer> answer here </answer>. User: prompt. Assistant:"
-*/
+// weighting algo is ((n_succ)/(n_fail+1))/(n_attempt^(\lambda+1))
+type RepoGraphBranchTarget struct {
+	BranchName BranchName    `json:"branch_name"`
+	Subgraphs  []CommitGraph `json:"subgraphs"`
+}
 
-func GeneratePrompt(opts PromptOpts) string {
-	return "A series of interactions between Assistant and a git repo. The repo starts in a bad state and " +
-		"the Assistant fixes it via a series of steps. The Assistant first thinks about the reasoning process in their mind " +
-		"and then executes a series of actions against the repo. The reasoning process and actions are enclosed within <think> </think> and " +
-		"<action> </action> tags, respectively, i.e. " +
-		"<think> reasoning process here </think> <action> action here </action> <action> second action here </action> ... " +
-		"The Assistant will get the ability to perform multiple steps so it is expected that they will use the first few steps to gather information " +
-		"and then only solve & push the solution once they are confident in the solution and think it fits in well with the rest of the codebase.\n" +
-		// Previous iterations
-		"<previous-steps> " +
-		"<step> \n" +
-		// step
-		"<issue>" + "{lean compilation error}" + "</issue>" +
-		"<output>" + "{output of reading from file}" + "</output>" +
-		"<assistant-output>" + "{output from last step}" + "</assistant-output>" +
-		"</step>" +
-		"</previous-steps> " +
-		// end
-		"<issue> " + "{lean compliation error}" + " </issue> " +
-		"Assistant:"
+type CommitGraph struct {
+	ProblemID string                     `json:"problem_id"`
+	RootNode  NodeID                     `json:"root_node"`
+	Nodes     map[NodeID]CommitGraphNode `json:"nodes"`
+	State     GraphState                 `json:"state"`
+}
+
+type CommitGraphNode struct {
+	ID    NodeID `json:"id"`
+	Depth int    `json:"depth"`
+	// nil if this is the root
+	Parent   *NodeID    `json:"parent"`
+	Children []NodeID   `json:"children"`
+	State    NodeState  `json:"state"`
+	Result   NodeResult `json:"result"`
+
+	InferenceOutput string         `json:"inference_output"`
+	ActionOutputs   []ActionOutput `json:"action_outputs"`
+}
+
+// not an action, but a way to return output from an action
+type ActionOutput struct {
+	ActionName string `json:"action_name"`
+	Text       string `json:"text"`
+}
+
+func (gn *CommitGraphNode) IsRoot() bool {
+	return gn.Parent == nil
+}
+
+func NewCommitGraphRoot() CommitGraph {
+	return CommitGraph{}
+}
+
+type ProblemI interface {
+	ID() string
+	ProblemGoal() string
+	SetupOnBranch(branch string) error
 }

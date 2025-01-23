@@ -24,6 +24,7 @@ func main() {
 			createPlaygroundCli(),
 			createRouterCli(),
 			lambda.CreateLambdaCli(),
+			createOrchestratorCli(),
 		},
 	}
 	if err := cmd.Run(ctx, os.Args); err != nil {

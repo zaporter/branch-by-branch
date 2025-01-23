@@ -21,3 +21,34 @@ func NewEngineTaskID() EngineTaskID {
 func IsValidEngineTaskID(id EngineTaskID) bool {
 	return strings.HasPrefix(string(id), "engine-task-")
 }
+
+type ProblemID string
+
+func NewProblemID() ProblemID {
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return ProblemID(fmt.Sprintf("problem-%s", uuid.String()))
+}
+
+// (other than `main`, we just want unique names that don't have to be human-readable)
+type BranchName string
+
+func NewBranchName() BranchName {
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return BranchName(fmt.Sprintf("branch-%s", uuid.String()))
+}
+
+type NodeID string
+
+func NewNodeID() NodeID {
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return NodeID(fmt.Sprintf("node-%s", uuid.String()))
+}

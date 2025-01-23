@@ -2,10 +2,15 @@ package main
 
 import (
 	"encoding/xml"
+	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/go-xmlfmt/xmlfmt"
 )
+
+// 🚩 This file uses XML Parsing from golang mostly for unmarshalling & prefers to do marshalling manually.
+// That is mostly because we want fine-grained control over the prompt.
 
 type XMLThought struct {
 	XMLName xml.Name `xml:"think"`
@@ -151,4 +156,59 @@ func (t XMLThought) ToXML() (string, error) {
 		return "", err
 	}
 	return string(xml), nil
+}
+
+type ParsedModelResponse struct {
+	Thought XMLThought
+	Actions XMLActions
+}
+
+func ParseModelResponse(input string) (ParsedModelResponse, error) {
+	lastCharacterAtEndOfThought := strings.Index(input, "</think>")
+	if lastCharacterAtEndOfThought == -1 {
+		return ParsedModelResponse{}, errors.New("no <think></think> second found in response")
+	}
+	thoughtInput := input[:lastCharacterAtEndOfThought+len("</think>")]
+	actionsInput := input[lastCharacterAtEndOfThought+len("</think>"):]
+
+	if len(strings.TrimSpace(actionsInput)) == 0 {
+		return ParsedModelResponse{}, errors.New("no <actions></actions> found in response")
+	}
+
+	thought, err := ThoughtFromXML(thoughtInput)
+	if err != nil {
+		return ParsedModelResponse{}, err
+	}
+	actions, err := ActionsFromXML(actionsInput)
+	if err != nil {
+		return ParsedModelResponse{}, err
+	}
+	return ParsedModelResponse{Thought: thought, Actions: actions}, nil
+}
+
+func (r ParsedModelResponse) ToXML() (string, error) {
+	thoughtXML, err := r.Thought.ToXML()
+	if err != nil {
+		return "", err
+	}
+	actionsXML, err := r.Actions.ToXML()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("<response>\n%s\n%s\n</response>", thoughtXML, actionsXML), nil
+}
+
+type PreviousStep struct {
+	CompilationOutput string
+	ModelResponse     ParsedModelResponse
+	Outputs           []ActionOutput
+}
+
+type PreviousSteps struct {
+	Steps []PreviousStep
+}
+
+type State struct {
+	Goal          string
+	PreviousSteps PreviousSteps
 }
