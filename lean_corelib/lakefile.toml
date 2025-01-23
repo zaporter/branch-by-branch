@@ -16,7 +16,7 @@ root = "Main"
 
 [[lean_exe]]
 name="mk_all"
-srcDir="scripts/mk_all"
+srcDir="scripts"
 
 [package.lean_corelib]
 moreLinkArgs = ["-lstdc++", "-lgcc_s", "-lc"]
