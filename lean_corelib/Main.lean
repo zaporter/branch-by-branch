@@ -4,7 +4,7 @@ import Init.Data.Nat.Basic
 
 open Nat
 #print Nat
-theorem solv (n:Nat): n+0= n := Nat.add_zero n
+theorem solv (n:ℕ): n+0= n := Nat.add_zero n
 
 theorem succ_pred (n : Nat) : n ≠ 0 → succ (pred n) = n := by
   intro (hn : n ≠ 0)

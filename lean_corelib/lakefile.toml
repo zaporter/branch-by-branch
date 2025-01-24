@@ -5,7 +5,14 @@ defaultTargets = ["lean_corelib"]
 [[require]]
 name = "Cli"
 scope = "leanprover"
+# Pin for compat with 4.15.0
 rev = "385d01ecdfffb9b8a387e4013c6d4b6c313cf24d"
+
+[[require]]
+name = "batteries"
+scope = "leanprover-community"
+# matching mathlib
+rev = "v4.15.0"
 
 [[lean_lib]]
 name = "Corelib"
@@ -16,6 +23,7 @@ root = "Main"
 
 [[lean_exe]]
 name="mk_all"
+supportInterpreter = true
 srcDir="scripts"
 
 [package.lean_corelib]
