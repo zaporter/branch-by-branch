@@ -193,6 +193,97 @@ func playgroundEngineSimpleInferenceTestCli() *cli.Command {
 		},
 	}
 }
+func playgroundEngineSimpleCompilationTestCli() *cli.Command {
+	var numTasks int64
+	action := func(c context.Context, _ *cli.Command) error {
+		logger := zerolog.Ctx(c)
+		logger.Info().Msg("simple compilation engine test")
+		rdb, err := connectToRedis(c)
+		if err != nil {
+			return err
+		}
+		schedulingParams := SchedulingParams{
+			MinTaskQueueSize:      10,
+			MaxTaskQueueSize:      100,
+			TaskProcessingTimeout: 1 * time.Minute,
+			CamShaftInterval:      1 * time.Second,
+			CrankShaftInterval:    1 * time.Second,
+			TimingBeltInterval:    200 * time.Millisecond,
+			ODBInterval:           10 * time.Second,
+			InputChanSize:         10,
+			OutputChanSize:        10,
+		}
+		engine := NewEngine(c, EngineJobNameCompilation, rdb, schedulingParams)
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-sigChan
+			// main thread should wait for stop
+			engine.TriggerStop()
+		}()
+		engine.Start(c)
+		dieChan := make(chan bool, 1)
+		input := engine.GetInput()
+		go func() {
+			for i := int64(0); i < numTasks; i++ {
+				logger.Info().Msgf("enqueuing task %d", i)
+				select {
+				case <-dieChan:
+					fmt.Println("die")
+					return
+				case input <- EngineTaskMsg{
+					Task: CompilationTask{
+						BranchName:        BranchName(fmt.Sprintf("branch-%d", i)),
+						NewBranchName:     BranchName(fmt.Sprintf("new-branch-%d", i)),
+						CompilationScript: "echo compiled bro",
+						PreCommands: []CompilationPreCommand{
+							{
+								Name:   "echo",
+								Script: "echo hi && exit 2",
+							},
+							{
+								Name:   "sleep",
+								Script: "sleep 1 && echo sleep",
+							},
+						},
+					}.ToJSON(),
+				}:
+				}
+			}
+		}()
+		output := engine.GetOutput()
+		go func() {
+			for {
+				select {
+				case <-dieChan:
+					fmt.Println("die")
+					return
+				case val := <-output:
+					fmt.Println("output", val)
+					_ = CompilationResultFromJSON(val.Result)
+				}
+			}
+		}()
+
+		engine.WaitForStop()
+		close(dieChan)
+
+		return nil
+	}
+	return &cli.Command{
+		Name:   "engine-simple-compilation-test",
+		Usage:  "engine simple compilation test",
+		Action: action,
+		Flags: []cli.Flag{
+			&cli.IntFlag{
+				Name:        "num-tasks",
+				Usage:       "number of tasks to enqueue",
+				Value:       100,
+				Destination: &numTasks,
+			},
+		},
+	}
+}
 
 func createPlaygroundCli() *cli.Command {
 	return &cli.Command{
@@ -203,6 +294,7 @@ func createPlaygroundCli() *cli.Command {
 			createTestGoRoutineCli(),
 			playgroundEngineStartupTestCli(),
 			playgroundEngineSimpleInferenceTestCli(),
+			playgroundEngineSimpleCompilationTestCli(),
 		},
 	}
 }
