@@ -56,7 +56,8 @@ def mkAllCLI (args : Parsed) : IO UInt32 := do
     -- mathlib exception: manually import Batteries in `Mathlib.lean`
     if d == "Mathlib" then
       allFiles := #["Batteries"] ++ allFiles
-    let fileContent := ("\n".intercalate (allFiles.map ("import " ++ ·)).toList).push '\n'
+    let header := "-- This file ensures all sub-files in Corelib get imported correctly. It is created automatically before building. Do not edit it manually. \n"
+    let fileContent := header ++ (("\n".intercalate (allFiles.map ("import " ++ ·)).toList).push '\n')
     if !(← pathExists fileName) then
       if check then
         IO.println s!"File '{fileName}' does not exist"
@@ -74,19 +75,14 @@ def mkAllCLI (args : Parsed) : IO UInt32 := do
       updates := updates + 1
   if updates == 0 then
     IO.println "No update necessary"
-  -- Make sure to return an exit code of at most 125, so this return value can be used further
-  -- in shell scripts.
-  return min updates 125
+  return 0
 
 open Cli in
 /-- Setting up command line options and help text for `lake exe mk_all`. -/
 def mkAll : Cmd := `[Cli|
   mk_all VIA mkAllCLI; ["0.0.1"]
   "Generate a file importing all the files of a Lean folder. \
-   By default, it generates the files for the Lean libraries of the package.\
-   In the case of `Mathlib`, it removes the libraries `Cache` and `LongestPole`\
-   and it adds `Mathlib/Tactic`. \
-   If you are working in a project downstream of mathlib, use `lake exe mk_all --lib MyProject`."
+   By default, it generates the files for the Lean libraries of the package."
 
   FLAGS:
     lib : String; "Create a folder importing all Lean files from the specified library/subfolder."
