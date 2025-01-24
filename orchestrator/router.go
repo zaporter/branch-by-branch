@@ -25,7 +25,7 @@ const (
 	RedisInferenceNumReturnSequences   RedisKey = "inference:num_return_sequences"
 	RedisInferenceNumBeams             RedisKey = "inference:num_beams"
 
-	RedisExecutionRepoName           RedisKey = "execution:repo_name"
+	RedisExecutionRepoUrl            RedisKey = "execution:repo_url"
 	RedisExecutionCompilationCommand RedisKey = "execution:compilation_command"
 )
 
@@ -40,7 +40,7 @@ var AllRouterKeys = []RedisKey{
 	RedisInferenceNumReturnSequences,
 	RedisInferenceNumBeams,
 
-	RedisExecutionRepoName,
+	RedisExecutionRepoUrl,
 	RedisExecutionCompilationCommand,
 }
 
@@ -149,7 +149,7 @@ func createInitializeRouterParamsCli() *cli.Command {
 		}
 		valsMap := map[RedisKey]string{
 			RedisInferenceEnabled:              "true",
-			RedisInferenceModelDir:             "/models",
+			RedisInferenceModelDir:             "meta-llama/Llama-3.1-8B-Instruct",
 			RedisInferenceAdapterDir:           "/adapters",
 			RedisInferenceBatchSize:            "32",
 			RedisInferenceMaxModelLen:          "512",
@@ -158,8 +158,8 @@ func createInitializeRouterParamsCli() *cli.Command {
 			RedisInferenceNumReturnSequences:   "3",
 			RedisInferenceNumBeams:             "3",
 
-			RedisExecutionRepoName:           "lean_corelib",
-			RedisExecutionCompilationCommand: "lake build",
+			RedisExecutionRepoUrl:            os.Getenv("HOSTED_GIT_CONNECTION_STRING") + "zaporter/byb1.git",
+			RedisExecutionCompilationCommand: "lake exe mk_all --lib Corelib && lake build",
 		}
 		for key, val := range valsMap {
 			statusCmd := rdb.Set(ctx, string(key), val, 0)

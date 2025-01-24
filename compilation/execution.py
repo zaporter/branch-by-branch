@@ -3,6 +3,7 @@ import os
 import redis
 import docker
 from typing import Optional
+import subprocess
 
 redisHost = os.getenv('REDIS_ADDRESS') or 'err no host'
 redisPassword = os.getenv('REDIS_PASSWORD') or 'err no pw'
@@ -13,6 +14,45 @@ dockerClient = docker.from_env()
 container: Optional[docker.models.containers.Container] = None
 
 image_name = "branch-by-branch-execution"
+
+repo_dir = os.getenv("REPO_DIR") or "repo"
+
+params=None
+
+def update_params():
+    global params
+    params = {
+        "repo_url": r.get("execution:repo_url"),
+        "compilation_command": r.get("execution:compilation_command"),
+    }
+
+def execGit(cmd: str, cwd: str | None):
+    env = os.environ.copy()
+    env["GIT_SSH_COMMAND"] = f"ssh -i {os.getenv('ROUTER_SSH_KEY')}"
+    result = subprocess.run(cmd, env=env, cwd=cwd, capture_output=True, text=True)
+    print(f"execGit {cmd} result: {result.returncode}")
+    print(result.stdout)
+    print(result.stderr)
+    if result.returncode != 0:
+        raise RuntimeError(f"Failed to execute git command {cmd} in repo {repo_dir}: {result.stderr}")
+
+def git_clone_repo(repo_url: str):
+    if os.path.exists(repo_dir):
+        git_pull(repo_dir)
+    else:
+        execGit(f"git clone {repo_url}", None)
+
+def git_pull():
+    execGit("git pull", repo_dir)
+
+def git_checkout(branch_name: str):
+    execGit(f"git pull origin {branch_name} && git checkout {branch_name}", repo_dir)
+
+def git_push(branch_name: str):
+    execGit(f"git push origin {branch_name}", repo_dir)
+
+def git_commit(branch_name: str, commit_msg: str):
+    execGit(f"git add . && git commit -m {commit_msg} && git push origin {branch_name}", repo_dir)
 
 def build_image():
     print("Building image")
@@ -25,6 +65,8 @@ def startup():
         build_image()
         print("Image built")
     # Create a persistent container that we'll reuse
+    print("cloning repo")
+    git_clone_repo(params["repo_url"])
     print("Creating container")
     container = dockerClient.containers.run(
         image=image_name,
@@ -111,4 +153,6 @@ def main():
         shutdown()
 
 if __name__ == "__main__":
-    main()
+    update_params()
+    git_clone_repo(params["repo_url"])
+    #main()
