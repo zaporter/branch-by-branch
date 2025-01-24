@@ -17,6 +17,10 @@ container: Optional[docker.models.containers.Container] = None
 image_name = "branch-by-branch-execution"
 
 repo_dir = os.getenv("REPO_DIR") or "repo"
+job = os.getenv("JOB")
+jobs = ["compilation-engine", "problem-engine"]
+if job not in jobs:
+    raise RuntimeError(f"Invalid job: {job}. Must be one of: {jobs}")
 
 params=None
 
@@ -24,7 +28,6 @@ def update_params():
     global params
     params = {
         "repo_url": r.get("execution:repo_url"),
-        "compilation_command": r.get("execution:compilation_command"),
     }
 
 def execGit(cmd: str, cwd: str | None):
@@ -40,6 +43,7 @@ def execGit(cmd: str, cwd: str | None):
 
 def git_clone_repo(repo_url: str):
     if os.path.exists(repo_dir):
+        execGit("git switch main", repo_dir)
         git_pull()
     else:
         execGit(f"git clone {repo_url} {repo_dir}", os.getcwd())
@@ -56,8 +60,8 @@ def git_checkout(branch_name: str):
 def git_push(branch_name: str):
     execGit(f"git push origin {branch_name}", repo_dir)
 
-def git_commit(branch_name: str, commit_msg: str):
-    execGit(f"git add . && git commit -m {commit_msg}", repo_dir)
+def git_commit(commit_msg: str):
+    execGit(f"git add . && git commit -m {commit_msg} --allow-empty", repo_dir)
 
 def build_image():
     print("Building image")
@@ -73,13 +77,26 @@ def startup():
     print("cloning repo")
     git_clone_repo(params["repo_url"])
     print("Creating container")
+
     container = dockerClient.containers.run(
         image=image_name,
         detach=True,  # Run in background
         tty=True,     # Keep container running
         remove=True,  # Remove container when stopped
+        user="ubuntu",
         volumes={
-           # "/home/lean/lean4-execution": {"bind": "/home/lean/lean4-execution", "mode": "rw"},
+           repo_dir: {"bind": "/home/ubuntu/repo", "mode": "rw"},
+           # Problem engine needs to write new tests
+           repo_dir+"/Test.lean": {
+               "bind": "/home/ubuntu/repo/Test.lean",
+               "mode": "rw" if job == "problem-engine" else "ro"
+           },
+           # Hardcoded read only sub-dirs 
+           repo_dir+"/lake-manifest.json": {"bind": "/home/ubuntu/repo/lake-manifest.json", "mode": "ro"},
+           repo_dir+"/lakefile.toml": {"bind": "/home/ubuntu/repo/lakefile.toml", "mode": "ro"},
+           repo_dir+"/lean-toolchain": {"bind": "/home/ubuntu/repo/lean-toolchain", "mode": "ro"},
+           repo_dir+"/.gitignore": {"bind": "/home/ubuntu/repo/.gitignore", "mode": "ro"},
+           repo_dir+"/scripts": {"bind": "/home/ubuntu/repo/scripts", "mode": "ro"},
         },
     )
     print(f"Started container {container.id}")
@@ -90,45 +107,62 @@ def shutdown():
         container.stop(timeout=1)
         container = None
 
-def execute(task_msg: dict) -> dict:
+def execute(task: dict) -> dict:
     global container
     if not container:
         raise RuntimeError("Container not initialized")
 
     print("Executing task")
-    print(task_msg)
-    # Extract the commands to run
-    task = json.loads(task_msg)
+    print(task)
     results = []
 
     # Execute each pre-command
+    hasFailed = False
     for cmd in task["pre_commands"]:
+        if hasFailed:
+            results.append({
+                "action_name": cmd["name"],
+                "out": "skipped due to previous failure",
+                "exit_code": 1
+            })
+            continue
         print(f"Executing command {cmd['name']}")
         print(f"Command script: {cmd['script']}")
         exit_code, output = container.exec_run(
             cmd=f"/bin/bash -c '{cmd['script']}'",
-          #  workdir="/home/lean/lean4-execution"
+            workdir="/home/ubuntu/repo"
         )
         print(f"Command {cmd['name']} exited with code {exit_code}")
+        if exit_code != 0:
+            hasFailed = True
+
         results.append({
             "action_name": cmd["name"],
             "out": output.decode('utf-8'),
             "exit_code": exit_code
         })
 
-    print(f"Executing compilation script: {task['compilation_script']}")
-    exit_code, output = container.exec_run(
-        cmd=f"/bin/bash -c '{task['compilation_script']}'",
-      #  workdir="/home/lean/lean4-execution"
-    )
-    compilation_result = {
-        "action_name": "compilation",
-        "out": output.decode('utf-8'),
-        "exit_code": exit_code
-    }
-    print(f"Compilation script exited with code {exit_code}")
+    compilation_result = None
+    if not hasFailed:
+        print(f"Executing compilation script: {task['compilation_script']}")
+        exit_code, output = container.exec_run(
+            cmd=f"/bin/bash -c '{task['compilation_script']}'",
+            workdir="/home/ubuntu/repo"
+        )
+        compilation_result = {
+            "action_name": "compilation",
+            "out": output.decode('utf-8'),
+            "exit_code": exit_code
+        }
+        print(f"Compilation script exited with code {exit_code}")
+    else:
+        compilation_result = {
+            "action_name": "compilation",
+            "out": "skipped due to previous failure",
+            "exit_code": 1
+        }
+
     return {
-        "branch_name": task["branch_name"],
         "pre_commands_results": results,
         "compilation_result": compilation_result
     }
@@ -137,20 +171,31 @@ def main():
     try:
         startup()
         while True:
-            task = r.brpoplpush("compilation-engine:tasks", "compilation-engine:processing")
+            task = r.brpoplpush(f"{job}:tasks", f"{job}:processing")
             if task:
-                task_msg = json.loads(task)
-                task_id = task_msg["task_id"]
-                inner_task = task_msg["task"]
+                try:
+                    task_msg = json.loads(task)
+                    task_id = task_msg["task_id"]
+                    compilation_task = json.loads(task_msg["task"])
+                    old_branch_name = compilation_task["branch_name"]
+                    new_branch_name = compilation_task["new_branch_name"]
+                    git_checkout(old_branch_name)
+                    git_create_branch(new_branch_name)
+                    result = execute(compilation_task)
+                    git_commit("compilation")
+                    git_push(new_branch_name)
 
-                result = execute(inner_task)
+                    result["branch_name"] = new_branch_name
 
-                result_msg = {
-                    "task_id": task_id,
-                    "result": json.dumps(result)
-                }
-                # Store the result back in Redis
-                r.lpush("compilation-engine:results", json.dumps(result_msg))
+                    result_msg = {
+                        "task_id": task_id,
+                        "result": json.dumps(result)
+                    }
+                    # Store the result back in Redis
+                    r.lpush(f"{job}:results", json.dumps(result_msg))
+                except Exception as e:
+                    # Fine -- it will be requeued.
+                    print(f"Error executing task {task_id}: {e}")
             else:
                 print("no tasks, should not be possible to reach here")
                 exit(1)
@@ -170,4 +215,4 @@ def testGit():
 
 if __name__ == "__main__":
     update_params()
-    testGit()
+    main()

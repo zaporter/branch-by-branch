@@ -26,7 +26,6 @@ const (
 	RedisInferenceNumBeams             RedisKey = "inference:num_beams"
 
 	RedisExecutionRepoUrl            RedisKey = "execution:repo_url"
-	RedisExecutionCompilationCommand RedisKey = "execution:compilation_command"
 )
 
 var AllRouterKeys = []RedisKey{
@@ -41,7 +40,6 @@ var AllRouterKeys = []RedisKey{
 	RedisInferenceNumBeams,
 
 	RedisExecutionRepoUrl,
-	RedisExecutionCompilationCommand,
 }
 
 func setRouterParam(ctx context.Context, rdb *redis.Client, key RedisKey, val string) error {
@@ -158,8 +156,7 @@ func createInitializeRouterParamsCli() *cli.Command {
 			RedisInferenceNumReturnSequences:   "3",
 			RedisInferenceNumBeams:             "3",
 
-			RedisExecutionRepoUrl:            os.Getenv("HOSTED_GIT_CONNECTION_STRING") + "zaporter/byb1.git",
-			RedisExecutionCompilationCommand: "lake exe mk_all --lib Corelib && lake build",
+			RedisExecutionRepoUrl: os.Getenv("HOSTED_GIT_CONNECTION_STRING") + "zaporter/byb-v1.git",
 		}
 		for key, val := range valsMap {
 			statusCmd := rdb.Set(ctx, string(key), val, 0)

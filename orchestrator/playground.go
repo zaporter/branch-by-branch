@@ -233,17 +233,17 @@ func playgroundEngineSimpleCompilationTestCli() *cli.Command {
 					return
 				case input <- EngineTaskMsg{
 					Task: CompilationTask{
-						BranchName:        BranchName(fmt.Sprintf("branch-%d", i)),
-						NewBranchName:     BranchName(fmt.Sprintf("new-branch-%d", i)),
-						CompilationScript: "echo compiled bro",
+						BranchName:        BranchName("core-1"),
+						NewBranchName:     NewBranchName(),
+						CompilationScript: "lake exec mk_all && lake build",
 						PreCommands: []CompilationPreCommand{
 							{
-								Name:   "echo",
-								Script: "echo hi && exit 2",
+								Name:   "write",
+								Script: "echo \"def hello2 : Nat := 1\" > Corelib/Hello.lean",
 							},
 							{
-								Name:   "sleep",
-								Script: "sleep 1 && echo sleep",
+								Name:   "pwd",
+								Script: "pwd",
 							},
 						},
 					}.ToJSON(),

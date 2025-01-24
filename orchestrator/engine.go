@@ -86,6 +86,7 @@ const (
 	EngineJobNameTest        EngineJobName = "test-engine"
 	EngineJobNameInference   EngineJobName = "inference-engine"
 	EngineJobNameCompilation EngineJobName = "compilation-engine"
+	EngineJobNameProblem     EngineJobName = "problem-engine"
 )
 
 type SchedulingParams struct {
@@ -412,7 +413,7 @@ func (e *Engine) createTimingBelt() {
 			timingBeltStarted: 1,
 		})
 
-		// This isn't accurate. However, jobs should be expected to take significantly longer than the timing belt interval.
+		// TODO: This length thing is stupid. Just read with timeout.
 		processingQueueSize, err := e.rdb.LLen(ctx, e.ProcessingQueueName()).Result()
 		if err != nil {
 			logger.Error().Err(err).Msg("Error getting processing queue size")
