@@ -1,4 +1,4 @@
--- This file ensures all sub-files in Corelib get imported correctly. It is created automatically before building. Do not edit it manually. 
+-- This file imports all sub-files in the library. It is created automatically during compilation. Do not edit this manually.
 import Corelib.Data.Nat.Notation
 import Corelib.Data.Rat.Init
 import Corelib.Tactic.TypeStar

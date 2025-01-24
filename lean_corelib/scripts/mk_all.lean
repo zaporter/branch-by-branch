@@ -56,7 +56,7 @@ def mkAllCLI (args : Parsed) : IO UInt32 := do
     -- mathlib exception: manually import Batteries in `Mathlib.lean`
     if d == "Mathlib" then
       allFiles := #["Batteries"] ++ allFiles
-    let header := "-- This file ensures all sub-files in Corelib get imported correctly. It is created automatically before building. Do not edit it manually. \n"
+    let header := "-- This file imports all sub-files in the library. It is created automatically during compilation. Do not edit this manually.\n"
     let fileContent := header ++ (("\n".intercalate (allFiles.map ("import " ++ ·)).toList).push '\n')
     if !(← pathExists fileName) then
       if check then
