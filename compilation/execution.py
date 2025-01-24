@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import redis
 import docker
 from typing import Optional
@@ -29,7 +30,8 @@ def update_params():
 def execGit(cmd: str, cwd: str | None):
     env = os.environ.copy()
     env["GIT_SSH_COMMAND"] = f"ssh -i {os.getenv('ROUTER_SSH_KEY')}"
-    result = subprocess.run(cmd, env=env, cwd=cwd, capture_output=True, text=True)
+    # the shell scripts never end. 🧅
+    result = subprocess.run(["/bin/sh", "-c", cmd], env=env, cwd=cwd, capture_output=True, text=True)
     print(f"execGit {cmd} result: {result.returncode}")
     print(result.stdout)
     print(result.stderr)
@@ -38,12 +40,15 @@ def execGit(cmd: str, cwd: str | None):
 
 def git_clone_repo(repo_url: str):
     if os.path.exists(repo_dir):
-        git_pull(repo_dir)
+        git_pull()
     else:
-        execGit(f"git clone {repo_url}", None)
+        execGit(f"git clone {repo_url} {repo_dir}", os.getcwd())
 
 def git_pull():
     execGit("git pull", repo_dir)
+
+def git_create_branch(branch_name: str):
+    execGit(f"git switch -c {branch_name}", repo_dir)
 
 def git_checkout(branch_name: str):
     execGit(f"git pull origin {branch_name} && git checkout {branch_name}", repo_dir)
@@ -52,7 +57,7 @@ def git_push(branch_name: str):
     execGit(f"git push origin {branch_name}", repo_dir)
 
 def git_commit(branch_name: str, commit_msg: str):
-    execGit(f"git add . && git commit -m {commit_msg} && git push origin {branch_name}", repo_dir)
+    execGit(f"git add . && git commit -m {commit_msg}", repo_dir)
 
 def build_image():
     print("Building image")
@@ -152,7 +157,17 @@ def main():
     finally:
         shutdown()
 
+def testGit():
+    git_clone_repo(params["repo_url"])
+    branch_name = "test" + str(random.randint(0, 1000000))
+    git_create_branch(branch_name)
+    ret = os.system(f"echo 'test' > {repo_dir}/test.txt")
+    if ret != 0:
+        raise RuntimeError("Failed to create test.txt")
+    git_commit(branch_name, "branch")
+    git_push(branch_name)
+    git_checkout("main")
+
 if __name__ == "__main__":
     update_params()
-    git_clone_repo(params["repo_url"])
-    #main()
+    testGit()

@@ -19,7 +19,7 @@ name = "Corelib"
 
 [[lean_exe]]
 name = "lean_corelib"
-root = "Main"
+root = "Test"
 
 [[lean_exe]]
 name="mk_all"

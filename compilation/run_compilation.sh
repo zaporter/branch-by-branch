@@ -20,5 +20,6 @@ pip install -r requirements.txt
 
 # source secrets
 source ../.env
+source ../secrets/router-params.sh
 
 python ./execution.py
