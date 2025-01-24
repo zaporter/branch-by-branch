@@ -3,3 +3,4 @@ secrets
 .direnv
 models
 inference/env
+execution/env

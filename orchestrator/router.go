@@ -24,6 +24,9 @@ const (
 	RedisInferenceMaxNewTokens         RedisKey = "inference:max_new_tokens"
 	RedisInferenceNumReturnSequences   RedisKey = "inference:num_return_sequences"
 	RedisInferenceNumBeams             RedisKey = "inference:num_beams"
+
+	RedisExecutionRepoName           RedisKey = "execution:repo_name"
+	RedisExecutionCompilationCommand RedisKey = "execution:compilation_command"
 )
 
 var AllRouterKeys = []RedisKey{
@@ -36,6 +39,9 @@ var AllRouterKeys = []RedisKey{
 	RedisInferenceMaxNewTokens,
 	RedisInferenceNumReturnSequences,
 	RedisInferenceNumBeams,
+
+	RedisExecutionRepoName,
+	RedisExecutionCompilationCommand,
 }
 
 func setRouterParam(ctx context.Context, rdb *redis.Client, key RedisKey, val string) error {
@@ -151,6 +157,9 @@ func createInitializeRouterParamsCli() *cli.Command {
 			RedisInferenceMaxNewTokens:         "128",
 			RedisInferenceNumReturnSequences:   "3",
 			RedisInferenceNumBeams:             "3",
+
+			RedisExecutionRepoName:           "lean_corelib",
+			RedisExecutionCompilationCommand: "lake build",
 		}
 		for key, val := range valsMap {
 			statusCmd := rdb.Set(ctx, string(key), val, 0)
