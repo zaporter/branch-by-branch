@@ -23,7 +23,6 @@ name = "Test"
 [[lean_exe]]
 name="mk_all"
 supportInterpreter = true
-srcDir="scripts"
 
 [package.lean_corelib]
 moreLinkArgs = ["-lstdc++", "-lgcc_s", "-lc"]
