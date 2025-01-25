@@ -18,6 +18,7 @@ import (
 func createOrchestratorStartCli() *cli.Command {
 	var webServerPort int64
 	var graphPath string
+	var goalFile string
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
 		logger.Info().Msg("starting orchestrator")
@@ -25,6 +26,7 @@ func createOrchestratorStartCli() *cli.Command {
 		if err != nil {
 			return err
 		}
+		goalProvider := StaticGoalProviderFromFile(goalFile)
 		if err := setRouterParam(ctx, rdb, RedisInferenceEnabled, "true"); err != nil {
 			return err
 		}
@@ -77,17 +79,17 @@ func createOrchestratorStartCli() *cli.Command {
 		goalCompilationEngine.Start(ctx)
 
 		orchestrator := Orchestrator{
-			logger:    logger,
-			ctx:       ctx,
-			wg:        &sync.WaitGroup{},
-			rdb:       rdb,
-			mu:        sync.Mutex{},
-			RepoGraph: rg,
-			GraphPath: graphPath,
-			//GoalProvider: &GoalProvider{},
+			logger:                logger,
+			ctx:                   ctx,
+			wg:                    &sync.WaitGroup{},
+			rdb:                   rdb,
+			mu:                    sync.Mutex{},
+			RepoGraph:             rg,
+			GraphPath:             graphPath,
+			GoalProvider:          goalProvider,
 			InferenceEngine:       inferenceEngine,
 			CompilationEngine:     compilationEngine,
-			GoalCompilationEngine: &Engine{},
+			GoalCompilationEngine: goalCompilationEngine,
 		}
 
 		mux := http.NewServeMux()
@@ -137,10 +139,15 @@ func createOrchestratorStartCli() *cli.Command {
 				Destination: &graphPath,
 				Required:    true,
 			},
+			&cli.StringFlag{
+				Name:        "goal-file",
+				Usage:       "path to the goal file",
+				Destination: &goalFile,
+				Required:    true,
+			},
 		},
 	}
 }
-
 
 func createOrchestratorCli() *cli.Command {
 	return &cli.Command{

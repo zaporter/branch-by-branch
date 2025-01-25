@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"strings"
 
 	"github.com/mroth/weightedrand/v2"
 	"github.com/rs/zerolog"
@@ -337,13 +338,78 @@ func (cg *CommitGraph) AllNodesInState(state NodeState) []*CommitGraphNode {
 	return nodes
 }
 
-func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator) (InferenceTask, error) {
-	_, err := rg.GetNodeSlice(nodeLocator)
+func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProvider GoalProvider) (InferenceTask, error) {
+	slice, err := rg.GetNodeSlice(nodeLocator)
 	if err != nil {
 		return InferenceTask{}, err
 	}
+
+	var sb strings.Builder
+
+	// Write the base prompt explaining the interaction model
+	sb.WriteString("A series of interactions between Assistant and a git repository. Assistant is given a goal at the beginning of the interaction and then executes a series of steps to accomplish that goal. ")
+	sb.WriteString("Assistant is able to see all previous steps and their results. From that, the assistant first thinks about the reasoning process in ")
+	sb.WriteString("their mind and then executes a series of actions against the repo. Assistant uses XML to perform actions against the repo. Supported actions:\n")
+	sb.WriteString("<ls>directory-name</ls>\n\tList all files in $directory-name. Supports \".\" to mean the root of the repository\n")
+	sb.WriteString("<cat>filename</cat>\n\tPrints the contents of $filename (including line numbers)\n")
+	sb.WriteString("<mkdir>new-directory</mkdir>\n\tInvokes the equivalent of mkdir -p $new-directory\n")
+	sb.WriteString("<ed>script</ed>\n\tEdit existing files & creating new ones. $script can be multiple lines will be executed with the text-editor ed.\n")
+	sb.WriteString("<git-status/>\n\tSee all uncommitted changes.\n")
+	sb.WriteString("<git-commit/>\n\tFinish your work on the repo. Assistant's work will be run though CI and reviewed. Assistant will no longer be able to perform any steps or actions. This should only be executed once the repo is in a working state, is formatted well, and is ready to show to others. It is a syntax-error to put any actions after the commit action.\n")
+	sb.WriteString("\n")
+	sb.WriteString("The reasoning process and actions are enclosed within <think> </think> and ")
+	sb.WriteString("<actions> </actions> tags, respectively. For example a valid response from Assistant would be:\n")
+	sb.WriteString("<think> reasoning process here </think>\n ")
+	sb.WriteString("<actions> <ls>.</ls> <git-status/> ... </actions>\n")
+	sb.WriteString("Assistant will get the ability to perform multiple steps so it is expected that they will use the first few steps to gather information\n\n")
+
+	goal := goalProvider.GetGoal(slice.CommitGraph.GoalID)
+	// Write the goal
+	sb.WriteString(fmt.Sprintf("<goal> %s </goal>\n", goal.GoalStatement()))
+
+	// we need to traverse up the graph to get the previous steps
+	// and then reverse so we write in grandparent->parent->child order
+	parents := []CommitGraphNode{}
+	currentNode := slice.CommitGraphNode
+	for currentNode.Parent != nil {
+		parents = append(parents, *slice.CommitGraph.Nodes[*currentNode.Parent])
+		currentNode = slice.CommitGraph.Nodes[*currentNode.Parent]
+	}
+	if len(parents) > 0 {
+		sb.WriteString("<previous-steps>\n")
+		for i := len(parents) - 1; i >= 0; i-- {
+			parentNode := parents[i]
+			sb.WriteString("<step>\n")
+
+			if parentNode.CompilationResult != nil {
+				sb.WriteString(fmt.Sprintf("<compilation-output code=\"%d\">\n%s\n</compilation-output>\n",
+					parentNode.CompilationResult.ExitCode, parentNode.CompilationResult.Out))
+			}
+
+			// TODO: Should we parse and pretty-print this?
+			sb.WriteString(parentNode.InferenceOutput)
+
+			// Add action outputs
+			for _, output := range parentNode.ActionOutputs {
+				sb.WriteString(fmt.Sprintf("<output action=\"%s\" code=\"%d\"> %s </output>\n",
+					output.ActionName, output.ExitCode, output.Text))
+			}
+
+			sb.WriteString("</step>\n")
+		}
+		sb.WriteString("</previous-steps>\n\n")
+	}
+
+	// Write the current compilation output if it exists
+	if slice.CommitGraphNode.CompilationResult != nil {
+		sb.WriteString(fmt.Sprintf("<compilation-output code=\"%d\">\n%s\n</compilation-output>\n",
+			slice.CommitGraphNode.CompilationResult.ExitCode, slice.CommitGraphNode.CompilationResult.Out))
+	}
+
+	sb.WriteString("Assistant:")
+
 	return InferenceTask{
-		Prompt: "Tell me the weather in San Francisco",
+		Prompt: sb.String(),
 	}, nil
 }
 
