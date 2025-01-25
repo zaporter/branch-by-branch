@@ -201,7 +201,7 @@ func (o *Orchestrator) startGoalCompilationTx() {
 
 		}
 		attempts := 0
-        numAdded := 0
+		numAdded := 0
 
 		for {
 			attempts += 1
@@ -214,35 +214,35 @@ func (o *Orchestrator) startGoalCompilationTx() {
 				o.mu.Lock()
 				defer o.mu.Unlock()
 				goal := o.GoalProvider.GetRandom()
-                bt:= o.RepoGraph.FindNewBranchTargetForGoal(goal.ID())
-                if bt == nil {
-                    return nil
-                }
-                cg := NewCommitGraph(goal.ID())
-                cg.Nodes[cg.RootNode].State = NodeStateRunningGoalSetup
-                bt.Subgraphs[goal.ID()] = cg
-                locator := NodeLocator {
-                    BranchTarget: bt.BranchName,
-                    ProblemID : cg.GoalID,
-                    NodeID: cg.RootNode,
-                }
-                validation := goal.SetupOnBranch(bt.BranchName, cg.Nodes[cg.RootNode].BranchName)
-                task := EngineTaskMsg {
-                    ID: NewEngineTaskID(),
-                    Task: validation.ToJSON(),
-                }
-                o.goalCompilationTaskToNodeLocator[task.ID] = locator
-                return &task
+				bt := o.RepoGraph.FindNewBranchTargetForGoal(goal.ID())
+				if bt == nil {
+					return nil
+				}
+				cg := NewCommitGraph(goal.ID())
+				cg.Nodes[cg.RootNode].State = NodeStateRunningGoalSetup
+				bt.Subgraphs[goal.ID()] = cg
+				locator := NodeLocator{
+					BranchTarget: bt.BranchName,
+					ProblemID:    cg.GoalID,
+					NodeID:       cg.RootNode,
+				}
+				validation := goal.SetupOnBranch(bt.BranchName, cg.Nodes[cg.RootNode].BranchName)
+				task := EngineTaskMsg{
+					ID:   NewEngineTaskID(),
+					Task: validation.ToJSON(),
+				}
+				o.goalCompilationTaskToNodeLocator[task.ID] = locator
+				return &task
 			}()
-            if toAdd != nil {
-                select {
-                    case <-o.ctx.Done():
-                        o.logger.Info().Msg("goalCompilationInput listener closing")
-                        return
-                    case goalCompilationInput <- *toAdd:
-                }
+			if toAdd != nil {
+				select {
+				case <-o.ctx.Done():
+					o.logger.Info().Msg("goalCompilationInput listener closing")
+					return
+				case goalCompilationInput <- *toAdd:
+				}
 
-            }
+			}
 		}
 
 	}
