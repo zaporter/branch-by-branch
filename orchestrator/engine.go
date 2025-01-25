@@ -296,6 +296,9 @@ func (e *Engine) createCamshaft() {
 				}
 				lastK = int(res.Val())
 			}
+			e.recordStatEvent(EngineStatEvent{
+				tasksEnqueued: len(tasks),
+			})
 			logger.Debug().Msgf("Pushed %d tasks to queue. Queue size: %d", len(tasks), lastK)
 		}()
 		e.recordStatEvent(EngineStatEvent{
@@ -487,6 +490,7 @@ func (e *Engine) createOBD() {
 		mergedStats := e.mergeStatsInInterval(nil)
 		statsLines = append(statsLines, fmt.Sprintf("\tNum stat events: %d", mergedStats.NumEvents))
 		statsLines = append(statsLines, fmt.Sprintf("\tTasks finished: %d", mergedStats.tasksFinished))
+		statsLines = append(statsLines, fmt.Sprintf("\tTasks enqueued: %d", mergedStats.tasksEnqueued))
 		statsLines = append(statsLines, fmt.Sprintf("\tAvg processing time per task: %s", mergedStats.AvgProcessingTimePerTask))
 		statsLines = append(statsLines, "")
 		statsLines = append(statsLines, fmt.Sprintf("\tTasks requeued: %d", mergedStats.tasksRequeued))
@@ -525,6 +529,7 @@ type EngineStatEvent struct {
 	timestamp                       time.Time
 	tasksFinished                   int
 	taskFinishedInTime              time.Duration
+	tasksEnqueued                   int
 	tasksRequeued                   int
 	taskTimeSpentInQueue            time.Duration
 	camshaftBlockedFromBackpressure int
@@ -568,6 +573,7 @@ func (e *Engine) mergeStatsInInterval(interval *time.Duration) MergedStats {
 		event := e.stats[i]
 		mergedEvent.tasksFinished += event.tasksFinished
 		mergedEvent.taskFinishedInTime += event.taskFinishedInTime
+		mergedEvent.tasksEnqueued += event.tasksEnqueued
 		mergedEvent.tasksRequeued += event.tasksRequeued
 		mergedEvent.taskTimeSpentInQueue += event.taskTimeSpentInQueue
 		mergedEvent.camshaftBlockedFromBackpressure += event.camshaftBlockedFromBackpressure

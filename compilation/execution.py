@@ -78,26 +78,29 @@ def startup():
     git_clone_repo(params["repo_url"])
     print("Creating container")
 
+    volumes={
+        repo_dir: {"bind": "/home/ubuntu/repo", "mode": "rw"},
+        # Problem engine needs to write new tests
+        repo_dir+"/Test.lean": {
+            "bind": "/home/ubuntu/repo/Test.lean",
+            "mode": "rw" if job == "goal-compilation-engine" else "ro"
+        },
+        # Hardcoded read only sub-dirs 
+        repo_dir+"/lake-manifest.json": {"bind": "/home/ubuntu/repo/lake-manifest.json", "mode": "ro"},
+        repo_dir+"/lakefile.toml": {"bind": "/home/ubuntu/repo/lakefile.toml", "mode": "ro"},
+        repo_dir+"/lean-toolchain": {"bind": "/home/ubuntu/repo/lean-toolchain", "mode": "ro"},
+        repo_dir+"/.gitignore": {"bind": "/home/ubuntu/repo/.gitignore", "mode": "ro"},
+        repo_dir+"/mk_all.lean": {"bind": "/home/ubuntu/repo/mk_all.lean", "mode": "ro"},
+    }
+    print(f"Volumes: {volumes}")
+
     container = dockerClient.containers.run(
         image=image_name,
         detach=True,  # Run in background
         tty=True,     # Keep container running
         remove=True,  # Remove container when stopped
         user="ubuntu",
-        volumes={
-           repo_dir: {"bind": "/home/ubuntu/repo", "mode": "rw"},
-           # Problem engine needs to write new tests
-           repo_dir+"/Test.lean": {
-               "bind": "/home/ubuntu/repo/Test.lean",
-               "mode": "rw" if job == "goal-compilation-engine" else "ro"
-           },
-           # Hardcoded read only sub-dirs 
-           repo_dir+"/lake-manifest.json": {"bind": "/home/ubuntu/repo/lake-manifest.json", "mode": "ro"},
-           repo_dir+"/lakefile.toml": {"bind": "/home/ubuntu/repo/lakefile.toml", "mode": "ro"},
-           repo_dir+"/lean-toolchain": {"bind": "/home/ubuntu/repo/lean-toolchain", "mode": "ro"},
-           repo_dir+"/.gitignore": {"bind": "/home/ubuntu/repo/.gitignore", "mode": "ro"},
-           repo_dir+"/mk_all.lean": {"bind": "/home/ubuntu/repo/mk_all.lean", "mode": "ro"},
-        },
+        volumes=volumes,
     )
     print(f"Started container {container.id}")
 

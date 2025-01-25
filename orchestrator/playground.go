@@ -242,6 +242,10 @@ func playgroundEngineSimpleCompilationTestCli() *cli.Command {
 								Script: "echo \"def hello2 : Nat := 1\" > Corelib/Hello.lean",
 							},
 							{
+								Name:   "write test",
+								Script: "cat << 'EOF' >> Test.lean\nexample : (P → Q) ∧ (Q → R) → (P → R) := by exact?\nEOF",
+							},
+							{
 								Name:   "pwd",
 								Script: "pwd",
 							},

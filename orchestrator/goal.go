@@ -78,15 +78,13 @@ func (g *GoalAddExample) GoalStatement() string {
 }
 
 func (g *GoalAddExample) SetupOnBranch(src BranchName, target BranchName) CompilationTask {
-	escapedScript := strings.ReplaceAll(g.Example, "'", "'\\''")
-	addExampleScript := fmt.Sprintf("printf '%s\\n' >> Test.lean", escapedScript)
 	return CompilationTask{
 		BranchName:    src,
 		NewBranchName: target,
 		PreCommands: []CompilationPreCommand{
 			{
 				Name:   "add-example",
-				Script: addExampleScript,
+				Script: fmt.Sprintf("cat << 'EOF' >> Test.lean\n%s\nEOF", g.Example),
 			},
 			{
 				// Shouldn't be needed... but just in case

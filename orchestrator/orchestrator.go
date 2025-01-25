@@ -90,6 +90,10 @@ func createOrchestratorStartCli() *cli.Command {
 			InferenceEngine:       inferenceEngine,
 			CompilationEngine:     compilationEngine,
 			GoalCompilationEngine: goalCompilationEngine,
+
+			inferenceTaskToNodeLocator:       map[EngineTaskID]NodeLocator{},
+			compilationTaskToNodeLocator:     map[EngineTaskID]NodeLocator{},
+			goalCompilationTaskToNodeLocator: map[EngineTaskID]NodeLocator{},
 		}
 
 		mux := http.NewServeMux()
@@ -221,7 +225,7 @@ func (o *Orchestrator) startGoalCompilationTx() {
 			o.mu.Lock()
 			defer o.mu.Unlock()
 			numUnfinished := len(o.RepoGraph.UnfinishedGraphs())
-			return numUnfinished - 10
+			return 10 - numUnfinished
 		}()
 		if numToAdd <= 0 {
 			continue
@@ -333,7 +337,7 @@ func (o *Orchestrator) startInferenceTx() {
 							ProblemID:    graphLocator.ProblemID,
 							NodeID:       node.ID,
 						}
-						inferenceTask, err := o.RepoGraph.BuildInferenceTaskForNode(locator)
+						inferenceTask, err := o.RepoGraph.BuildInferenceTaskForNode(locator, o.GoalProvider)
 						if err != nil {
 							o.logger.Fatal().Err(err).Msg("error building inference task for node")
 						}

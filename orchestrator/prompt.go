@@ -112,18 +112,7 @@ func (a XMLActionEd) GetType() string {
 }
 
 func (a XMLActionEd) GetCompilationTask() string {
-	// TODO:
-	// Test
-	// 1,$d
-	// a
-	// line 1
-	// line 2 with 'quotes'
-	// .
-	// w
-	// Escape single quotes by replacing ' with '\''
-	escapedScript := strings.ReplaceAll(a.Script, "'", "'\\''")
-	// Wrap the entire script in single quotes to preserve newlines and other special characters
-	return fmt.Sprintf("printf '%s\\n' | ed", escapedScript)
+	return fmt.Sprintf("cat << 'EOF' | ed\n%s\nEOF", a.Script)
 }
 
 func (a XMLActionEd) Validate() error {
