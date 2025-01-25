@@ -280,8 +280,19 @@ func (actions *XMLActions) Validate() error {
 				return errors.New("git-commit must be the last action")
 			}
 		}
+        err := action.Validate()
+        if err != nil {
+            return err
+        }
 	}
 	return nil
+}
+
+func (actions *XMLActions) ContainsGitCommit() bool {
+    if len(actions.Items) == 0 {
+        return false
+    }
+    return actions.Items[len(actions.Items)-1].GetType() == "git-commit"
 }
 
 func ThoughtFromXML(input string) (XMLThought, error) {

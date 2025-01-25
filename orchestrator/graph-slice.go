@@ -3,14 +3,14 @@ package main
 import "errors"
 
 type CommitGraphLocator struct {
-	BranchName BranchName
-	ProblemID  GoalID
+	BranchTarget BranchName
+	ProblemID    GoalID
 }
 
 type NodeLocator struct {
-	BranchName BranchName
-	ProblemID  GoalID
-	NodeID     NodeID
+	BranchTarget BranchName
+	ProblemID    GoalID
+	NodeID       NodeID
 }
 
 // NodeSlice is a slice through the repo down to a CommitGraphNode
@@ -27,7 +27,7 @@ type CommitGraphSlice struct {
 }
 
 func (rg *RepoGraph) GetNodeSlice(locator NodeLocator) (NodeSlice, error) {
-	branchTarget, ok := rg.BranchTargets[locator.BranchName]
+	branchTarget, ok := rg.BranchTargets[locator.BranchTarget]
 	if !ok {
 		return NodeSlice{}, errors.New("branch target not found")
 	}
@@ -47,7 +47,7 @@ func (rg *RepoGraph) GetNodeSlice(locator NodeLocator) (NodeSlice, error) {
 }
 
 func (rg *RepoGraph) GetCommitGraphSlice(locator CommitGraphLocator) (CommitGraphSlice, error) {
-	branchTarget, ok := rg.BranchTargets[locator.BranchName]
+	branchTarget, ok := rg.BranchTargets[locator.BranchTarget]
 	if !ok {
 		return CommitGraphSlice{}, errors.New("branch target not found")
 	}

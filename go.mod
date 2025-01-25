@@ -6,7 +6,7 @@ require (
 	github.com/go-xmlfmt/xmlfmt v1.1.3
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/melbahja/goph v1.4.0
-	github.com/mroth/weightedrand v1.0.0
+	github.com/mroth/weightedrand/v2 v2.1.0
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0

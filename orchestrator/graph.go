@@ -1,23 +1,38 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
+	"github.com/mroth/weightedrand/v2"
 	"github.com/rs/zerolog"
 )
 
 type NodeState string
 
 const (
+	NodeStateAwaitingGoalSetup NodeState = "node_awaiting_goal_setup"
+	NodeStateRunningGoalSetup  NodeState = "node_state_running_goal_setup"
 	// Will be queued to be compiled
 	NodeStateAwaitingCompilation NodeState = "node_awaiting_compilation"
+	NodeStateRunningCompilation  NodeState = "node_state_running_compilation"
 	// Will be queued to have inference run (producing children)
 	NodeStateAwaitingInference NodeState = "node_awaiting_inference"
+	NodeStateRunningInference  NodeState = "node_state_running_inference"
 	// All nodes will rest here until the graph is finished
 	// At that point, a reward can be calculated for each child
 	// NodeResult should be calculated at this point (it may remain none for non-terminal nodes)
 	NodeStateDone NodeState = "node_state_done"
 )
+
+// The graph tries to be as stateless as possible
+// However, there are serious ergonomic & performance benefits
+// To these extra states. We just have to reset them in order to resume from a saved graph
+var TransientNodeStateResetMap = map[NodeState]NodeState{
+	NodeStateRunningGoalSetup:   NodeStateAwaitingGoalSetup,
+	NodeStateRunningCompilation: NodeStateAwaitingCompilation,
+	NodeStateRunningInference:   NodeStateAwaitingInference,
+}
 
 type NodeResult string
 
@@ -26,6 +41,8 @@ const (
 	NodeResultNone NodeResult = "node_result_none"
 	// 🤙
 	NodeResultSuccess NodeResult = "node_result_success"
+	// The model said it was done when it wasn't
+	NodeResultFailure NodeResult = "node_result_failure"
 	// bad action syntax -> instant failure
 	NodeResultSyntaxFailure NodeResult = "node_result_syntax_failure"
 	// max depth exceeded
@@ -52,9 +69,11 @@ type RepoGraph struct {
 
 type RepoGraphBranchTarget struct {
 	// nil if this is the root
-	ParentBranchName *BranchName             `json:"parent_branch_name,omitempty"`
-	BranchName       BranchName              `json:"branch_name"`
-	Subgraphs        map[GoalID]*CommitGraph `json:"subgraphs"`
+	ParentBranchName *BranchName `json:"parent_branch_name,omitempty"`
+	// Goal that was used to create this branch target (nil if this is the root)
+	TraversalGoalID *GoalID                 `json:"traversal_goal_id,omitempty"`
+	BranchName      BranchName              `json:"branch_name"`
+	Subgraphs       map[GoalID]*CommitGraph `json:"subgraphs"`
 }
 
 type CommitGraph struct {
@@ -81,7 +100,7 @@ type CommitGraphNode struct {
 	// The results of the computation from apply(parse(inference_output) @ parent.branch_name)
 	ActionOutputs []ActionOutput `json:"action_outputs"`
 	// The results of the compilation
-	CompilationOutput *CompilationTaskResponse `json:"compilation_output"`
+	CompilationResult *CompilationResult `json:"compilation_result"`
 	// apply(parse(inference_output) @ parent.branch_name) is written to branch_name
 	// (unless this is the root, in which case, it is:
 	// apply(goals[goal_id].GoalStatement @ branch_target.branch_name))
@@ -89,24 +108,24 @@ type CommitGraphNode struct {
 }
 
 // not an action, but a way to return output from an action
+// Probably could be merged with CompilationResult
 type ActionOutput struct {
 	ActionName string `json:"action_name"`
 	Text       string `json:"text"`
+	ExitCode   int    `json:"exit_code"`
 }
 
-func NewCommitGraph(goalID GoalID) CommitGraph {
+func NewCommitGraph(goalID GoalID) *CommitGraph {
 	rootNode := &CommitGraphNode{
-		ID:       NewNodeID(),
-		Depth:    0,
-		Parent:   nil,
-		Children: []NodeID{},
-		// Root is always done because computation
-		// is blocked by the graph setup check
-		State:      NodeStateDone,
+		ID:         NewNodeID(),
+		Depth:      0,
+		Parent:     nil,
+		Children:   []NodeID{},
+		State:      NodeStateAwaitingGoalSetup,
 		Result:     NodeResultNone,
 		BranchName: NewBranchName(),
 	}
-	return CommitGraph{
+	return &CommitGraph{
 		GoalID:   goalID,
 		RootNode: rootNode.ID,
 		Nodes:    map[NodeID]*CommitGraphNode{rootNode.ID: rootNode},
@@ -120,6 +139,7 @@ func NewRepoGraph(rootBranchName BranchName) *RepoGraph {
 			rootBranchName: {
 				BranchName:       rootBranchName,
 				ParentBranchName: nil,
+				TraversalGoalID:  nil,
 				Subgraphs:        map[GoalID]*CommitGraph{},
 			},
 		},
@@ -127,10 +147,12 @@ func NewRepoGraph(rootBranchName BranchName) *RepoGraph {
 	return rg
 }
 
-func (rg *RepoGraph) AddBranchTarget(parentBranchName BranchName, branchName BranchName) {
+func (rg *RepoGraph) AddBranchTarget(parentBranchName BranchName, traversalGoalID GoalID) {
+	branchName := NewBranchName()
 	rg.BranchTargets[branchName] = &RepoGraphBranchTarget{
 		BranchName:       branchName,
 		ParentBranchName: &parentBranchName,
+		TraversalGoalID:  &traversalGoalID,
 		Subgraphs:        map[GoalID]*CommitGraph{},
 	}
 }
@@ -140,6 +162,13 @@ func (rg *RepoGraph) HandleSetupCompilationOutput(logger *zerolog.Logger, locato
 	if err != nil {
 		return err
 	}
+	if slice.CommitGraphNode.State != NodeStateRunningGoalSetup {
+		return fmt.Errorf("node %v is not in state RunningGoalSetup", locator)
+	}
+	if slice.CommitGraph.State != GraphStateAwaitingGoalSetup {
+		return fmt.Errorf("graph %v is not in state AwaitingGoalSetup", locator)
+	}
+
 	goal := goalProvider.GetGoal(slice.CommitGraph.GoalID)
 	ok := goal.ValidateSetup(*result)
 	if !ok {
@@ -147,8 +176,12 @@ func (rg *RepoGraph) HandleSetupCompilationOutput(logger *zerolog.Logger, locato
 		slice.CommitGraph.State = GraphStateGoalSetupFailed
 		return nil
 	}
-	slice.CommitGraphNode.State = NodeStateDone
+
+	// goal compilation result is expected to be fed into the root node
+	slice.CommitGraphNode.CompilationResult = &result.CompilationResult
+	slice.CommitGraphNode.State = NodeStateAwaitingInference
 	slice.CommitGraphNode.Result = NodeResultNone
+	slice.CommitGraph.State = GraphStateInProgress
 	return nil
 }
 
@@ -157,11 +190,18 @@ func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *Inferenc
 	if err != nil {
 		return err
 	}
+	if slice.CommitGraphNode.State != NodeStateRunningInference {
+		return fmt.Errorf("node %v is not in state RunningInference", locator)
+	}
+	if slice.CommitGraph.State != GraphStateInProgress {
+		return fmt.Errorf("graph %v is not in state InProgress", locator)
+	}
 	node := slice.CommitGraphNode
 	node.State = NodeStateDone
 	// if we have children, we are (by definition) non-terminal
 	node.Result = NodeResultNone
 	for _, seq := range result.ReturnSequences {
+
 		newNode := &CommitGraphNode{
 			ID:              NewNodeID(),
 			Depth:           node.Depth + 1,
@@ -173,20 +213,77 @@ func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *Inferenc
 			ActionOutputs:   []ActionOutput{},
 			BranchName:      NewBranchName(),
 		}
+		// check for syntax errors
+		// (easier here before pulling this off to queue)
+		parsed, err := ParseModelResponse(seq)
+		if err != nil || parsed.Actions.Validate() != nil {
+			newNode.State = NodeStateDone
+			newNode.Result = NodeResultSyntaxFailure
+		}
 		slice.CommitGraph.Nodes[newNode.ID] = newNode
 		node.Children = append(node.Children, newNode.ID)
 	}
 	return nil
 }
-func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *CompilationResult) error {
+
+func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *CompilationTaskResponse, maxDepth int) error {
 	slice, err := rg.GetNodeSlice(locator)
 	if err != nil {
 		return err
 	}
+	if slice.CommitGraphNode.State != NodeStateRunningCompilation {
+		return fmt.Errorf("node %v is not in state RunningCompilation", locator)
+	}
+	if slice.CommitGraph.State != GraphStateInProgress {
+		return fmt.Errorf("graph %v is not in state InProgress", locator)
+	}
 	node := slice.CommitGraphNode
-	node.State = NodeStateDone
-	// if we have children, we are (by definition) non-terminal
-	node.Result = NodeResultNone
+
+	resp, err := ParseModelResponse(node.InferenceOutput)
+	if err != nil {
+		return fmt.Errorf("node somehow got compiled with non-parsable inference output %v %w", locator, err)
+	}
+	for _, res := range result.PreCommandsResults {
+		node.ActionOutputs = append(node.ActionOutputs, ActionOutput{
+			ActionName: res.ActionName,
+			Text:       res.Out,
+			ExitCode:   res.ExitCode,
+		})
+	}
+	node.CompilationResult = &result.CompilationResult
+
+	if resp.Actions.ContainsGitCommit() {
+		node.State = NodeStateDone
+		if node.CompilationResult.ExitCode == 0 {
+			node.Result = NodeResultSuccess
+		} else {
+			node.Result = NodeResultFailure
+		}
+	} else if node.Depth >= maxDepth {
+		node.State = NodeStateDone
+		node.Result = NodeResultDepthExhaustionFailure
+	} else {
+		// After compiling the output, we are able to produce a new prompt
+		node.State = NodeStateAwaitingInference
+	}
+
+	// If all nodes are done, we can determine if the graph is successful
+	if len(slice.CommitGraph.Nodes) == len(slice.CommitGraph.AllNodesInState(NodeStateDone)) {
+		hasSuccess := false
+		for _, node := range slice.CommitGraph.Nodes {
+			if node.Result == NodeResultSuccess {
+				hasSuccess = true
+			}
+		}
+		if hasSuccess {
+			// ❤️ create a new branch target!
+			slice.CommitGraph.State = GraphStateSuccess
+			rg.AddBranchTarget(slice.BranchTarget.BranchName, slice.CommitGraph.GoalID)
+		} else {
+			slice.CommitGraph.State = GraphStateFailed
+		}
+	}
+
 	return nil
 }
 
@@ -195,7 +292,7 @@ func (rg *RepoGraph) UnfinishedGraphs() []CommitGraphLocator {
 	for branchName, branchTarget := range rg.BranchTargets {
 		for problemID, subgraph := range branchTarget.Subgraphs {
 			if subgraph.State == GraphStateInProgress {
-				unfinishedGraphs = append(unfinishedGraphs, CommitGraphLocator{BranchName: branchName, ProblemID: problemID})
+				unfinishedGraphs = append(unfinishedGraphs, CommitGraphLocator{BranchTarget: branchName, ProblemID: problemID})
 			}
 		}
 	}
@@ -220,13 +317,70 @@ func (cg *CommitGraph) AllNodesInState(state NodeState) []*CommitGraphNode {
 	return nodes
 }
 
-func (node *CommitGraphNode) GetPrompt() string {
-	// TODO
-	return "What is the weather in San Francisco?"
+func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator) (InferenceTask, error) {
+	_, err := rg.GetNodeSlice(nodeLocator)
+	if err != nil {
+		return InferenceTask{}, err
+	}
+	return InferenceTask{
+		Prompt: "Tell me the weather in San Francisco",
+	}, nil
+}
+
+func (rg *RepoGraph) BuildCompilationTasksForNode(nodeLocator NodeLocator) (CompilationTask, error) {
+	slice, err := rg.GetNodeSlice(nodeLocator)
+	if err != nil {
+		return CompilationTask{}, err
+	}
+	node := slice.CommitGraphNode
+	if node.IsRoot() {
+		return CompilationTask{}, fmt.Errorf("tried to compile the root node %v", node.ID)
+	}
+	parent := slice.CommitGraph.Nodes[*node.Parent]
+	preCommands := []CompilationPreCommand{}
+	parsedAction, err := ParseModelResponse(node.InferenceOutput)
+	if err != nil {
+		return CompilationTask{}, fmt.Errorf("Should not happen: node %v has non-parsable inference output %w", node.ID, err)
+	}
+	for _, action := range parsedAction.Actions.Items {
+		task := action.GetCompilationTask()
+		if task != "" {
+			preCommands = append(preCommands, CompilationPreCommand{
+				Name:   action.GetType(),
+				Script: task,
+			})
+		} else if action.GetType() == "git-status" {
+			// git status is special because the LLM doesn't know we are actually using
+			// branches instead of building a single commit
+			preCommands = append(preCommands, CompilationPreCommand{
+				Name:   "git-status",
+				Script: fmt.Sprintf("git diff %s", slice.BranchTarget.BranchName),
+			})
+		}
+	}
+
+	preCommands = append(preCommands, CompilationPreCommand{
+		Name:   "mk_all-hidden",
+		Script: "lake exec mk_all --lib Corelib",
+	})
+
+	// helps remove noise from caching & building unrelated files
+	preCommands = append(preCommands, CompilationPreCommand{
+		Name:   "prebuild-hidden",
+		Script: "lake build",
+	})
+
+	return CompilationTask{
+		BranchName: parent.BranchName,
+		// compile onto the new branch
+		NewBranchName:     node.BranchName,
+		PreCommands:       preCommands,
+		CompilationScript: "lake build",
+	}, nil
 }
 
 /**
- * λ  = decay rate (a higher value means less exploration) (0-1)
+ * λ  = decay rate (a higher value means we will prioritize less-seen branches) (>0)
  * α  = grace period (a lower value means more early exploration) (0-1)
  * β  = inProgress penalty multiplier (higher values mean less work will be
  *                 scheduled simultaneously) (>0)
@@ -269,4 +423,50 @@ func (bt *RepoGraphBranchTarget) RandomSamplingWeight() float64 {
 
 func (gn *CommitGraphNode) IsRoot() bool {
 	return gn.Parent == nil
+}
+
+func (rg *RepoGraph) CountBranchTargetsWithGoal(goalID GoalID) int {
+	count := 0
+	for _, branchTarget := range rg.BranchTargets {
+		if branchTarget.Subgraphs[goalID] != nil {
+			count++
+		}
+	}
+	return count
+}
+
+// check if any of the parents of a branch target are created by the goal
+// all goals should be cummulative and commute but should not be applied twice
+//
+// THIS DOES NOT CHECK IF THE CURRENT BRANCH CONTAINS A CHILD GOAL ID.
+// Use bt.Subgraphs[goalID] != nil for that.
+func (rg *RepoGraph) BranchTargetDerivesFromGoal(branchTarget *RepoGraphBranchTarget, goalID GoalID) bool {
+	bt := branchTarget
+	for bt.ParentBranchName != nil {
+		if bt.TraversalGoalID != nil && *bt.TraversalGoalID == goalID {
+			return true
+		}
+		bt = rg.BranchTargets[*bt.ParentBranchName]
+	}
+	return false
+}
+
+func (rg *RepoGraph) FindNewBranchTargetForGoal(goalID GoalID) *RepoGraphBranchTarget {
+	// TODO: See if this is worth caching (and how to do it)
+	choices := []weightedrand.Choice[*RepoGraphBranchTarget, int64]{}
+	for _, branchTarget := range rg.BranchTargets {
+		if branchTarget.Subgraphs[goalID] != nil || rg.BranchTargetDerivesFromGoal(branchTarget, goalID) {
+			continue
+		}
+		choices = append(choices,
+			weightedrand.NewChoice(branchTarget, int64(100000*branchTarget.RandomSamplingWeight())))
+	}
+	if len(choices) == 0 {
+		return nil
+	}
+	chooser, err := weightedrand.NewChooser(choices...)
+	if err != nil {
+		return nil
+	}
+	return chooser.Pick()
 }

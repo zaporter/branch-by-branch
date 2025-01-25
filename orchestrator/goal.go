@@ -4,7 +4,7 @@ type GoalI interface {
 	ID() GoalID
 	GoalStatement() string
 	// Returns a setup script that will be run on the branch
-	SetupOnBranch(BranchName) CompilationTask
+	SetupOnBranch(src BranchName, target BranchName) CompilationTask
 	// Returns true if the setup script was successful
 	// & if the branch is ready to be explored
 	//
