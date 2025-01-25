@@ -31,13 +31,29 @@ find . -type f -name "*.lean" | grep -v "\.lake" | while read -r file; do
     # Create a temporary file
     temp_file=$(mktemp)
     
-    # Use awk to remove the attribution block at the start of the file
-    # This looks for /- at the start, followed by any content until -/, 
-    # followed by optional whitespace
+    # Use awk to remove copyright block if it exists at start of file
+    # Only checks the first /- ... -/ block and only if it starts at line 1
     awk '
-        BEGIN { skip = 0; found = 0 }
-        /^\/\-\nCopyright/ { if (!found) { skip = 1; found = 1; next } }
-        /\-\// { if (skip) { skip = 0; next } }
+        BEGIN { skip = 0; buffer = ""; line_num = 0 }
+        {line_num++}
+        /^\/\-/ { 
+            if (line_num == 1) {
+                skip = 1
+                buffer = $0 "\n"
+                next
+            }
+        }
+        skip { buffer = buffer $0 "\n" }
+        /\-\// { 
+            if (skip) { 
+                skip = 0
+                if (buffer !~ /Copyright/) {
+                    printf "%s", buffer
+                }
+                buffer = ""
+                next 
+            }
+        }
         !skip { print }
     ' "$file" > "$temp_file"
     
