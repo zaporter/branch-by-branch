@@ -235,7 +235,7 @@ func playgroundEngineSimpleCompilationTestCli() *cli.Command {
 					Task: CompilationTask{
 						BranchName:        BranchName("core-1"),
 						NewBranchName:     NewBranchName(),
-						CompilationScript: "lake exec mk_all && lake build",
+						CompilationScript: "lake build",
 						PreCommands: []CompilationPreCommand{
 							{
 								Name:   "write",
@@ -244,6 +244,14 @@ func playgroundEngineSimpleCompilationTestCli() *cli.Command {
 							{
 								Name:   "pwd",
 								Script: "pwd",
+							},
+							{
+								Name:   "mk_all",
+								Script: "lake exec mk_all --lib Corelib",
+							},
+							{
+								Name:   "prebuild",
+								Script: "lake build",
 							},
 						},
 					}.ToJSON(),

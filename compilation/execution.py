@@ -96,7 +96,7 @@ def startup():
            repo_dir+"/lakefile.toml": {"bind": "/home/ubuntu/repo/lakefile.toml", "mode": "ro"},
            repo_dir+"/lean-toolchain": {"bind": "/home/ubuntu/repo/lean-toolchain", "mode": "ro"},
            repo_dir+"/.gitignore": {"bind": "/home/ubuntu/repo/.gitignore", "mode": "ro"},
-           repo_dir+"/scripts": {"bind": "/home/ubuntu/repo/scripts", "mode": "ro"},
+           repo_dir+"/mk_all.lean": {"bind": "/home/ubuntu/repo/mk_all.lean", "mode": "ro"},
         },
     )
     print(f"Started container {container.id}")
