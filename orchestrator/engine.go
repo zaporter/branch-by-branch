@@ -86,7 +86,7 @@ const (
 	EngineJobNameTest        EngineJobName = "test-engine"
 	EngineJobNameInference   EngineJobName = "inference-engine"
 	EngineJobNameCompilation EngineJobName = "compilation-engine"
-	EngineJobNameProblem     EngineJobName = "problem-engine"
+	EngineJobNameGoalCompilation EngineJobName = "goal-compilation-engine"
 )
 
 type SchedulingParams struct {

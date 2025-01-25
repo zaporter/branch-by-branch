@@ -38,85 +38,55 @@ const (
 type GraphState string
 
 const (
-	GraphStateInProgress GraphState = "graph_in_progress"
-	GraphStateSuccess    GraphState = "graph_success"
-	GraphStateFailed     GraphState = "graph_failed"
+	GraphStateAwaitingGoalSetup GraphState = "graph_awaiting_goal_setup"
+	GraphStateInProgress        GraphState = "graph_in_progress"
+	GraphStateSuccess           GraphState = "graph_success"
+	GraphStateFailed            GraphState = "graph_failed"
 )
 
 type CommitGraphLocator struct {
 	BranchName BranchName
-	ProblemID  ProblemID
+	ProblemID  GoalID
 }
 
 type NodeLocator struct {
 	BranchName BranchName
-	ProblemID  ProblemID
+	ProblemID  GoalID
 	NodeID     NodeID
 }
 
-type NodeTree struct {
+// NodeSlice is a slice through the repo down to a CommitGraphNode
+type NodeSlice struct {
 	BranchTarget    *RepoGraphBranchTarget
 	CommitGraph     *CommitGraph
 	CommitGraphNode *CommitGraphNode
+}
+
+// CommitGraphSlice is a slice through the repo down to a CommitGraph
+type CommitGraphSlice struct {
+	BranchTarget *RepoGraphBranchTarget
+	CommitGraph  *CommitGraph
 }
 
 type RepoGraph struct {
 	BranchTargets map[BranchName]RepoGraphBranchTarget `json:"branch_targets"`
 }
 
-func (rg *RepoGraph) GetTreeAtLocator(locator NodeLocator) (NodeTree, error) {
-	branchTarget, ok := rg.BranchTargets[locator.BranchName]
-	if !ok {
-		return NodeTree{}, errors.New("branch target not found")
-	}
-	subgraph, ok := branchTarget.Subgraphs[locator.ProblemID]
-	if !ok {
-		return NodeTree{}, errors.New("subgraph not found")
-	}
-	node, ok := subgraph.Nodes[locator.NodeID]
-	if !ok {
-		return NodeTree{}, errors.New("node not found")
-	}
-	return NodeTree{
-		BranchTarget:    &branchTarget,
-		CommitGraph:     &subgraph,
-		CommitGraphNode: &node,
-	}, nil
-}
-
-type CommitGraphTree struct {
-	BranchTarget *RepoGraphBranchTarget
-	CommitGraph  *CommitGraph
-}
-
-func (rg *RepoGraph) GetTreeAtCommitGraphLocator(locator CommitGraphLocator) (CommitGraphTree, error) {
-	branchTarget, ok := rg.BranchTargets[locator.BranchName]
-	if !ok {
-		return CommitGraphTree{}, errors.New("branch target not found")
-	}
-	subgraph, ok := branchTarget.Subgraphs[locator.ProblemID]
-	if !ok {
-		return CommitGraphTree{}, errors.New("subgraph not found")
-	}
-	return CommitGraphTree{
-		BranchTarget: &branchTarget,
-		CommitGraph:  &subgraph,
-	}, nil
-}
-
 // weighting algo is ((n_succ)/(n_fail+1))/(n_attempt^(\lambda+1))
 type RepoGraphBranchTarget struct {
-	BranchName BranchName                `json:"branch_name"`
-	Subgraphs  map[ProblemID]CommitGraph `json:"subgraphs"`
+	BranchName BranchName             `json:"branch_name"`
+	Subgraphs  map[GoalID]CommitGraph `json:"subgraphs"`
 }
 
 type CommitGraph struct {
-	// problem_id is a unique identifier for the graph because
-	// we will never start a new graph at the same target on the same problem
-	ProblemID ProblemID                  `json:"problem_id"`
-	RootNode  NodeID                     `json:"root_node"`
-	Nodes     map[NodeID]CommitGraphNode `json:"nodes"`
-	State     GraphState                 `json:"state"`
+	// goal_id is a unique identifier for the graph because
+	// we will never start a new graph at the same target on the same goal
+	GoalID   GoalID                     `json:"goal_id"`
+	RootNode NodeID                     `json:"root_node"`
+	Nodes    map[NodeID]CommitGraphNode `json:"nodes"`
+	State    GraphState                 `json:"state"`
+	// apply(goals[goal_id].GoalStatement @ parent.branch_name) is written to branch_name
+	BranchName BranchName `json:"branch_name"`
 }
 
 type CommitGraphNode struct {
@@ -128,8 +98,12 @@ type CommitGraphNode struct {
 	State    NodeState  `json:"state"`
 	Result   NodeResult `json:"result"`
 
-	InferenceOutput string         `json:"inference_output"`
-	ActionOutputs   []ActionOutput `json:"action_outputs"`
+	// The inference result that LED to the creation of this node.
+	InferenceOutput string `json:"inference_output"`
+	// The results of the computation from apply(parse(inference_output) @ parent.branch_name)
+	ActionOutputs []ActionOutput `json:"action_outputs"`
+	// apply(parse(inference_output) @ parent.branch_name) is written to branch_name
+	BranchName BranchName `json:"branch_name"`
 }
 
 // not an action, but a way to return output from an action
@@ -146,14 +120,35 @@ func NewCommitGraphRoot() CommitGraph {
 	return CommitGraph{}
 }
 
-type ProblemI interface {
-	ID() string
-	ProblemGoal() string
-	SetupOnBranch(branch string) error
+type GoalI interface {
+	ID() GoalID
+	GoalStatement() string
+	// Returns a setup script that will be run on the branch
+	SetupOnBranch(BranchName) CompilationTask
+	// Returns true if the setup script was successful
+	// & if the branch is ready to be explored
+	//
+	// If this returns false, the branch should not be scheduled.
+	ValidateSetup(CompilationResult) bool
+}
+
+func NewRepoGraph(rootBranchName BranchName) *RepoGraph {
+	rg := &RepoGraph{
+		BranchTargets: make(map[BranchName]RepoGraphBranchTarget),
+	}
+	rg.AddBranchTarget(rootBranchName)
+	return rg
+}
+
+func (rg *RepoGraph) AddBranchTarget(branchName BranchName) {
+	rg.BranchTargets[branchName] = RepoGraphBranchTarget{
+		BranchName: branchName,
+		Subgraphs:  make(map[GoalID]CommitGraph),
+	}
 }
 
 func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *InferenceTaskResponse) error {
-	tree, err := rg.GetTreeAtLocator(locator)
+	tree, err := rg.GetNodeSlice(locator)
 	if err != nil {
 		return err
 	}
@@ -211,4 +206,39 @@ func (cg *CommitGraph) AllNodesInState(state NodeState) []CommitGraphNode {
 func (node *CommitGraphNode) GetPrompt() string {
 	// TODO
 	return "What is the weather in San Francisco?"
+}
+
+func (rg *RepoGraph) GetNodeSlice(locator NodeLocator) (NodeSlice, error) {
+	branchTarget, ok := rg.BranchTargets[locator.BranchName]
+	if !ok {
+		return NodeSlice{}, errors.New("branch target not found")
+	}
+	subgraph, ok := branchTarget.Subgraphs[locator.ProblemID]
+	if !ok {
+		return NodeSlice{}, errors.New("subgraph not found")
+	}
+	node, ok := subgraph.Nodes[locator.NodeID]
+	if !ok {
+		return NodeSlice{}, errors.New("node not found")
+	}
+	return NodeSlice{
+		BranchTarget:    &branchTarget,
+		CommitGraph:     &subgraph,
+		CommitGraphNode: &node,
+	}, nil
+}
+
+func (rg *RepoGraph) GetCommitGraphSlice(locator CommitGraphLocator) (CommitGraphSlice, error) {
+	branchTarget, ok := rg.BranchTargets[locator.BranchName]
+	if !ok {
+		return CommitGraphSlice{}, errors.New("branch target not found")
+	}
+	subgraph, ok := branchTarget.Subgraphs[locator.ProblemID]
+	if !ok {
+		return CommitGraphSlice{}, errors.New("subgraph not found")
+	}
+	return CommitGraphSlice{
+		BranchTarget: &branchTarget,
+		CommitGraph:  &subgraph,
+	}, nil
 }

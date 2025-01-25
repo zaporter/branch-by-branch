@@ -18,7 +18,7 @@ image_name = "branch-by-branch-execution"
 
 repo_dir = os.getenv("REPO_DIR") or "repo"
 job = os.getenv("JOB")
-jobs = ["compilation-engine", "problem-engine"]
+jobs = ["compilation-engine", "goal-compilation-engine"]
 if job not in jobs:
     raise RuntimeError(f"Invalid job: {job}. Must be one of: {jobs}")
 
@@ -89,7 +89,7 @@ def startup():
            # Problem engine needs to write new tests
            repo_dir+"/Test.lean": {
                "bind": "/home/ubuntu/repo/Test.lean",
-               "mode": "rw" if job == "problem-engine" else "ro"
+               "mode": "rw" if job == "goal-compilation-engine" else "ro"
            },
            # Hardcoded read only sub-dirs 
            repo_dir+"/lake-manifest.json": {"bind": "/home/ubuntu/repo/lake-manifest.json", "mode": "ro"},

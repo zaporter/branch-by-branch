@@ -146,7 +146,7 @@ func executeInnerOrchestrator(ctx context.Context, rdb *redis.Client, inferenceE
 
 				// clear stale (finished) graphs
 				for i, graph := range graphPriorityQueue {
-					tree, err := repoGraph.GetTreeAtCommitGraphLocator(graph)
+					tree, err := repoGraph.GetCommitGraphSlice(graph)
 					if err != nil {
 						logger.Fatal().Err(err).Msg("error getting tree at commit graph locator")
 					}
@@ -171,7 +171,7 @@ func executeInnerOrchestrator(ctx context.Context, rdb *redis.Client, inferenceE
 						}
 					}
 					graph := graphPriorityQueue[graphIndex]
-					tree, err := repoGraph.GetTreeAtCommitGraphLocator(graph)
+					tree, err := repoGraph.GetCommitGraphSlice(graph)
 					if err != nil {
 						logger.Fatal().Err(err).Msg("error getting tree at commit graph locator")
 					}

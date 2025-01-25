@@ -22,14 +22,14 @@ func IsValidEngineTaskID(id EngineTaskID) bool {
 	return strings.HasPrefix(string(id), "engine-task-")
 }
 
-type ProblemID string
+type GoalID string
 
-func NewProblemID() ProblemID {
+func NewGoalID() GoalID {
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return ProblemID(fmt.Sprintf("problem-%s", uuid.String()))
+	return GoalID(fmt.Sprintf("goal-%s", uuid.String()))
 }
 
 // (other than `main`, we just want unique names that don't have to be human-readable)
