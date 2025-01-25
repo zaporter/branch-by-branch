@@ -1,7 +1,6 @@
 import Std
 import Corelib
-import Init.Data.Nat.Basic
 
 example : m + 0 = m := by exact?
-
 example : 0 + m = m := by exact?
+example : ∀ n, n ≠ 0 ∧ n ≠ 1 → Nat.succ (Nat.pred n) = n := by exact?

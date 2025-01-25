@@ -1,6 +1,6 @@
 name = "lean_corelib"
 version = "0.1.0"
-defaultTargets = ["lean_corelib"]
+defaultTargets = ["Test"]
 
 [[require]]
 name = "Cli"
@@ -17,9 +17,8 @@ rev = "v4.15.0"
 [[lean_lib]]
 name = "Corelib"
 
-[[lean_exe]]
-name = "lean_corelib"
-root = "Test"
+[[lean_lib]]
+name = "Test"
 
 [[lean_exe]]
 name="mk_all"
