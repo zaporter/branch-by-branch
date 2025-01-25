@@ -268,7 +268,7 @@ func playgroundEngineSimpleCompilationTestCli() *cli.Command {
 					return
 				case val := <-output:
 					fmt.Println("output", val)
-					_ = CompilationResultFromJSON(val.Result)
+					_ = CompilationTaskResponseFromJSON(val.Result)
 				}
 			}
 		}()

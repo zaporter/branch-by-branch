@@ -1,15 +1,14 @@
 package main
 
-import "errors"
+import (
+	"math"
+
+	"github.com/rs/zerolog"
+)
 
 type NodeState string
 
 const (
-	// Needs to be scheduled to go through action-execution.go
-	// From here, the node will either go to:
-	// - awaiting_inference (if no filesystem changes were made)
-	// - awaiting_compilation (if we need to run the compiler (new branch or filesystem changes))
-	NodeStateAwaitingActionEvaluation NodeState = "node_awaiting_action_evaluation"
 	// Will be queued to be compiled
 	NodeStateAwaitingCompilation NodeState = "node_awaiting_compilation"
 	// Will be queued to have inference run (producing children)
@@ -42,51 +41,29 @@ const (
 	GraphStateInProgress        GraphState = "graph_in_progress"
 	GraphStateSuccess           GraphState = "graph_success"
 	GraphStateFailed            GraphState = "graph_failed"
+	// May not count against the weighting of the branch target
+	// (depending on gracious I am feeling)
+	GraphStateGoalSetupFailed GraphState = "graph_goal_setup_failed"
 )
 
-type CommitGraphLocator struct {
-	BranchName BranchName
-	ProblemID  GoalID
-}
-
-type NodeLocator struct {
-	BranchName BranchName
-	ProblemID  GoalID
-	NodeID     NodeID
-}
-
-// NodeSlice is a slice through the repo down to a CommitGraphNode
-type NodeSlice struct {
-	BranchTarget    *RepoGraphBranchTarget
-	CommitGraph     *CommitGraph
-	CommitGraphNode *CommitGraphNode
-}
-
-// CommitGraphSlice is a slice through the repo down to a CommitGraph
-type CommitGraphSlice struct {
-	BranchTarget *RepoGraphBranchTarget
-	CommitGraph  *CommitGraph
-}
-
 type RepoGraph struct {
-	BranchTargets map[BranchName]RepoGraphBranchTarget `json:"branch_targets"`
+	BranchTargets map[BranchName]*RepoGraphBranchTarget `json:"branch_targets"`
 }
 
-// weighting algo is ((n_succ)/(n_fail+1))/(n_attempt^(\lambda+1))
 type RepoGraphBranchTarget struct {
-	BranchName BranchName             `json:"branch_name"`
-	Subgraphs  map[GoalID]CommitGraph `json:"subgraphs"`
+	// nil if this is the root
+	ParentBranchName *BranchName             `json:"parent_branch_name,omitempty"`
+	BranchName       BranchName              `json:"branch_name"`
+	Subgraphs        map[GoalID]*CommitGraph `json:"subgraphs"`
 }
 
 type CommitGraph struct {
 	// goal_id is a unique identifier for the graph because
 	// we will never start a new graph at the same target on the same goal
-	GoalID   GoalID                     `json:"goal_id"`
-	RootNode NodeID                     `json:"root_node"`
-	Nodes    map[NodeID]CommitGraphNode `json:"nodes"`
-	State    GraphState                 `json:"state"`
-	// apply(goals[goal_id].GoalStatement @ parent.branch_name) is written to branch_name
-	BranchName BranchName `json:"branch_name"`
+	GoalID   GoalID                      `json:"goal_id"`
+	RootNode NodeID                      `json:"root_node"`
+	Nodes    map[NodeID]*CommitGraphNode `json:"nodes"`
+	State    GraphState                  `json:"state"`
 }
 
 type CommitGraphNode struct {
@@ -99,10 +76,15 @@ type CommitGraphNode struct {
 	Result   NodeResult `json:"result"`
 
 	// The inference result that LED to the creation of this node.
+	// Empty if this is the root
 	InferenceOutput string `json:"inference_output"`
 	// The results of the computation from apply(parse(inference_output) @ parent.branch_name)
 	ActionOutputs []ActionOutput `json:"action_outputs"`
+	// The results of the compilation
+	CompilationOutput *CompilationTaskResponse `json:"compilation_output"`
 	// apply(parse(inference_output) @ parent.branch_name) is written to branch_name
+	// (unless this is the root, in which case, it is:
+	// apply(goals[goal_id].GoalStatement @ branch_target.branch_name))
 	BranchName BranchName `json:"branch_name"`
 }
 
@@ -112,64 +94,99 @@ type ActionOutput struct {
 	Text       string `json:"text"`
 }
 
-func (gn *CommitGraphNode) IsRoot() bool {
-	return gn.Parent == nil
-}
-
-func NewCommitGraphRoot() CommitGraph {
-	return CommitGraph{}
-}
-
-type GoalI interface {
-	ID() GoalID
-	GoalStatement() string
-	// Returns a setup script that will be run on the branch
-	SetupOnBranch(BranchName) CompilationTask
-	// Returns true if the setup script was successful
-	// & if the branch is ready to be explored
-	//
-	// If this returns false, the branch should not be scheduled.
-	ValidateSetup(CompilationResult) bool
+func NewCommitGraph(goalID GoalID) CommitGraph {
+	rootNode := &CommitGraphNode{
+		ID:       NewNodeID(),
+		Depth:    0,
+		Parent:   nil,
+		Children: []NodeID{},
+		// Root is always done because computation
+		// is blocked by the graph setup check
+		State:      NodeStateDone,
+		Result:     NodeResultNone,
+		BranchName: NewBranchName(),
+	}
+	return CommitGraph{
+		GoalID:   goalID,
+		RootNode: rootNode.ID,
+		Nodes:    map[NodeID]*CommitGraphNode{rootNode.ID: rootNode},
+		State:    GraphStateAwaitingGoalSetup,
+	}
 }
 
 func NewRepoGraph(rootBranchName BranchName) *RepoGraph {
 	rg := &RepoGraph{
-		BranchTargets: make(map[BranchName]RepoGraphBranchTarget),
+		BranchTargets: map[BranchName]*RepoGraphBranchTarget{
+			rootBranchName: {
+				BranchName:       rootBranchName,
+				ParentBranchName: nil,
+				Subgraphs:        map[GoalID]*CommitGraph{},
+			},
+		},
 	}
-	rg.AddBranchTarget(rootBranchName)
 	return rg
 }
 
-func (rg *RepoGraph) AddBranchTarget(branchName BranchName) {
-	rg.BranchTargets[branchName] = RepoGraphBranchTarget{
-		BranchName: branchName,
-		Subgraphs:  make(map[GoalID]CommitGraph),
+func (rg *RepoGraph) AddBranchTarget(parentBranchName BranchName, branchName BranchName) {
+	rg.BranchTargets[branchName] = &RepoGraphBranchTarget{
+		BranchName:       branchName,
+		ParentBranchName: &parentBranchName,
+		Subgraphs:        map[GoalID]*CommitGraph{},
 	}
 }
 
-func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *InferenceTaskResponse) error {
-	tree, err := rg.GetNodeSlice(locator)
+func (rg *RepoGraph) HandleSetupCompilationOutput(logger *zerolog.Logger, locator NodeLocator, result *CompilationTaskResponse, goalProvider GoalProvider) error {
+	slice, err := rg.GetNodeSlice(locator)
 	if err != nil {
 		return err
 	}
-	node := tree.CommitGraphNode
+	goal := goalProvider.GetGoal(slice.CommitGraph.GoalID)
+	ok := goal.ValidateSetup(*result)
+	if !ok {
+		logger.Error().Msgf("goal setup failed for %s on branch %s to branch %s", slice.CommitGraph.GoalID, slice.BranchTarget.BranchName, slice.CommitGraphNode.BranchName)
+		slice.CommitGraph.State = GraphStateGoalSetupFailed
+		return nil
+	}
+	slice.CommitGraphNode.State = NodeStateDone
+	slice.CommitGraphNode.Result = NodeResultNone
+	return nil
+}
+
+func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *InferenceTaskResponse) error {
+	slice, err := rg.GetNodeSlice(locator)
+	if err != nil {
+		return err
+	}
+	node := slice.CommitGraphNode
 	node.State = NodeStateDone
 	// if we have children, we are (by definition) non-terminal
 	node.Result = NodeResultNone
 	for _, seq := range result.ReturnSequences {
-		newNode := CommitGraphNode{
+		newNode := &CommitGraphNode{
 			ID:              NewNodeID(),
 			Depth:           node.Depth + 1,
 			Parent:          &node.ID,
 			Children:        []NodeID{},
-			State:           NodeStateAwaitingActionEvaluation,
+			State:           NodeStateAwaitingCompilation,
 			Result:          NodeResultNone,
 			InferenceOutput: seq,
 			ActionOutputs:   []ActionOutput{},
+			BranchName:      NewBranchName(),
 		}
-		tree.CommitGraph.Nodes[newNode.ID] = newNode
+		slice.CommitGraph.Nodes[newNode.ID] = newNode
 		node.Children = append(node.Children, newNode.ID)
 	}
+	return nil
+}
+func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *CompilationResult) error {
+	slice, err := rg.GetNodeSlice(locator)
+	if err != nil {
+		return err
+	}
+	node := slice.CommitGraphNode
+	node.State = NodeStateDone
+	// if we have children, we are (by definition) non-terminal
+	node.Result = NodeResultNone
 	return nil
 }
 
@@ -193,8 +210,8 @@ func (rg *RepoGraph) SpawnNewGraph() (*CommitGraphLocator, bool) {
 	return nil, false
 }
 
-func (cg *CommitGraph) AllNodesInState(state NodeState) []CommitGraphNode {
-	nodes := []CommitGraphNode{}
+func (cg *CommitGraph) AllNodesInState(state NodeState) []*CommitGraphNode {
+	nodes := []*CommitGraphNode{}
 	for _, node := range cg.Nodes {
 		if node.State == state {
 			nodes = append(nodes, node)
@@ -208,37 +225,48 @@ func (node *CommitGraphNode) GetPrompt() string {
 	return "What is the weather in San Francisco?"
 }
 
-func (rg *RepoGraph) GetNodeSlice(locator NodeLocator) (NodeSlice, error) {
-	branchTarget, ok := rg.BranchTargets[locator.BranchName]
-	if !ok {
-		return NodeSlice{}, errors.New("branch target not found")
+/**
+ * λ  = decay rate (a higher value means less exploration) (0-1)
+ * α  = grace period (a lower value means more early exploration) (0-1)
+ * β  = inProgress penalty multiplier (higher values mean less work will be
+ *                 scheduled simultaneously) (>0)
+ *
+ *          succ(bt) + 1                             1
+ * w(bt) =  ------------ * -------------------------------------------------------------
+ *          fail(bt) + 1   inProgress(bt) * β + ( 1 +  α * (fail(bt) + succ(bt)) )^( 1 + λ )
+ *
+ * This came to me during a walk in central park.
+ * It feels about right. But I should probably do some research.
+ * https://www.desmos.com/calculator/uu9zk9fnhd
+ *
+ * It also might be interesting to experiment with graph depth as a param.
+ * I hope that deeper graphs will have higher success rates... but not sure.
+ * Newer graphs will have a higher weight, so perhaps that is enough
+ */
+func (bt *RepoGraphBranchTarget) RandomSamplingWeight() float64 {
+	lambda := 0.6
+	alpha := 0.2
+	beta := 0.5
+	numInProgress := float64(0)
+	numSuccess := float64(0)
+	numFail := float64(0)
+	for _, subgraph := range bt.Subgraphs {
+		if subgraph.State == GraphStateInProgress || subgraph.State == GraphStateAwaitingGoalSetup {
+			numInProgress++
+		}
+		if subgraph.State == GraphStateSuccess {
+			numSuccess++
+		}
+		// Don't include failed setup graphs... I don't understand when they happen yet.
+		if subgraph.State == GraphStateFailed {
+			numFail++
+		}
 	}
-	subgraph, ok := branchTarget.Subgraphs[locator.ProblemID]
-	if !ok {
-		return NodeSlice{}, errors.New("subgraph not found")
-	}
-	node, ok := subgraph.Nodes[locator.NodeID]
-	if !ok {
-		return NodeSlice{}, errors.New("node not found")
-	}
-	return NodeSlice{
-		BranchTarget:    &branchTarget,
-		CommitGraph:     &subgraph,
-		CommitGraphNode: &node,
-	}, nil
+	result := (numSuccess + 1) / (numFail + 1)
+	result = result * (1 / (numInProgress*beta + math.Pow(1+alpha*(numFail+numSuccess), 1+lambda)))
+	return result
 }
 
-func (rg *RepoGraph) GetCommitGraphSlice(locator CommitGraphLocator) (CommitGraphSlice, error) {
-	branchTarget, ok := rg.BranchTargets[locator.BranchName]
-	if !ok {
-		return CommitGraphSlice{}, errors.New("branch target not found")
-	}
-	subgraph, ok := branchTarget.Subgraphs[locator.ProblemID]
-	if !ok {
-		return CommitGraphSlice{}, errors.New("subgraph not found")
-	}
-	return CommitGraphSlice{
-		BranchTarget: &branchTarget,
-		CommitGraph:  &subgraph,
-	}, nil
+func (gn *CommitGraphNode) IsRoot() bool {
+	return gn.Parent == nil
 }

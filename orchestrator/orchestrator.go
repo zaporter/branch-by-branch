@@ -175,6 +175,7 @@ func executeInnerOrchestrator(ctx context.Context, rdb *redis.Client, inferenceE
 					if err != nil {
 						logger.Fatal().Err(err).Msg("error getting tree at commit graph locator")
 					}
+					// ⛳️ Bug. The node state isn't updated so next time this loops, we will re-add the same starting nodes.
 					nodes := tree.CommitGraph.AllNodesInState(NodeStateAwaitingInference)
 					nodeIndex := 0
 				innerInsertion:

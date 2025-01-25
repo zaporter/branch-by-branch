@@ -25,7 +25,7 @@ const (
 	RedisInferenceNumReturnSequences   RedisKey = "inference:num_return_sequences"
 	RedisInferenceNumBeams             RedisKey = "inference:num_beams"
 
-	RedisExecutionRepoUrl            RedisKey = "execution:repo_url"
+	RedisExecutionRepoUrl RedisKey = "execution:repo_url"
 )
 
 var AllRouterKeys = []RedisKey{

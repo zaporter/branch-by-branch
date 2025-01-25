@@ -11,9 +11,9 @@ func TestMarshal(t *testing.T) {
 
 	acts := XMLActions{
 		Items: []XMLAction{
-			XMLActionHelp{},
+			XMLActionLs{Path: "."},
 			XMLActionCat{Filename: "./test.txt"},
-			XMLActionHelp{},
+			XMLActionGitStatus{},
 		},
 	}
 
@@ -22,18 +22,18 @@ func TestMarshal(t *testing.T) {
 
 	// Verify the marshalled XML
 	expected := `<actions>
-	<help/>
+	<ls>./test.txt</ls>
 	<cat>./test.txt</cat>
-	<help/>
+	<git-status/>
 </actions>`
 	require.Equal(t, expected, res)
 }
 
 func TestUnmarshal(t *testing.T) {
 	input := `<actions>
-		<help/>
+		<ls>./test.txt</ls>
 		<cat>./test.txt</cat>
-		<help/>
+		<git-status/>
 	</actions>`
 
 	actions, err := ActionsFromXML(input)
@@ -43,7 +43,7 @@ func TestUnmarshal(t *testing.T) {
 	require.Len(t, actions.Items, 3)
 
 	// Verify the order
-	expectedTypes := []string{"help", "cat", "help"}
+	expectedTypes := []string{"ls", "cat", "git-status"}
 	gotTypes := make([]string, len(actions.Items))
 	for i, item := range actions.Items {
 		gotTypes[i] = item.GetType()
@@ -127,7 +127,7 @@ w test2.txt
 func TestResponseMarshal(t *testing.T) {
 	response := ParsedModelResponse{
 		Thought: XMLThought{Text: "Hello, world!"},
-		Actions: XMLActions{Items: []XMLAction{XMLActionCat{Filename: "./test.txt"}, XMLActionHelp{}}},
+		Actions: XMLActions{Items: []XMLAction{XMLActionCat{Filename: "./test.txt"}, XMLActionGitStatus{}}},
 	}
 
 	xml, err := response.ToXML()
@@ -136,7 +136,7 @@ func TestResponseMarshal(t *testing.T) {
 <think>Hello, world!</think>
 <actions>
 	<cat>./test.txt</cat>
-	<help/>
+	<git-status/>
 </actions>
 </response>`
 

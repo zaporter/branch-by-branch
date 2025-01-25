@@ -18,18 +18,18 @@ type CompilationTask struct {
 	CompilationScript string                  `json:"compilation_script"`
 }
 
-type Result struct {
+type CompilationResult struct {
 	ActionName string `json:"action_name"`
 	// merge of stdout and stderr
 	Out      string `json:"out"`
 	ExitCode int    `json:"exit_code"`
 }
 
-type CompilationResult struct {
+type CompilationTaskResponse struct {
 	// The processing script has the ability to keep the old branch if no files have been changed
-	BranchName         BranchName `json:"branch_name"`
-	PreCommandsResults []Result   `json:"pre_commands_results"`
-	CompilationResult  Result     `json:"compilation_result"`
+	BranchName         BranchName          `json:"branch_name"`
+	PreCommandsResults []CompilationResult `json:"pre_commands_results"`
+	CompilationResult  CompilationResult   `json:"compilation_result"`
 }
 
 func (t CompilationTask) ToJSON() string {
@@ -54,8 +54,8 @@ func ExecuteAction(action XMLAction) (string, error) {
 
 }
 
-func CompilationResultFromJSON(input string) CompilationResult {
-	var result CompilationResult
+func CompilationTaskResponseFromJSON(input string) CompilationTaskResponse {
+	var result CompilationTaskResponse
 	err := json.Unmarshal([]byte(input), &result)
 	if err != nil {
 		panic(err)

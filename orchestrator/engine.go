@@ -83,9 +83,9 @@ type Engine struct {
 type EngineJobName string
 
 const (
-	EngineJobNameTest        EngineJobName = "test-engine"
-	EngineJobNameInference   EngineJobName = "inference-engine"
-	EngineJobNameCompilation EngineJobName = "compilation-engine"
+	EngineJobNameTest            EngineJobName = "test-engine"
+	EngineJobNameInference       EngineJobName = "inference-engine"
+	EngineJobNameCompilation     EngineJobName = "compilation-engine"
 	EngineJobNameGoalCompilation EngineJobName = "goal-compilation-engine"
 )
 
