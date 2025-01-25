@@ -25,6 +25,8 @@ func main() {
 			createRouterCli(),
 			lambda.CreateLambdaCli(),
 			createOrchestratorCli(),
+			createGraphCreateCli(),
+			createGoalFileCli(),
 		},
 	}
 	if err := cmd.Run(ctx, os.Args); err != nil {

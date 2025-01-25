@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"math"
+	"os"
 
 	"github.com/mroth/weightedrand/v2"
 	"github.com/rs/zerolog"
+	"github.com/urfave/cli/v3"
 )
 
 type NodeState string
@@ -145,6 +149,22 @@ func NewRepoGraph(rootBranchName BranchName) *RepoGraph {
 		},
 	}
 	return rg
+}
+
+func (rg *RepoGraph) SaveToFile(path string) error {
+	json, err := json.Marshal(rg)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, json, 0644)
+}
+
+func (rg *RepoGraph) LoadFromFile(path string) error {
+	str, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(str, rg)
 }
 
 func (rg *RepoGraph) AddBranchTarget(parentBranchName BranchName, traversalGoalID GoalID) {
@@ -469,4 +489,33 @@ func (rg *RepoGraph) FindNewBranchTargetForGoal(goalID GoalID) *RepoGraphBranchT
 		return nil
 	}
 	return chooser.Pick()
+}
+
+func createGraphCreateCli() *cli.Command {
+	var rootBranchName string
+	var path string
+	action := func(ctx context.Context, _ *cli.Command) error {
+		rg := NewRepoGraph(BranchName(rootBranchName))
+		rg.SaveToFile(path)
+		return nil
+	}
+	return &cli.Command{
+		Name:   "graph-create",
+		Usage:  "create an empty graph",
+		Action: action,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "root-branch",
+				Usage:       "root branch name",
+				Destination: &rootBranchName,
+				Required:    true,
+			},
+			&cli.StringFlag{
+				Name:        "out",
+				Usage:       "path to save the graph",
+				Destination: &path,
+				Required:    true,
+			},
+		},
+	}
 }

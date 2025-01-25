@@ -17,6 +17,7 @@ import (
 
 func createOrchestratorStartCli() *cli.Command {
 	var webServerPort int64
+	var graphPath string
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
 		logger.Info().Msg("starting orchestrator")
@@ -31,6 +32,10 @@ func createOrchestratorStartCli() *cli.Command {
 			return err
 		}
 		if err := setRouterParam(ctx, rdb, RedisInferenceAdapterDir, ""); err != nil {
+			return err
+		}
+		rg := &RepoGraph{}
+		if err := rg.LoadFromFile(graphPath); err != nil {
 			return err
 		}
 		inferenceSchedulingParams := SchedulingParams{
@@ -77,7 +82,8 @@ func createOrchestratorStartCli() *cli.Command {
 			wg:        &sync.WaitGroup{},
 			rdb:       rdb,
 			mu:        sync.Mutex{},
-			RepoGraph: &RepoGraph{},
+			RepoGraph: rg,
+			GraphPath: graphPath,
 			//GoalProvider: &GoalProvider{},
 			InferenceEngine:       inferenceEngine,
 			CompilationEngine:     compilationEngine,
@@ -106,7 +112,11 @@ func createOrchestratorStartCli() *cli.Command {
 		compilationEngine.WaitForStop()
 		goalCompilationEngine.WaitForStop()
 
-		// TODO: save the repo graph
+		logger.Info().Msg("saving graph to file")
+		if err := rg.SaveToFile(graphPath); err != nil {
+			logger.Error().Err(err).Msg("error saving graph to file")
+			return err
+		}
 
 		return nil
 	}
@@ -121,9 +131,16 @@ func createOrchestratorStartCli() *cli.Command {
 				Value:       8080,
 				Destination: &webServerPort,
 			},
+			&cli.StringFlag{
+				Name:        "graph",
+				Usage:       "path to the graph file",
+				Destination: &graphPath,
+				Required:    true,
+			},
 		},
 	}
 }
+
 
 func createOrchestratorCli() *cli.Command {
 	return &cli.Command{
@@ -149,6 +166,7 @@ type Orchestrator struct {
 
 	mu                               sync.Mutex
 	RepoGraph                        *RepoGraph
+	GraphPath                        string
 	GoalProvider                     GoalProvider
 	inferenceTaskToNodeLocator       map[EngineTaskID]NodeLocator
 	compilationTaskToNodeLocator     map[EngineTaskID]NodeLocator
@@ -170,16 +188,18 @@ func (o *Orchestrator) WaitForStop() {
 }
 
 func (o *Orchestrator) Start() {
-	o.wg.Add(6)
+	o.wg.Add(7)
 	go o.startGoalCompilationTx()
 	go o.startGoalCompilationRx()
 	go o.startInferenceRx()
 	go o.startInferenceTx()
 	go o.startCompilationTx()
 	go o.startCompilationRx()
+	go o.startGraphPeriodicSave()
 }
 
 // Due to architectural complexity I am using polling here
+// It would be better to have a channel that gets pushed to when a graph is finished
 func (o *Orchestrator) startGoalCompilationTx() {
 	defer o.wg.Done()
 	goalCompilationInput := o.GoalCompilationEngine.GetInput()
@@ -188,7 +208,7 @@ func (o *Orchestrator) startGoalCompilationTx() {
 		case <-o.ctx.Done():
 			o.logger.Info().Msg("goalCompilationInput listener closing")
 			return
-		case <-time.After(5 * time.Second):
+		case <-time.After(6 * time.Second):
 		}
 		numToAdd := func() int {
 			o.mu.Lock()
@@ -327,7 +347,7 @@ func (o *Orchestrator) startInferenceTx() {
 				case <-o.ctx.Done():
 					o.logger.Info().Msg("inferenceInput listener closing")
 					return
-				case <-time.After(1 * time.Second):
+				case <-time.After(2 * time.Second):
 					continue
 				}
 			}
@@ -416,7 +436,7 @@ func (o *Orchestrator) startCompilationTx() {
 				case <-o.ctx.Done():
 					o.logger.Info().Msg("compilationInput listener closing")
 					return
-				case <-time.After(1 * time.Second):
+				case <-time.After(2 * time.Second):
 					continue
 				}
 			}
@@ -451,6 +471,21 @@ func (o *Orchestrator) startCompilationRx() {
 				}
 				delete(o.compilationTaskToNodeLocator, val.ID)
 			}()
+		}
+	}
+}
+
+func (o *Orchestrator) startGraphPeriodicSave() {
+	defer o.wg.Done()
+	for {
+		select {
+		case <-o.ctx.Done():
+			return
+		case <-time.After(1 * time.Minute):
+		}
+		o.logger.Info().Msg("periodic saving graph to file")
+		if err := o.RepoGraph.SaveToFile(o.GraphPath); err != nil {
+			o.logger.Error().Err(err).Msg("error saving graph to file")
 		}
 	}
 }

@@ -1,0 +1,1 @@
+{"add_example_goals":[{"name":"simple not 0 not 2","id":"goal-8fb4f95c-ecf7-46e3-98fb-3d0818ff482a","example":"example : ∀ n, n ≠ 0 ∧ n ≠ 2 → Nat.succ (Nat.pred n) = n := by exact?"},{"name":"basic logic prop","id":"goal-6bc8c22f-41b2-48ab-9b23-c0cd78448f6b","example":"example : (P → Q) ∧ (Q → R) → (P → R) := by exact?"}]}
