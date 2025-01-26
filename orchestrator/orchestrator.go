@@ -102,11 +102,15 @@ func createOrchestratorStartCli() *cli.Command {
 		}
 
 		mux := http.NewServeMux()
+		server := &http.Server{
+			Addr:    fmt.Sprintf(":%d", webServerPort),
+			Handler: mux,
+		}
 		orchestrator.RegisterHandlers(mux)
 
 		logger.Info().Msgf("starting web server on port %d", webServerPort)
 		go func() {
-			err := http.ListenAndServe(fmt.Sprintf(":%d", webServerPort), mux)
+			err := server.ListenAndServe()
 			if err != nil {
 				logger.Error().Err(err).Msg("error starting web server")
 				cancel()
@@ -116,6 +120,7 @@ func createOrchestratorStartCli() *cli.Command {
 		if !noExecute {
 			orchestrator.Start()
 			orchestrator.WaitForStop()
+			server.Shutdown(ctx)
 
 			inferenceEngine.TriggerStop()
 			compilationEngine.TriggerStop()
@@ -130,7 +135,9 @@ func createOrchestratorStartCli() *cli.Command {
 			}
 		} else {
 			<-ctx.Done()
-
+			shutdownCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+			defer cancel()
+			server.Shutdown(shutdownCtx)
 		}
 
 		return nil
