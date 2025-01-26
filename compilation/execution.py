@@ -136,7 +136,8 @@ def execute(task: dict) -> dict:
             workdir="/home/ubuntu/repo"
         )
         print(f"Command {cmd['name']} exited with code {exit_code}")
-        if exit_code != 0:
+        # Hidden commands are allowed to fail
+        if exit_code != 0 and not cmd["name"].endswith("hidden"):
             hasFailed = True
 
         results.append({
@@ -212,7 +213,7 @@ def testGit():
     ret = os.system(f"echo 'test' > {repo_dir}/test.txt")
     if ret != 0:
         raise RuntimeError("Failed to create test.txt")
-    git_commit(branch_name, "branch")
+    git_commit("compilation")
     git_push(branch_name)
     git_checkout("main")
 

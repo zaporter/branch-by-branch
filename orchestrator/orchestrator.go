@@ -17,6 +17,7 @@ import (
 
 func createOrchestratorStartCli() *cli.Command {
 	var webServerPort int64
+	var noExecute bool
 	var graphPath string
 	var goalFile string
 	action := func(ctx context.Context, _ *cli.Command) error {
@@ -27,14 +28,16 @@ func createOrchestratorStartCli() *cli.Command {
 			return err
 		}
 		goalProvider := StaticGoalProviderFromFile(goalFile)
-		if err := setRouterParam(ctx, rdb, RedisInferenceEnabled, "true"); err != nil {
-			return err
-		}
-		if err := setRouterParam(ctx, rdb, RedisInferenceModelDir, "meta-llama/Llama-3.1-8B-Instruct"); err != nil {
-			return err
-		}
-		if err := setRouterParam(ctx, rdb, RedisInferenceAdapterDir, ""); err != nil {
-			return err
+		if !noExecute {
+			if err := setRouterParam(ctx, rdb, RedisInferenceEnabled, "true"); err != nil {
+				return err
+			}
+			if err := setRouterParam(ctx, rdb, RedisInferenceModelDir, "meta-llama/Llama-3.1-8B-Instruct"); err != nil {
+				return err
+			}
+			if err := setRouterParam(ctx, rdb, RedisInferenceAdapterDir, ""); err != nil {
+				return err
+			}
 		}
 		rg := &RepoGraph{}
 		if err := rg.LoadFromFile(graphPath); err != nil {
@@ -74,9 +77,11 @@ func createOrchestratorStartCli() *cli.Command {
 			cancel()
 		}()
 
-		inferenceEngine.Start(ctx)
-		compilationEngine.Start(ctx)
-		goalCompilationEngine.Start(ctx)
+		if !noExecute {
+			inferenceEngine.Start(ctx)
+			compilationEngine.Start(ctx)
+			goalCompilationEngine.Start(ctx)
+		}
 
 		orchestrator := Orchestrator{
 			logger:                logger,
@@ -108,20 +113,24 @@ func createOrchestratorStartCli() *cli.Command {
 			}
 		}()
 
-		orchestrator.Start()
-		orchestrator.WaitForStop()
+		if !noExecute {
+			orchestrator.Start()
+			orchestrator.WaitForStop()
 
-		inferenceEngine.TriggerStop()
-		compilationEngine.TriggerStop()
-		goalCompilationEngine.TriggerStop()
-		inferenceEngine.WaitForStop()
-		compilationEngine.WaitForStop()
-		goalCompilationEngine.WaitForStop()
+			inferenceEngine.TriggerStop()
+			compilationEngine.TriggerStop()
+			goalCompilationEngine.TriggerStop()
+			inferenceEngine.WaitForStop()
+			compilationEngine.WaitForStop()
+			goalCompilationEngine.WaitForStop()
+			logger.Info().Msg("saving graph to file")
+			if err := rg.SaveToFile(graphPath); err != nil {
+				logger.Error().Err(err).Msg("error saving graph to file")
+				return err
+			}
+		} else {
+			<-ctx.Done()
 
-		logger.Info().Msg("saving graph to file")
-		if err := rg.SaveToFile(graphPath); err != nil {
-			logger.Error().Err(err).Msg("error saving graph to file")
-			return err
 		}
 
 		return nil
@@ -148,6 +157,12 @@ func createOrchestratorStartCli() *cli.Command {
 				Usage:       "path to the goal file",
 				Destination: &goalFile,
 				Required:    true,
+			},
+			&cli.BoolFlag{
+				Name:        "no-execute",
+				Usage:       "don't execute the engines",
+				Value:       false,
+				Destination: &noExecute,
 			},
 		},
 	}

@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/mroth/weightedrand/v2"
 	"github.com/rs/zerolog"
@@ -73,6 +74,7 @@ type RepoGraph struct {
 }
 
 type RepoGraphBranchTarget struct {
+	CreatedAt time.Time `json:"created_at"`
 	// nil if this is the root
 	ParentBranchName *BranchName `json:"parent_branch_name,omitempty"`
 	// Goal that was used to create this branch target (nil if this is the root)
@@ -91,8 +93,9 @@ type CommitGraph struct {
 }
 
 type CommitGraphNode struct {
-	ID    NodeID `json:"id"`
-	Depth int    `json:"depth"`
+	ID        NodeID    `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Depth     int       `json:"depth"`
 	// nil if this is the root
 	Parent   *NodeID    `json:"parent"`
 	Children []NodeID   `json:"children"`
@@ -123,6 +126,7 @@ type ActionOutput struct {
 func NewCommitGraph(goalID GoalID) *CommitGraph {
 	rootNode := &CommitGraphNode{
 		ID:         NewNodeID(),
+		CreatedAt:  time.Now(),
 		Depth:      0,
 		Parent:     nil,
 		Children:   []NodeID{},
@@ -142,6 +146,7 @@ func NewRepoGraph(rootBranchName BranchName) *RepoGraph {
 	rg := &RepoGraph{
 		BranchTargets: map[BranchName]*RepoGraphBranchTarget{
 			rootBranchName: {
+				CreatedAt:        time.Now(),
 				BranchName:       rootBranchName,
 				ParentBranchName: nil,
 				TraversalGoalID:  nil,
@@ -171,6 +176,7 @@ func (rg *RepoGraph) LoadFromFile(path string) error {
 func (rg *RepoGraph) AddBranchTarget(parentBranchName BranchName, traversalGoalID GoalID) {
 	branchName := NewBranchName()
 	rg.BranchTargets[branchName] = &RepoGraphBranchTarget{
+		CreatedAt:        time.Now(),
 		BranchName:       branchName,
 		ParentBranchName: &parentBranchName,
 		TraversalGoalID:  &traversalGoalID,
@@ -225,6 +231,7 @@ func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *Inferenc
 
 		newNode := &CommitGraphNode{
 			ID:              NewNodeID(),
+			CreatedAt:       time.Now(),
 			Depth:           node.Depth + 1,
 			Parent:          &node.ID,
 			Children:        []NodeID{},
