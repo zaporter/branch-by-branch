@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -194,23 +195,36 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 		o.mu.Lock()
 		defer o.mu.Unlock()
 		type Response struct {
-			Depth           int        `json:"depth"`
-			State           NodeState  `json:"state"`
-			Result          NodeResult `json:"result"`
-			InferenceOutput string     `json:"inference_output"`
-			BranchName      BranchName `json:"branch_name"`
+			Depth             int                `json:"depth"`
+			State             NodeState          `json:"state"`
+			Result            NodeResult         `json:"result"`
+			InferenceOutput   string             `json:"inference_output"`
+			BranchName        BranchName         `json:"branch_name"`
+			ActionOutputs     []ActionOutput     `json:"action_outputs"`
+			CompilationResult *CompilationResult `json:"compilation_result,omitempty"`
+			Prompt            string             `json:"prompt,omitempty"`
 		}
 		slice, err := o.RepoGraph.GetNodeSlice(request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		prompt_task, err := o.RepoGraph.BuildInferenceTaskForNode(request, o.GoalProvider)
+		var prompt string
+		if err != nil {
+			prompt = fmt.Sprintf("Error building prompt: %s", err.Error())
+		} else {
+			prompt = prompt_task.Prompt
+		}
 		response := Response{
-			Depth:           slice.CommitGraphNode.Depth,
-			State:           slice.CommitGraphNode.State,
-			Result:          slice.CommitGraphNode.Result,
-			InferenceOutput: slice.CommitGraphNode.InferenceOutput,
-			BranchName:      slice.CommitGraphNode.BranchName,
+			Depth:             slice.CommitGraphNode.Depth,
+			State:             slice.CommitGraphNode.State,
+			Result:            slice.CommitGraphNode.Result,
+			InferenceOutput:   slice.CommitGraphNode.InferenceOutput,
+			BranchName:        slice.CommitGraphNode.BranchName,
+			ActionOutputs:     slice.CommitGraphNode.ActionOutputs,
+			CompilationResult: slice.CommitGraphNode.CompilationResult,
+			Prompt:            prompt,
 		}
 		json.NewEncoder(w).Encode(response)
 	})

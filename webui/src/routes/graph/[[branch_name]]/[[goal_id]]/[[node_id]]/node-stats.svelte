@@ -22,5 +22,21 @@
 		<dd>{data.state}</dd>
 		<dt>Result</dt>
 		<dd>{data.result}</dd>
+		<dt>Prompt</dt>
+		<dd><pre class="whitespace-pre-wrap">{data.prompt}</pre></dd>
+		<dt>Inference Output</dt>
+		<dd><pre class="whitespace-pre-wrap">{data.inference_output}</pre></dd>
+		<dt>Action Outputs</dt>
+		<dd>
+			{#each data.action_outputs ?? [] as action_output}
+				<pre class="whitespace-pre-wrap">{action_output.action_name}: {action_output.text}</pre>
+			{/each}
+		</dd>
+		<dt>Compilation Result</dt>
+		<dd>
+			{#if data.compilation_result}
+				<pre class="whitespace-pre-wrap">{data.compilation_result.out}</pre>
+			{/if}
+		</dd>
 	</dl>
 {/if}

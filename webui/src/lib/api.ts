@@ -138,12 +138,26 @@ export const createCommitGraphStatsQuery = (locator: CommitGraphLocator) => {
             .then(data => commitGraphStatsSchema.parse(data)),
     });
 }
+const actionOutputSchema = z.object({
+    action_name: z.string(),
+    text: z.string(),
+    exit_code: z.number(),
+})
+export type ActionOutput = z.infer<typeof actionOutputSchema>;
+const compilationResultSchema = z.object({
+    out: z.string(),
+    exit_code: z.number(),
+})
+export type CompilationResult = z.infer<typeof compilationResultSchema>;
 //@api /api/graph/node-stats
 export const nodeStatsSchema = z.object({
     depth: z.number(),
     state: nodeStateSchema,
     result: nodeResultSchema,
     inference_output: z.string().optional(),
+    action_outputs: z.array(actionOutputSchema).optional().nullable(),
+    compilation_result: compilationResultSchema.optional().nullable(),
+    prompt: z.string().optional(),
     branch_name: z.string(),
 })
 export type NodeStats = z.infer<typeof nodeStatsSchema>;
