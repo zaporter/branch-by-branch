@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+// Note to self:
+// If I ever design nested locators again in my life,
+// I should remember this file and design it as far away from this as possible.
+// This is very pointlessly painful.
+
 export const branchTargetLocatorSchema = z.object({
     branch_name: z.string(),
 })
@@ -28,17 +33,29 @@ export const locatorFromString = (locator: string): UnknownLocator => {
     return z.union([commitGraphLocatorSchema, branchTargetLocatorSchema, nodeLocatorSchema]).parse(parsed);
 }
 
-export const isBranchTargetLocator = (locator: UnknownLocator): locator is BranchTargetLocator => {
-    return (
+export const isBranchTargetLocator = (locator: UnknownLocator | undefined): locator is BranchTargetLocator => {
+    return locator !== undefined && (
         'branch_name' in locator
     );
 }
-export const isCommitGraphLocator = (locator: UnknownLocator): locator is CommitGraphLocator => {
-    return (
+export const isCommitGraphLocator = (locator: UnknownLocator | undefined): locator is CommitGraphLocator => {
+    return locator !== undefined && (
         'branch_target_locator' in locator
     );
 }
-export const isNodeLocator = (locator: UnknownLocator): locator is NodeLocator => {
-    return (
+export const isNodeLocator = (locator: UnknownLocator | undefined): locator is NodeLocator => {
+    return locator !== undefined && (
         'node_id' in locator);
+}
+
+export const branchLocatorFromUnknown = (locator: UnknownLocator | undefined): BranchTargetLocator | undefined => {
+    return isBranchTargetLocator(locator) ? locator : isCommitGraphLocator(locator) ? locator.branch_target_locator : isNodeLocator(locator) ? locator.commit_graph_locator.branch_target_locator : undefined;
+}
+
+export const commitGraphLocatorFromUnknown = (locator: UnknownLocator | undefined): CommitGraphLocator | undefined => {
+    return isCommitGraphLocator(locator) ? locator : isNodeLocator(locator) ? locator.commit_graph_locator : undefined;
+}
+
+export const nodeLocatorFromUnknown = (locator: UnknownLocator | undefined): NodeLocator | undefined => {
+    return isNodeLocator(locator) ? locator : undefined;
 }

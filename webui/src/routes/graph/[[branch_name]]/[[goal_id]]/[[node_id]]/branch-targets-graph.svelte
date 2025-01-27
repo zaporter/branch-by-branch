@@ -1,9 +1,11 @@
 <script lang="ts">
 	import {
+		isBranchTargetLocator,
 		isCommitGraphLocator,
 		locatorFromString,
 		locatorToJSON,
-		type BranchTargetGraph,
+		type BranchTargetGraphLocators,
+		type BranchTargetLocator,
 		type CommitGraphLocator
 	} from '$lib';
 	import Graph from 'graphology';
@@ -11,9 +13,11 @@
 	import ForceSupervisor from 'graphology-layout-force/worker';
 	import { onMount } from 'svelte';
 	interface Props {
-		graph: BranchTargetGraph;
+		graph: BranchTargetGraphLocators;
 		selectedCommitGraph: CommitGraphLocator | undefined;
+		selectedBranchTarget: BranchTargetLocator | undefined;
 		onSelectCommitGraph: (locator: CommitGraphLocator) => void;
+		onSelectBranchTarget: (locator: BranchTargetLocator) => void;
 	}
 	const props: Props = $props();
 
@@ -21,7 +25,13 @@
 	let layout: ForceSupervisor | undefined;
 	let container: HTMLElement;
 
-	function updateGraph({ graph, selectedCommitGraph, onSelectCommitGraph }: Props) {
+	function updateGraph({
+		graph,
+		selectedCommitGraph,
+		selectedBranchTarget,
+		onSelectCommitGraph,
+		onSelectBranchTarget
+	}: Props) {
 		if (!container) return;
 
 		const RED = '#ff0000';
@@ -39,6 +49,8 @@
 				const locator = locatorFromString(node);
 				if (isCommitGraphLocator(locator)) {
 					onSelectCommitGraph(locator);
+				} else if (isBranchTargetLocator(locator)) {
+					onSelectBranchTarget(locator);
 				}
 			});
 		}
@@ -51,16 +63,18 @@
 		// Add/update branch target nodes
 		for (const branchTarget of graph.branch_targets) {
 			const nodeId = locatorToJSON(branchTarget);
+			const isSelected =
+				selectedBranchTarget && locatorToJSON(branchTarget) === locatorToJSON(selectedBranchTarget);
 			if (graphObject.hasNode(nodeId)) {
 				graphObject.setNodeAttribute(nodeId, 'label', branchTarget.branch_name);
-				graphObject.setNodeAttribute(nodeId, 'color', RED);
+				graphObject.setNodeAttribute(nodeId, 'color', isSelected ? GREEN : RED);
 			} else {
 				graphObject.addNode(nodeId, {
 					label: branchTarget.branch_name,
 					x: graphObject.order ? Math.random() * 100 : 0,
 					y: graphObject.order ? Math.random() * 100 : 0,
-					size: 10,
-					color: RED
+					size: 20,
+					color: isSelected ? GREEN : RED
 				});
 			}
 			existingNodes.delete(nodeId);

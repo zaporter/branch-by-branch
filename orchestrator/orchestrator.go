@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -211,73 +210,6 @@ type Orchestrator struct {
 	GoalCompilationEngine *Engine
 }
 
-func setupHeader(w *http.ResponseWriter, isJson bool) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	if isJson {
-		(*w).Header().Set("Content-Type", "application/json; charset=utf-8")
-	} else {
-		(*w).Header().Set("Content-Type", "text/html; charset=utf-8")
-	}
-}
-
-func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
-	mux.HandleFunc("/api/ping", func(w http.ResponseWriter, r *http.Request) {
-		setupHeader(&w, false)
-		w.Write([]byte("pong"))
-	})
-
-	mux.HandleFunc("/api/graph/branch-target-graph", func(w http.ResponseWriter, r *http.Request) {
-		setupHeader(&w, true)
-		o.mu.Lock()
-		defer o.mu.Unlock()
-		type GoalBranchNode struct {
-			ParentBranchTarget    BranchTargetLocator   `json:"parent_branch_target"`
-			ChildrenBranchTargets []BranchTargetLocator `json:"children_branch_targets"`
-			CommitGraph           CommitGraphLocator    `json:"commit_graph"`
-			GoalName              string                `json:"goal_name"`
-		}
-		type Response struct {
-			BranchTargets []BranchTargetLocator `json:"branch_targets"`
-			Subgraphs     []GoalBranchNode      `json:"subgraphs"`
-		}
-		response := Response{}
-		for _, bt := range o.RepoGraph.BranchTargets {
-			response.BranchTargets = append(response.BranchTargets, BranchTargetLocator{
-				BranchName: bt.BranchName,
-			})
-			for _, subgraph := range bt.Subgraphs {
-				children := []BranchTargetLocator{}
-				// N^2
-				for _, testB := range o.RepoGraph.BranchTargets {
-					if testB.TraversalGoalID != nil && *testB.TraversalGoalID == subgraph.GoalID {
-						children = append(children, BranchTargetLocator{
-							BranchName: testB.BranchName,
-						})
-					}
-				}
-				name := o.GoalProvider.GetGoal(subgraph.GoalID).Name()
-
-				response.Subgraphs = append(response.Subgraphs, GoalBranchNode{
-					ParentBranchTarget: BranchTargetLocator{
-						BranchName: bt.BranchName,
-					},
-					ChildrenBranchTargets: children,
-					CommitGraph: CommitGraphLocator{
-						BranchTargetLocator: BranchTargetLocator{
-							BranchName: bt.BranchName,
-						},
-						GoalID: subgraph.GoalID,
-					},
-					GoalName: name,
-				})
-			}
-		}
-		json.NewEncoder(w).Encode(response)
-	})
-
-}
 
 func (o *Orchestrator) WaitForStop() {
 	o.wg.Wait()
