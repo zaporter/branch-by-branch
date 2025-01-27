@@ -29,6 +29,10 @@ type CommitGraphSlice struct {
 	CommitGraph  *CommitGraph
 }
 
+type BranchTargetSlice struct {
+	BranchTarget *RepoGraphBranchTarget
+}
+
 func (rg *RepoGraph) GetNodeSlice(locator NodeLocator) (NodeSlice, error) {
 	branchTarget, ok := rg.BranchTargets[locator.CommitGraphLocator.BranchTargetLocator.BranchName]
 	if !ok {
@@ -61,5 +65,15 @@ func (rg *RepoGraph) GetCommitGraphSlice(locator CommitGraphLocator) (CommitGrap
 	return CommitGraphSlice{
 		BranchTarget: branchTarget,
 		CommitGraph:  subgraph,
+	}, nil
+}
+
+func (rg *RepoGraph) GetBranchTargetSlice(locator BranchTargetLocator) (BranchTargetSlice, error) {
+	branchTarget, ok := rg.BranchTargets[locator.BranchName]
+	if !ok {
+		return BranchTargetSlice{}, errors.New("branch target not found")
+	}
+	return BranchTargetSlice{
+		BranchTarget: branchTarget,
 	}, nil
 }

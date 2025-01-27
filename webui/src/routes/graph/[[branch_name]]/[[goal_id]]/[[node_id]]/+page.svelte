@@ -13,8 +13,12 @@
 		type NodeLocator,
 		type UnknownLocator
 	} from '$lib';
+	import BranchTargetStats from './branch-target-stats.svelte';
 	import BranchTargetsGraph from './branch-targets-graph.svelte';
+	import CommitGraphStats from './commit-graph-stats.svelte';
 	import CommitGraph from './commit-graph.svelte';
+	import NodeStats from './node-stats.svelte';
+	import StatsContainer from './stats-container.svelte';
 
 	const pingQuery = createPingQuery();
 	const branchTargetGraphQuery = createBranchTargetGraphQuery();
@@ -69,34 +73,58 @@
 	};
 </script>
 
-{#if $pingQuery.isLoading}
-	<p>Loading...</p>
-{:else if $pingQuery.isError}
-	<p>Error: {$pingQuery.error.message}</p>
-{:else}
-	<p>{$pingQuery.data}</p>
-{/if}
+<div class="flex flex-row gap-4 p-4">
+	<div class="flex flex-col gap-4">
+		{#if $pingQuery.isLoading}
+			<p>Loading...</p>
+		{:else if $pingQuery.isError}
+			<p>Error: {$pingQuery.error.message}</p>
+		{/if}
 
-{#if $branchTargetGraphQuery.isLoading}
-	<p>Loading...</p>
-{:else if $branchTargetGraphQuery.isError}
-	<p>Error: {$branchTargetGraphQuery.error.message}</p>
-{:else if $branchTargetGraphQuery.data}
-	<BranchTargetsGraph
-		graph={$branchTargetGraphQuery.data}
-		selectedCommitGraph={currentCommitGraphLocator}
-		selectedBranchTarget={currentBranchTargetLocator}
-		{onSelectCommitGraph}
-		{onSelectBranchTarget}
-	/>
-{/if}
+		{#if $branchTargetGraphQuery.isLoading}
+			<p>Loading...</p>
+		{:else if $branchTargetGraphQuery.isError}
+			<p>Error: {$branchTargetGraphQuery.error.message}</p>
+		{:else if $branchTargetGraphQuery.data}
+			<BranchTargetsGraph
+				graph={$branchTargetGraphQuery.data}
+				selectedCommitGraph={currentCommitGraphLocator}
+				selectedBranchTarget={currentBranchTargetLocator}
+				{onSelectCommitGraph}
+				{onSelectBranchTarget}
+			/>
+		{/if}
 
-{#if $commitGraphQuery}
-	{#if $commitGraphQuery.isLoading}
-		<p>Loading...</p>
-	{:else if $commitGraphQuery.isError}
-		<p>Error: {$commitGraphQuery.error.message}</p>
-	{:else if $commitGraphQuery.data}
-		<CommitGraph graph={$commitGraphQuery.data} selectedNode={currentNodeLocator} {onSelectNode} />
-	{/if}
-{/if}
+		{#if $commitGraphQuery}
+			{#if $commitGraphQuery.isLoading}
+				<p>Loading...</p>
+			{:else if $commitGraphQuery.isError}
+				<p>Error: {$commitGraphQuery.error.message}</p>
+			{:else if $commitGraphQuery.data}
+				<CommitGraph
+					graph={$commitGraphQuery.data}
+					selectedNode={currentNodeLocator}
+					{onSelectNode}
+				/>
+			{/if}
+		{/if}
+	</div>
+
+	<div class="flex w-full flex-col gap-4">
+		{#if currentBranchTargetLocator}
+			<StatsContainer title={`Branch ${currentBranchTargetLocator.branch_name}`}>
+				<BranchTargetStats locator={currentBranchTargetLocator} />
+			</StatsContainer>
+		{/if}
+		{#if currentCommitGraphLocator}
+			<StatsContainer title={`Commit Graph ${currentCommitGraphLocator.goal_id}`}>
+				<CommitGraphStats locator={currentCommitGraphLocator} />
+			</StatsContainer>
+		{/if}
+		{#if currentNodeLocator}
+			<StatsContainer title={`Node ${currentNodeLocator.node_id}`}>
+				<NodeStats locator={currentNodeLocator} />
+			</StatsContainer>
+		{/if}
+	</div>
+</div>

@@ -1,6 +1,6 @@
 import { createQuery } from '@tanstack/svelte-query'
 import { z } from 'zod'
-import { branchTargetLocatorSchema, commitGraphLocatorSchema, nodeLocatorSchema, type CommitGraphLocator } from './locator';
+import { branchTargetLocatorSchema, commitGraphLocatorSchema, nodeLocatorSchema, type BranchTargetLocator, type CommitGraphLocator, type NodeLocator } from './locator';
 
 // TODO: don't hardcode this
 const bePort = 8080;
@@ -96,5 +96,66 @@ export const createCommitGraphQuery = (locator: CommitGraphLocator) => {
         )
             .then(res => res.json())
             .then(data => commitGraphLocatorsSchema.parse(data)),
+    });
+}
+
+
+//@api /api/graph/branch-target-stats
+export const branchTargetStatsSchema = z.object({
+    branch_name: z.string(),
+    parent_branch_name: z.string().optional(),
+    num_subgraphs: z.number(),
+})
+export type BranchTargetStats = z.infer<typeof branchTargetStatsSchema>;
+
+export const createBranchTargetStatsQuery = (locator: BranchTargetLocator) => {
+    return createQuery({
+        queryKey: ['branch-target-stats', locator],
+        queryFn: () => fetch(`${beHost}/api/graph/branch-target-stats`, {
+            method: 'POST',
+            body: JSON.stringify(locator),
+        })
+            .then(res => res.json())
+            .then(data => branchTargetStatsSchema.parse(data)),
+    });
+}
+
+//@api /api/graph/commit-graph-stats
+export const commitGraphStatsSchema = z.object({
+    state: graphStateSchema,
+    goal_id: z.string(),
+})
+export type CommitGraphStats = z.infer<typeof commitGraphStatsSchema>;
+
+export const createCommitGraphStatsQuery = (locator: CommitGraphLocator) => {
+    return createQuery({
+        queryKey: ['commit-graph-stats', locator],
+        queryFn: () => fetch(`${beHost}/api/graph/commit-graph-stats`, {
+            method: 'POST',
+            body: JSON.stringify(locator),
+        })
+            .then(res => res.json())
+            .then(data => commitGraphStatsSchema.parse(data)),
+    });
+}
+//@api /api/graph/node-stats
+export const nodeStatsSchema = z.object({
+    depth: z.number(),
+    state: nodeStateSchema,
+    result: nodeResultSchema,
+    inference_output: z.string().optional(),
+    branch_name: z.string(),
+})
+export type NodeStats = z.infer<typeof nodeStatsSchema>;
+
+export const createNodeStatsQuery = (locator: NodeLocator) => {
+    return createQuery({
+        queryKey: ['node-stats', locator],
+        queryFn: () => fetch(`${beHost}/api/graph/node-stats`, {
+            method: 'POST',
+            body: JSON.stringify(locator),
+        })
+            .then(res => res.json())
+            .then(data => nodeStatsSchema.parse(data)),
     });
 }

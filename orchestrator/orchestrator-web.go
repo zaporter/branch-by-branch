@@ -129,5 +129,90 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 		}
 		json.NewEncoder(w).Encode(response)
 	})
+	mux.HandleFunc("/api/graph/branch-target-stats", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		var request BranchTargetLocator
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		type Response struct {
+			BranchName       BranchName  `json:"branch_name"`
+			ParentBranchName *BranchName `json:"parent_branch_name,omitempty"`
+			NumSubgraphs     int         `json:"num_subgraphs"`
+		}
+		slice, err := o.RepoGraph.GetBranchTargetSlice(request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		response := Response{
+			BranchName:       slice.BranchTarget.BranchName,
+			ParentBranchName: slice.BranchTarget.ParentBranchName,
+			NumSubgraphs:     len(slice.BranchTarget.Subgraphs),
+		}
+		json.NewEncoder(w).Encode(response)
+	})
+
+	mux.HandleFunc("/api/graph/commit-graph-stats", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		var request CommitGraphLocator
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		type Response struct {
+			State  GraphState `json:"state"`
+			GoalID GoalID     `json:"goal_id"`
+		}
+		slice, err := o.RepoGraph.GetCommitGraphSlice(request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		response := Response{
+			State:  slice.CommitGraph.State,
+			GoalID: slice.CommitGraph.GoalID,
+		}
+		json.NewEncoder(w).Encode(response)
+	})
+
+	mux.HandleFunc("/api/graph/node-stats", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		var request NodeLocator
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		type Response struct {
+			Depth           int        `json:"depth"`
+			State           NodeState  `json:"state"`
+			Result          NodeResult `json:"result"`
+			InferenceOutput string     `json:"inference_output"`
+			BranchName      BranchName `json:"branch_name"`
+		}
+		slice, err := o.RepoGraph.GetNodeSlice(request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		response := Response{
+			Depth:           slice.CommitGraphNode.Depth,
+			State:           slice.CommitGraphNode.State,
+			Result:          slice.CommitGraphNode.Result,
+			InferenceOutput: slice.CommitGraphNode.InferenceOutput,
+			BranchName:      slice.CommitGraphNode.BranchName,
+		}
+		json.NewEncoder(w).Encode(response)
+	})
 
 }
