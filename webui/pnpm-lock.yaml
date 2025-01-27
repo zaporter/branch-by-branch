@@ -14,6 +14,9 @@ importers:
       '@eslint/js':
         specifier: ^9.18.0
         version: 9.19.0
+      '@sigma/node-image':
+        specifier: ^3.0.0
+        version: 3.0.0(sigma@3.0.1(graphology-types@0.24.8))
       '@sveltejs/adapter-auto':
         specifier: ^4.0.0
         version: 4.0.0(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.19.3)(vite@6.0.11(jiti@1.21.7)(yaml@2.7.0)))(svelte@5.19.3)(vite@6.0.11(jiti@1.21.7)(yaml@2.7.0)))
@@ -23,6 +26,9 @@ importers:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^5.0.0
         version: 5.0.3(svelte@5.19.3)(vite@6.0.11(jiti@1.21.7)(yaml@2.7.0))
+      '@tanstack/svelte-query':
+        specifier: ^5.64.2
+        version: 5.64.2(svelte@5.19.3)
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.5.1)
@@ -38,6 +44,12 @@ importers:
       globals:
         specifier: ^15.14.0
         version: 15.14.0
+      graphology:
+        specifier: ^0.26.0
+        version: 0.26.0(graphology-types@0.24.8)
+      graphology-layout-force:
+        specifier: ^0.2.4
+        version: 0.2.4(graphology-types@0.24.8)
       prettier:
         specifier: ^3.4.2
         version: 3.4.2
@@ -47,6 +59,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.6.10
         version: 0.6.11(prettier-plugin-svelte@3.3.3(prettier@3.4.2)(svelte@5.19.3))(prettier@3.4.2)
+      sigma:
+        specifier: ^3.0.1
+        version: 3.0.1(graphology-types@0.24.8)
       svelte:
         specifier: ^5.0.0
         version: 5.19.3
@@ -65,6 +80,9 @@ importers:
       vite:
         specifier: ^6.0.0
         version: 6.0.11(jiti@1.21.7)(yaml@2.7.0)
+      zod:
+        specifier: ^3.24.1
+        version: 3.24.1
 
 packages:
 
@@ -425,6 +443,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@sigma/node-image@3.0.0':
+    resolution: {integrity: sha512-i4WLNPugDY4jgQEZtNSiSVj4HHXOraciXLtlgdygeUxMVEhH8PJ/+Q1vQ9f/SlKFnZQ+7vH3HnsSDW6FD9aP+g==}
+    peerDependencies:
+      sigma: '>=3.0.0-beta.10'
+
   '@sveltejs/adapter-auto@4.0.0':
     resolution: {integrity: sha512-kmuYSQdD2AwThymQF0haQhM8rE5rhutQXG4LNbnbShwhMO4qQGnKaaTy+88DuNSuoQDi58+thpq8XpHc1+oEKQ==}
     peerDependencies:
@@ -453,6 +476,14 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
       vite: ^6.0.0
+
+  '@tanstack/query-core@5.64.2':
+    resolution: {integrity: sha512-hdO8SZpWXoADNTWXV9We8CwTkXU88OVWRBcsiFrk7xJQnhm6WRlweDzMD+uH+GnuieTBVSML6xFa17C2cNV8+g==}
+
+  '@tanstack/svelte-query@5.64.2':
+    resolution: {integrity: sha512-0Jdw33u/zSmB8bwADyx9ASdMO4KVcvZqjx5q1k9cOS/HeoMFU8eCnr6xA8Pxz5mGVSji+kM7e6zIKOAQdoj6Mw==}
+    peerDependencies:
+      svelte: ^3.54.0 || ^4.0.0 || ^5.0.0-next.0
 
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
@@ -776,6 +807,10 @@ packages:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
 
+  events@3.3.0:
+    resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
+    engines: {node: '>=0.8.x'}
+
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
@@ -856,6 +891,24 @@ packages:
 
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
+
+  graphology-layout-force@0.2.4:
+    resolution: {integrity: sha512-NYZz0YAnDkn5pkm30cvB0IScFoWGtbzJMrqaiH070dYlYJiag12Oc89dbVfaMaVR/w8DMIKxn/ix9Bqj+Umm9Q==}
+    peerDependencies:
+      graphology-types: '>=0.19.0'
+
+  graphology-types@0.24.8:
+    resolution: {integrity: sha512-hDRKYXa8TsoZHjgEaysSRyPdT6uB78Ci8WnjgbStlQysz7xR52PInxNsmnB7IBOM1BhikxkNyCVEFgmPKnpx3Q==}
+
+  graphology-utils@2.5.2:
+    resolution: {integrity: sha512-ckHg8MXrXJkOARk56ZaSCM1g1Wihe2d6iTmz1enGOz4W/l831MBCKSayeFQfowgF8wd+PQ4rlch/56Vs/VZLDQ==}
+    peerDependencies:
+      graphology-types: '>=0.23.0'
+
+  graphology@0.26.0:
+    resolution: {integrity: sha512-8SSImzgUUYC89Z042s+0r/vMibY7GX/Emz4LDO5e7jYXhuoWfHISPFJYjpRLUSJGq6UQ6xlenvX1p/hJdfXuXg==}
+    peerDependencies:
+      graphology-types: '>=0.24.0'
 
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
@@ -1274,6 +1327,9 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
+  sigma@3.0.1:
+    resolution: {integrity: sha512-z67BX1FhIpD+wLs2WJ7QS2aR49TcSr3YaVZ2zU8cAc5jMiUYlSbeDp4EI6euBDUpm3/lzO4pfytP/gW4BhXWuA==}
+
   signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
@@ -1477,6 +1533,9 @@ packages:
 
   zimmerframe@1.1.2:
     resolution: {integrity: sha512-rAbqEGa8ovJy4pyBxZM70hg4pE6gDgaQ0Sl9M3enG3I0d6H4XSAM3GeNGLKnsBpuijUow064sf7ww1nutC5/3w==}
+
+  zod@3.24.1:
+    resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
 
 snapshots:
 
@@ -1721,6 +1780,10 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.32.0':
     optional: true
 
+  '@sigma/node-image@3.0.0(sigma@3.0.1(graphology-types@0.24.8))':
+    dependencies:
+      sigma: 3.0.1(graphology-types@0.24.8)
+
   '@sveltejs/adapter-auto@4.0.0(@sveltejs/kit@2.16.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.19.3)(vite@6.0.11(jiti@1.21.7)(yaml@2.7.0)))(svelte@5.19.3)(vite@6.0.11(jiti@1.21.7)(yaml@2.7.0)))':
     dependencies:
       '@sveltejs/kit': 2.16.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.19.3)(vite@6.0.11(jiti@1.21.7)(yaml@2.7.0)))(svelte@5.19.3)(vite@6.0.11(jiti@1.21.7)(yaml@2.7.0))
@@ -1764,6 +1827,13 @@ snapshots:
       vitefu: 1.0.5(vite@6.0.11(jiti@1.21.7)(yaml@2.7.0))
     transitivePeerDependencies:
       - supports-color
+
+  '@tanstack/query-core@5.64.2': {}
+
+  '@tanstack/svelte-query@5.64.2(svelte@5.19.3)':
+    dependencies:
+      '@tanstack/query-core': 5.64.2
+      svelte: 5.19.3
 
   '@types/cookie@0.6.0': {}
 
@@ -2140,6 +2210,8 @@ snapshots:
 
   esutils@2.0.3: {}
 
+  events@3.3.0: {}
+
   fast-deep-equal@3.1.3: {}
 
   fast-glob@3.3.3:
@@ -2214,6 +2286,22 @@ snapshots:
   globals@15.14.0: {}
 
   graphemer@1.4.0: {}
+
+  graphology-layout-force@0.2.4(graphology-types@0.24.8):
+    dependencies:
+      graphology-types: 0.24.8
+      graphology-utils: 2.5.2(graphology-types@0.24.8)
+
+  graphology-types@0.24.8: {}
+
+  graphology-utils@2.5.2(graphology-types@0.24.8):
+    dependencies:
+      graphology-types: 0.24.8
+
+  graphology@0.26.0(graphology-types@0.24.8):
+    dependencies:
+      events: 3.3.0
+      graphology-types: 0.24.8
 
   has-flag@4.0.0: {}
 
@@ -2526,6 +2614,13 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
+  sigma@3.0.1(graphology-types@0.24.8):
+    dependencies:
+      events: 3.3.0
+      graphology-utils: 2.5.2(graphology-types@0.24.8)
+    transitivePeerDependencies:
+      - graphology-types
+
   signal-exit@4.1.0: {}
 
   sirv@3.0.0:
@@ -2727,3 +2822,5 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   zimmerframe@1.1.2: {}
+
+  zod@3.24.1: {}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -210,10 +211,72 @@ type Orchestrator struct {
 	GoalCompilationEngine *Engine
 }
 
+func setupHeader(w *http.ResponseWriter, isJson bool) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	if isJson {
+		(*w).Header().Set("Content-Type", "application/json; charset=utf-8")
+	} else {
+		(*w).Header().Set("Content-Type", "text/html; charset=utf-8")
+	}
+}
+
 func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, World!"))
+	mux.HandleFunc("/api/ping", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, false)
+		w.Write([]byte("pong"))
 	})
+
+	mux.HandleFunc("/api/graph/branch-target-graph", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		type GoalBranchNode struct {
+			ParentBranchTarget    BranchTargetLocator   `json:"parent_branch_target"`
+			ChildrenBranchTargets []BranchTargetLocator `json:"children_branch_targets"`
+			CommitGraph           CommitGraphLocator    `json:"commit_graph"`
+			GoalName              string                `json:"goal_name"`
+		}
+		type Response struct {
+			BranchTargets []BranchTargetLocator `json:"branch_targets"`
+			Subgraphs     []GoalBranchNode      `json:"subgraphs"`
+		}
+		response := Response{}
+		for _, bt := range o.RepoGraph.BranchTargets {
+			response.BranchTargets = append(response.BranchTargets, BranchTargetLocator{
+				BranchName: bt.BranchName,
+			})
+			for _, subgraph := range bt.Subgraphs {
+				children := []BranchTargetLocator{}
+				// N^2
+				for _, testB := range o.RepoGraph.BranchTargets {
+					if testB.TraversalGoalID != nil && *testB.TraversalGoalID == subgraph.GoalID {
+						children = append(children, BranchTargetLocator{
+							BranchName: testB.BranchName,
+						})
+					}
+				}
+				name := o.GoalProvider.GetGoal(subgraph.GoalID).Name()
+
+				response.Subgraphs = append(response.Subgraphs, GoalBranchNode{
+					ParentBranchTarget: BranchTargetLocator{
+						BranchName: bt.BranchName,
+					},
+					ChildrenBranchTargets: children,
+					CommitGraph: CommitGraphLocator{
+						BranchTargetLocator: BranchTargetLocator{
+							BranchName: bt.BranchName,
+						},
+						GoalID: subgraph.GoalID,
+					},
+					GoalName: name,
+				})
+			}
+		}
+		json.NewEncoder(w).Encode(response)
+	})
+
 }
 
 func (o *Orchestrator) WaitForStop() {
@@ -275,9 +338,13 @@ func (o *Orchestrator) startGoalCompilationTx() {
 				cg.Nodes[cg.RootNode].State = NodeStateRunningGoalSetup
 				bt.Subgraphs[goal.ID()] = cg
 				locator := NodeLocator{
-					BranchTarget: bt.BranchName,
-					ProblemID:    cg.GoalID,
-					NodeID:       cg.RootNode,
+					CommitGraphLocator: CommitGraphLocator{
+						BranchTargetLocator: BranchTargetLocator{
+							BranchName: bt.BranchName,
+						},
+						GoalID: cg.GoalID,
+					},
+					NodeID: cg.RootNode,
 				}
 				validation := goal.SetupOnBranch(bt.BranchName, cg.Nodes[cg.RootNode].BranchName)
 				task := EngineTaskMsg{
@@ -355,9 +422,13 @@ func (o *Orchestrator) startInferenceTx() {
 					nodes := slice.CommitGraph.AllNodesInState(NodeStateAwaitingInference)
 					for _, node := range nodes {
 						locator := NodeLocator{
-							BranchTarget: graphLocator.BranchTarget,
-							ProblemID:    graphLocator.ProblemID,
-							NodeID:       node.ID,
+							CommitGraphLocator: CommitGraphLocator{
+								BranchTargetLocator: BranchTargetLocator{
+									BranchName: graphLocator.BranchTargetLocator.BranchName,
+								},
+								GoalID: graphLocator.GoalID,
+							},
+							NodeID: node.ID,
 						}
 						inferenceTask, err := o.RepoGraph.BuildInferenceTaskForNode(locator, o.GoalProvider)
 						if err != nil {
@@ -444,9 +515,13 @@ func (o *Orchestrator) startCompilationTx() {
 					nodes := slice.CommitGraph.AllNodesInState(NodeStateAwaitingCompilation)
 					for _, node := range nodes {
 						locator := NodeLocator{
-							BranchTarget: graphLocator.BranchTarget,
-							ProblemID:    graphLocator.ProblemID,
-							NodeID:       node.ID,
+							CommitGraphLocator: CommitGraphLocator{
+								BranchTargetLocator: BranchTargetLocator{
+									BranchName: graphLocator.BranchTargetLocator.BranchName,
+								},
+								GoalID: graphLocator.GoalID,
+							},
+							NodeID: node.ID,
 						}
 						compilationTask, err := o.RepoGraph.BuildCompilationTasksForNode(locator)
 						if err != nil {

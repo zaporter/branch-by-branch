@@ -318,9 +318,13 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 func (rg *RepoGraph) UnfinishedGraphs() []CommitGraphLocator {
 	unfinishedGraphs := []CommitGraphLocator{}
 	for branchName, branchTarget := range rg.BranchTargets {
-		for problemID, subgraph := range branchTarget.Subgraphs {
+		for goalID, subgraph := range branchTarget.Subgraphs {
 			if subgraph.State == GraphStateInProgress {
-				unfinishedGraphs = append(unfinishedGraphs, CommitGraphLocator{BranchTarget: branchName, ProblemID: problemID})
+				unfinishedGraphs = append(unfinishedGraphs,
+					CommitGraphLocator{
+						BranchTargetLocator: BranchTargetLocator{BranchName: branchName},
+						GoalID:              goalID,
+					})
 			}
 		}
 	}
