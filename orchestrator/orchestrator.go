@@ -32,12 +32,6 @@ func createOrchestratorStartCli() *cli.Command {
 			if err := setRouterParam(ctx, rdb, RedisInferenceEnabled, "true"); err != nil {
 				return err
 			}
-			if err := setRouterParam(ctx, rdb, RedisInferenceModelDir, "meta-llama/Llama-3.1-8B-Instruct"); err != nil {
-				return err
-			}
-			if err := setRouterParam(ctx, rdb, RedisInferenceAdapterDir, ""); err != nil {
-				return err
-			}
 		}
 		rg := &RepoGraph{}
 		if err := rg.LoadFromFile(graphPath); err != nil {
@@ -46,7 +40,7 @@ func createOrchestratorStartCli() *cli.Command {
 		inferenceSchedulingParams := SchedulingParams{
 			MinTaskQueueSize:      32,
 			MaxTaskQueueSize:      64,
-			TaskProcessingTimeout: 2 * time.Minute,
+			TaskProcessingTimeout: 5 * time.Minute,
 			CamShaftInterval:      1 * time.Second,
 			CrankShaftInterval:    1 * time.Second,
 			TimingBeltInterval:    2 * time.Second,
@@ -209,7 +203,6 @@ type Orchestrator struct {
 	CompilationEngine     *Engine
 	GoalCompilationEngine *Engine
 }
-
 
 func (o *Orchestrator) WaitForStop() {
 	o.wg.Wait()

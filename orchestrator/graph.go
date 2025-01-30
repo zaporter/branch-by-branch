@@ -213,6 +213,9 @@ func (rg *RepoGraph) HandleSetupCompilationOutput(logger *zerolog.Logger, locato
 }
 
 func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *InferenceTaskResponse) error {
+	for i := range result.ReturnSequences {
+		result.ReturnSequences[i] = "<think>" + result.ReturnSequences[i]
+	}
 	slice, err := rg.GetNodeSlice(locator)
 	if err != nil {
 		return err
@@ -251,6 +254,10 @@ func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *Inferenc
 		slice.CommitGraph.Nodes[newNode.ID] = newNode
 		node.Children = append(node.Children, newNode.ID)
 	}
+	rg.tickUpdateCommitGraph(&CommitGraphSlice{
+		BranchTarget: slice.BranchTarget,
+		CommitGraph:  slice.CommitGraph,
+	})
 	return nil
 }
 
@@ -295,6 +302,16 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 		node.State = NodeStateAwaitingInference
 	}
 
+	rg.tickUpdateCommitGraph(&CommitGraphSlice{
+		BranchTarget: slice.BranchTarget,
+		CommitGraph:  slice.CommitGraph,
+	})
+
+	return nil
+}
+
+// internal
+func (rg *RepoGraph) tickUpdateCommitGraph(slice *CommitGraphSlice) {
 	// If all nodes are done, we can determine if the graph is successful
 	if len(slice.CommitGraph.Nodes) == len(slice.CommitGraph.AllNodesInState(NodeStateDone)) {
 		hasSuccess := false
@@ -312,7 +329,6 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 		}
 	}
 
-	return nil
 }
 
 func (rg *RepoGraph) UnfinishedGraphs() []CommitGraphLocator {
@@ -354,9 +370,13 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	if err != nil {
 		return InferenceTask{}, err
 	}
+	if slice.CommitGraphNode.Result == NodeResultSyntaxFailure {
+		return InferenceTask{}, fmt.Errorf("cannot build inference task for node %v because it has syntax failure", slice.CommitGraphNode.ID)
+	}
 
 	var sb strings.Builder
 
+	sb.WriteString("<setup>\n")
 	// Write the base prompt explaining the interaction model
 	sb.WriteString("A series of interactions between Assistant and a git repository. Assistant is given a goal at the beginning of the interaction and then executes a series of steps to accomplish that goal. ")
 	sb.WriteString("Assistant is able to see all previous steps and their results. From that, the assistant first thinks about the reasoning process in ")
@@ -372,7 +392,9 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	sb.WriteString("<actions> </actions> tags, respectively. For example a valid response from Assistant would be:\n")
 	sb.WriteString("<think> reasoning process here </think>\n ")
 	sb.WriteString("<actions> <ls>.</ls> <git-status/> ... </actions>\n")
+	sb.WriteString("Test.lean is read-only\n")
 	sb.WriteString("Assistant will get the ability to perform multiple steps so it is expected that they will use the first few steps to gather information\n\n")
+	sb.WriteString("</setup>\n")
 
 	goal := goalProvider.GetGoal(slice.CommitGraph.GoalID)
 	// Write the goal
@@ -380,28 +402,47 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 
 	// we need to traverse up the graph to get the previous steps
 	// and then reverse so we write in grandparent->parent->child order
-	parents := []CommitGraphNode{}
 	currentNode := slice.CommitGraphNode
+	parents := []CommitGraphNode{*currentNode}
 	for currentNode.Parent != nil {
 		parents = append(parents, *slice.CommitGraph.Nodes[*currentNode.Parent])
 		currentNode = slice.CommitGraph.Nodes[*currentNode.Parent]
 	}
-	if len(parents) > 0 {
+	if len(parents) > 1 {
 		sb.WriteString("<previous-steps>\n")
-		for i := len(parents) - 1; i >= 0; i-- {
+		for i := len(parents) - 2; i >= 0; i-- {
+			grandParent := parents[i+1]
 			parentNode := parents[i]
 			sb.WriteString("<step>\n")
 
-			if parentNode.CompilationResult != nil {
+			if grandParent.CompilationResult != nil {
 				sb.WriteString(fmt.Sprintf("<compilation-output code=\"%d\">\n%s\n</compilation-output>\n",
-					parentNode.CompilationResult.ExitCode, parentNode.CompilationResult.Out))
+					grandParent.CompilationResult.ExitCode, grandParent.CompilationResult.Out))
 			}
 
-			// TODO: Should we parse and pretty-print this?
-			sb.WriteString(parentNode.InferenceOutput)
+			// TODO: Should we parse and pretty-print this? > yes
+			parsed, err := ParseModelResponse(parentNode.InferenceOutput)
+			if err != nil {
+				return InferenceTask{}, fmt.Errorf("node %v has non-parsable inference output %w", parentNode.ID, err)
+			}
+			thoughtXML, err := parsed.Thought.ToXML()
+			if err != nil {
+				return InferenceTask{}, fmt.Errorf("node %v has non-parsable thought %w", parentNode.ID, err)
+			}
+			sb.WriteString(thoughtXML)
+			sb.WriteString("\n")
+			actionsXML, err := parsed.Actions.ToXML()
+			if err != nil {
+				return InferenceTask{}, fmt.Errorf("node %v has non-parsable actions %w", parentNode.ID, err)
+			}
+			sb.WriteString(actionsXML)
+			sb.WriteString("\n")
 
 			// Add action outputs
 			for _, output := range parentNode.ActionOutputs {
+				if strings.HasSuffix(output.ActionName, "hidden") {
+					continue
+				}
 				sb.WriteString(fmt.Sprintf("<output action=\"%s\" code=\"%d\"> %s </output>\n",
 					output.ActionName, output.ExitCode, output.Text))
 			}
@@ -417,7 +458,7 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 			slice.CommitGraphNode.CompilationResult.ExitCode, slice.CommitGraphNode.CompilationResult.Out))
 	}
 
-	sb.WriteString("Assistant:")
+	sb.WriteString("<next-step>\n<think>\n")
 
 	return InferenceTask{
 		Prompt: sb.String(),

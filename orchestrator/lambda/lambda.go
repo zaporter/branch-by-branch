@@ -92,6 +92,8 @@ func createLaunchCli() *cli.Command {
 			filesystemNames = []string{"cache-w3"}
 		} else if instanceRegion == "us-east-1" {
 			filesystemNames = []string{"cache-e1"}
+		} else if instanceRegion == "us-south-1" {
+			filesystemNames = []string{"cache-s1"}
 		}
 
 		if len(filesystemNames) == 0 {
