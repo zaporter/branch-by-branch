@@ -3,7 +3,7 @@ FROM ubuntu:24.04
 
 ENV LEAN_TOOLCHAIN_VERSION="v4.15.0"
 
-RUN apt-get update && apt-get install -y curl git elan
+RUN apt-get update && apt-get install -y curl git elan ed
 
 # Ignoring instructions on https://leanprover-community.github.io/install/linux.html
 # Installing elan via apt is easier.

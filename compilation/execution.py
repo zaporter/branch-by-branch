@@ -14,7 +14,7 @@ r = redis.Redis(host=redisHost, port=int(redisPort), password=redisPassword, dec
 dockerClient = docker.from_env()
 container: Optional[docker.models.containers.Container] = None
 
-image_name = "branch-by-branch-execution"
+image_name = "branch-by-branch-execution-1"
 
 repo_dir = os.getenv("REPO_DIR") or "repo"
 job = os.getenv("JOB")
@@ -55,7 +55,9 @@ def git_create_branch(branch_name: str):
     execGit(f"git switch -c {branch_name}", repo_dir)
 
 def git_checkout(branch_name: str):
-    execGit(f"git pull origin {branch_name} && git checkout {branch_name}", repo_dir)
+    execGit(f"git fetch origin {branch_name}", repo_dir)
+    execGit(f"git checkout {branch_name}", repo_dir)
+    execGit(f"git pull origin {branch_name} --ff-only", repo_dir)
 
 def git_push(branch_name: str):
     execGit(f"git push origin {branch_name}", repo_dir)
