@@ -34,6 +34,7 @@ export type BranchTargetGraphLocators = z.infer<typeof branchTargetGraphLocators
 export const createBranchTargetGraphQuery = () => {
     return createQuery({
         queryKey: ['branch-target-graph'],
+        refetchInterval: 1000,
         queryFn: () => fetch(`${beHost}/api/graph/branch-target-graph-locators`)
             .then(res => res.json())
             .then(data => branchTargetGraphLocatorsSchema.parse(data)),
@@ -87,6 +88,7 @@ export type CommitGraphLocators = z.infer<typeof commitGraphLocatorsSchema>;
 export const createCommitGraphQuery = (locator: CommitGraphLocator) => {
     return createQuery({
         queryKey: ['commit-graph', locator],
+        refetchInterval: 1000,
         queryFn: () => fetch(
             `${beHost}/api/graph/commit-graph-locators`,
             {
@@ -111,6 +113,7 @@ export type BranchTargetStats = z.infer<typeof branchTargetStatsSchema>;
 export const createBranchTargetStatsQuery = (locator: BranchTargetLocator) => {
     return createQuery({
         queryKey: ['branch-target-stats', locator],
+        refetchInterval: 1000,
         queryFn: () => fetch(`${beHost}/api/graph/branch-target-stats`, {
             method: 'POST',
             body: JSON.stringify(locator),
@@ -130,6 +133,7 @@ export type CommitGraphStats = z.infer<typeof commitGraphStatsSchema>;
 export const createCommitGraphStatsQuery = (locator: CommitGraphLocator) => {
     return createQuery({
         queryKey: ['commit-graph-stats', locator],
+        refetchInterval: 1000,
         queryFn: () => fetch(`${beHost}/api/graph/commit-graph-stats`, {
             method: 'POST',
             body: JSON.stringify(locator),
@@ -165,6 +169,7 @@ export type NodeStats = z.infer<typeof nodeStatsSchema>;
 export const createNodeStatsQuery = (locator: NodeLocator) => {
     return createQuery({
         queryKey: ['node-stats', locator],
+        refetchInterval: 1000,
         queryFn: () => fetch(`${beHost}/api/graph/node-stats`, {
             method: 'POST',
             body: JSON.stringify(locator),

@@ -22,21 +22,21 @@
 		<dd>{data.state}</dd>
 		<dt>Result</dt>
 		<dd>{data.result}</dd>
-		<dt>Prompt</dt>
-		<dd><pre class="whitespace-pre-wrap">{data.prompt}</pre></dd>
-		<dt>Inference Output</dt>
+		<dt>Inference Output (from parent)</dt>
 		<dd><pre class="whitespace-pre-wrap">{data.inference_output}</pre></dd>
-		<dt>Action Outputs</dt>
+		<dt>Action Outputs (from applying parsed(inference output) to the parent branch)</dt>
 		<dd>
 			{#each data.action_outputs ?? [] as action_output}
 				<pre class="whitespace-pre-wrap">{action_output.action_name}: {action_output.text}</pre>
 			{/each}
 		</dd>
-		<dt>Compilation Result</dt>
+		<dt>Compilation Result (from applying parsed(inference output) to the parent branch)</dt>
 		<dd>
 			{#if data.compilation_result}
 				<pre class="whitespace-pre-wrap">{data.compilation_result.out}</pre>
 			{/if}
 		</dd>
+		<dt>Prompt (that is used to create children)</dt>
+		<dd><pre class="whitespace-pre-wrap">{data.prompt}</pre></dd>
 	</dl>
 {/if}

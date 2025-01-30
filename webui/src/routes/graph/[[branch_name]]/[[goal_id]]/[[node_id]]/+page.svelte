@@ -110,7 +110,7 @@
 		{/if}
 	</div>
 
-	<div class="flex w-full flex-col gap-4">
+	<div class="flex h-full max-h-[calc(100vh-100px)] w-full flex-col gap-4 overflow-y-auto">
 		{#if currentBranchTargetLocator}
 			<StatsContainer title={`Branch ${currentBranchTargetLocator.branch_name}`}>
 				<BranchTargetStats locator={currentBranchTargetLocator} />
