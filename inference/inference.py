@@ -3,7 +3,8 @@ import redis
 import os
 import json
 import gc
-import sys
+from vllm.sampling_params import GuidedDecodingParams
+import re
 
 
 redisHost = os.getenv('REDIS_ADDRESS') or 'err no host'
@@ -36,10 +37,14 @@ def process_batch(model, batch_prompts, batch_task_ids):
     global params
     # get the inference params in here to reduce risk of drift
     update_params()
+    pattern = r"<think>[^<]+</think>.*</actions>END"
+    guided_decoding_params = GuidedDecodingParams(regex=pattern, whitespace_pattern=r"\s+")
     sampling_params = SamplingParams(
         max_tokens=params["max_new_tokens"],
         n=params["num_return_sequences"],
         best_of=params["num_beams"],
+        guided_decoding=guided_decoding_params,
+        stop=["END"]
     )
     generated = model.generate(batch_prompts, sampling_params)
     return generated
@@ -83,7 +88,7 @@ def main():
         model=local_model_dir(params["model_dir"]),
         max_model_len=params["max_model_len"],
         gpu_memory_utilization=params["gpu_memory_utilization"],
-        tensor_parallel_size=4,
+        tensor_parallel_size=1,
     )
     # TODO: if the params for the LLM() constructor change, we need to reconstruct the model
 

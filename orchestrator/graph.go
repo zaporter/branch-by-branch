@@ -213,9 +213,6 @@ func (rg *RepoGraph) HandleSetupCompilationOutput(logger *zerolog.Logger, locato
 }
 
 func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *InferenceTaskResponse) error {
-	for i := range result.ReturnSequences {
-		result.ReturnSequences[i] = "<think>" + result.ReturnSequences[i]
-	}
 	slice, err := rg.GetNodeSlice(locator)
 	if err != nil {
 		return err
@@ -376,7 +373,6 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 
 	var sb strings.Builder
 
-	sb.WriteString("<setup>\n")
 	// Write the base prompt explaining the interaction model
 	sb.WriteString("A series of interactions between Assistant and a git repository. Assistant is given a goal at the beginning of the interaction and then executes a series of steps to accomplish that goal. ")
 	sb.WriteString("Assistant is able to see all previous steps and their results. From that, the assistant first thinks about the reasoning process in ")
@@ -394,7 +390,6 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	sb.WriteString("<actions> <ls>.</ls> <git-status/> ... </actions>\n")
 	sb.WriteString("Test.lean is read-only\n")
 	sb.WriteString("Assistant will get the ability to perform multiple steps so it is expected that they will use the first few steps to gather information\n\n")
-	sb.WriteString("</setup>\n")
 
 	goal := goalProvider.GetGoal(slice.CommitGraph.GoalID)
 	// Write the goal
@@ -458,7 +453,7 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 			slice.CommitGraphNode.CompilationResult.ExitCode, slice.CommitGraphNode.CompilationResult.Out))
 	}
 
-	sb.WriteString("<next-step>\n<think>\n")
+	sb.WriteString("Assistant's next step:\n")
 
 	return InferenceTask{
 		Prompt: sb.String(),
