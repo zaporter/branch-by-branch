@@ -83,6 +83,7 @@ def main():
         model=local_model_dir(params["model_dir"]),
         max_model_len=params["max_model_len"],
         gpu_memory_utilization=params["gpu_memory_utilization"],
+        tensor_parallel_size=4,
     )
     # TODO: if the params for the LLM() constructor change, we need to reconstruct the model
 

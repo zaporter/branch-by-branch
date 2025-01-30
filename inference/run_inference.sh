@@ -10,15 +10,35 @@ fi
 script_dir="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 # start in inference dir
 cd "$script_dir"
-python3 -m venv env
-source ./env/bin/activate
+CACHE_DIR="foo-dont-use-lambda-fs-is-abhorrent/cache"
+VENV_DIR="env"
+if [[ -d "$CACHE_DIR" ]]; then
+    mkdir -p "$CACHE_DIR/inference"
+    VENV_DIR="$CACHE_DIR/inference/env"
+fi
+
+python3 -m venv "$VENV_DIR"
+
+if [[ ! -f "$VENV_DIR/bin/activate" ]]; then
+    echo "Failed to create virtual environment"
+    exit 1
+fi
+
+
+source "$VENV_DIR/bin/activate"
 
 echo "python:"
 which python
 
-pip install -r requirements.txt
+# install uv if not installed
+if ! which uv; then
+    sudo snap install astral-uv --classic
+fi
+
+uv pip install -r requirements.txt
 
 # source secrets
 source ../.env
 
+which python
 python ./inference.py
