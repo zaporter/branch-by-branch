@@ -19,6 +19,8 @@ in
       viddy # fancy watch
       redis
       python310Packages.huggingface-hub
+      # backblaze
+      rclone
     ];
     shellHook = ''
       # Nix can be so painful at times....

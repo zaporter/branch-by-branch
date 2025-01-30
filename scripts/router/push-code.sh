@@ -11,6 +11,9 @@ rsync -zrv \
     --delete \
     --exclude=.git \
     --exclude=inference/env \
+    --exclude=compilation/env \
+    --exclude=lean_corelib \
+    --exclude=webui \
     --exclude=.direnv \
     --exclude=models \
     . \
