@@ -18,6 +18,8 @@ elif [ -d "$HOME/cache-w3" ]; then
     CACHE_DIR="$HOME/cache-w3"
 elif [ -d "$HOME/cache-e1" ]; then
     CACHE_DIR="$HOME/cache-e1"
+elif [ -d "$HOME/cache-s1" ]; then
+    CACHE_DIR="$HOME/cache-s1"
 else
     echo "Cache dir does not exist"
     exit 1

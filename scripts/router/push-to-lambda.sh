@@ -15,6 +15,7 @@ rsync -zrv \
     --exclude=compilation/env \
     --exclude=.direnv \
     --exclude=models \
+    --exclude=webui \
     --exclude=lean_corelib/.lake \
     . \
     ubuntu@$IP:/home/ubuntu/branch-by-branch
