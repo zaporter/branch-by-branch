@@ -44,9 +44,12 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 			})
 			for _, subgraph := range bt.Subgraphs {
 				children := []BranchTargetLocator{}
-				// N^2
+				// N^2 Build map if this causes trouble
 				for _, testB := range o.RepoGraph.BranchTargets {
-					if testB.TraversalGoalID != nil && *testB.TraversalGoalID == subgraph.GoalID {
+					if testB.TraversalGoalID != nil &&
+						*testB.TraversalGoalID == subgraph.GoalID &&
+						testB.ParentBranchName != nil &&
+						*testB.ParentBranchName == bt.BranchName {
 						children = append(children, BranchTargetLocator{
 							BranchName: testB.BranchName,
 						})

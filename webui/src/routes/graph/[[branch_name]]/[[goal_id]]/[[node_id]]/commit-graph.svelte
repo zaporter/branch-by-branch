@@ -30,7 +30,10 @@
 	let layout: FA2Layout | undefined;
 
 	let settings: ForceAtlas2Settings | undefined;
-	const colorForNode = (node: CommitGraphLocatorsNode) => {
+	const colorForNode = (node: CommitGraphLocatorsNode, isSelected: boolean) => {
+		if (isSelected) {
+			return '#00ff00';
+		}
 		if (node.state === 'node_state_done') {
 			if (node.result === 'node_result_success') {
 				return '#1B2F33';
@@ -59,6 +62,7 @@
 			return '#7D80DA';
 		}
 	};
+	let firstTime = true;
 
 	function updateGraph({ graph, selectedNode, onSelectNode }: Props) {
 		if (!container) return;
@@ -66,7 +70,7 @@
 		// Create graph object only if it doesn't exist
 		if (!renderer) {
 			const graphObject = new Graph();
-			layout = new FA2Layout(graphObject);
+			layout = new FA2Layout(graphObject, { settings: { gravity: 1.5, adjustSizes: true } });
 
 			renderer = new Sigma(graphObject, container, { minCameraRatio: 0.01, maxCameraRatio: 2 });
 
@@ -88,7 +92,6 @@
 		const existingEdges = new Set(graphObject.edges());
 
 		// Add/update branch target nodes
-		let numNewNodes = 0;
 		let maxDepth = 0;
 		for (const node of graph.nodes) {
 			maxDepth = Math.max(maxDepth, node.depth);
@@ -96,21 +99,20 @@
 		for (const node of graph.nodes) {
 			const nodeId = locatorToJSON(node.locator);
 			const isSelected =
-				selectedNode && locatorToJSON(node.locator) === locatorToJSON(selectedNode);
+				(selectedNode && locatorToJSON(node.locator) === locatorToJSON(selectedNode)) ?? false;
 			const objSize =
-				((maxDepth - node.depth + 1) * Math.max(15, 1)) / Math.pow(graph.nodes.length, 0.45);
+				((maxDepth - Math.pow(node.depth,0.8) + 1) * Math.max(10, 1)) / Math.pow(graph.nodes.length, 0.45);
 			if (graphObject.hasNode(nodeId)) {
-				graphObject.setNodeAttribute(nodeId, 'color', colorForNode(node));
-				graphObject.setNodeAttribute(nodeId, 'label', node.depth);
+				graphObject.setNodeAttribute(nodeId, 'color', colorForNode(node, isSelected));
+				graphObject.setNodeAttribute(nodeId, 'label', node.depth || 'root');
 				graphObject.setNodeAttribute(nodeId, 'size', objSize);
 			} else {
-				numNewNodes++;
 				graphObject.addNode(nodeId, {
 					x: 0,
 					y: 0,
 					size: objSize,
-					color: colorForNode(node),
-					label: node.depth
+					color: colorForNode(node, isSelected),
+					label: node.depth || 'root'
 				});
 			}
 			existingNodes.delete(nodeId);
@@ -127,8 +129,9 @@
 				}
 			}
 		}
-		if (numNewNodes == graph.nodes.length) {
+		if (firstTime) {
 			circular.assign(graphObject);
+			firstTime = false;
 		}
 
 		// Remove nodes and edges that no longer exist
