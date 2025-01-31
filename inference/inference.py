@@ -14,6 +14,13 @@ r = redis.Redis(host=redisHost, port=int(redisPort), password=redisPassword, dec
 
 print("started")
 params=None
+#pattern = r"<think>[^<]+</think><actions>.*</actions>"
+# I wonder if the the any hurts performance.
+grammar_str = r"""
+root ::= "<think>" words "</think>\n<actions>" any "</actions>"
+words ::= [^<]+
+any ::= [^~]*
+"""
 
 def update_params():
     global params
@@ -37,14 +44,13 @@ def process_batch(model, batch_prompts, batch_task_ids):
     global params
     # get the inference params in here to reduce risk of drift
     update_params()
-    pattern = r"<think>[^<]+</think>.*</actions>END"
-    guided_decoding_params = GuidedDecodingParams(regex=pattern, whitespace_pattern=r"\s+")
+    guided_decoding_params = GuidedDecodingParams(grammar=grammar_str)
     sampling_params = SamplingParams(
         max_tokens=params["max_new_tokens"],
         n=params["num_return_sequences"],
         best_of=params["num_beams"],
         guided_decoding=guided_decoding_params,
-        stop=["END"]
+        stop=["</actions>"]
     )
     generated = model.generate(batch_prompts, sampling_params)
     return generated
@@ -56,7 +62,7 @@ def send_results(generated, batch_prompts, batch_task_ids):
     for i in range(len(batch_prompts)):
         return_sequences = []
         for j in range(num_sequences_per_prompt):
-            model_output = generated[i].outputs[j].text
+            model_output = generated[i].outputs[j].text + "</actions>"
             prompt = batch_prompts[i]
             print("=" * 5 + "prompt "+str(i))
             print(prompt)
@@ -89,6 +95,8 @@ def main():
         max_model_len=params["max_model_len"],
         gpu_memory_utilization=params["gpu_memory_utilization"],
         tensor_parallel_size=1,
+        # Wait till v1. This causes poor gpu-utilization.
+        enable_prefix_caching=False
     )
     # TODO: if the params for the LLM() constructor change, we need to reconstruct the model
 

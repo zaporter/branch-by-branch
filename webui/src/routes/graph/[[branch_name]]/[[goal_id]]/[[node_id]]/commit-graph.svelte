@@ -5,6 +5,7 @@
 		isNodeLocator,
 		locatorFromString,
 		locatorToJSON,
+		nodeStateSchema,
 		type BranchTargetGraphLocators,
 		type BranchTargetLocator,
 		type CommitGraphLocator,
@@ -16,6 +17,7 @@
 	import Sigma from 'sigma';
 	import forceAtlas2, { type ForceAtlas2Settings } from 'graphology-layout-forceatlas2';
 	import FA2Layout from 'graphology-layout-forceatlas2/worker';
+	import ForceLayout from 'graphology-layout-force/worker';
 	import circular from 'graphology-layout/circular';
 	import { onMount } from 'svelte';
 	interface Props {
@@ -70,7 +72,11 @@
 		// Create graph object only if it doesn't exist
 		if (!renderer) {
 			const graphObject = new Graph();
-			layout = new FA2Layout(graphObject, { settings: { gravity: 1.5, adjustSizes: true } });
+			if (graph.nodes.length > 100) {
+				layout = new FA2Layout(graphObject, { settings: { gravity: 1.5, adjustSizes: true } });
+			} else {
+				layout = new ForceLayout(graphObject);
+			}
 
 			renderer = new Sigma(graphObject, container, { minCameraRatio: 0.01, maxCameraRatio: 2 });
 
@@ -101,15 +107,16 @@
 			const isSelected =
 				(selectedNode && locatorToJSON(node.locator) === locatorToJSON(selectedNode)) ?? false;
 			const objSize =
-				((maxDepth - Math.pow(node.depth,0.8) + 1) * Math.max(10, 1)) / Math.pow(graph.nodes.length, 0.45);
+				((maxDepth - Math.pow(node.depth, 0.8) + 1) * Math.max(10, 1)) /
+				Math.pow(graph.nodes.length, 0.45);
 			if (graphObject.hasNode(nodeId)) {
 				graphObject.setNodeAttribute(nodeId, 'color', colorForNode(node, isSelected));
 				graphObject.setNodeAttribute(nodeId, 'label', node.depth || 'root');
 				graphObject.setNodeAttribute(nodeId, 'size', objSize);
 			} else {
 				graphObject.addNode(nodeId, {
-					x: 0,
-					y: 0,
+					x: Math.random() * 100,
+					y: Math.random() * 100,
 					size: objSize,
 					color: colorForNode(node, isSelected),
 					label: node.depth || 'root'
