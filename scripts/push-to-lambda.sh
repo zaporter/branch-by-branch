@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -euxo pipefail
+script_dir="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+pushd "$script_dir/.."
 
 source ./.env
 
