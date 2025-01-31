@@ -51,6 +51,9 @@ def git_clone_repo(repo_url: str):
 def git_pull():
     execGit("git pull", repo_dir)
 
+def git_clean():
+    execGit("git clean -fd", repo_dir)
+
 def git_create_branch(branch_name: str):
     execGit(f"git switch -c {branch_name}", repo_dir)
 
@@ -187,6 +190,7 @@ def main():
                     new_branch_name = compilation_task["new_branch_name"]
                     git_checkout(old_branch_name)
                     git_create_branch(new_branch_name)
+                    git_clean()
                     result = execute(compilation_task)
                     git_commit("compilation")
                     git_push(new_branch_name)

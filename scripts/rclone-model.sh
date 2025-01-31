@@ -23,5 +23,5 @@ pushd "$script_dir"
 MODEL_NAME="$1"
 
 mkdir -p "cache/models/$MODEL_NAME"
-rclone --progress --config ../secrets/rclone.conf copy "b2:branch-by-branch/$MODEL_NAME" "cache/models/$MODEL_NAME"
+rclone --progress --config ../secrets/rclone.conf copy "b2:branch-by-branch/$MODEL_NAME" "$HOME/cache/models/$MODEL_NAME"
 

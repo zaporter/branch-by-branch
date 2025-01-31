@@ -403,6 +403,12 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 		parents = append(parents, *slice.CommitGraph.Nodes[*currentNode.Parent])
 		currentNode = slice.CommitGraph.Nodes[*currentNode.Parent]
 	}
+	leanOutputParams := StripParams{
+		stripErrors:   false,
+		stripInfos:    true,
+		stripTraces:   true,
+		stripWarnings: false,
+	}
 	if len(parents) > 1 {
 		sb.WriteString("<previous-steps>\n")
 		for i := len(parents) - 2; i >= 0; i-- {
@@ -412,7 +418,7 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 
 			if grandParent.CompilationResult != nil {
 				sb.WriteString(fmt.Sprintf("<compilation-output code=\"%d\">\n%s\n</compilation-output>\n",
-					grandParent.CompilationResult.ExitCode, grandParent.CompilationResult.Out))
+					grandParent.CompilationResult.ExitCode, stripLeanOutput(grandParent.CompilationResult.Out, leanOutputParams)))
 			}
 
 			// TODO: Should we parse and pretty-print this? > yes
@@ -450,7 +456,7 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	// Write the current compilation output if it exists
 	if slice.CommitGraphNode.CompilationResult != nil {
 		sb.WriteString(fmt.Sprintf("<compilation-output code=\"%d\">\n%s\n</compilation-output>\n",
-			slice.CommitGraphNode.CompilationResult.ExitCode, slice.CommitGraphNode.CompilationResult.Out))
+			slice.CommitGraphNode.CompilationResult.ExitCode, stripLeanOutput(slice.CommitGraphNode.CompilationResult.Out, leanOutputParams)))
 	}
 
 	sb.WriteString("Assistant's next step:\n")
