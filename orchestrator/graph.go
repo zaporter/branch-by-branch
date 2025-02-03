@@ -31,6 +31,36 @@ const (
 	NodeStateDone NodeState = "node_state_done"
 )
 
+// collapsed version of NodeState
+type NodeStage string
+
+const (
+	NodeStageGoalSetup   NodeStage = "node_stage_goal_setup"
+	NodeStageCompilation NodeStage = "node_stage_compilation"
+	NodeStageInference   NodeStage = "node_stage_inference"
+	NodeStageDone        NodeStage = "node_stage_done"
+)
+
+func NodeStageFromState(state NodeState) NodeStage {
+	switch state {
+	case NodeStateAwaitingGoalSetup:
+		fallthrough
+	case NodeStateRunningGoalSetup:
+		return NodeStageGoalSetup
+	case NodeStateAwaitingCompilation:
+		fallthrough
+	case NodeStateRunningCompilation:
+		return NodeStageCompilation
+	case NodeStateAwaitingInference:
+		fallthrough
+	case NodeStateRunningInference:
+		return NodeStageInference
+	case NodeStateDone:
+		return NodeStageDone
+	}
+	panic(fmt.Sprintf("unknown state %s", state))
+}
+
 // The graph tries to be as stateless as possible
 // However, there are serious ergonomic & performance benefits
 // To these extra states. We just have to reset them in order to resume from a saved graph
@@ -221,7 +251,7 @@ func (rg *RepoGraph) HandleSetupCompilationOutput(logger *zerolog.Logger, locato
 	slice.CommitGraphNode.CompilationResult = &result.CompilationResult
 	slice.CommitGraphNode.State = NodeStateAwaitingInference
 	slice.CommitGraphNode.Result = NodeResultNone
-	slice.CommitGraph.State = GraphStateInProgress
+	rg.tickUpdateCommitGraph(slice.AsCommitGraphSlice())
 	return nil
 }
 
@@ -241,34 +271,43 @@ func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *Inferenc
 	// if we have children, we are (by definition) non-terminal
 	node.Result = NodeResultNone
 	for _, seq := range result.ReturnSequences {
-
-		newNode := &CommitGraphNode{
-			ID:              NewNodeID(),
-			CreatedAt:       time.Now(),
-			Depth:           node.Depth + 1,
-			Parent:          &node.ID,
-			Children:        []NodeID{},
-			State:           NodeStateAwaitingCompilation,
-			Result:          NodeResultNone,
-			InferenceOutput: seq,
-			ActionOutputs:   []ActionOutput{},
-			BranchName:      NewBranchName(),
+		if _, err := rg.AddNodeToCommitGraph(locator, seq); err != nil {
+			return err
 		}
-		// check for syntax errors
-		// (easier here before pulling this off to queue)
-		parsed, err := ParseModelResponse(seq)
-		if err != nil || parsed.Actions.Validate() != nil {
-			newNode.State = NodeStateDone
-			newNode.Result = NodeResultSyntaxFailure
-		}
-		slice.CommitGraph.Nodes[newNode.ID] = newNode
-		node.Children = append(node.Children, newNode.ID)
 	}
-	rg.tickUpdateCommitGraph(&CommitGraphSlice{
-		BranchTarget: slice.BranchTarget,
-		CommitGraph:  slice.CommitGraph,
-	})
+	// add nodeToCommitGraph will tickUpdateCommitGraph
 	return nil
+}
+
+func (rg *RepoGraph) AddNodeToCommitGraph(parentLocator NodeLocator, inferenceOutput string) (NodeLocator, error) {
+	parentSlice, err := rg.GetNodeSlice(parentLocator)
+	if err != nil {
+		return NodeLocator{}, err
+	}
+	parentNode := parentSlice.CommitGraphNode
+	newNode := &CommitGraphNode{
+		ID:              NewNodeID(),
+		CreatedAt:       time.Now(),
+		Depth:           parentNode.Depth + 1,
+		Parent:          &parentNode.ID,
+		Children:        []NodeID{},
+		State:           NodeStateAwaitingCompilation,
+		Result:          NodeResultNone,
+		InferenceOutput: inferenceOutput,
+		ActionOutputs:   []ActionOutput{},
+		BranchName:      NewBranchName(),
+	}
+	// check for syntax errors
+	// (easier here before pulling this off to queue)
+	parsed, err := ParseModelResponse(inferenceOutput)
+	if err != nil || parsed.Actions.Validate() != nil {
+		newNode.State = NodeStateDone
+		newNode.Result = NodeResultSyntaxFailure
+	}
+	parentSlice.CommitGraph.Nodes[newNode.ID] = newNode
+	parentNode.Children = append(parentNode.Children, newNode.ID)
+	rg.tickUpdateCommitGraph(parentSlice.AsCommitGraphSlice())
+	return NodeLocatorFromTriplet(parentSlice.BranchTarget.BranchName, parentSlice.CommitGraph.GoalID, newNode.ID), nil
 }
 
 func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *CompilationTaskResponse, maxDepth int) error {
@@ -312,16 +351,13 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 		node.State = NodeStateAwaitingInference
 	}
 
-	rg.tickUpdateCommitGraph(&CommitGraphSlice{
-		BranchTarget: slice.BranchTarget,
-		CommitGraph:  slice.CommitGraph,
-	})
+	rg.tickUpdateCommitGraph(slice.AsCommitGraphSlice())
 
 	return nil
 }
 
 // internal
-func (rg *RepoGraph) tickUpdateCommitGraph(slice *CommitGraphSlice) {
+func (rg *RepoGraph) tickUpdateCommitGraph(slice CommitGraphSlice) {
 	// If all nodes are done, we can determine if the graph is successful
 	if len(slice.CommitGraph.Nodes) == len(slice.CommitGraph.AllNodesInState(NodeStateDone)) {
 		hasSuccess := false
@@ -336,6 +372,17 @@ func (rg *RepoGraph) tickUpdateCommitGraph(slice *CommitGraphSlice) {
 			rg.AddBranchTarget(slice.BranchTarget.BranchName, slice.CommitGraph.GoalID)
 		} else {
 			slice.CommitGraph.State = GraphStateFailed
+		}
+	} else {
+		rootNode, ok := slice.CommitGraph.Nodes[slice.CommitGraph.RootNode]
+		if !ok {
+			panic(fmt.Sprintf("root node %v not found", slice.CommitGraph.RootNode))
+		}
+		rootStage := NodeStageFromState(rootNode.State)
+		if rootStage == NodeStageGoalSetup {
+			slice.CommitGraph.State = GraphStateAwaitingGoalSetup
+		} else {
+			slice.CommitGraph.State = GraphStateInProgress
 		}
 	}
 

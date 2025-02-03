@@ -32,6 +32,15 @@ type CommitGraphSlice struct {
 type BranchTargetSlice struct {
 	BranchTarget *RepoGraphBranchTarget
 }
+func NodeLocatorFromTriplet(branchName BranchName, goalID GoalID, nodeID NodeID) NodeLocator {
+	return NodeLocator{
+		CommitGraphLocator: CommitGraphLocator{
+			BranchTargetLocator: BranchTargetLocator{BranchName: branchName},
+			GoalID:              goalID,
+		},
+		NodeID: nodeID,
+	}
+}
 
 func (rg *RepoGraph) GetNodeSlice(locator NodeLocator) (NodeSlice, error) {
 	branchTarget, ok := rg.BranchTargets[locator.CommitGraphLocator.BranchTargetLocator.BranchName]
@@ -76,4 +85,17 @@ func (rg *RepoGraph) GetBranchTargetSlice(locator BranchTargetLocator) (BranchTa
 	return BranchTargetSlice{
 		BranchTarget: branchTarget,
 	}, nil
+}
+
+func (ns *NodeSlice) AsCommitGraphSlice() CommitGraphSlice {
+	return CommitGraphSlice{
+		BranchTarget: ns.BranchTarget,
+		CommitGraph:  ns.CommitGraph,
+	}
+}
+
+func (ns *NodeSlice) AsBranchTargetSlice() BranchTargetSlice {
+	return BranchTargetSlice{
+		BranchTarget: ns.BranchTarget,
+	}
 }

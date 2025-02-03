@@ -209,3 +209,27 @@ export const createDeleteNodeMutation = (locator: NodeLocator) => {
             .then(res => res.text()),
     });
 }
+
+// @api /api/graph/create-node
+export const createNodeRequestSchema = z.object({
+    parent_node_locator: nodeLocatorSchema,
+    inference_output: z.string(),
+})
+export type CreateNodeRequest = z.infer<typeof createNodeRequestSchema>;
+
+// @api /api/graph/create-node
+export const createNodeResponseSchema = z.object({
+    node_locator: nodeLocatorSchema,
+})
+export type CreateNodeResponse = z.infer<typeof createNodeResponseSchema>;
+
+export const createCreateNodeMutation = (request: CreateNodeRequest) => {
+    return createMutation({
+        mutationFn: () => fetch(`${beHost}/api/graph/create-node`, {
+            method: 'POST',
+            body: JSON.stringify(request),
+        })
+            .then(res => res.json())
+            .then(data => createNodeResponseSchema.parse(data)),
+    });
+}

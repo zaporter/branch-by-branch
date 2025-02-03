@@ -293,4 +293,32 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 		delete(slice.CommitGraph.Nodes, request.NodeID)
 		w.Write([]byte("ok"))
 	})
+	mux.HandleFunc("/api/graph/create-node", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		type Request struct {
+			ParentNodeLocator NodeLocator `json:"parent_node_locator"`
+			InferenceOutput   string      `json:"inference_output"`
+		}
+		type Response struct {
+			NodeLocator NodeLocator `json:"node_locator"`
+		}
+		var request Request
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		locator, err := o.RepoGraph.AddNodeToCommitGraph(request.ParentNodeLocator, request.InferenceOutput)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		response := Response{
+			NodeLocator: locator,
+		}
+		json.NewEncoder(w).Encode(response)
+	})
 }
+
