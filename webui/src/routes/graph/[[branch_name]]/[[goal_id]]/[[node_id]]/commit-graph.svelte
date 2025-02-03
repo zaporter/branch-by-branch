@@ -47,7 +47,7 @@
 				return '#2E0014';
 			}
 			if (node.result === 'node_result_depth_exhaustion') {
-				return '#F17105';
+				return '#FF31F5';
 			}
 			return '#0000ff';
 		} else if (node.state === 'node_awaiting_goal_setup') {

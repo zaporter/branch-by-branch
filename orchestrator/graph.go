@@ -493,7 +493,7 @@ func (rg *RepoGraph) BuildCompilationTasksForNode(nodeLocator NodeLocator) (Comp
 			// branches instead of building a single commit
 			preCommands = append(preCommands, CompilationPreCommand{
 				Name:   "git-status",
-				Script: fmt.Sprintf("git diff %s", slice.BranchTarget.BranchName),
+				Script: fmt.Sprintf("git diff origin/%s", slice.BranchTarget.BranchName),
 			})
 		}
 	}

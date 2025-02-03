@@ -55,7 +55,10 @@ def git_clean():
     execGit("git clean -fd", repo_dir)
 
 def git_create_branch(branch_name: str):
-    execGit(f"git switch -c {branch_name}", repo_dir)
+    #execGit(f"git switch -c {branch_name}", repo_dir)
+    # create if not exists (I think)
+    # ran into issues where when the job failed, it couldn't be retried because the branch already existed
+    execGit(f"git checkout -B {branch_name}", repo_dir)
 
 def git_checkout(branch_name: str):
     execGit(f"git fetch origin {branch_name}", repo_dir)
@@ -130,16 +133,21 @@ def execute(task: dict) -> dict:
         if hasFailed:
             results.append({
                 "action_name": cmd["name"],
-                "out": "skipped due to previous failure",
+                "out": "error: skipped due to previous failure",
                 "exit_code": 1
             })
             continue
         print(f"Executing command {cmd['name']}")
         print(f"Command script: {cmd['script']}")
-        exit_code, output = container.exec_run(
-            cmd=f"/bin/bash -c '{cmd['script']}'",
-            workdir="/home/ubuntu/repo"
-        )
+        try:
+            exit_code, output = container.exec_run(
+                cmd=f"/bin/bash -c '{cmd['script']}'",
+                workdir="/home/ubuntu/repo"
+            )
+        except Exception as e:  
+            print(f"Command {cmd['name']} failed with error: {e}")
+            exit_code = 1
+            output = "error: " + str(e)
         print(f"Command {cmd['name']} exited with code {exit_code}")
         # Hidden commands are allowed to fail
         if exit_code != 0 and not cmd["name"].endswith("hidden"):
@@ -147,7 +155,7 @@ def execute(task: dict) -> dict:
 
         results.append({
             "action_name": cmd["name"],
-            "out": output.decode('utf-8'),
+            "out": type(output) == str and output or output.decode('utf-8'),
             "exit_code": exit_code
         })
 
@@ -167,7 +175,8 @@ def execute(task: dict) -> dict:
     else:
         compilation_result = {
             "action_name": "compilation",
-            "out": "skipped due to previous failure",
+            # mimic lean4 output style so it gets stripped correctly
+            "out": "error: skipped due to previous failure",
             "exit_code": 1
         }
 
