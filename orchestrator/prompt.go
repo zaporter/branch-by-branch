@@ -112,12 +112,15 @@ func (a XMLActionEd) GetType() string {
 }
 
 func (a XMLActionEd) GetCompilationTask() string {
-	return fmt.Sprintf("cat << 'EOF' | ed\n%s\nEOF", a.Script)
+	return fmt.Sprintf("cat << 'EOF' | ed\n%s\nEOF", strings.TrimSpace(a.Script))
 }
 
 func (a XMLActionEd) Validate() error {
 	if a.Script == "" {
 		return errors.New("script is required")
+	}
+	if strings.Contains(a.Script, "EOF") {
+		return errors.New("script cannot contain EOF")
 	}
 	return nil
 }
