@@ -4,3 +4,7 @@ secrets
 models
 inference/env
 compilation/env
+# testing
+testgraphs
+goals
+test.json
