@@ -1,14 +1,8 @@
 <script lang="ts">
 	import {
-		isBranchTargetLocator,
-		isCommitGraphLocator,
 		isNodeLocator,
 		locatorFromString,
 		locatorToJSON,
-		nodeStateSchema,
-		type BranchTargetGraphLocators,
-		type BranchTargetLocator,
-		type CommitGraphLocator,
 		type CommitGraphLocators,
 		type CommitGraphLocatorsNode,
 		type NodeLocator
@@ -48,6 +42,9 @@
 			}
 			if (node.result === 'node_result_depth_exhaustion') {
 				return '#FF31F5';
+			}
+			if (node.result === 'node_result_terminated') {
+				return '#EA31F5';
 			}
 			return '#0000ff';
 		} else if (node.state === 'node_awaiting_goal_setup') {

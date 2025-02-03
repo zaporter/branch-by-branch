@@ -1,10 +1,23 @@
 <script lang="ts">
-	import { createNodeStatsQuery, type NodeLocator } from '$lib';
+	import {
+		createNodeStatsQuery,
+		createRequestNodeTerminationMutation,
+		type NodeLocator
+	} from '$lib';
 	interface Props {
 		locator: NodeLocator;
 	}
 	const props: Props = $props();
 	const query = $derived(createNodeStatsQuery(props.locator));
+	const requestNodeTerminationMutation = $derived(
+		createRequestNodeTerminationMutation(props.locator)
+	);
+
+	const terminateNode = $derived(async () => {
+		const res = await $requestNodeTerminationMutation.mutateAsync();
+		console.log(res);
+		await $query.refetch();
+	});
 </script>
 
 {#if $query.isLoading}
@@ -13,11 +26,16 @@
 	<p>Error: {$query.error.message}</p>
 {:else if $query.data}
 	{@const data = $query.data}
+
 	<dl class="text-xs [&_dd]:ml-4 [&_dd]:font-normal [&_dt]:font-semibold">
 		<dt>Branch Name</dt>
 		<dd>{data.branch_name}</dd>
 		<dt>Depth</dt>
 		<dd>{data.depth}</dd>
+		<dt>Termination Requested</dt>
+		<dd>{data.termination_requested}</dd>
+		<dt>Metadata</dt>
+		<dd><pre class="whitespace-pre-wrap">{JSON.stringify(data.metadata, null, 2)}</pre></dd>
 		<dt>State</dt>
 		<dd>{data.state}</dd>
 		<dt>Result</dt>

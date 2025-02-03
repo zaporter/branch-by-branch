@@ -1,4 +1,4 @@
-import { createQuery } from '@tanstack/svelte-query'
+import { createMutation, createQuery } from '@tanstack/svelte-query'
 import { z } from 'zod'
 import { branchTargetLocatorSchema, commitGraphLocatorSchema, nodeLocatorSchema, type BranchTargetLocator, type CommitGraphLocator, type NodeLocator } from './locator';
 
@@ -40,6 +40,12 @@ export const createBranchTargetGraphQuery = () => {
             .then(data => branchTargetGraphLocatorsSchema.parse(data)),
     });
 }
+export const nodeMetadataSchema = z.object({
+    was_manually_created: z.boolean().optional(),
+    is_favorite: z.boolean().optional(),
+    label: z.string().optional(),
+})
+export type NodeMetadata = z.infer<typeof nodeMetadataSchema>;
 export const nodeStateSchema = z.enum([
     'node_awaiting_goal_setup',
     'node_state_running_goal_setup',
@@ -57,6 +63,7 @@ export const nodeResultSchema = z.enum([
     'node_result_syntax_failure',
     'node_result_depth_exhaustion',
     'node_result_context_exhaustion',
+    'node_result_terminated',
 ]);
 export type NodeResult = z.infer<typeof nodeResultSchema>;
 export const graphStateSchema = z.enum([
@@ -74,6 +81,8 @@ export const commitGraphLocatorsNodeSchema = z.object({
     result: nodeResultSchema.optional(),
     state: nodeStateSchema,
     depth: z.number(),
+    metadata: nodeMetadataSchema,
+    termination_requested: z.boolean(),
     children: z.array(nodeLocatorSchema).default([]),
 })
 export type CommitGraphLocatorsNode = z.infer<typeof commitGraphLocatorsNodeSchema>;
@@ -153,11 +162,14 @@ const compilationResultSchema = z.object({
     exit_code: z.number(),
 })
 export type CompilationResult = z.infer<typeof compilationResultSchema>;
+
 //@api /api/graph/node-stats
 export const nodeStatsSchema = z.object({
     depth: z.number(),
     state: nodeStateSchema,
     result: nodeResultSchema,
+    metadata: nodeMetadataSchema,
+    termination_requested: z.boolean(),
     inference_output: z.string().optional(),
     action_outputs: z.array(actionOutputSchema).optional().nullable(),
     compilation_result: compilationResultSchema.optional().nullable(),
@@ -176,5 +188,14 @@ export const createNodeStatsQuery = (locator: NodeLocator) => {
         })
             .then(res => res.json())
             .then(data => nodeStatsSchema.parse(data)),
+    });
+}
+export const createRequestNodeTerminationMutation = (locator: NodeLocator) => {
+    return createMutation({
+        mutationFn: () => fetch(`${beHost}/api/graph/request-node-termination`, {
+            method: 'POST',
+            body: JSON.stringify(locator),
+        })
+            .then(res => res.text()),
     });
 }
