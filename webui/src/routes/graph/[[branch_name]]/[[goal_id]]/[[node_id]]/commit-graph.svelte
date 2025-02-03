@@ -138,12 +138,16 @@
 			firstTime = false;
 		}
 
-		// Remove nodes and edges that no longer exist
-		for (const nodeId of existingNodes) {
-			graphObject.dropNode(nodeId);
-		}
-		for (const edgeId of existingEdges) {
-			graphObject.dropEdge(edgeId);
+		try {
+			// Remove nodes and edges that no longer exist
+			for (const nodeId of existingNodes) {
+				graphObject.dropNode(nodeId);
+			}
+			for (const edgeId of existingEdges) {
+				graphObject.dropEdge(edgeId);
+			}
+		} catch (e) {
+			console.error(e);
 		}
 
 		// Start layout if not already started

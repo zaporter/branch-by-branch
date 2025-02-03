@@ -71,6 +71,11 @@
 			`/graph/${locator.commit_graph_locator.branch_target_locator.branch_name}/${locator.commit_graph_locator.goal_id}/${locator.node_id}`
 		);
 	};
+	const unselectNode = () => {
+		goto(
+			`/graph/${currentNodeLocator?.commit_graph_locator.branch_target_locator.branch_name}/${currentNodeLocator?.commit_graph_locator.goal_id}`
+		);
+	};
 </script>
 
 <div class="flex flex-row gap-4 p-4">
@@ -123,7 +128,7 @@
 		{/if}
 		{#if currentNodeLocator}
 			<StatsContainer title={`Node ${currentNodeLocator.node_id}`}>
-				<NodeStats locator={currentNodeLocator} />
+				<NodeStats locator={currentNodeLocator} {unselectNode} />
 			</StatsContainer>
 		{/if}
 	</div>

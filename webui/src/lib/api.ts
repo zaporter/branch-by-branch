@@ -199,3 +199,13 @@ export const createRequestNodeTerminationMutation = (locator: NodeLocator) => {
             .then(res => res.text()),
     });
 }
+
+export const createDeleteNodeMutation = (locator: NodeLocator) => {
+    return createMutation({
+        mutationFn: () => fetch(`${beHost}/api/graph/delete-node`, {
+            method: 'POST',
+            body: JSON.stringify(locator),
+        })
+            .then(res => res.text()),
+    });
+}
