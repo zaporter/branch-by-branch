@@ -5,7 +5,7 @@ import json
 import gc
 from vllm.sampling_params import GuidedDecodingParams
 import re
-
+import torch
 
 redisHost = os.getenv('REDIS_ADDRESS') or 'err no host'
 redisPassword = os.getenv('REDIS_PASSWORD') or 'err no pw'
@@ -28,6 +28,7 @@ def update_params():
         "enabled": r.get("inference:enabled") == "true",
         "model_dir": r.get("inference:model_dir"),
         "adapter_dir": r.get("inference:adapter_dir"),
+        "load_format": r.get("inference:load_format"), # ex: bitsandbytes or ""
         "batch_size": int(r.get("inference:batch_size")),
         "max_model_len": int(r.get("inference:max_model_len")),
         "gpu_memory_utilization": float(r.get("inference:gpu_memory_utilization")),
@@ -89,14 +90,27 @@ def main():
         exit(1)
 
     print("params", params)
+
+    load_format = params["load_format"] if params["load_format"]!="" else None
+
+    print("load_format", load_format)
+
+    num_gpus = torch.cuda.device_count()
+
+    print("num_gpus", num_gpus)
     # https://github.com/vllm-project/vllm/blob/bc96d5c330e079fa501eee05e97bf15009c9a094/vllm/entrypoints/llm.py#L24
     model = LLM(
         model=local_model_dir(params["model_dir"]),
         max_model_len=params["max_model_len"],
         gpu_memory_utilization=params["gpu_memory_utilization"],
-        tensor_parallel_size=1,
+        tensor_parallel_size=num_gpus,
         # Wait till v1. This causes poor gpu-utilization.
-        enable_prefix_caching=False
+        enable_prefix_caching=False,
+        trust_remote_code=True,
+        # same https://docs.vllm.ai/en/latest/features/quantization/bnb.html
+        load_format=load_format,
+        quantization=load_format,
+
     )
     # TODO: if the params for the LLM() constructor change, we need to reconstruct the model
 

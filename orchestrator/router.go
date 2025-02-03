@@ -19,6 +19,7 @@ const (
 	RedisInferenceModelDir             RedisKey = "inference:model_dir"
 	RedisInferenceAdapterDir           RedisKey = "inference:adapter_dir"
 	RedisInferenceBatchSize            RedisKey = "inference:batch_size"
+	RedisInferenceLoadFormat           RedisKey = "inference:load_format"
 	RedisInferenceMaxModelLen          RedisKey = "inference:max_model_len"
 	RedisInferenceGpuMemoryUtilization RedisKey = "inference:gpu_memory_utilization"
 	RedisInferenceMaxNewTokens         RedisKey = "inference:max_new_tokens"
@@ -33,6 +34,7 @@ var AllRouterKeys = []RedisKey{
 	RedisInferenceModelDir,
 	RedisInferenceAdapterDir,
 	RedisInferenceBatchSize,
+	RedisInferenceLoadFormat,
 	RedisInferenceMaxModelLen,
 	RedisInferenceGpuMemoryUtilization,
 	RedisInferenceMaxNewTokens,
@@ -63,6 +65,10 @@ func createRouterParamsCli() *cli.Command {
 			}
 			if valToSet == "" {
 				return errors.New("value is required")
+			}
+			// special case empty string
+			if valToSet == "_" {
+				valToSet = ""
 			}
 			var statusCmd *redis.StatusCmd
 			for _, key := range AllRouterKeys {
@@ -101,17 +107,20 @@ func createRouterParamsCli() *cli.Command {
 		Action: action,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
+				Aliases:     []string{"s"},
 				Name:        "set",
 				Usage:       "set router params",
 				Destination: &set,
 			},
 			&cli.BoolFlag{
+				Aliases:     []string{"r"},
 				Name:        "read",
 				Usage:       "read router params",
 				Destination: &read,
 			},
 		},
 		ArgsUsage: "[key] [value]",
+		Aliases:   []string{"p"},
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name:        "key",
@@ -149,6 +158,7 @@ func createInitializeRouterParamsCli() *cli.Command {
 			RedisInferenceEnabled:              "true",
 			RedisInferenceModelDir:             "meta-llama/Llama-3.1-8B-Instruct",
 			RedisInferenceAdapterDir:           "/adapters",
+			RedisInferenceLoadFormat:           "",
 			RedisInferenceBatchSize:            "32",
 			RedisInferenceMaxModelLen:          "512",
 			RedisInferenceGpuMemoryUtilization: "0.85",
@@ -176,8 +186,9 @@ func createInitializeRouterParamsCli() *cli.Command {
 
 func createRouterCli() *cli.Command {
 	return &cli.Command{
-		Name:  "router",
-		Usage: "router",
+		Name:    "router",
+		Usage:   "router",
+		Aliases: []string{"r"},
 		Commands: []*cli.Command{
 			createRouterParamsCli(),
 			createInitializeRouterParamsCli(),
