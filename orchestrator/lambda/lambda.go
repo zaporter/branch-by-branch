@@ -3,12 +3,13 @@ package lambda
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
 )
 
-func createListCli() *cli.Command {
+func createInstanceTypesCli() *cli.Command {
 	allBool := false
 	action := func(_ context.Context, _ *cli.Command) error {
 		instanceTypes, err := GetInstanceTypes()
@@ -16,9 +17,16 @@ func createListCli() *cli.Command {
 			fmt.Printf("Error fetching instance types: %v\n", err)
 			return nil
 		}
-
+		// get all values from instanceTypes.Data
+		values := make([]InstanceTypeDetails, 0, len(instanceTypes.Data))
+		for _, value := range instanceTypes.Data {
+			values = append(values, value)
+		}
+		sort.Slice(values, func(i, j int) bool {
+			return values[i].InstanceType.Name < values[j].InstanceType.Name
+		})
 		// Print the instance types details.
-		for _, details := range instanceTypes.Data {
+		for _, details := range values {
 			if !allBool && len(details.RegionsWithCapacityAvailable) == 0 {
 				continue
 			}
@@ -276,7 +284,7 @@ func CreateLambdaCli() *cli.Command {
 	return &cli.Command{
 		Name: "lambda",
 		Commands: []*cli.Command{
-			createListCli(),
+			createInstanceTypesCli(),
 			createListInstancesCli(),
 			createLaunchCli(),
 			createTerminateCli(),

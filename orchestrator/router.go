@@ -86,7 +86,7 @@ func createRouterParamsCli() *cli.Command {
 			logger.Info().Msgf("set inference params %s=%s", toSet, valToSet)
 		} else if read {
 			if toSet != "" {
-				return errors.New("read with key is not supported")
+				return errors.New("list with key is not supported")
 			}
 			for _, key := range AllRouterKeys {
 				val, err := rdb.Get(ctx, string(key)).Result()
@@ -113,9 +113,9 @@ func createRouterParamsCli() *cli.Command {
 				Destination: &set,
 			},
 			&cli.BoolFlag{
-				Aliases:     []string{"r"},
-				Name:        "read",
-				Usage:       "read router params",
+				Aliases:     []string{"l"},
+				Name:        "list",
+				Usage:       "list router params",
 				Destination: &read,
 			},
 		},

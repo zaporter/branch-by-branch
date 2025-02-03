@@ -380,7 +380,7 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	sb.WriteString("<ls>directory-name</ls>\n\tList all files in $directory-name. Supports \".\" to mean the root of the repository\n")
 	sb.WriteString("<cat>filename</cat>\n\tPrints the contents of $filename (including line numbers)\n")
 	sb.WriteString("<mkdir>new-directory</mkdir>\n\tInvokes the equivalent of mkdir -p $new-directory\n")
-	sb.WriteString("<ed>script</ed>\n\tEdit existing files & creating new ones. $script can be multiple lines will be executed with the text-editor ed.\n")
+	sb.WriteString("<ed>script</ed>\n\tEdit existing files & creating new ones. $script can be multiple lines and will be executed with the text-editor ed (without a default open file).\n")
 	sb.WriteString("<git-status/>\n\tSee all uncommitted changes.\n")
 	sb.WriteString("<git-commit/>\n\tFinish your work on the repo. Assistant's work will be run though CI and reviewed. Assistant will no longer be able to perform any steps or actions. This should only be executed once the repo is in a working state, is formatted well, and is ready to show to others. It is a syntax-error to put any actions after the commit action.\n")
 	sb.WriteString("\n")
@@ -388,7 +388,12 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	sb.WriteString("<actions> </actions> tags, respectively. For example a valid response from Assistant would be:\n")
 	sb.WriteString("<think> reasoning process here </think>\n ")
 	sb.WriteString("<actions> <ls>.</ls> <git-status/> ... </actions>\n")
-	sb.WriteString("Test.lean is read-only\n")
+	sb.WriteString("\n")
+	sb.WriteString("IMPORTANT HINTS:\n")
+	sb.WriteString("\tTest.lean is READ ONLY. ASSISTANT CANNOT WRITE TO IT. The proof must be added to the Corelib directory.\n")
+	sb.WriteString("\tWhen you finish editing a file, you must end your script with 'w filetowrite.lean' otherwise ed won't know which file to write to.\n")
+	sb.WriteString("\tI recommend reading and editing Corelib/Data/Nat/Basic.lean. That will help you solve the problem.\n")
+	sb.WriteString("\n")
 	sb.WriteString("Assistant will get the ability to perform multiple steps so it is expected that they will use the first few steps to gather information\n\n")
 
 	goal := goalProvider.GetGoal(slice.CommitGraph.GoalID)
@@ -409,6 +414,9 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 		stripTraces:   true,
 		stripWarnings: false,
 	}
+	stripEndNewline := func(s string) string {
+		return strings.TrimSuffix(s, "\n")
+	}
 	if len(parents) > 1 {
 		sb.WriteString("<previous-steps>\n")
 		for i := len(parents) - 2; i >= 0; i-- {
@@ -418,7 +426,7 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 
 			if grandParent.CompilationResult != nil {
 				sb.WriteString(fmt.Sprintf("<compilation-output code=\"%d\">\n%s\n</compilation-output>\n",
-					grandParent.CompilationResult.ExitCode, stripLeanOutput(grandParent.CompilationResult.Out, leanOutputParams)))
+					grandParent.CompilationResult.ExitCode, stripEndNewline(stripLeanOutput(grandParent.CompilationResult.Out, leanOutputParams))))
 			}
 
 			// TODO: Should we parse and pretty-print this? > yes
@@ -444,8 +452,8 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 				if strings.HasSuffix(output.ActionName, "hidden") {
 					continue
 				}
-				sb.WriteString(fmt.Sprintf("<output action=\"%s\" code=\"%d\"> %s </output>\n",
-					output.ActionName, output.ExitCode, output.Text))
+				sb.WriteString(fmt.Sprintf("<output action=\"%s\" code=\"%d\">\n%s\n</output>\n",
+					output.ActionName, output.ExitCode, stripEndNewline(output.Text)))
 			}
 
 			sb.WriteString("</step>\n")
@@ -456,7 +464,7 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	// Write the current compilation output if it exists
 	if slice.CommitGraphNode.CompilationResult != nil {
 		sb.WriteString(fmt.Sprintf("<compilation-output code=\"%d\">\n%s\n</compilation-output>\n",
-			slice.CommitGraphNode.CompilationResult.ExitCode, stripLeanOutput(slice.CommitGraphNode.CompilationResult.Out, leanOutputParams)))
+			slice.CommitGraphNode.CompilationResult.ExitCode, stripEndNewline(stripLeanOutput(slice.CommitGraphNode.CompilationResult.Out, leanOutputParams))))
 	}
 
 	sb.WriteString("Assistant's next step:\n")
