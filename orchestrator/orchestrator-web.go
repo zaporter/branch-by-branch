@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 )
 
 func setupHeader(w *http.ResponseWriter, isJson bool) {
@@ -90,11 +91,13 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 			return
 		}
 		type CommitGraphLocatorsNode struct {
-			Locator  NodeLocator   `json:"locator"`
-			Result   NodeResult    `json:"result"`
-			State    NodeState     `json:"state"`
-			Depth    int           `json:"depth"`
-			Children []NodeLocator `json:"children"`
+			Locator              NodeLocator   `json:"locator"`
+			Result               NodeResult    `json:"result"`
+			State                NodeState     `json:"state"`
+			Depth                int           `json:"depth"`
+			Metadata             NodeMetadata  `json:"metadata"`
+			TerminationRequested bool          `json:"termination_requested"`
+			Children             []NodeLocator `json:"children"`
 		}
 		type Response struct {
 			State GraphState `json:"state"`
@@ -117,10 +120,12 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 					CommitGraphLocator: request,
 					NodeID:             node.ID,
 				},
-				Result:   node.Result,
-				State:    node.State,
-				Depth:    node.Depth,
-				Children: children,
+				Result:               node.Result,
+				State:                node.State,
+				Depth:                node.Depth,
+				TerminationRequested: node.TerminationRequested,
+				Metadata:             node.Metadata,
+				Children:             children,
 			})
 		}
 		response := Response{
@@ -198,14 +203,16 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 		o.mu.Lock()
 		defer o.mu.Unlock()
 		type Response struct {
-			Depth             int                `json:"depth"`
-			State             NodeState          `json:"state"`
-			Result            NodeResult         `json:"result"`
-			InferenceOutput   string             `json:"inference_output"`
-			BranchName        BranchName         `json:"branch_name"`
-			ActionOutputs     []ActionOutput     `json:"action_outputs"`
-			CompilationResult *CompilationResult `json:"compilation_result,omitempty"`
-			Prompt            string             `json:"prompt,omitempty"`
+			Depth                int                `json:"depth"`
+			State                NodeState          `json:"state"`
+			Result               NodeResult         `json:"result"`
+			InferenceOutput      string             `json:"inference_output"`
+			BranchName           BranchName         `json:"branch_name"`
+			ActionOutputs        []ActionOutput     `json:"action_outputs"`
+			Metadata             NodeMetadata       `json:"metadata"`
+			TerminationRequested bool               `json:"termination_requested"`
+			CompilationResult    *CompilationResult `json:"compilation_result,omitempty"`
+			Prompt               string             `json:"prompt,omitempty"`
 		}
 		slice, err := o.RepoGraph.GetNodeSlice(request)
 		if err != nil {
@@ -220,16 +227,70 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 			prompt = prompt_task.Prompt
 		}
 		response := Response{
-			Depth:             slice.CommitGraphNode.Depth,
-			State:             slice.CommitGraphNode.State,
-			Result:            slice.CommitGraphNode.Result,
-			InferenceOutput:   slice.CommitGraphNode.InferenceOutput,
-			BranchName:        slice.CommitGraphNode.BranchName,
-			ActionOutputs:     slice.CommitGraphNode.ActionOutputs,
-			CompilationResult: slice.CommitGraphNode.CompilationResult,
-			Prompt:            prompt,
+			Depth:                slice.CommitGraphNode.Depth,
+			State:                slice.CommitGraphNode.State,
+			Result:               slice.CommitGraphNode.Result,
+			InferenceOutput:      slice.CommitGraphNode.InferenceOutput,
+			BranchName:           slice.CommitGraphNode.BranchName,
+			ActionOutputs:        slice.CommitGraphNode.ActionOutputs,
+			CompilationResult:    slice.CommitGraphNode.CompilationResult,
+			Prompt:               prompt,
+			Metadata:             slice.CommitGraphNode.Metadata,
+			TerminationRequested: slice.CommitGraphNode.TerminationRequested,
 		}
 		json.NewEncoder(w).Encode(response)
 	})
 
+	mux.HandleFunc("/api/graph/request-node-termination", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		var request NodeLocator
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		slice, err := o.RepoGraph.GetNodeSlice(request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		err = slice.CommitGraph.RequestNodeTerminationRecursively(request.NodeID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// todo: return some kind of status
+		w.Write([]byte("ok"))
+	})
+	// THIS IS AN EXTREMELY DANGEROUS OPERATION THAT CAN CRASH THE ORCHESTRATOR
+	// It should only ever be used when the orchestrator is launched with the --view-only flag
+	// This does not recursively delete children. That is the operator's responsibility
+	mux.HandleFunc("/api/graph/delete-node", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		var request NodeLocator
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		slice, err := o.RepoGraph.GetNodeSlice(request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		for _, node := range slice.CommitGraph.Nodes {
+			if slices.Contains(node.Children, request.NodeID) {
+				children := slices.DeleteFunc(node.Children, func(child NodeID) bool {
+					return child == request.NodeID
+				})
+				node.Children = children
+			}
+		}
+		delete(slice.CommitGraph.Nodes, request.NodeID)
+		w.Write([]byte("ok"))
+	})
 }

@@ -17,7 +17,7 @@ import (
 
 func createOrchestratorStartCli() *cli.Command {
 	var webServerPort int64
-	var noExecute bool
+	var viewOnly bool
 	var graphPath string
 	var goalFile string
 	action := func(ctx context.Context, _ *cli.Command) error {
@@ -28,7 +28,7 @@ func createOrchestratorStartCli() *cli.Command {
 			return err
 		}
 		goalProvider := StaticGoalProviderFromFile(goalFile)
-		if !noExecute {
+		if !viewOnly {
 			if err := setRouterParam(ctx, rdb, RedisInferenceEnabled, "true"); err != nil {
 				return err
 			}
@@ -71,7 +71,7 @@ func createOrchestratorStartCli() *cli.Command {
 			cancel()
 		}()
 
-		if !noExecute {
+		if !viewOnly {
 			inferenceEngine.Start(ctx)
 			compilationEngine.Start(ctx)
 			goalCompilationEngine.Start(ctx)
@@ -111,7 +111,7 @@ func createOrchestratorStartCli() *cli.Command {
 			}
 		}()
 
-		if !noExecute {
+		if !viewOnly {
 			orchestrator.Start()
 			orchestrator.WaitForStop()
 			server.Shutdown(ctx)
@@ -160,10 +160,11 @@ func createOrchestratorStartCli() *cli.Command {
 				Required:    true,
 			},
 			&cli.BoolFlag{
-				Name:        "no-execute",
-				Usage:       "don't execute the engines",
+				Name:        "view-only",
+				Aliases:     []string{"view"},
+				Usage:       "don't execute the engines. Will still save on SIGTERM",
 				Value:       false,
-				Destination: &noExecute,
+				Destination: &viewOnly,
 			},
 		},
 	}

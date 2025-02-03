@@ -55,6 +55,8 @@ const (
 	NodeResultDepthExhaustionFailure NodeResult = "node_result_depth_exhaustion"
 	// max context length exceeded
 	NodeResultContextExhaustionFailure NodeResult = "node_result_context_exhaustion"
+	// was in a non-terminal state but had been requested to be terminated
+	NodeResultTerminated NodeResult = "node_result_terminated"
 )
 
 type GraphState string
@@ -97,10 +99,12 @@ type CommitGraphNode struct {
 	CreatedAt time.Time `json:"created_at"`
 	Depth     int       `json:"depth"`
 	// nil if this is the root
-	Parent   *NodeID    `json:"parent"`
-	Children []NodeID   `json:"children"`
-	State    NodeState  `json:"state"`
-	Result   NodeResult `json:"result"`
+	Parent               *NodeID      `json:"parent"`
+	Children             []NodeID     `json:"children"`
+	State                NodeState    `json:"state"`
+	Result               NodeResult   `json:"result"`
+	TerminationRequested bool         `json:"termination_requested"`
+	Metadata             NodeMetadata `json:"metadata"`
 
 	// The inference result that LED to the creation of this node.
 	// Empty if this is the root
@@ -113,6 +117,15 @@ type CommitGraphNode struct {
 	// (unless this is the root, in which case, it is:
 	// apply(goals[goal_id].GoalStatement @ branch_target.branch_name))
 	BranchName BranchName `json:"branch_name"`
+}
+
+// Manual data that I have added from the webui.
+// normal execution should probably not populate these fields.
+// add fields to CommitGraphNode instead.
+type NodeMetadata struct {
+	WasManuallyCreated bool   `json:"was_manually_created,omitempty"`
+	IsFavorite         bool   `json:"is_favorite,omitempty"`
+	Label              string `json:"label,omitempty"`
 }
 
 // not an action, but a way to return output from an action
@@ -350,6 +363,20 @@ func (rg *RepoGraph) UnfinishedGraphs() []CommitGraphLocator {
 func (rg *RepoGraph) SpawnNewGraph() (*CommitGraphLocator, bool) {
 	//TODO
 	return nil, false
+}
+
+func (rg *CommitGraph) RequestNodeTerminationRecursively(nodeID NodeID) error {
+	node, ok := rg.Nodes[nodeID]
+	if !ok {
+		return fmt.Errorf("node %v not found", nodeID)
+	}
+	node.TerminationRequested = true
+	for _, child := range node.Children {
+		if err := rg.RequestNodeTerminationRecursively(child); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (cg *CommitGraph) AllNodesInState(state NodeState) []*CommitGraphNode {
