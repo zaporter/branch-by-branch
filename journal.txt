@@ -1,0 +1,46 @@
+## 2025-02-03
+First time I am recording my results. Hoping this will work as a sort of diary / journal that I can reference in order to perform more-efficient hyperparameter optimization.
+
+Today, I ran:
+- unsloth/llama-3-70b-bnb-4bit
+- unsloth/Llama-3.3-70B-Instruct-bnb-4bit
+- unsloth/DeepSeek-R1-Distill-Llama-70B-bnb-4bit
+
+Observations:
+- llama-3-70b was terrible
+- R1-Distill didn't understand ed. It was close to understanding the problem
+- 3.3-I got incredibly close to solving the goal with:
+```
+cat << 'EOF' | ed
+
+a
+-Corelib/Data/Nat/Basic.lean
+open Nat
+theorem succ_pred_one (n : ℕ) : n ≠ 0 ∧ n ≠ 1 → succ (pred n) = n := by
+  intro hn
+  cases n with
+  | zero => exact absurd rfl (And.left hn)
+  | succ n => rw [Nat.pred_succ]
+theorem succ_pred_two (n : ℕ) : n ≠ 0 ∧ n ≠ 2 → succ (pred n) = n := by
+  intro hn
+  cases n with
+  | zero => exact absurd rfl (And.left hn)
+  | succ n => rw [Nat.pred_succ]
+
+w Corelib/Data/Nat/Basic.lean
+
+EOF
+```
+This is, unfortunately, not valid ed. But I checked, succ_pred_two would have worked perfectly if the model had understood ed better.
+
+- I added some IMPORTANT HINTS to the goal. This helped a ton. I am worried they are slightly too hardcoded, but I suspect that once I have a lora adapter layer on this, it will understand the problem a lot better.
+- It is really strange that it doesn't know any ed syntax. I suspect as the models get further from being trained on the internet (distil), they forget everything in those classes of information.
+    - To remedy this, I suggest that I will have to:
+        1. swap to a bigger model (possibly 405B-I) (or maybe deepseek R1 671B) (depending on how they fit with lambda-labs instance sizes) 
+        2. manually teach it ed via manually-edited samples
+
+- 405b @ q4 should fit inside "4x H100 (80 GB SXM5)" But that is probably a pretty hot commodity. Will have to fight to get instances.
+(and even then, it will be very close. Not sure.)
+
+- I think git diff should output in ed format. 
+    - Actually, no I dont. The problem with that is that it would collapse line deletions into `d` commands instead of informing the model that it removed important things like an import 
