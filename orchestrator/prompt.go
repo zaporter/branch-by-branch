@@ -122,6 +122,12 @@ func (a XMLActionEd) Validate() error {
 	if strings.Contains(a.Script, "EOF") {
 		return errors.New("script cannot contain EOF")
 	}
+	lines := strings.Split(a.Script, "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "!") {
+			return errors.New("script cannot have command lines (lines starting with !)")
+		}
+	}
 	return nil
 }
 

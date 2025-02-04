@@ -1,3 +1,28 @@
+## 2025-02-03 (pt2)
+Today, I spent my evening working on manually creating nodes, favoriting them, terminating trees, and labeling them.
+
+Importantly, I got a successful BT! I had to teach it ed. But this worked for the simple succ_pred_two goal.
+```
+<think>
+The new test added to Test.lean is very similar to the previous test. It also looks like succ_pred_one is the proof for that proof. I should duplicate succ_pred_one and create succ_pred_two (even though the naming is confusing... maybe succ_pred_not_two would be better. Lets wait on that). I will append it to the end of the file so I don't remove succ_pred_one
+</think>
+<actions>
+<ed>
+e Corelib/Data/Nat/Basic.lean
+a
+theorem succ_pred_two (n : ℕ) : n ≠ 0 ∧ n ≠ 2 → succ (pred n) = n := by
+  intro hn
+  cases n with
+  | zero => exact absurd rfl (And.left hn)
+  | succ n => rw [Nat.pred_succ]
+.
+w
+</ed>
+</actions>
+```
+
+I have saved this graph in testgraphs/first_succ.json
+
 ## 2025-02-03
 First time I am recording my results. Hoping this will work as a sort of diary / journal that I can reference in order to perform more-efficient hyperparameter optimization.
 
