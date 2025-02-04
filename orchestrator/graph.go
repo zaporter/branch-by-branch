@@ -217,8 +217,7 @@ func (rg *RepoGraph) LoadFromFile(path string) error {
 	return json.Unmarshal(str, rg)
 }
 
-func (rg *RepoGraph) AddBranchTarget(parentBranchName BranchName, traversalGoalID GoalID) {
-	branchName := NewBranchName()
+func (rg *RepoGraph) AddBranchTarget(parentBranchName BranchName, branchName BranchName, traversalGoalID GoalID) {
 	rg.BranchTargets[branchName] = &RepoGraphBranchTarget{
 		CreatedAt:        time.Now(),
 		BranchName:       branchName,
@@ -348,6 +347,8 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 		node.State = NodeStateDone
 		if node.CompilationResult.ExitCode == 0 {
 			node.Result = NodeResultSuccess
+			// ❤️ create a new branch target!
+			rg.AddBranchTarget(slice.BranchTarget.BranchName, slice.CommitGraphNode.BranchName, slice.CommitGraph.GoalID)
 		} else {
 			node.Result = NodeResultFailure
 		}
@@ -375,9 +376,7 @@ func (rg *RepoGraph) tickUpdateCommitGraph(slice CommitGraphSlice) {
 			}
 		}
 		if hasSuccess {
-			// ❤️ create a new branch target!
 			slice.CommitGraph.State = GraphStateSuccess
-			rg.AddBranchTarget(slice.BranchTarget.BranchName, slice.CommitGraph.GoalID)
 		} else {
 			slice.CommitGraph.State = GraphStateFailed
 		}
