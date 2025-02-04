@@ -14,6 +14,7 @@
 	import ForceLayout from 'graphology-layout-force/worker';
 	import circular from 'graphology-layout/circular';
 	import { onMount } from 'svelte';
+	import { Button } from '$lib/components/ui/button';
 	interface Props {
 		graph: CommitGraphLocators;
 		selectedNode: NodeLocator | undefined;
@@ -44,7 +45,7 @@
 				return '#FF31F5';
 			}
 			if (node.result === 'node_result_terminated') {
-				return '#EA31F5';
+				return '#EAF157';
 			}
 			return '#0000ff';
 		} else if (node.state === 'node_awaiting_goal_setup') {
@@ -60,6 +61,20 @@
 		} else if (node.state === 'node_state_running_inference') {
 			return '#7D80DA';
 		}
+	};
+	const labelForNode = (node: CommitGraphLocatorsNode) => {
+		let label = String(node.depth || 'root');
+		if (node.metadata.was_manually_created) {
+			label += '-M';
+		}
+		// prefer label over star emoji
+		if (node.metadata.is_favorite && !node.metadata.label) {
+			label += '-🌟';
+		}
+		if (node.metadata.label) {
+			label += `-${node.metadata.label}`;
+		}
+		return label;
 	};
 	let firstTime = true;
 
@@ -108,7 +123,7 @@
 				Math.pow(graph.nodes.length, 0.45);
 			if (graphObject.hasNode(nodeId)) {
 				graphObject.setNodeAttribute(nodeId, 'color', colorForNode(node, isSelected));
-				graphObject.setNodeAttribute(nodeId, 'label', node.depth || 'root');
+				graphObject.setNodeAttribute(nodeId, 'label', labelForNode(node));
 				graphObject.setNodeAttribute(nodeId, 'size', objSize);
 			} else {
 				graphObject.addNode(nodeId, {
@@ -116,7 +131,7 @@
 					y: Math.random() * 100,
 					size: objSize,
 					color: colorForNode(node, isSelected),
-					label: node.depth || 'root'
+					label: labelForNode(node)
 				});
 			}
 			existingNodes.delete(nodeId);
@@ -176,8 +191,36 @@
 			layout?.stop();
 		};
 	});
+	const quickSelectFavorites = $derived(
+		props.graph.nodes
+			.filter(
+				(node) =>
+					node.metadata.is_favorite || node.metadata.was_manually_created || node.metadata.label
+			)
+			.toSorted(
+				(a, b) =>
+					labelForNode(a).localeCompare(labelForNode(b)) ||
+					b.locator.node_id.localeCompare(a.locator.node_id)
+			)
+	);
 </script>
 
-<div class="border-1 h-fit w-fit border">
-	<div id="commit-graph" style="height: 500px; width: 500px;"></div>
+<div class="flex h-full min-h-0 flex-col">
+	<div class="flex-none">
+		<div id="commit-graph" style="height: 500px; width: 500px;" class="border"></div>
+	</div>
+	<!-- node selector for favorites -->
+	<h4>Quick Select</h4>
+	<div class="flex flex-col gap-2 overflow-y-auto">
+		{#each quickSelectFavorites as node}
+			{@const is_selected =
+				props.selectedNode && locatorToJSON(node.locator) === locatorToJSON(props.selectedNode)}
+			<Button
+				variant={is_selected ? 'default' : 'outline'}
+				onclick={() => props.onSelectNode(node.locator)}
+			>
+				{labelForNode(node)}
+			</Button>
+		{/each}
+	</div>
 </div>

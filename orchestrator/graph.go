@@ -152,6 +152,7 @@ type CommitGraphNode struct {
 // Manual data that I have added from the webui.
 // normal execution should probably not populate these fields.
 // add fields to CommitGraphNode instead.
+// Make sure this is kept up to date with the webui (otherwise the webui will accidentally overwrite the data)
 type NodeMetadata struct {
 	WasManuallyCreated bool   `json:"was_manually_created,omitempty"`
 	IsFavorite         bool   `json:"is_favorite,omitempty"`
@@ -260,6 +261,9 @@ func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *Inferenc
 	if err != nil {
 		return err
 	}
+	if slice.CommitGraphNode.State == NodeStateDone && slice.CommitGraphNode.Result == NodeResultTerminated {
+		return nil
+	}
 	if slice.CommitGraphNode.State != NodeStateRunningInference {
 		return fmt.Errorf("node %v is not in state RunningInference", locator)
 	}
@@ -271,7 +275,7 @@ func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *Inferenc
 	// if we have children, we are (by definition) non-terminal
 	node.Result = NodeResultNone
 	for _, seq := range result.ReturnSequences {
-		if _, err := rg.AddNodeToCommitGraph(locator, seq); err != nil {
+		if _, err := rg.AddNodeToCommitGraph(locator, seq, NodeMetadata{}); err != nil {
 			return err
 		}
 	}
@@ -279,7 +283,7 @@ func (rg *RepoGraph) HandleInferenceOutput(locator NodeLocator, result *Inferenc
 	return nil
 }
 
-func (rg *RepoGraph) AddNodeToCommitGraph(parentLocator NodeLocator, inferenceOutput string) (NodeLocator, error) {
+func (rg *RepoGraph) AddNodeToCommitGraph(parentLocator NodeLocator, inferenceOutput string, metadata NodeMetadata) (NodeLocator, error) {
 	parentSlice, err := rg.GetNodeSlice(parentLocator)
 	if err != nil {
 		return NodeLocator{}, err
@@ -296,6 +300,7 @@ func (rg *RepoGraph) AddNodeToCommitGraph(parentLocator NodeLocator, inferenceOu
 		InferenceOutput: inferenceOutput,
 		ActionOutputs:   []ActionOutput{},
 		BranchName:      NewBranchName(),
+		Metadata:        metadata,
 	}
 	// check for syntax errors
 	// (easier here before pulling this off to queue)
@@ -314,6 +319,9 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 	slice, err := rg.GetNodeSlice(locator)
 	if err != nil {
 		return err
+	}
+	if slice.CommitGraphNode.State == NodeStateDone && slice.CommitGraphNode.Result == NodeResultTerminated {
+		return nil
 	}
 	if slice.CommitGraphNode.State != NodeStateRunningCompilation {
 		return fmt.Errorf("node %v is not in state RunningCompilation", locator)
@@ -404,20 +412,16 @@ func (rg *RepoGraph) UnfinishedGraphs() []CommitGraphLocator {
 	return unfinishedGraphs
 }
 
-// Traverse all the branch targets, usiing weighting, select a problem, select a branch
-// Create a new CommitGraph, set the root node, and return the locator
-// returns false if no new graphs can be spawned
-func (rg *RepoGraph) SpawnNewGraph() (*CommitGraphLocator, bool) {
-	//TODO
-	return nil, false
-}
-
 func (rg *CommitGraph) RequestNodeTerminationRecursively(nodeID NodeID) error {
 	node, ok := rg.Nodes[nodeID]
 	if !ok {
 		return fmt.Errorf("node %v not found", nodeID)
 	}
 	node.TerminationRequested = true
+	if node.State != NodeStateDone {
+		node.State = NodeStateDone
+		node.Result = NodeResultTerminated
+	}
 	for _, child := range node.Children {
 		if err := rg.RequestNodeTerminationRecursively(child); err != nil {
 			return err

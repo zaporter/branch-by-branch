@@ -3,15 +3,20 @@
 		createNodeStatsQuery,
 		createRequestNodeTerminationMutation,
 		createDeleteNodeMutation,
-		type NodeLocator
+		type NodeLocator,
+		createCreateNodeMutation,
+		createSetNodeMetadataMutation
 	} from '$lib';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { useQueryClient } from '@tanstack/svelte-query';
+	import CreateNodeDialog from './create-node-dialog.svelte';
+	import { Input } from '$lib/components/ui/input';
 
 	interface Props {
 		locator: NodeLocator;
 		unselectNode: () => void;
+		selectNode: (locator: NodeLocator) => void;
 	}
 	const props: Props = $props();
 	const query = $derived(createNodeStatsQuery(props.locator));
@@ -19,6 +24,8 @@
 		createRequestNodeTerminationMutation(props.locator)
 	);
 	const deleteNodeMutation = $derived(createDeleteNodeMutation(props.locator));
+	const createNodeMutation = $derived(createCreateNodeMutation());
+	const setNodeMetadataMutation = $derived(createSetNodeMetadataMutation());
 	const queryClient = useQueryClient();
 
 	const terminateNode = $derived(async () => {
@@ -33,6 +40,35 @@
 		// everything
 		queryClient.invalidateQueries({ queryKey: [] });
 	});
+	const createNode = $derived(async (text: string) => {
+		const res = await $createNodeMutation.mutateAsync({
+			parent_node_locator: props.locator,
+			inference_output: text
+		});
+		props.selectNode(res.node_locator);
+	});
+	const toggleFavorite = $derived(async () => {
+		if (!$query.data) return;
+		await $setNodeMetadataMutation.mutateAsync({
+			node_locator: props.locator,
+			metadata: { ...$query.data.metadata, is_favorite: !Boolean($query.data.metadata.is_favorite) }
+		});
+		await $query.refetch();
+	});
+	let savedLabelText = $derived($query.data?.metadata.label ?? '');
+	let labelText = $state('');
+	$effect(() => {
+		labelText = savedLabelText;
+	});
+	const setLabel = $derived(async (label: string) => {
+		if (!$query.data) return;
+		await $setNodeMetadataMutation.mutateAsync({
+			node_locator: props.locator,
+			metadata: { ...$query.data.metadata, label }
+		});
+		await $query.refetch();
+	});
+
 </script>
 
 {#if $query.isLoading}
@@ -41,30 +77,38 @@
 	<p>Error: {$query.error.message}</p>
 {:else if $query.data}
 	{@const data = $query.data}
-
-	<div class="flex justify-end">
+	<div class="flex justify-end gap-2">
+		<Button onclick={toggleFavorite}>
+			{data.metadata.is_favorite ? '⭐️' : '☆'}
+		</Button>
+		<Input type="text" bind:value={labelText} onfocusout={() => setLabel(labelText)} />
+		<CreateNodeDialog
+			parentNodeLocator={props.locator}
+			prompt={data.prompt ?? 'no prompt'}
+			onCreateNode={createNode}
+		/>
 		<AlertDialog.Root>
-			<AlertDialog.Trigger class={buttonVariants({ variant: 'outline' })}>
-				Show Dialog
+			<AlertDialog.Trigger class={buttonVariants({ variant: 'destructive' })}>
+				Delete Node
 			</AlertDialog.Trigger>
 			<AlertDialog.Content>
 				<AlertDialog.Header>
 					<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
 					<AlertDialog.Description>
-						This action cannot be undone. This will permanently delete your account and remove your
-						data from our servers.
+						This is a dangerous operation that can crash the orchestrator & corrupt your graph.
+						Please read the source of orchestrator-web.go to understand the implications &
+						implementation of this action. At least make a backup of the graph before doing this.
 					</AlertDialog.Description>
 				</AlertDialog.Header>
 				<AlertDialog.Footer>
 					<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-					<AlertDialog.Action>Continue</AlertDialog.Action>
+					<AlertDialog.Action onclick={deleteNode}>Do it</AlertDialog.Action>
 				</AlertDialog.Footer>
 			</AlertDialog.Content>
 		</AlertDialog.Root>
 		<Button variant="destructive" onclick={terminateNode} disabled={data.termination_requested}>
 			{data.termination_requested ? 'Termination Requested' : 'Request Termination'}
 		</Button>
-		<Button variant="destructive" onclick={deleteNode}>🗑️</Button>
 	</div>
 
 	<dl class="text-xs [&_dd]:ml-4 [&_dd]:font-normal [&_dt]:font-semibold">

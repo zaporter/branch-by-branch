@@ -262,10 +262,10 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 			return
 		}
 		// todo: return some kind of status
-		w.Write([]byte("ok"))
+		w.Write([]byte("{}"))
 	})
 	// THIS IS AN EXTREMELY DANGEROUS OPERATION THAT CAN CRASH THE ORCHESTRATOR
-	// It should only ever be used when the orchestrator is launched with the --view-only flag
+	// It should only ever be used on terminal nodes that are not generating new nodes
 	// This does not recursively delete children. That is the operator's responsibility
 	mux.HandleFunc("/api/graph/delete-node", func(w http.ResponseWriter, r *http.Request) {
 		setupHeader(&w, true)
@@ -291,7 +291,7 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 			}
 		}
 		delete(slice.CommitGraph.Nodes, request.NodeID)
-		w.Write([]byte("ok"))
+		w.Write([]byte("{}"))
 	})
 	mux.HandleFunc("/api/graph/create-node", func(w http.ResponseWriter, r *http.Request) {
 		setupHeader(&w, true)
@@ -310,7 +310,13 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 		}
 		o.mu.Lock()
 		defer o.mu.Unlock()
-		locator, err := o.RepoGraph.AddNodeToCommitGraph(request.ParentNodeLocator, request.InferenceOutput)
+		locator, err := o.RepoGraph.AddNodeToCommitGraph(
+			request.ParentNodeLocator,
+			request.InferenceOutput,
+			NodeMetadata{
+				WasManuallyCreated: true,
+			},
+		)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -320,5 +326,26 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 		}
 		json.NewEncoder(w).Encode(response)
 	})
+	mux.HandleFunc("/api/graph/set-node-metadata", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		type Request struct {
+			NodeLocator NodeLocator  `json:"node_locator"`
+			Metadata    NodeMetadata `json:"metadata"`
+		}
+		var request Request
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		slice, err := o.RepoGraph.GetNodeSlice(request.NodeLocator)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		slice.CommitGraphNode.Metadata = request.Metadata
+		w.Write([]byte("{}"))
+	})
 }
-

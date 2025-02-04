@@ -44,7 +44,8 @@ export const nodeMetadataSchema = z.object({
     was_manually_created: z.boolean().optional(),
     is_favorite: z.boolean().optional(),
     label: z.string().optional(),
-})
+}).strict() // ensure this is kept up to date with the backend
+
 export type NodeMetadata = z.infer<typeof nodeMetadataSchema>;
 export const nodeStateSchema = z.enum([
     'node_awaiting_goal_setup',
@@ -223,13 +224,30 @@ export const createNodeResponseSchema = z.object({
 })
 export type CreateNodeResponse = z.infer<typeof createNodeResponseSchema>;
 
-export const createCreateNodeMutation = (request: CreateNodeRequest) => {
+export const createCreateNodeMutation = () => {
     return createMutation({
-        mutationFn: () => fetch(`${beHost}/api/graph/create-node`, {
+        mutationFn: (request: CreateNodeRequest) => fetch(`${beHost}/api/graph/create-node`, {
             method: 'POST',
             body: JSON.stringify(request),
         })
             .then(res => res.json())
             .then(data => createNodeResponseSchema.parse(data)),
+    });
+}
+
+// @api /api/graph/set-node-metadata
+export const setNodeMetadataRequestSchema = z.object({
+    node_locator: nodeLocatorSchema,
+    metadata: nodeMetadataSchema,
+})
+export type SetNodeMetadataRequest = z.infer<typeof setNodeMetadataRequestSchema>;
+
+export const createSetNodeMetadataMutation = () => {
+    return createMutation({
+        mutationFn: (request: SetNodeMetadataRequest) => fetch(`${beHost}/api/graph/set-node-metadata`, {
+            method: 'POST',
+            body: JSON.stringify(request),
+        })
+            .then(res => res.text()),
     });
 }

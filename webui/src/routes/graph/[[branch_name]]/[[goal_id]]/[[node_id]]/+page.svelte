@@ -78,8 +78,8 @@
 	};
 </script>
 
-<div class="flex flex-row gap-4 p-4">
-	<div class="flex flex-col gap-4">
+<div class="flex h-full flex-row gap-4 p-4">
+	<div class="flex h-full flex-col gap-4">
 		{#if $pingQuery.isLoading}
 			<p>Loading...</p>
 		{:else if $pingQuery.isError}
@@ -115,7 +115,7 @@
 		{/if}
 	</div>
 
-	<div class="flex h-full max-h-[calc(100vh-100px)] w-full flex-col gap-4 overflow-y-auto">
+	<div class="flex h-full h-full w-full flex-col gap-4 overflow-y-auto">
 		{#if currentBranchTargetLocator}
 			<StatsContainer title={`Branch ${currentBranchTargetLocator.branch_name}`}>
 				<BranchTargetStats locator={currentBranchTargetLocator} />
@@ -128,7 +128,7 @@
 		{/if}
 		{#if currentNodeLocator}
 			<StatsContainer title={`Node ${currentNodeLocator.node_id}`}>
-				<NodeStats locator={currentNodeLocator} {unselectNode} />
+				<NodeStats locator={currentNodeLocator} {unselectNode} selectNode={onSelectNode} />
 			</StatsContainer>
 		{/if}
 	</div>
