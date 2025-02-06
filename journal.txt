@@ -10,6 +10,22 @@ Savefile: testgraphs/2025-02-05.json
 ========================================Starting batch. Len: 4
 Processed prompts:  50%|██████████████████████████▌                          | 4/8 [00:48<00:48, 12.14s/it, est. speed input: 83.02 toks/s, output: 17.96 toks/s]
 
+After changing some params, got to:
+[main 4a34edb] speed up inference
+========================================Starting batch building
+========================================Starting batch. Len: 8
+Processed prompts:   0%|                                                 | 0/16 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Processed prompts:  50%|███████████████████                   | 8/16 [00:59<00:59,  7.41s/it, est. speed input: 217.66 toks/s, output: 23.02 toks/s]
+num_sequences_per_prompt 2
+========================================Starting batch building
+========================================Starting batch. Len: 8
+Processed prompts:  50%|███████████████████                   | 8/16 [01:03<01:03,  7.93s/it, est. speed input: 212.76 toks/s, output: 32.55 toks/s]
+num_sequences_per_prompt 2
+
+
+I installed flashinfer and everything got Significantlty slower. Deleting it and clearing the cache didn't work. I think it installed itself somewhere that vllm is finding.. not sure. Signing off.
+
+
 ## 2025-02-03 (pt2)
 Today, I spent my evening working on manually creating nodes, favoriting them, terminating trees, and labeling them.
 
