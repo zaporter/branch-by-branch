@@ -230,6 +230,17 @@ func (rg *RepoGraph) LoadFromFile(path string) error {
 	}
 	return json.Unmarshal(str, rg)
 }
+func (rg *RepoGraph) ResetTransientStates() {
+	for _, branchTarget := range rg.BranchTargets {
+		for _, subgraph := range branchTarget.Subgraphs {
+			for _, node := range subgraph.Nodes {
+				if _, ok := TransientNodeStateResetMap[node.State]; ok {
+					node.State = TransientNodeStateResetMap[node.State]
+				}
+			}
+		}
+	}
+}
 
 // implies success
 // may not actually create a new branch if the diffpatch is duplicative
@@ -364,10 +375,6 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 	}
 	node := slice.CommitGraphNode
 
-	resp, err := ParseModelResponse(node.InferenceOutput)
-	if err != nil {
-		return fmt.Errorf("node somehow got compiled with non-parsable inference output %v %w", locator, err)
-	}
 	gitCommitDiffPatch := ""
 	for _, res := range result.PreCommandsResults {
 		node.ActionOutputs = append(node.ActionOutputs, ActionOutput{
@@ -375,17 +382,13 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 			Text:       res.Out,
 			ExitCode:   res.ExitCode,
 		})
-		if res.ActionName == "git-commit" {
+		if res.ActionName == "git-commit" && res.ExitCode == 0 {
 			gitCommitDiffPatch = res.Out
-			if res.ExitCode != 0 {
-				// this is probably not deserving of a panic.
-				panic(fmt.Sprintf("git-commit failed with exit code %d %s", res.ExitCode, res.Out))
-			}
 		}
 	}
 	node.CompilationResult = &result.CompilationResult
 
-	if resp.Actions.ContainsGitCommit() {
+	if gitCommitDiffPatch != "" {
 		node.State = NodeStateDone
 		if node.CompilationResult.ExitCode == 0 {
 			node.Result = NodeResultSuccess

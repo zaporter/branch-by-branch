@@ -6,6 +6,9 @@ import gc
 from vllm.sampling_params import GuidedDecodingParams
 import re
 import torch
+# was crashing. This terrifies me.
+import torch._dynamo
+torch._dynamo.config.suppress_errors = True
 
 redisHost = os.getenv('REDIS_ADDRESS') or 'err no host'
 redisPassword = os.getenv('REDIS_PASSWORD') or 'err no pw'
@@ -50,7 +53,10 @@ def process_batch(model, batch_prompts, batch_task_ids):
         max_tokens=params["max_new_tokens"],
         n=params["num_return_sequences"],
         best_of=params["num_beams"],
+        include_stop_str_in_output=True,
         guided_decoding=guided_decoding_params,
+        temperature=0.1,
+        top_p=0.9,
         stop=["</actions>"]
     )
     generated = model.generate(batch_prompts, sampling_params)
@@ -63,10 +69,10 @@ def send_results(generated, batch_prompts, batch_task_ids):
     for i in range(len(batch_prompts)):
         return_sequences = []
         for j in range(num_sequences_per_prompt):
-            model_output = generated[i].outputs[j].text + "</actions>"
+            model_output = generated[i].outputs[j].text
             prompt = batch_prompts[i]
-            print("=" * 5 + "prompt "+str(i))
-            print(prompt)
+            #print("=" * 5 + "prompt "+str(i))
+            #print(prompt)
             print("-" * 5 + "output "+str(i))
             print(model_output)
             return_sequences.append(model_output)
@@ -104,12 +110,16 @@ def main():
         max_model_len=params["max_model_len"],
         gpu_memory_utilization=params["gpu_memory_utilization"],
         tensor_parallel_size=num_gpus,
-        # Wait till v1. This causes poor gpu-utilization.
-        enable_prefix_caching=False,
         trust_remote_code=True,
         # same https://docs.vllm.ai/en/latest/features/quantization/bnb.html
         load_format=load_format,
         quantization=load_format,
+        # https://docs.vllm.ai/en/stable/performance/optimization.html
+        enable_chunked_prefill=True,
+        # https://docs.vllm.ai/en/stable/performance/optimization.html
+        max_num_batched_tokens=8192,
+        # https://docs.vllm.ai/en/stable/features/automatic_prefix_caching.html
+        enable_prefix_caching=True
 
     )
     # TODO: if the params for the LLM() constructor change, we need to reconstruct the model

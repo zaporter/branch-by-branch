@@ -1,7 +1,9 @@
+# Cant upgrade to 0.7.1 because of 
+# torch._dynamo.exc.Unsupported: Dynamic slicing on data-dependent value is not supported
 vllm==0.6.6.post1
 redis==5.2.1
 # Prioritize matching vllm
 xgrammar>=0.1.10
 torch
 # https://docs.vllm.ai/en/latest/features/quantization/bnb.html
-bitsandbytes>=0.45.0
+bitsandbytes>=0.45.1

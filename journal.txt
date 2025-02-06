@@ -1,3 +1,15 @@
+## 2025-02-05
+- Added branch target deduping by adding CGResults
+
+- It successfully edited Test.lean (proving, much to my amusement, that the git diff works)
+
+- Also added transient state resetting (I finally had a graph crash (I wrote a bad panic))
+
+Savefile: testgraphs/2025-02-05.json
+
+========================================Starting batch. Len: 4
+Processed prompts:  50%|██████████████████████████▌                          | 4/8 [00:48<00:48, 12.14s/it, est. speed input: 83.02 toks/s, output: 17.96 toks/s]
+
 ## 2025-02-03 (pt2)
 Today, I spent my evening working on manually creating nodes, favoriting them, terminating trees, and labeling them.
 

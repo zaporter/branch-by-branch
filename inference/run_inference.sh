@@ -41,4 +41,8 @@ uv pip install -r requirements.txt
 source ../.env
 
 which python
+
+# https://blog.vllm.ai/2025/01/27/v1-alpha-release.html
+#export VLLM_USE_V1=1
+
 python ./inference.py
