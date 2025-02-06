@@ -140,6 +140,7 @@ func (a XMLActionGitStatus) GetType() string {
 }
 
 func (a XMLActionGitStatus) GetCompilationTask() string {
+	// special. replaced during execution.
 	return ""
 }
 
@@ -156,6 +157,7 @@ func (a XMLActionGitCommit) GetType() string {
 }
 
 func (a XMLActionGitCommit) GetCompilationTask() string {
+	// special. replaced during execution.
 	return ""
 }
 

@@ -45,7 +45,8 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 			})
 			for _, subgraph := range bt.Subgraphs {
 				children := []BranchTargetLocator{}
-				// N^2 Build map if this causes trouble
+				// TODO: refactor this to use CG.Results.
+				// N^2
 				for _, testB := range o.RepoGraph.BranchTargets {
 					if testB.TraversalGoalID != nil &&
 						*testB.TraversalGoalID == subgraph.GoalID &&

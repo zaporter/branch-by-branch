@@ -115,6 +115,16 @@ type RepoGraphBranchTarget struct {
 	Subgraphs       map[GoalID]*CommitGraph `json:"subgraphs"`
 }
 
+// See comment in BuildCompilationTasksForNode about git-commit
+// to understand this more
+type CGResult struct {
+	// This is also CG[GeneratingNodes[0]].BranchName
+	BranchTarget BranchName `json:"branch_target"`
+	// can be used as a unique identifier within the CG results array
+	DiffPatch       string   `json:"diff_patch"`
+	GeneratingNodes []NodeID `json:"generating_nodes"`
+}
+
 type CommitGraph struct {
 	// goal_id is a unique identifier for the graph because
 	// we will never start a new graph at the same target on the same goal
@@ -122,6 +132,8 @@ type CommitGraph struct {
 	RootNode NodeID                      `json:"root_node"`
 	Nodes    map[NodeID]*CommitGraphNode `json:"nodes"`
 	State    GraphState                  `json:"state"`
+
+	Results []*CGResult `json:"results"`
 }
 
 type CommitGraphNode struct {
@@ -177,12 +189,14 @@ func NewCommitGraph(goalID GoalID) *CommitGraph {
 		State:      NodeStateAwaitingGoalSetup,
 		Result:     NodeResultNone,
 		BranchName: NewBranchName(),
+		Metadata:   NodeMetadata{},
 	}
 	return &CommitGraph{
 		GoalID:   goalID,
 		RootNode: rootNode.ID,
 		Nodes:    map[NodeID]*CommitGraphNode{rootNode.ID: rootNode},
 		State:    GraphStateAwaitingGoalSetup,
+		Results:  []*CGResult{},
 	}
 }
 
@@ -217,11 +231,31 @@ func (rg *RepoGraph) LoadFromFile(path string) error {
 	return json.Unmarshal(str, rg)
 }
 
-func (rg *RepoGraph) AddBranchTarget(parentBranchName BranchName, branchName BranchName, traversalGoalID GoalID) {
-	rg.BranchTargets[branchName] = &RepoGraphBranchTarget{
+// implies success
+// may not actually create a new branch if the diffpatch is duplicative
+func (rg *RepoGraph) CreateBranchTargetFromNode(slice NodeSlice, gitCommitDiffPatch string) {
+	sourceBranchName := slice.BranchTarget.BranchName
+	newBranchName := slice.CommitGraphNode.BranchName
+	traversalGoalID := slice.CommitGraph.GoalID
+
+	for _, result := range slice.CommitGraph.Results {
+		if gitCommitDiffPatch == result.DiffPatch {
+			// this is a duplicate
+			result.GeneratingNodes = append(result.GeneratingNodes, slice.CommitGraphNode.ID)
+			return
+		}
+	}
+
+	slice.CommitGraph.Results = append(slice.CommitGraph.Results, &CGResult{
+		BranchTarget:    newBranchName,
+		DiffPatch:       gitCommitDiffPatch,
+		GeneratingNodes: []NodeID{slice.CommitGraphNode.ID},
+	})
+
+	rg.BranchTargets[newBranchName] = &RepoGraphBranchTarget{
 		CreatedAt:        time.Now(),
-		BranchName:       branchName,
-		ParentBranchName: &parentBranchName,
+		BranchName:       newBranchName,
+		ParentBranchName: &sourceBranchName,
 		TraversalGoalID:  &traversalGoalID,
 		Subgraphs:        map[GoalID]*CommitGraph{},
 	}
@@ -334,12 +368,20 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 	if err != nil {
 		return fmt.Errorf("node somehow got compiled with non-parsable inference output %v %w", locator, err)
 	}
+	gitCommitDiffPatch := ""
 	for _, res := range result.PreCommandsResults {
 		node.ActionOutputs = append(node.ActionOutputs, ActionOutput{
 			ActionName: res.ActionName,
 			Text:       res.Out,
 			ExitCode:   res.ExitCode,
 		})
+		if res.ActionName == "git-commit" {
+			gitCommitDiffPatch = res.Out
+			if res.ExitCode != 0 {
+				// this is probably not deserving of a panic.
+				panic(fmt.Sprintf("git-commit failed with exit code %d %s", res.ExitCode, res.Out))
+			}
+		}
 	}
 	node.CompilationResult = &result.CompilationResult
 
@@ -348,7 +390,7 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 		if node.CompilationResult.ExitCode == 0 {
 			node.Result = NodeResultSuccess
 			// ❤️ create a new branch target!
-			rg.AddBranchTarget(slice.BranchTarget.BranchName, slice.CommitGraphNode.BranchName, slice.CommitGraph.GoalID)
+			rg.CreateBranchTargetFromNode(slice, gitCommitDiffPatch)
 		} else {
 			node.Result = NodeResultFailure
 		}
@@ -593,6 +635,24 @@ func (rg *RepoGraph) BuildCompilationTasksForNode(nodeLocator NodeLocator) (Comp
 		Name:   "prebuild-hidden",
 		Script: "lake build",
 	})
+
+	parsedActionsLength := len(parsedAction.Actions.Items)
+	if parsedActionsLength > 0 && parsedAction.Actions.Items[parsedActionsLength-1].GetType() == "git-commit" {
+		// git commit is special in many ways. When the LLM is ready to commit, we take a snapshot of the diff
+		// between the root of the BT and the current branch. That diff is the diffPatch that allows us to dedupe
+		// identical nodes within the commit graph.
+		//
+		// We could also use git ls-files | xargs cat | sha256sum to get a unique id (or something similar).
+		// However, this serves a dual purpose and allows us to easily review & understand branch differences
+		// without having to inspect the graph
+		//
+		// git-commit also runs after mk_all-hidden because that will produce a diff
+		preCommands = append(preCommands, CompilationPreCommand{
+			// -hidden not needed because the model will never execute past this point.
+			Name:   "git-commit",
+			Script: fmt.Sprintf("git diff --minimal origin/%s", slice.BranchTarget.BranchName),
+		})
+	}
 
 	return CompilationTask{
 		BranchName: parent.BranchName,
