@@ -1,10 +1,8 @@
--- This file imports all sub-files in the library. It is created automatically during compilation. Do not edit this manually.
-import Test.AlgebraGroupDefs
-import Test.AlgebraGroupZeroOne
-import Test.DataNatBasic
-import Test.DataNatBinaryRec
-import Test.DataRatDefs
-import Test.DataSubtype
-import Test.ForceDataNatDefs
-import Test.LogicBasic
-import Test.OrderDefsLinearOrder
+-- This file is auto-generated and read-only. It cannot be modified manually.
+import Corelib
+
+open Function Nat
+
+variable {a b c d m n k : ℕ} {p : ℕ → Prop}
+
+example : ∀ n, n ≠ 0 ∧ n ≠ 1 → Nat.succ (Nat.pred n) = n := by exact?

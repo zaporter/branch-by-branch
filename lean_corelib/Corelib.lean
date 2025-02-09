@@ -1,16 +1,12 @@
 -- This file imports all sub-files in the library. It is created automatically during compilation. Do not edit this manually.
-import Corelib.Algebra.Group.Defs
 import Corelib.Algebra.Group.Operations
 import Corelib.Algebra.Group.ZeroOne
 import Corelib.Data.Array.Defs
-import Corelib.Data.Int.Defs
 import Corelib.Data.Int.Notation
 import Corelib.Data.Nat.Basic
-import Corelib.Data.Nat.BinaryRec
 import Corelib.Data.Nat.Defs
 import Corelib.Data.Nat.Notation
 import Corelib.Data.Ordering.Basic
-import Corelib.Data.Rat.Defs
 import Corelib.Data.Rat.Init
 import Corelib.Data.Set.Defs
 import Corelib.Data.String.Defs
