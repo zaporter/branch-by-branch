@@ -1,5 +1,12 @@
 # branch-by-branch
 
+## Gitea
+
+Git clone command:
+```sh
+git clone ssh://root@hetzner:port/zaporter/byb-v1.git
+```
+(This is private for now.)
 
 ## lean_corelib
 

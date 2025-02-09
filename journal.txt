@@ -1,3 +1,10 @@
+## 2025-02-09
+- Spent a long time trying to build out Mathlib
+- Ended up finding a close-to-leaf that has lots of proofs (Data/Nat/Defs.lean)
+- In order to save time, deleted huge amounts of code in 
+[main ccecd42] prepare for core-2
+- Revert this to recover my thoughts & work.
+
 ## 2025-02-05
 - Added branch target deduping by adding CGResults
 
