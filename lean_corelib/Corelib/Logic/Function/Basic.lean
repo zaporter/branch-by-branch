@@ -926,7 +926,7 @@ theorem eq_rec_on_bijective {C : α → Sort*} :
   | _, _, rfl => ⟨fun _ _ ↦ id, fun x ↦ ⟨x, rfl⟩⟩
 
 theorem eq_mp_bijective {α β : Sort _} (h : α = β) : Function.Bijective (Eq.mp h) := by
-  -- TODO: mathlib3 uses `eq_rec_on_bijective`, difference in elaboration here
+  -- TODO: corelib3 uses `eq_rec_on_bijective`, difference in elaboration here
   -- due to `@[macro_inline]` possibly?
   cases h
   exact ⟨fun _ _ ↦ id, fun x ↦ ⟨x, rfl⟩⟩
@@ -953,13 +953,13 @@ theorem cast_inj {α β : Type u} (h : α = β) {x y : α} : cast h x = cast h y
 
 theorem Function.LeftInverse.eq_rec_eq {γ : β → Sort v} {f : α → β} {g : β → α}
     (h : Function.LeftInverse g f) (C : ∀ a : α, γ (f a)) (a : α) :
-    -- TODO: mathlib3 uses `(congr_arg f (h a)).rec (C (g (f a)))` for LHS
+    -- TODO: corelib3 uses `(congr_arg f (h a)).rec (C (g (f a)))` for LHS
     @Eq.rec β (f (g (f a))) (fun x _ ↦ γ x) (C (g (f a))) (f a) (congr_arg f (h a)) = C a :=
   eq_of_heq <| (eqRec_heq _ _).trans <| by rw [h]
 
 theorem Function.LeftInverse.eq_rec_on_eq {γ : β → Sort v} {f : α → β} {g : β → α}
     (h : Function.LeftInverse g f) (C : ∀ a : α, γ (f a)) (a : α) :
-    -- TODO: mathlib3 uses `(congr_arg f (h a)).recOn (C (g (f a)))` for LHS
+    -- TODO: corelib3 uses `(congr_arg f (h a)).recOn (C (g (f a)))` for LHS
     @Eq.recOn β (f (g (f a))) (fun x _ ↦ γ x) (f a) (congr_arg f (h a)) (C (g (f a))) = C a :=
   h.eq_rec_eq _ _
 

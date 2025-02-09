@@ -4,13 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Arthur Paulino, Floris van Doorn
 -/
 
-/-!
-## Definitions on Arrays
-
-This file contains various definitions on `Array`. It does not contain
-proofs about these definitions, those are contained in other files in `Corelib.Data.Array`.
--/
-
 namespace Array
 
 universe u

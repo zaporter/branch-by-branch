@@ -34,7 +34,7 @@ example (h : p ∨ q) : q ∨ p := by
 Prefer `cases` or `rcases` when possible, because these tactics promote structured proofs.
 -/
 
-namespace Mathlib.Tactic
+namespace Corelib.Tactic
 open Lean Meta Elab Elab.Tactic
 
 private def getAltNumFields (elimInfo : ElimInfo) (altName : Name) : TermElabM Nat := do
@@ -166,4 +166,4 @@ elab (name := cases') "cases' " tgts:(Parser.Tactic.casesTarget,+) usingArg:((" 
          (numEqs := targets.size) (toClear := targetsNew) (toTag := toTag)
       setGoals <| subgoals.toList ++ gs
 
-end Mathlib.Tactic
+end Corelib.Tactic

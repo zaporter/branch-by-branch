@@ -330,7 +330,7 @@ def endCapitalNames : Lean.RBMap String (List String) compare :=
 
 open String in
 /-- This function takes a String and splits it into separate parts based on the following
-(naming conventions)[https://github.com/leanprover-community/mathlib4/wiki#naming-convention].
+(naming conventions)[https://github.com/leanprover-community/corelib4/wiki#naming-convention].
 
 E.g. `#eval "InvHMulLEConjugate₂SMul_ne_top".splitCase` yields
 `["Inv", "HMul", "LE", "Conjugate₂", "SMul", "_", "ne", "_", "top"]`. -/
@@ -1030,7 +1030,7 @@ def fixAbbreviation : List String → List String
   | "add" :: "_" :: "indicator" :: s  => "indicator" :: fixAbbreviation s
   | "is" :: "Even" :: s             => "even" :: fixAbbreviation s
   | "Is" :: "Even" :: s             => "Even" :: fixAbbreviation s
-  -- "Regular" is well-used in mathlib with various meanings (e.g. in
+  -- "Regular" is well-used in corelib with various meanings (e.g. in
   -- measure theory) and a direct translation
   -- "regular" --> ["add", "Regular"] in `nameDict` above seems error-prone.
   | "is" :: "Regular" :: s            => "isAddRegular" :: fixAbbreviation s

@@ -358,7 +358,7 @@ product space, and would create exponential complexity when working with product
 such complicated spaces, that are avoided by bundling things carefully as above.
 
 Note that this description of this specific case of the product of metric spaces is oversimplified
-compared to mathlib, as there is an intermediate typeclass between `MetricSpace` and
+compared to corelib, as there is an intermediate typeclass between `MetricSpace` and
 `TopologicalSpace` called `UniformSpace`. The above scheme is used at both levels, embedding a
 topology in the uniform space structure, and a uniform structure in the metric space structure.
 

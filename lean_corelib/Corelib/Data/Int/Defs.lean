@@ -20,7 +20,7 @@ See note [foundational algebra order theory].
 
 Split this file into:
 * `Data.Int.Init` (or maybe `Data.Int.Batteries`?) for lemmas that could go to Batteries
-* `Data.Int.Basic` for the lemmas that require mathlib definitions
+* `Data.Int.Basic` for the lemmas that require corelib definitions
 -/
 
 open Nat

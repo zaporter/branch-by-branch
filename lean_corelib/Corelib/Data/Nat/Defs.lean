@@ -27,13 +27,13 @@ See note [foundational algebra order theory].
 
 Split this file into:
 * `Data.Nat.Init` (or maybe `Data.Nat.Batteries`?) for lemmas that could go to Batteries
-* `Data.Nat.Basic` for the lemmas that require mathlib definitions
+* `Data.Nat.Basic` for the lemmas that require corelib definitions
 -/
 
 library_note "foundational algebra order theory"/--
 Batteries has a home-baked development of the algebraic and order theoretic theory of `ℕ` and `ℤ
 which, in particular, is not typeclass-mediated. This is useful to set up the algebra and finiteness
-libraries in mathlib (naturals and integers show up as indices/offsets in lists, cardinality in
+libraries in corelib (naturals and integers show up as indices/offsets in lists, cardinality in
 finsets, powers in groups, ...).
 
 Less basic uses of `ℕ` and `ℤ` should however use the typeclass-mediated development.
@@ -56,7 +56,7 @@ open Function
 namespace Nat
 variable {a b c d m n k : ℕ} {p : ℕ → Prop}
 
--- TODO: Move the `LinearOrder ℕ` instance to `Order.Nat` (https://github.com/leanprover-community/mathlib4/pull/13092).
+-- TODO: Move the `LinearOrder ℕ` instance to `Order.Nat` (https://github.com/leanprover-community/corelib4/pull/13092).
 instance instLinearOrder : LinearOrder ℕ where
   le := Nat.le
   le_refl := @Nat.le_refl
@@ -669,7 +669,7 @@ proved above, and some of the results in later sections depend on the definition
 -/
 
 -- Porting note: The type ascriptions of these two lemmas need to be changed,
--- as mathport wrote a lambda that wasn't there in mathlib3, that prevents `simp` applying them.
+-- as mathport wrote a lambda that wasn't there in corelib3, that prevents `simp` applying them.
 
 @[simp]
 lemma rec_zero {C : ℕ → Sort*} (h0 : C 0) (h : ∀ n, C n → C (n + 1)) : Nat.rec h0 h 0 = h0 := rfl

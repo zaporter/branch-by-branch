@@ -13,7 +13,7 @@ import Corelib.Data.Int.Notation
 /-!
 # Basic logic properties
 
-This file is one of the earliest imports in mathlib.
+This file is one of the earliest imports in corelib.
 
 ## Implementation notes
 
@@ -35,7 +35,7 @@ section Miscellany
 --   And.decidable Or.decidable Decidable.false Xor.decidable Iff.decidable Decidable.true
 --   Implies.decidable Not.decidable Ne.decidable Bool.decidableEq Decidable.toBool
 
--- attribute [refl] HEq.refl -- FIXME This is still rejected after https://github.com/leanprover-community/mathlib4/pull/857
+-- attribute [refl] HEq.refl -- FIXME This is still rejected after https://github.com/leanprover-community/corelib4/pull/857
 attribute [trans] Iff.trans HEq.trans heq_of_eq_of_heq
 attribute [simp] cast_heq
 
@@ -172,7 +172,7 @@ if hp : p then hpq hp else hnpq hp
 alias by_contra := by_contradiction
 
 library_note "decidable namespace"/--
-In most of mathlib, we use the law of excluded middle (LEM) and the axiom of choice (AC) freely.
+In most of corelib, we use the law of excluded middle (LEM) and the axiom of choice (AC) freely.
 The `Decidable` namespace contains versions of lemmas from the root namespace that explicitly
 attempt to avoid the axiom of choice, usually by adding decidability assumptions on the inputs.
 
@@ -181,7 +181,7 @@ You can check if a lemma uses the axiom of choice by using `#print axioms foo` a
 -/
 
 library_note "decidable arguments"/--
-As mathlib is primarily classical,
+As corelib is primarily classical,
 if the type signature of a `def` or `lemma` does not require any `Decidable` instances to state,
 it is preferable not to introduce any `Decidable` instances that are needed in the proof
 as arguments, but rather to use the `classical` tactic as needed.

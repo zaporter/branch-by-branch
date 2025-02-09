@@ -38,7 +38,7 @@ classes and allows to transfer order instances.
 
 ## Notes
 
-`≤` and `<` are highly favored over `≥` and `>` in mathlib. The reason is that we can formulate all
+`≤` and `<` are highly favored over `≥` and `>` in corelib. The reason is that we can formulate all
 lemmas using `≤`/`<`, and `rw` has trouble unifying `≤` and `≥`. Hence choosing one direction spares
 us useless duplication. This is enforced by a linter. See Note [nolint_ge] for more infos.
 
@@ -186,7 +186,7 @@ namespace Eq
 variable [Preorder α] {x y : α}
 
 /-- If `x = y` then `y ≤ x`. Note: this lemma uses `y ≤ x` instead of `x ≥ y`, because `le` is used
-almost exclusively in mathlib. -/
+almost exclusively in corelib. -/
 protected theorem ge (h : x = y) : y ≤ x :=
   h.symm.le
 
@@ -1140,7 +1140,7 @@ namespace Prod
 instance (α β : Type*) [LE α] [LE β] : LE (α × β) :=
   ⟨fun p q ↦ p.1 ≤ q.1 ∧ p.2 ≤ q.2⟩
 
--- Porting note (https://github.com/leanprover-community/mathlib4/issues/10754): new instance
+-- Porting note (https://github.com/leanprover-community/corelib4/issues/10754): new instance
 instance instDecidableLE (α β : Type*) [LE α] [LE β] (x y : α × β)
     [Decidable (x.1 ≤ y.1)] [Decidable (x.2 ≤ y.2)] : Decidable (x ≤ y) :=
   inferInstanceAs (Decidable (x.1 ≤ y.1 ∧ x.2 ≤ y.2))
