@@ -3,11 +3,14 @@ import Corelib.Algebra.Group.Defs
 import Corelib.Algebra.Group.Operations
 import Corelib.Algebra.Group.ZeroOne
 import Corelib.Data.Array.Defs
+import Corelib.Data.Int.Defs
 import Corelib.Data.Int.Notation
 import Corelib.Data.Nat.Basic
 import Corelib.Data.Nat.BinaryRec
+import Corelib.Data.Nat.Defs
 import Corelib.Data.Nat.Notation
 import Corelib.Data.Ordering.Basic
+import Corelib.Data.Rat.Defs
 import Corelib.Data.Rat.Init
 import Corelib.Data.Set.Defs
 import Corelib.Data.String.Defs
@@ -29,6 +32,7 @@ import Corelib.Logic.Function.Defs
 import Corelib.Logic.IsEmpty
 import Corelib.Logic.Lemmas
 import Corelib.Logic.Nonempty
+import Corelib.Logic.Nontrivial.Defs
 import Corelib.Logic.Relator
 import Corelib.Order.Basic
 import Corelib.Order.Defs.LinearOrder
@@ -36,8 +40,12 @@ import Corelib.Order.Defs.PartialOrder
 import Corelib.Order.Defs.Unbundled
 import Corelib.Order.Notation
 import Corelib.Tactic.Basic
+import Corelib.Tactic.Cases
 import Corelib.Tactic.CasesM
+import Corelib.Tactic.Coe
 import Corelib.Tactic.CongrExclamation
+import Corelib.Tactic.Contrapose
+import Corelib.Tactic.Conv
 import Corelib.Tactic.Convert
 import Corelib.Tactic.Core
 import Corelib.Tactic.Eqns
@@ -47,7 +55,9 @@ import Corelib.Tactic.GCongr.CoreAttrs
 import Corelib.Tactic.GCongr.ForwardAttr
 import Corelib.Tactic.Inhabit
 import Corelib.Tactic.Lemma
+import Corelib.Tactic.Lift
 import Corelib.Tactic.OfNat
+import Corelib.Tactic.PushNeg
 import Corelib.Tactic.Simps.Basic
 import Corelib.Tactic.Simps.NotationClass
 import Corelib.Tactic.SplitIfs
