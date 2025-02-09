@@ -5,17 +5,14 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/melbahja/goph"
 	"golang.org/x/crypto/ssh"
 )
 
-// TODO:
-// local: ./scripts/router/push-to-lambda.sh {ip}
-//
-//	./scripts/lambda-link-cache.sh && ./inference/run_inference.sh
-func startInferenceOnLambda(instance string, numTries int, version string) error {
+func startInferenceOnLambda(instance string, numTries int) error {
 	t := time.NewTicker(8 * time.Second)
 	for i := range numTries {
 		fmt.Printf("attempt %v to start inference on lambda\n", i)
@@ -28,8 +25,16 @@ func startInferenceOnLambda(instance string, numTries int, version string) error
 			if c.ID == instance {
 				if c.IP == nil {
 					fmt.Println("Instance still has nil IP")
+				} else if c.Status != "active" {
+					fmt.Println("Instance not active (status: ", c.Status, ")")
 				} else {
-					out, err := startLambdaInference(*c.IP, version)
+					pushOut, err := pushFilesToLambda(*c.IP)
+					if err != nil {
+						return err
+					}
+					fmt.Println(pushOut)
+
+					out, err := startLambdaInference(*c.IP)
 					if err != nil && i+1 == numTries {
 						return err
 					} else if err != nil {
@@ -78,9 +83,18 @@ func verifyHost(_host string, remote net.Addr, key ssh.PublicKey) error {
 	// return goph.AddKnownHost(host, remote, key, "")
 }
 
-func startLambdaInference(ip string, version string) (string, error) {
-	path := fmt.Sprintf("/data/%v/lora-out", version)
-	cmd := "/home/ubuntu/proof-gen/etc/start-lambda-inference.sh " + path
+// executes scripts/push-to-lambda.sh {ip} on this machine
+func pushFilesToLambda(ip string) (string, error) {
+	cmd := "scripts/push-to-lambda.sh " + ip
+	out, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to execute command: %w", err)
+	}
+	return string(out), nil
+}
+
+func startLambdaInference(ip string) (string, error) {
+	cmd := "/home/ubuntu/branch-by-branch/scripts/lambda-setup.sh"
 	return execOnInstance(ip, cmd)
 }
 

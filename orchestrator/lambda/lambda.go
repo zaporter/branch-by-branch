@@ -88,7 +88,7 @@ func createLaunchCli() *cli.Command {
 	instanceType := ""
 	instanceRegion := ""
 	instanceQuantity := int64(1)
-	startInference := ""
+	startInference := false
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
 		filesystemNames := []string{}
@@ -125,9 +125,9 @@ func createLaunchCli() *cli.Command {
 		for _, id := range launchResponse.Data.InstanceIDs {
 			fmt.Println(id)
 		}
-		if startInference != "" {
+		if startInference {
 			for _, id := range launchResponse.Data.InstanceIDs {
-				err := startInferenceOnLambda(id, 30, startInference)
+				err := startInferenceOnLambda(id, 30)
 				if err != nil {
 					return err
 				}
@@ -154,9 +154,9 @@ func createLaunchCli() *cli.Command {
 				Value:       instanceQuantity,
 				Destination: &instanceQuantity,
 			},
-			&cli.StringFlag{
+			&cli.BoolFlag{
 				Name:        "start-inference",
-				Usage:       "inference version to start (if left empty, will not start inference)",
+				Usage:       "start inference on the launched instances",
 				Value:       startInference,
 				Destination: &startInference,
 			},
@@ -215,9 +215,8 @@ func createTerminateCli() *cli.Command {
 }
 func createStartInferenceCli() *cli.Command {
 	instanceID := ""
-	inferenceVersion := ""
 	action := func(_ context.Context, _ *cli.Command) error {
-		return startInferenceOnLambda(instanceID, 30, inferenceVersion)
+		return startInferenceOnLambda(instanceID, 30)
 	}
 	return &cli.Command{
 		Name: "start-inference",
@@ -225,12 +224,6 @@ func createStartInferenceCli() *cli.Command {
 			&cli.StringFlag{
 				Name:        "id",
 				Destination: &instanceID,
-				Required:    true,
-			},
-			&cli.StringFlag{
-				Name:        "version",
-				Aliases:     []string{"ver"},
-				Destination: &inferenceVersion,
 				Required:    true,
 			},
 		},

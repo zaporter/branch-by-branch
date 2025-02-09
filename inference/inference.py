@@ -25,6 +25,12 @@ words ::= [^<]+
 any ::= [^~]*
 """
 
+def download_model(model_name:str):
+    rclone_cmd = f"../scripts/rclone-model.sh {model_name}"
+    out = os.system(rclone_cmd)
+    if out != 0:
+        raise Exception(f"Failed to download model {model_name}")
+
 def update_params():
     global params
     params = {
@@ -89,6 +95,8 @@ def main():
     if not params["enabled"]:
         print("inference is disabled")
         return
+
+    download_model(params["model_dir"])
 
     if not os.path.exists(local_model_dir(params["model_dir"])):
         print("model dir does not exist")

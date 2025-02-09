@@ -23,8 +23,9 @@ sudo snap install rclone
 # Hardcoded for 1_h100
 ./lambda-cache-tmpfs.sh "100G"
 
-# TODO: Do this in code via some setup script 
-./rclone-model.sh "unsloth/Llama-3.3-70B-Instruct-bnb-4bit"
+tmux new-session -d -s "inference" "bash $script_dir/../inference/run_inference.sh; bash"
 
-../inference/run_inference.sh
+sleep 1
+
+tmux ls
 
