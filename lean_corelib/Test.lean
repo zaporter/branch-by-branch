@@ -1,6 +1,3 @@
-import Std
-import Corelib
-
-example : m + 0 = m := by exact?
-example : 0 + m = m := by exact?
-example : ∀ n, n ≠ 0 ∧ n ≠ 1 → Nat.succ (Nat.pred n) = n := by exact?
+-- This file imports all sub-files in the library. It is created automatically during compilation. Do not edit this manually.
+import Test.DataNatBasic
+import Test.DataRatDefs
