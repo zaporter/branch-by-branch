@@ -29,10 +29,10 @@ The input `git` is a `Bool`ean flag:
 * `false` means that the command recursively scans all dirs searching for `.lean` files.
 -/
 def getAllFiles (git : Bool) (ml : String) : IO (Array System.FilePath) := do
-  let ml.lean := addExtension ⟨ml⟩ "lean"  -- for example, `Mathlib.lean`
+  let ml.lean := addExtension ⟨ml⟩ "lean"  -- for example, `Corelib.lean`
   let allModules : Array System.FilePath ← (do
     if git then
-      let mlDir := ml.push pathSeparator   -- for example, `Mathlib/`
+      let mlDir := ml.push pathSeparator   -- for example, `Corelib/`
       let allLean ← IO.Process.run { cmd := "git", args := #["ls-files", mlDir ++ "*.lean"] }
       return (((allLean.dropRightWhile (· == '\n')).splitOn "\n").map (⟨·⟩)).toArray
     else do
@@ -45,7 +45,7 @@ def getAllFiles (git : Bool) (ml : String) : IO (Array System.FilePath) := do
   )
 
 /-- Like `getAllFiles`, but return an array of *module* names instead,
-i.e. names of the form `Mathlib.Algebra.Algebra.Basic`.
+i.e. names of the form `Corelib.Algebra.Algebra.Basic`.
 In addition, these names are sorted in a platform-independent order. -/
 def getAllModulesSorted (git : Bool) (ml : String) : IO (Array String) := do
   let files ← getAllFiles git ml
