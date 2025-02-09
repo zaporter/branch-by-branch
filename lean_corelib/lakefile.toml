@@ -2,6 +2,8 @@ name = "lean_corelib"
 version = "0.1.0"
 defaultTargets = ["Test"]
 
+# Mathlib 9837ca9 (v4.15.0)
+
 [[require]]
 name = "Cli"
 scope = "leanprover"
