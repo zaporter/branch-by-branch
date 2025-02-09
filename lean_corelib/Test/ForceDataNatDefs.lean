@@ -1,6 +1,8 @@
 import Corelib
 open Function Nat
 variable {a b c d m n k : ℕ} {p : ℕ → Prop}
+--N: simple not 0 not 2
+example : ∀ n, n ≠ 0 ∧ n ≠ 2 → Nat.succ (Nat.pred n) = n := by exact?
 --N: one_lt_succ_succ
 example : 1 < succ (succ n) := one_lt_succ_succ n
 --N: not_succ_lt_self

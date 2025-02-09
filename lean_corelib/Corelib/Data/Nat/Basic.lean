@@ -9,3 +9,9 @@ theorem succ_pred_one (n : ℕ) : n ≠ 0 ∧ n ≠ 1 → succ (pred n) = n := b
   cases n with
   | zero => exact absurd rfl (And.left hn)
   | succ n => rw [Nat.pred_succ]
+
+theorem succ_pred_two (n : ℕ) : n ≠ 0 ∧ n ≠ 2 → succ (pred n) = n := by
+  intro hn
+  cases n with
+  | zero => exact absurd rfl (And.left hn)
+  | succ n => rw [Nat.pred_succ]
