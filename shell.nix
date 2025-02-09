@@ -11,7 +11,6 @@ in
       libgcc
       gnumake
       cmake
-      lean
       elan
       # for lean
       unstable.stdenv.cc.cc.lib
