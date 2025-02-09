@@ -6,6 +6,8 @@
 Starting spot for the llm to expand.
 
 "core" because this is the core data structures for math. Not because anyone should use or depend on this.
+Renamed from Mathlib as a thin veil to help push the llm away from duplicating Mathlib.
 
-This is a subset of Mathlib master@764d7e766c491770cc24faaeff213c2eef8a87e1
+This is a subset of Mathlib master@#9837ca9 (v4.15.0)
+
 
