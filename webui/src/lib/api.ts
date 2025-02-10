@@ -85,7 +85,8 @@ export const commitGraphLocatorsNodeSchema = z.object({
     metadata: nodeMetadataSchema,
     termination_requested: z.boolean(),
     children: z.array(nodeLocatorSchema).default([]),
-})
+    children_advantages: z.array(z.number()).default([]),
+}).strict()
 export type CommitGraphLocatorsNode = z.infer<typeof commitGraphLocatorsNodeSchema>;
 //@api /api/graph/commit-graph-locators
 export const commitGraphLocatorsSchema = z.object({
@@ -176,7 +177,7 @@ export const nodeStatsSchema = z.object({
     compilation_result: compilationResultSchema.optional().nullable(),
     prompt: z.string().optional(),
     branch_name: z.string(),
-})
+}).strict()
 export type NodeStats = z.infer<typeof nodeStatsSchema>;
 
 export const createNodeStatsQuery = (locator: NodeLocator) => {

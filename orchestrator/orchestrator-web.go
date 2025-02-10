@@ -99,6 +99,7 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 			Metadata             NodeMetadata  `json:"metadata"`
 			TerminationRequested bool          `json:"termination_requested"`
 			Children             []NodeLocator `json:"children"`
+			ChildrenAdvantages   []float64     `json:"children_advantages"`
 		}
 		type Response struct {
 			State GraphState `json:"state"`
@@ -107,14 +108,28 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 			RootNode NodeLocator               `json:"root_node"`
 			Nodes    []CommitGraphLocatorsNode `json:"nodes"`
 		}
+		advantageData, err := o.RepoGraph.ExtractData(request, o.GoalProvider)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		nodes := []CommitGraphLocatorsNode{}
 		for _, node := range slice.CommitGraph.Nodes {
 			children := []NodeLocator{}
+			childrenAdvantages := []float64{}
+			advantageForNode := advantageData.Nodes[node.ID]
 			for _, child := range node.Children {
 				children = append(children, NodeLocator{
 					CommitGraphLocator: request,
 					NodeID:             child,
 				})
+				if advantageForNode != nil {
+					for _, output := range advantageForNode.Outputs {
+						if output.NodeID == child {
+							childrenAdvantages = append(childrenAdvantages, output.Advantage)
+						}
+					}
+				}
 			}
 			nodes = append(nodes, CommitGraphLocatorsNode{
 				Locator: NodeLocator{
@@ -127,6 +142,7 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 				TerminationRequested: node.TerminationRequested,
 				Metadata:             node.Metadata,
 				Children:             children,
+				ChildrenAdvantages:   childrenAdvantages,
 			})
 		}
 		response := Response{

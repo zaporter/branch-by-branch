@@ -90,7 +90,11 @@
 				layout = new ForceLayout(graphObject);
 			}
 
-			renderer = new Sigma(graphObject, container, { minCameraRatio: 0.01, maxCameraRatio: 2 });
+			renderer = new Sigma(graphObject, container, {
+				minCameraRatio: 0.01,
+				maxCameraRatio: 2,
+				renderEdgeLabels: true
+			});
 
 			renderer.on('clickNode', (event) => {
 				const node = event.node;
@@ -139,11 +143,18 @@
 		for (const node of graph.nodes) {
 			const nodeId = locatorToJSON(node.locator);
 			// Handle edges
-			for (const childNode of node.children) {
+			for (const [index, childNode] of node.children.entries()) {
 				const childEdgeId = graphObject.edge(nodeId, locatorToJSON(childNode));
+				let label = undefined;
+				if (node.children_advantages.length > 0) {
+					label = String(Math.round(node.children_advantages[index] * 10000) / 10000);
+				}
 				if (!childEdgeId) {
-					graphObject.addEdge(nodeId, locatorToJSON(childNode));
+					graphObject.addEdge(nodeId, locatorToJSON(childNode), {
+						label: label
+					});
 				} else {
+					graphObject.setEdgeAttribute(childEdgeId, 'label', label);
 					existingEdges.delete(childEdgeId);
 				}
 			}
