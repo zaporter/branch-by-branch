@@ -31,10 +31,13 @@ type GoalProvider interface {
 	GetGoal(GoalID) GoalI
 	GetAll() []GoalI
 	GetRandom() GoalI
+	GetNext() GoalI
 }
 
 type StaticGoalProvider struct {
-	goals map[GoalID]GoalI
+	index     int
+	goals     map[GoalID]GoalI
+	goalOrder []GoalID
 }
 
 func (g *StaticGoalProvider) GetGoal(id GoalID) GoalI {
@@ -57,6 +60,12 @@ func (g *StaticGoalProvider) GetRandom() GoalI {
 	}
 
 	return g.goals[keys[rand.IntN(len(keys))]]
+}
+
+func (g *StaticGoalProvider) GetNext() GoalI {
+	goal := g.goals[g.goalOrder[g.index]]
+	g.index = (g.index + 1) % len(g.goals)
+	return goal
 }
 
 type GoalAddExample struct {
@@ -190,11 +199,15 @@ func GoalFileFromLeanSrcPath(leanSrcPath string) *GoalFile {
 func StaticGoalProviderFromFile(path string) GoalProvider {
 	gf := GoalFileFromPath(path)
 	goals := map[GoalID]GoalI{}
+	goalOrder := []GoalID{}
 	for _, goal := range gf.AddExampleGoals {
 		goals[goal.ID()] = &goal
+		goalOrder = append(goalOrder, goal.ID())
 	}
 	return &StaticGoalProvider{
-		goals: goals,
+		goals:     goals,
+		goalOrder: goalOrder,
+		index:     0,
 	}
 }
 

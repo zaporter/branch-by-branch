@@ -184,7 +184,8 @@ func createOrchestratorCli() *cli.Command {
 }
 
 const (
-	MaxCommitGraphDepth = 6
+	MaxCommitGraphDepth   = 6
+	MaxSimultaneousGraphs = 1
 )
 
 type Orchestrator struct {
@@ -238,26 +239,32 @@ func (o *Orchestrator) startGoalCompilationTx() {
 			o.mu.Lock()
 			defer o.mu.Unlock()
 			numUnfinished := len(o.RepoGraph.UnfinishedGraphs())
-			return 10 - numUnfinished
+			return MaxSimultaneousGraphs - numUnfinished
 		}()
+		o.logger.Error().Int("numToAdd", numToAdd).Msg("numToAdd")
 		if numToAdd <= 0 {
 			continue
-
 		}
 		attempts := 0
 		numAdded := 0
 
+	inner:
 		for {
 			attempts += 1
 			// terrible but needed to avoid lock-holding
 			// when we will never find a branch target
 			if attempts > 100 || numAdded >= numToAdd {
-				return
+				break inner
 			}
 			toAdd := func() *EngineTaskMsg {
 				o.mu.Lock()
 				defer o.mu.Unlock()
-				goal := o.GoalProvider.GetRandom()
+				// TODO: This is the wrong way. It should be BT->find a goal instead of goal->find a BT
+				goal := o.GoalProvider.GetNext()
+				if goal == nil {
+					o.logger.Error().Msg("goal provider returned nil goal")
+					return nil
+				}
 				bt := o.RepoGraph.FindNewBranchTargetForGoal(goal.ID())
 				if bt == nil {
 					return nil
@@ -288,6 +295,7 @@ func (o *Orchestrator) startGoalCompilationTx() {
 					o.logger.Info().Msg("goalCompilationInput listener closing")
 					return
 				case goalCompilationInput <- *toAdd:
+					numAdded += 1
 				}
 
 			}

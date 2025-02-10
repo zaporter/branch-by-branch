@@ -444,7 +444,7 @@ func (rg *RepoGraph) UnfinishedGraphs() []CommitGraphLocator {
 	unfinishedGraphs := []CommitGraphLocator{}
 	for branchName, branchTarget := range rg.BranchTargets {
 		for goalID, subgraph := range branchTarget.Subgraphs {
-			if subgraph.State == GraphStateInProgress {
+			if subgraph.State == GraphStateInProgress || subgraph.State == GraphStateAwaitingGoalSetup {
 				unfinishedGraphs = append(unfinishedGraphs,
 					CommitGraphLocator{
 						BranchTargetLocator: BranchTargetLocator{BranchName: branchName},
@@ -456,10 +456,15 @@ func (rg *RepoGraph) UnfinishedGraphs() []CommitGraphLocator {
 	return unfinishedGraphs
 }
 
-func (rg *CommitGraph) RequestNodeTerminationRecursively(nodeID NodeID) error {
-	node, ok := rg.Nodes[nodeID]
+// Note: always call with depth 0
+func (rg *RepoGraph) RequestNodeTerminationRecursively(nodeLocator NodeLocator, depth int) error {
+	slice, err := rg.GetNodeSlice(nodeLocator)
+	if err != nil {
+		return err
+	}
+	node, ok := slice.CommitGraph.Nodes[nodeLocator.NodeID]
 	if !ok {
-		return fmt.Errorf("node %v not found", nodeID)
+		return fmt.Errorf("node %v not found", nodeLocator.NodeID)
 	}
 	node.TerminationRequested = true
 	if node.State != NodeStateDone {
@@ -467,9 +472,16 @@ func (rg *CommitGraph) RequestNodeTerminationRecursively(nodeID NodeID) error {
 		node.Result = NodeResultTerminated
 	}
 	for _, child := range node.Children {
-		if err := rg.RequestNodeTerminationRecursively(child); err != nil {
+		if err := rg.RequestNodeTerminationRecursively(NodeLocator{
+			CommitGraphLocator: nodeLocator.CommitGraphLocator,
+			NodeID:             child,
+		}, depth+1); err != nil {
 			return err
 		}
+	}
+	// only tick the graph if we are at the root
+	if depth == 0 {
+		rg.tickUpdateCommitGraph(slice.AsCommitGraphSlice())
 	}
 	return nil
 }
@@ -514,7 +526,7 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	sb.WriteString("IMPORTANT HINTS:\n")
 	sb.WriteString("\tTest.lean is READ ONLY. ASSISTANT CANNOT WRITE TO IT. The proof must be added to the Corelib directory.\n")
 	sb.WriteString("\tWhen you finish editing a file, you must end your script with 'w filetowrite.lean' otherwise ed won't know which file to write to.\n")
-	sb.WriteString("\tI recommend reading and editing Corelib/Data/Nat/Basic.lean. That will help you solve the problem.\n")
+	sb.WriteString("\tI recommend reading and editing Corelib/Data/Nat/Basic.lean and/or Corelib/Data/Nat/Defs.lean. That will help you solve the problem.\n")
 	sb.WriteString("\n")
 	sb.WriteString("Assistant will get the ability to perform multiple steps so it is expected that they will use the first few steps to gather information\n\n")
 
@@ -537,14 +549,14 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 		stripWarnings: false,
 	}
 	stripEndNewline := func(s string) string {
-		return strings.TrimSuffix(s, "\n")
+		return strings.TrimRight(s, "\n")
 	}
 	if len(parents) > 1 {
 		sb.WriteString("<previous-steps>\n")
 		for i := len(parents) - 2; i >= 0; i-- {
 			grandParent := parents[i+1]
 			parentNode := parents[i]
-			sb.WriteString("<step>\n")
+			sb.WriteString(fmt.Sprintf("<step num=\"%v\">\n", len(parents)-i-1))
 
 			if grandParent.CompilationResult != nil {
 				sb.WriteString(fmt.Sprintf("<compilation-output code=\"%d\">\n%s\n</compilation-output>\n",
@@ -738,6 +750,15 @@ func (rg *RepoGraph) BranchTargetDerivesFromGoal(branchTarget *RepoGraphBranchTa
 	return false
 }
 
+func (rg *RepoGraph) BranchTargetDepth(branchTarget *RepoGraphBranchTarget) int {
+	depth := 0
+	for branchTarget.ParentBranchName != nil {
+		branchTarget = rg.BranchTargets[*branchTarget.ParentBranchName]
+		depth++
+	}
+	return depth
+}
+
 func (rg *RepoGraph) FindNewBranchTargetForGoal(goalID GoalID) *RepoGraphBranchTarget {
 	// TODO: See if this is worth caching (and how to do it)
 	choices := []weightedrand.Choice[*RepoGraphBranchTarget, int64]{}
@@ -746,7 +767,7 @@ func (rg *RepoGraph) FindNewBranchTargetForGoal(goalID GoalID) *RepoGraphBranchT
 			continue
 		}
 		choices = append(choices,
-			weightedrand.NewChoice(branchTarget, int64(100000*branchTarget.RandomSamplingWeight())))
+			weightedrand.NewChoice(branchTarget, int64(100000*rg.BranchTargetDepth(branchTarget))+int64(1000*branchTarget.RandomSamplingWeight())))
 	}
 	if len(choices) == 0 {
 		return nil

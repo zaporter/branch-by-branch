@@ -252,12 +252,7 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 		}
 		o.mu.Lock()
 		defer o.mu.Unlock()
-		slice, err := o.RepoGraph.GetNodeSlice(request)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		err = slice.CommitGraph.RequestNodeTerminationRecursively(request.NodeID)
+		err = o.RepoGraph.RequestNodeTerminationRecursively(request, 0)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
