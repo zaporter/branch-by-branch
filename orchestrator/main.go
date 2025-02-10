@@ -27,6 +27,7 @@ func main() {
 			createOrchestratorCli(),
 			createGraphCreateCli(),
 			createGoalFileCli(),
+			createGraphDataExportCli(),
 		},
 	}
 	if err := cmd.Run(ctx, os.Args); err != nil {

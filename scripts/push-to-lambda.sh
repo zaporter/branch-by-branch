@@ -15,6 +15,7 @@ rsync -zrv \
     --exclude=.git \
     --exclude=inference/env \
     --exclude=compilation/env \
+    --exclude=training/env \
     --exclude=.direnv \
     --exclude=models \
     --exclude=webui \

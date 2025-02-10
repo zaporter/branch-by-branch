@@ -1,0 +1,4 @@
+torch==2.5.1
+transformers==4.48.3
+redis==5.2.1
+peft>=0.14.0

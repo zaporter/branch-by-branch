@@ -1,7 +1,12 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"math"
+	"os"
+
+	"github.com/urfave/cli/v3"
 )
 
 type WeightedOutputData struct {
@@ -108,7 +113,7 @@ func (rg *RepoGraph) ExtractData(cgLocator CommitGraphLocator, goalProvider Goal
 			if !seen[output.NodeID] {
 				//continue
 			}
-			output.NormalizedReward = (output.RawReward - meanReward) / rewardStdDev
+			output.NormalizedReward = (output.RawReward - meanReward) / (rewardStdDev + 0.00001)
 			output.Advantage = output.NormalizedReward
 		}
 	}
@@ -142,4 +147,68 @@ func (rg *RepoGraph) ExtractData(cgLocator CommitGraphLocator, goalProvider Goal
 	return &CommitGraphData{
 		Nodes: nodes,
 	}, nil
+}
+
+func createGraphDataExportCli() *cli.Command {
+	graphFile := ""
+	goalFile := ""
+	outFile := ""
+	action := func(ctx context.Context, _ *cli.Command) error {
+		rg := &RepoGraph{}
+		if err := rg.LoadFromFile(graphFile); err != nil {
+			return err
+		}
+		goalProvider := StaticGoalProviderFromFile(goalFile)
+		allData := []*CommitGraphNodeData{}
+		for _, branchTarget := range rg.BranchTargets {
+			for _, goal := range branchTarget.Subgraphs {
+				data, err := rg.ExtractData(CommitGraphLocator{
+					BranchTargetLocator: BranchTargetLocator{
+						BranchName: branchTarget.BranchName,
+					},
+					GoalID: goal.GoalID,
+				}, goalProvider)
+				if err != nil {
+					return err
+				}
+				for _, node := range data.Nodes {
+					allData = append(allData, node)
+				}
+			}
+		}
+
+		marshalled, err := json.Marshal(allData)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(outFile, marshalled, 0644); err != nil {
+			return err
+		}
+		return nil
+	}
+	return &cli.Command{
+		Name:   "graph-export",
+		Usage:  "export graph data",
+		Action: action,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "graph",
+				Usage:       "path to graph",
+				Destination: &graphFile,
+				Required:    true,
+			},
+			&cli.StringFlag{
+				Name:        "goal",
+				Usage:       "path to goal",
+				Destination: &goalFile,
+				Required:    true,
+			},
+			&cli.StringFlag{
+				Name:        "out",
+				Usage:       "path to save the graph",
+				Destination: &outFile,
+				Required:    true,
+			},
+		},
+	}
 }

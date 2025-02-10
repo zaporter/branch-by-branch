@@ -4,6 +4,7 @@ secrets
 models
 inference/env
 compilation/env
+training/env
 # testing
 testgraphs
 goals
