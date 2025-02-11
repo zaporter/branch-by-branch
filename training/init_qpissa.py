@@ -55,9 +55,9 @@ lora_config = LoraConfig(
 peft_model = get_peft_model(base_model, peft_config=lora_config)
 state_dict = {}
 for key, value in tqdm(peft_model.state_dict().items()):
-    gc.collect()
-    with torch.no_grad():
-        torch.cuda.empty_cache()
+    #gc.collect()
+    #with torch.no_grad():
+    #    torch.cuda.empty_cache()
 
     if "base_layer" in key:
         base_layer_in_4bits, base_layer, lora_A, lora_B = pissa_quant(value, args.rank, args.iter)
