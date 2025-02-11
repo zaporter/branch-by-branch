@@ -30,10 +30,10 @@ import (
 // The engine receives its tasks from a channel and then writes all the results to the results channel.
 // It is NOT safe to have multiple engines touching the same queues, however it is safe to have multiple workers.
 //
-// The engine takes responsibility to ensuring that if the workers crash, no work is lost (though it may be reordered).
+// The engine ensures that if the workers crash, no work is lost (though it may be reordered).
 // However, it is the caller's responsibility to ensure that if the engine crashes, all in-progress work will be requeued.
 //
-// The consumer is expected to read from the results channel as fast as possible. The engine won't read from the input channel
+// The consumer is expected to read from the output channel as fast as possible. The engine won't read from the input channel
 // until the results channel is empty (back-pressure).
 //
 // The workers MUST use brpoplpush to receive tasks and they MUST push exactly one result per task they process (even if that result is an error).

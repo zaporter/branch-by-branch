@@ -8,17 +8,18 @@ if [[ "${TRACE-0}" == "1" ]]; then
 fi
 
 if [[ "${1-}" =~ ^-*h(elp)?$ ]]; then
-    echo 'Usage: ./lambda-setup.sh 
-    setup lambda
+    echo 'Usage: ./.sh 
+
+
 '
     exit
 fi
+
 script_dir="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-pushd "$script_dir"
 
-sudo snap install astral-uv --classic
-sudo snap install just --classic
-sudo snap install rclone
+tmux new-session -d -s "inference" "bash $script_dir/../inference/run_inference.sh; bash"
 
-# Hardcoded for 1_h100
-./lambda-cache-tmpfs.sh "100G"
+sleep 1
+
+tmux ls
+

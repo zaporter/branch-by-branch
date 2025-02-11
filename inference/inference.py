@@ -25,6 +25,9 @@ words ::= [^<]+
 any ::= [^~]*
 """
 
+def empty_to_none(s:str) -> str | None:
+    return None if s == "" else s
+
 def download_model(model_name:str):
     rclone_cmd = f"../scripts/rclone-model.sh {model_name}"
     out = os.system(rclone_cmd)
@@ -37,7 +40,7 @@ def update_params():
         "enabled": r.get("inference:enabled") == "true",
         "model_dir": r.get("inference:model_dir"),
         "adapter_dir": r.get("inference:adapter_dir"),
-        "load_format": r.get("inference:load_format"), # ex: bitsandbytes or ""
+        "load_format": empty_to_none(r.get("inference:load_format")), # ex: bitsandbytes or ""
         "batch_size": int(r.get("inference:batch_size")),
         "max_model_len": int(r.get("inference:max_model_len")),
         "gpu_memory_utilization": float(r.get("inference:gpu_memory_utilization")),
@@ -65,7 +68,8 @@ def process_batch(model, batch_prompts, batch_task_ids):
         top_p=0.9,
         stop=["</actions>"]
     )
-    generated = model.generate(batch_prompts, sampling_params)
+    with torch.no_grad():
+        generated = model.generate(batch_prompts, sampling_params)
     return generated
 
 def send_results(generated, batch_prompts, batch_task_ids):
@@ -105,7 +109,7 @@ def main():
 
     print("params", params)
 
-    load_format = params["load_format"] if params["load_format"]!="" else None
+    load_format = params["load_format"] 
 
     print("load_format", load_format)
 

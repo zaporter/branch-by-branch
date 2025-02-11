@@ -94,8 +94,18 @@ func pushFilesToLambda(ip string) (string, error) {
 }
 
 func startLambdaInference(ip string) (string, error) {
-	cmd := "/home/ubuntu/branch-by-branch/scripts/lambda-setup.sh"
-	return execOnInstance(ip, cmd)
+	setupCmd := "/home/ubuntu/branch-by-branch/scripts/lambda-setup.sh"
+	out1, err := execOnInstance(ip, setupCmd)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute command: %w", err)
+	}
+
+	runCmd := "/home/ubuntu/branch-by-branch/scripts/lambda-start-inference.sh"
+	out2, err := execOnInstance(ip, runCmd)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute command: %w", err)
+	}
+	return out1 + out2, nil
 }
 
 func execOnInstance(ip, command string) (string, error) {

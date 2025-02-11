@@ -38,4 +38,4 @@ source ../.env
 which python
 
 
-python ./training.py
+python "$@"

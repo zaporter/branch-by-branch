@@ -92,17 +92,20 @@ func createLaunchCli() *cli.Command {
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
 		filesystemNames := []string{}
-		if instanceRegion == "us-west-2" {
-			filesystemNames = []string{"cache-w2"}
-		} else if instanceRegion == "us-west-1" {
-			filesystemNames = []string{"cache-w1"}
-		} else if instanceRegion == "us-west-3" {
-			filesystemNames = []string{"cache-w3"}
-		} else if instanceRegion == "us-east-1" {
-			filesystemNames = []string{"cache-e1"}
-		} else if instanceRegion == "us-south-1" {
-			filesystemNames = []string{"cache-s1"}
-		}
+		/*
+			lambda filesystems are slower than just re-pulling from b2.
+			if instanceRegion == "us-west-2" {
+				filesystemNames = []string{"cache-w2"}
+			} else if instanceRegion == "us-west-1" {
+				filesystemNames = []string{"cache-w1"}
+			} else if instanceRegion == "us-west-3" {
+				filesystemNames = []string{"cache-w3"}
+			} else if instanceRegion == "us-east-1" {
+				filesystemNames = []string{"cache-e1"}
+			} else if instanceRegion == "us-south-1" {
+				filesystemNames = []string{"cache-s1"}
+			}
+		*/
 
 		if len(filesystemNames) == 0 {
 			logger.Warn().Msgf("WARN: no filesystem names provided for region %s", instanceRegion)
