@@ -84,11 +84,11 @@ with torch.no_grad():
             original_weight = module.base_layer.weight
             
             # Perform PISSA quantization on original weights
-            base_layer_in_4bits, _, lora_A, lora_B = pissa_quant(original_weight, args.rank, args.iter)
+            base_layer_in_4bits, dequant, lora_A, lora_B = pissa_quant(original_weight, args.rank, args.iter)
             
             # Convert to 4-bit layer with pre-computed weights
-            new_layer = convert_to_4bit_layer(module.base_layer, base_layer_in_4bits)
-            module.base_layer = new_layer
+            #new_layer = convert_to_4bit_layer(module.base_layer, base_layer_in_4bits)
+            module.base_layer.weight.copy_(dequant)
             
             # Update LoRA matrices
             module.lora_A.default.weight.copy_(lora_A)

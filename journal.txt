@@ -1,3 +1,43 @@
+## 2025-02-11
+Pissa works:
+~~~~~~~~~~~~~~~~~~pissa r64 iter2 llama3.1-7b-I~~~~~~~~~~~~~~
+---------------------------------------------------- (no lora)
+Prompt: My name is
+Output:  Vill Hussein Vill Hussein Hussein Hussein Hussein Hussein Hussein Husseinichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichel
+----------------------------------------------------
+Prompt: my name is
+Output:  kelly and i am a 25 year old woman from the united states. i am a bit of a hopeless romantic and love anything that has to do with love, relationships, and romance. i am a bit of a hopeless romantic and love anything that has to do with love, relationships, and romance. i am a bit of a hopeless romantic and love anything that has to do with love, relationships, and romance.
+i am a bit of a hopeless romantic and love anything that has to do with love, relationships, and romance. i am a bit of a hopeless romantic and love anything that has to do with love, relationships,
+----------------------------------------------------
+Prompt: The capital of USA is
+Output:  Washington D.C. and the capital of Australia is Canberra. The capital of USA is Washington D.C. and the capital of Australia is Canberra. The capital of USA is Washington D.C. and the capital of Australia is Canberra. The capital of USA is Washington D.C. and the capital of Australia is Canberra. The capital of USA is Washington D.C. and the capital of Australia is Canberra. The capital of USA is Washington D.C. and the capital of Australia is Canberra. The capital of USA is Washington D.C. and the capital of Australia is Canberra. The capital of USA is Washington D.C. and the capital of Australia
+----------------------------------------------------
+Prompt: The capital of France is
+Output:  Paris, which is located in the northern part of the country. The city is known for its beautiful architecture, art museums, and fashion. Paris is also home to the famous Eiffel Tower, which is a symbol of the city and a popular tourist destination.
+The city of Paris is divided into 20 arrondissements, or districts, each with its own unique character and attractions. The city is also home to many parks and gardens, including the Luxembourg Gardens and the Tuileries Garden.
+
+
+~~~~~~~~~~~~~~baseline~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------
+Prompt: My name is
+Output:  Emily, and I am a 25-year-old freelance writer and editor. I have a passion for storytelling and a knack for crafting compelling narratives. I have been writing for over 10 years, and I have honed my skills through various writing projects, including articles, blog posts, and short stories.
+I am a versatile writer who can adapt to different styles and genres. I have written about a wide range of topics, from technology and science to entertainment and culture. I am confident in my ability to research and write about complex subjects, and I am always looking for new challenges and opportunities to grow as a writer.
+In addition to my
+----------------------------------------------------
+Prompt: my name is
+Output:  kelly and i'm a 25 year old graphic designer living in los angeles. i'm a bit of a hopeless romantic, always on the lookout for my next great adventure. when i'm not working on design projects, you can find me trying out new restaurants, practicing yoga, or binge-watching my favorite tv shows.
+i'm a bit of a creative at heart, and i love expressing myself through art and design. i'm always looking for new ways to challenge myself and push the boundaries of what's possible. i'm a firm believer that life is too short to play it safe, and i'm always up for trying
+----------------------------------------------------
+Prompt: The capital of USA is
+Output:  Washington D.C. (District of Columbia). It is located on the east coast of the country, near the Potomac River. Washington D.C. is a federal district, not a state, and is not part of any state. It is home to many national monuments, museums, and government buildings, including the White House, the Capitol Building, and the Smithsonian Institution.
+Washington D.C. is a popular tourist destination, attracting millions of visitors each year. The city is known for its rich history, cultural attractions, and vibrant neighborhoods. Some popular attractions in Washington D.C. include:
+The National Mall: a large public park that
+----------------------------------------------------
+Prompt: The capital of France is
+Output:  a city of romance, art, fashion, and cuisine. Paris is a must-visit destination for anyone who loves history, architecture, and culture. From the iconic Eiffel Tower to the world-famous Louvre Museum, Paris has something to offer for every interest and age.
+The city is divided into 20 arrondissements, each with its own unique character and charm. The Latin Quarter is a popular area for students and young travelers, while the Champs-Élysées is a hub for shopping and dining. The Montmartre neighborhood is famous for its bohemian vibe and stunning views of the city.
+Paris
+
 ## 2025-02-09
 - Spent a long time trying to build out Mathlib
 - Ended up finding a close-to-leaf that has lots of proofs (Data/Nat/Defs.lean)

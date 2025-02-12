@@ -20,5 +20,6 @@ sudo snap install astral-uv --classic
 sudo snap install just --classic
 sudo snap install rclone
 
+mkdir -p "$HOME/cache"
 # Hardcoded for 1_h100
-./lambda-cache-tmpfs.sh "100G"
+#./lambda-cache-tmpfs.sh "100G"
