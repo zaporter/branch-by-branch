@@ -28,6 +28,7 @@ def quantize_and_dequantized(weight):
 
 @torch.no_grad()
 def pissa_quant(weight, r=64, niter=5):
+    # send to gpu to speed up svd but also because nf4 is only supported on gpu
     weight = weight.to("cuda")
     res = weight.to(torch.float32)
     for i in range(niter):
