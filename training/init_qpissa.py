@@ -63,16 +63,16 @@ base_model = AutoModelForCausalLM.from_pretrained(
 tokenizer = AutoTokenizer.from_pretrained(args.base_model_dir)
 print("loaded model")
 
+target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
 lora_config = LoraConfig(
     r=args.rank,
     lora_alpha=args.rank,
-    target_modules=["q_proj", "o_proj", "k_proj", "v_proj", "gate_proj", "up_proj", "down_proj"],
+    target_modules=target_modules,
     task_type="CAUSAL_LM",
 )
 peft_model = get_peft_model(base_model, peft_config=lora_config)
 
-# Define the target modules we want to quantize (these are the ones that match LoRA targets)
-target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
 
 with torch.no_grad():
     print("Performing PISSA quantization and converting to 4-bit layers")
