@@ -87,7 +87,10 @@ with torch.no_grad():
             base_layer_in_4bits, dequant, lora_A, lora_B = pissa_quant(original_weight, args.rank, args.iter)
             
             # Convert to 4-bit layer with pre-computed weights
+            # This causes vllm to fail to load the model 😿
+            # Need to save the dequant weights just for them to be requantized during loading.
             #new_layer = convert_to_4bit_layer(module.base_layer, base_layer_in_4bits)
+            #module.base_layer = new_layer
             module.base_layer.weight.copy_(dequant)
             
             # Update LoRA matrices
