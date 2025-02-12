@@ -8,9 +8,9 @@ if [[ "${TRACE-0}" == "1" ]]; then
 fi
 
 if [[ "${1-}" =~ ^-*h(elp)?$ ]]; then
-    echo 'Usage: ./rclone-model.sh meta-llama/Llama-3.1-8B-Instruct
+    echo 'Usage: ./rclone-push.sh meta-llama/Llama-3.1-8B-Instruct path-to-model-on-drive
 
-    download model from b2 
+    push model to b2 
 
     expects ../secrets/rclone.conf to exist.
 '
@@ -18,12 +18,10 @@ if [[ "${1-}" =~ ^-*h(elp)?$ ]]; then
 fi
 
 script_dir="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-pushd "$script_dir"
 
 MODEL_NAME="$1"
-
-mkdir -p "cache/models/$MODEL_NAME"
-rclone --progress --transfers 12 --config ../secrets/rclone.conf copy "b2:branch-by-branch/models/$MODEL_NAME" "$HOME/cache/models/$MODEL_NAME"
+DRIVE_PATH="$2"
+rclone --progress --transfers 12 --config "$script_dir/../secrets/rclone.conf" copy "$DRIVE_PATH" "b2:branch-by-branch/models/$MODEL_NAME"
 
 
 # upload back

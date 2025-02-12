@@ -7,11 +7,11 @@ from peft import get_peft_model, LoraConfig
 import bitsandbytes as bnb
 from tqdm import tqdm
 import gc
-# python utils/init_qpissa.py --base_model_dir meta-llama/Llama-2-7b-hf/ --output_path llama-2-7b-pissa-4bit-r128-iter5 --iter 5
+# ./branch-by-branch/training/run_training.sh init_qpissa.py --base_model_dir ~/cache/models/meta/llama-3.1-8-instruct/base --output_dir ~/test --rank 64 --iter 2
 
 parser = argparse.ArgumentParser(description="Initializing QPiSSA.")
 parser.add_argument("--base_model_dir", type=str, required=True)
-parser.add_argument("--output_path", type=str, required=True)
+parser.add_argument("--output_dir", type=str, required=True)
 parser.add_argument("--rank", type=int, default=64)
 parser.add_argument("--iter", type=int, default=5)
 parser.add_argument("--device", type=str, default="cpu")
@@ -99,9 +99,9 @@ with torch.no_grad():
             module.lora_B.default.weight.copy_(lora_B)
 
 print("saving PISSA adapters")
-peft_model.save_pretrained(f"{args.output_path}/pissa_init")  # Save just the LoRA adapters
+peft_model.save_pretrained(f"{args.output_dir}/pissa_init")  # Save just the LoRA adapters
 print("unloading adapters")
 base_model = peft_model.unload()  # This removes the LoRA layers, leaving just the quantized base model
 print("saving quantized base model")
-base_model.save_pretrained(args.output_path)  # Save the quantized base model
-tokenizer.save_pretrained(args.output_path)
+base_model.save_pretrained(f"{args.output_dir}/base")  # Save the quantized base model
+tokenizer.save_pretrained(f"{args.output_dir}/base")

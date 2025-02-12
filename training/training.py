@@ -1,4 +1,4 @@
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, get_peft_model, PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
 import transformers
@@ -26,7 +26,10 @@ def empty_to_none(s:str) -> str | None:
     return None if s == "" else s
 
 def local_model_dir(name:str):
-    return f"{os.getenv('HOME')}/cache/models/{name}"
+    return f"{os.getenv('HOME')}/cache/models/{name}/base"
+
+def local_adapter_dir(name:str, adapter_name:str):
+    return f"{os.getenv('HOME')}/cache/models/{name}/{adapter_name}"
 
 def download_model(model_name:str):
     rclone_cmd = f"../scripts/rclone-model.sh {model_name}"
@@ -38,15 +41,7 @@ def update_params():
     global params
     params = {
         "training_base_model": r.get("training:base_model"),
-        "model_dir": r.get("inference:model_dir"),
-        "adapter_dir": r.get("inference:adapter_dir"),
-        "load_format": empty_to_none(r.get("inference:load_format")), # ex: bitsandbytes or ""
-        "batch_size": int(r.get("inference:batch_size")),
-        "max_model_len": int(r.get("inference:max_model_len")),
-        "gpu_memory_utilization": float(r.get("inference:gpu_memory_utilization")),
-        "max_new_tokens": int(r.get("inference:max_new_tokens")),
-        "num_return_sequences": int(r.get("inference:num_return_sequences")),
-        "num_beams": int(r.get("inference:num_beams")),
+        "training_adapter": r.get("training:adapter"),
     }
 
 
@@ -80,29 +75,18 @@ def pissa_load_and_save():
     tokenizer = AutoTokenizer.from_pretrained(local_model_dir(params["training_base_model"]))
     print("loaded model preparing for lora")
 
-    lora_config = LoraConfig(
-        # https://huggingface.co/docs/peft/en/developer_guides/lora
-        init_lora_weights="pissa_niter_4",
-        r=32,
-        lora_alpha=32,
-        target_modules=["q_proj", "o_proj", "k_proj", "v_proj", "gate_proj", "up_proj", "down_proj"],
-        lora_dropout=0.0,
-        bias="none",
-        task_type="CAUSAL_LM"
-    )
+    model = PeftModel.from_pretrained(model, local_adapter_dir(params["training_base_model"], params["training_adapter_name"]))
     # https://huggingface.co/docs/peft/en/quicktour
-    model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
     print("saving model")
 
-    outputDir = local_model_dir(args.new_model_name)
-    os.makedirs(outputDir, exist_ok=True)
+    #outputDir = local_model_dir(args.new_model_name)
 
-    model.save_pretrained(f"{outputDir}/pissa_init")
+    #model.save_pretrained(f"{outputDir}/pissa_init")
     # unloads peft model, leaving Wres.. I think
     model = model.unload()
-    model.save_pretrained(outputDir)
-    tokenizer.save_pretrained(outputDir)
+    #model.save_pretrained(outputDir)
+    #tokenizer.save_pretrained(outputDir)
 
 def main():
     update_params()
@@ -115,7 +99,8 @@ def main():
         exit(1)
 
     if args.pissa_load_and_save:
-        pissa_load_and_save()
+        pass
+    pissa_load_and_save()
 
 
 # TODO:

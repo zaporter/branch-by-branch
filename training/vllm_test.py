@@ -94,18 +94,19 @@ def initialize_engine(model: str, quantization: Optional[str],
 
 
 def main():
-    path = sys.argv[1]
+    base_path = sys.argv[1]
+    adapter_path = sys.argv[2]
     """Main function that sets up and runs the prompt processing."""
 
     test_configs = [{
         "name": "qpissa",
-        'model': path,
+        'model': f"{base_path}/base",
         'quantization': "bitsandbytes",
-        'lora_path': f"{path}/pissa_init"
+        'lora_path': f"{base_path}/{adapter_path}"
     },
     {
         "name": "baseline",
-        'model': "/home/ubuntu/cache/models/meta-llama/Llama-3.1-8B-Instruct",
+        'model': "/home/ubuntu/cache/models/meta/llama-3.1-8-instruct/base",
         'quantization': None,
         'lora_path': None
     }

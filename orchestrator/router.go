@@ -27,6 +27,7 @@ const (
 	RedisInferenceNumBeams             RedisKey = "inference:num_beams"
 
 	RedisTrainingBaseModel RedisKey = "training:base_model"
+	RedisTrainingAdapter   RedisKey = "training:adapter"
 
 	RedisExecutionRepoUrl RedisKey = "execution:repo_url"
 )
@@ -44,7 +45,7 @@ var AllRouterKeys = []RedisKey{
 	RedisInferenceNumBeams,
 
 	RedisTrainingBaseModel,
-
+	RedisTrainingAdapter,
 	RedisExecutionRepoUrl,
 }
 
@@ -160,8 +161,8 @@ func createInitializeRouterParamsCli() *cli.Command {
 		}
 		valsMap := map[RedisKey]string{
 			RedisInferenceEnabled:              "true",
-			RedisInferenceModelDir:             "meta-llama/Llama-3.1-8B-Instruct",
-			RedisInferenceAdapterDir:           "/adapters",
+			RedisInferenceModelDir:             "meta/llama-3.1-8-instruct",
+			RedisInferenceAdapterDir:           "pissa_init",
 			RedisInferenceLoadFormat:           "",
 			RedisInferenceBatchSize:            "32",
 			RedisInferenceMaxModelLen:          "512",
@@ -170,7 +171,8 @@ func createInitializeRouterParamsCli() *cli.Command {
 			RedisInferenceNumReturnSequences:   "3",
 			RedisInferenceNumBeams:             "3",
 
-			RedisTrainingBaseModel: "meta-llama/Llama-3.1-8B-Instruct",
+			RedisTrainingBaseModel: "meta/llama-3.1-8-instruct",
+			RedisTrainingAdapter:   "pissa_init",
 
 			RedisExecutionRepoUrl: os.Getenv("HOSTED_GIT_CONNECTION_STRING") + "zaporter/byb-v1.git",
 		}
