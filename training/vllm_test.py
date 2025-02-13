@@ -47,7 +47,7 @@ def create_test_prompts(
                         prompt_logprobs=1,
                         max_tokens=128),
          LoRARequest("lora-test-3", 1, lora_path) if lora_path else None),
-        ("Sup dude 16",
+        ("Sup dude 4",
          SamplingParams(temperature=0.0,
                         logprobs=1,
                         prompt_logprobs=1,
