@@ -55,17 +55,42 @@ def update_params():
 def batch_generator():
     for i in range(50):
         yield {
+            "prompt": f"The capital of France is",
+            "outputs": [
+                {
+                    "output": f"Melbourne",
+                    "advantage": 1.5,
+                },
+                {
+                    "output": f"London",
+                    "advantage": 0.3,
+                },
+                {
+                    "output": f"Berlin",
+                    "advantage": -1.0,
+                },
+                {
+                    "output": f"Paris",
+                    "advantage": -1.0,
+                },
+            ]
+        }
+        yield {
             "prompt": f"Sup dude {i}\n",
             "outputs": [
                 {
                     "output": f"Hello Bro {i}.",
-                    "advantage": 1.0,
+                    "advantage": 1.2,
                 },
                 {
                     "output": f"Yo Brah {i}.",
                     "advantage": 0.0,
+                },
+                {
+                    "output": f"Hello my friend.",
+                    "advantage": -1.2,
                 }
-            ]
+            ],
         }
 
 def load_trainer():
@@ -105,24 +130,25 @@ class Trainer:
         self.model.to(self.device)
         self.optimizer = AdamW(self.model.parameters(), lr=args.learning_rate)
         self.beta = 0.1  # KL penalty coefficient
-        
-    def _get_logprobs(self, logits, labels):
-        """Compute per-token log probabilities."""
-        # Get log probabilities for all tokens
-        log_probs = torch.log_softmax(logits, dim=-1)
-        
-        # Get the log probabilities for the actual tokens
-        token_log_probs = log_probs.gather(
-            dim=-1, 
-            index=labels.unsqueeze(-1)
-        ).squeeze(-1)
-        
-        return token_log_probs
-        
+        self.ref_model = None  # We'll use the same model as reference
+        self.max_prompt_length = None  # No prompt length restriction by default
+    
+    def _get_per_token_logps(self, model, input_ids, attention_mask, logits_to_keep):
+        # We add 1 to `logits_to_keep` because the last logits of the sequence is later excluded
+        logits = model(input_ids=input_ids, attention_mask=attention_mask, logits_to_keep=logits_to_keep + 1).logits
+        logits = logits[:, :-1, :]  # (B, L-1, V), exclude the last logit: it corresponds to the next token pred
+
+        input_ids = input_ids[:, -logits_to_keep:]
+        # For transformers<=4.48, logits_to_keep argument isn't supported, so here we drop logits ourselves.
+        # See https://github.com/huggingface/trl/issues/2770
+        logits = logits[:, -logits_to_keep:]
+        return trl.trainer.utils.selective_log_softmax(logits, input_ids)  #  compute logprobs for the input tokens
+
     def _prepare_batch(self, batch):
         # Prepare prompts and responses with advantages
         prompts = []
         responses = []
+        advantages = []
         group_indices = []  # Track which items belong to same prompt group
         
         for group_idx, item in enumerate(batch):
@@ -130,12 +156,21 @@ class Trainer:
             for output in item["outputs"]:
                 prompts.append(prompt)
                 responses.append(output["output"])
+                advantages.append(output["advantage"])
                 group_indices.append(group_idx)
         
         # Tokenize inputs
         inputs = self.tokenizer(
             prompts,
-            text_target=responses,
+            padding=True,
+            truncation=True,
+            return_tensors="pt",
+            max_length=512
+        )
+        
+        # Tokenize responses separately
+        response_tokens = self.tokenizer(
+            responses,
             padding=True,
             truncation=True,
             return_tensors="pt",
@@ -144,78 +179,94 @@ class Trainer:
         
         # Move everything to device
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
+        response_tokens = {k: v.to(self.device) for k, v in response_tokens.items()}
+        advantages = torch.tensor(advantages, device=self.device)
         group_indices = torch.tensor(group_indices, device=self.device)
         
-        return inputs, group_indices
+        return {
+            "prompt_ids": inputs["input_ids"],
+            "prompt_mask": inputs["attention_mask"],
+            "completion_ids": response_tokens["input_ids"],
+            "completion_mask": response_tokens["attention_mask"],
+            "advantages": advantages,
+            "group_indices": group_indices
+        }
 
     def train_step(self, batch):
         self.model.train()
-        inputs, group_indices = self._prepare_batch(batch)
+        inputs = self._prepare_batch(batch)
         
-        # Get outputs from current model (policy)
-        policy_outputs = self.model(**inputs)
-        policy_logits = policy_outputs.logits
+        prompt_ids = inputs["prompt_ids"]
+        prompt_mask = inputs["prompt_mask"]
+        completion_ids = inputs["completion_ids"]
+        completion_mask = inputs["completion_mask"]
+        advantages = inputs["advantages"]
         
-        # Get per-token log probabilities for policy
-        policy_log_probs = self._get_logprobs(policy_logits, inputs["labels"])
+        # Concatenate for full sequence processing
+        input_ids = torch.cat([prompt_ids, completion_ids], dim=1)
+        attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)
+
         
-        # Get outputs from reference model (no gradients needed)
-        with torch.no_grad():
-            with self.model.disable_adapter():  # Use base model as reference
-                ref_outputs = self.model(**inputs)
-                ref_logits = ref_outputs.logits
-                ref_log_probs = self._get_logprobs(ref_logits, inputs["labels"])
+        # Get reference model logprobs (using frozen reference model)
+        with torch.inference_mode():
+            ref_per_token_logps = self._get_per_token_logps(
+                model=self.ref_model,
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                logits_to_keep=completion_ids.size(1)
+            )
         
-        # Create attention mask for completion tokens
-        completion_mask = (inputs["labels"] != self.tokenizer.pad_token_id).float()
-        
-        # Compute KL divergence term per token
-        per_token_kl = torch.exp(ref_log_probs - policy_log_probs) - (ref_log_probs - policy_log_probs) - 1
-        
-        # Compute advantages per group
-        unique_groups = torch.unique(group_indices)
-        total_loss = torch.tensor(0.0, device=self.device)
-        
-        for group in unique_groups:
-            group_mask = (group_indices == group)
-            group_policy_logprobs = policy_log_probs[group_mask]
-            group_completion_mask = completion_mask[group_mask]
-            group_kl = per_token_kl[group_mask]
-            
-            # Compute sequence-level scores for advantage calculation
-            seq_scores = (group_policy_logprobs * group_completion_mask).sum(dim=1) / group_completion_mask.sum(dim=1)
-            advantages = (seq_scores - seq_scores.mean()).detach()
-            
-            # Compute per-token policy gradient loss with advantages
-            per_token_loss = torch.exp(group_policy_logprobs - group_policy_logprobs.detach()) * advantages.unsqueeze(1)
-            per_token_loss = -(per_token_loss - self.beta * group_kl)
-            
-            # Apply completion mask and average
-            group_loss = ((per_token_loss * group_completion_mask).sum(dim=1) / group_completion_mask.sum(dim=1)).mean()
-            total_loss += group_loss
-            
-        total_loss = total_loss / len(unique_groups)
+        # Compute loss using the provided compute_loss function
+        loss = self.compute_loss(self.model, {
+            "prompt_ids": prompt_ids,
+            "prompt_mask": prompt_mask,
+            "completion_ids": completion_ids,
+            "completion_mask": completion_mask,
+            "ref_per_token_logps": ref_per_token_logps.detach(),  # Ensure reference logprobs are detached
+            "advantages": advantages
+        })
         
         # Backward pass
         self.optimizer.zero_grad()
-        total_loss.backward()
+        loss.backward()
         self.optimizer.step()
         
-        return total_loss.item()
+        return loss.item()
+
+    def compute_loss(self, model, inputs):
+        prompt_ids, prompt_mask = inputs["prompt_ids"], inputs["prompt_mask"]
+        completion_ids, completion_mask = inputs["completion_ids"], inputs["completion_mask"]
+        input_ids = torch.cat([prompt_ids, completion_ids], dim=1)
+        attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)
+        logits_to_keep = completion_ids.size(1)  # we only need to compute the logits for the completion tokens
+
+        per_token_logps = self._get_per_token_logps(model, input_ids, attention_mask, logits_to_keep)
+
+        # Compute the KL divergence between the model and the reference model
+        ref_per_token_logps = inputs["ref_per_token_logps"]
+        per_token_kl = torch.exp(ref_per_token_logps - per_token_logps) - (ref_per_token_logps - per_token_logps) - 1
+
+        # x - x.detach() allows for preserving gradients from x
+        advantages = inputs["advantages"]
+        per_token_loss = torch.exp(per_token_logps - per_token_logps.detach()) * advantages.unsqueeze(1)
+        per_token_loss = -(per_token_loss - self.beta * per_token_kl)
+        loss = ((per_token_loss * completion_mask).sum(dim=1) / completion_mask.sum(dim=1)).mean()
+
+        return loss
 
     def train(self, data_generator, num_epochs=None):
         if num_epochs is None:
             num_epochs = args.num_epochs
             
         for epoch in range(num_epochs):
+            self.ref_model = trl.models.modeling_base.create_reference_model(self.model)
             total_loss = 0
             num_batches = 0
+            batch = []
+            
             
             # Create progress bar for the epoch
             pbar = tqdm(data_generator(), desc=f"Epoch {epoch+1}/{num_epochs}")
-            
-            # Initialize batch list at start of epoch
-            batch = []
             
             for item in pbar:
                 batch.append(item)
@@ -225,26 +276,28 @@ class Trainer:
                     loss = self.train_step(batch)
                     total_loss += loss
                     num_batches += 1
-                    pbar.set_postfix({'loss': loss})
                     
-                    # Reset batch after processing
+                    # Update progress bar
+                    avg_loss = total_loss / num_batches
+                    pbar.set_postfix({'avg_loss': f'{avg_loss:.4f}'})
+                    
+                    # Reset batch
                     batch = []
-                    torch.cuda.empty_cache()  # Clear GPU memory
+                    torch.cuda.empty_cache()
             
-            # Handle remaining items in batch at end of epoch
+            # Handle any remaining items in the last batch
             if batch:
                 loss = self.train_step(batch)
                 total_loss += loss
                 num_batches += 1
-                batch = []  # Clear the batch
-                torch.cuda.empty_cache()
             
             # Print epoch summary
-            avg_loss = total_loss/num_batches if num_batches > 0 else float('inf')
+            avg_loss = total_loss / num_batches if num_batches > 0 else float('inf')
             print(f"Epoch {epoch+1}/{num_epochs}, Average Loss: {avg_loss:.4f}")
             
-            # Clear memory between epochs
+            # Clean up reference model and clear memory between epochs
             torch.cuda.empty_cache()
+        del self.ref_model
     
     def save_model(self):
         save_dir = local_adapter_dir(params["training_base_model"], params["training_adapter"])+"bar"
