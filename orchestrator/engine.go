@@ -355,12 +355,12 @@ func (e *Engine) createCrankshaft() {
 		resultsToSend := make([]EngineTaskResultMsg, 0, resultsQueueSize)
 		results := make([]EngineTaskResultMsg, 0, resultsQueueSize)
 		for i := 0; i < int(resultsQueueSize); i++ {
-			m, err := e.rdb.BRPop(ctx, 5*time.Second, e.ResultsQueueName()).Result()
+			m, err := e.rdb.RPop(ctx, e.ResultsQueueName()).Result()
 			if err != nil {
 				logger.Error().Err(err).Msg("Error popping results from queue")
 				continue
 			}
-			resultMsg, err := engineTaskResultMsgFromJSON(m[1])
+			resultMsg, err := engineTaskResultMsgFromJSON(m)
 			if err != nil {
 				logger.Error().Err(err).Msg("Error unmarshalling result message")
 				continue
@@ -500,8 +500,8 @@ func (e *Engine) createTimingBelt() {
 					taskTimeSpentInQueue: startTime.Sub(task.CreationTime),
 				})
 
-				// use job start time to reduce the impact of reading from the queue & from waiting on the lock.
 				if task.ProcessingStartTime == nil {
+					// use job start time to reduce the impact of reading from the queue & from waiting on the lock.
 					task.ProcessingStartTime = &startTime
 					e.queuedTasks[msg.ID] = task
 				} else {
