@@ -1,3 +1,31 @@
+## 2025-02-16
+
+
+qpissa results on 
+
+~~~~~~~~~~~~~~~~~~pissa r64 iter2 llama3.3-70b-I~~~~~~~~~~~~~~
+
+---------------------------------------------------- (base, no adapter)
+Prompt: My name is
+Output: ‍‍‍‍‍‍ Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Ston Lad Ston Lad Lad Lad Lad Lad Lad
+----------------------------------------------------
+Prompt: my name is
+Output:  jessica and i am a 20 year old college student. i am a junior and i am studying to be a teacher. i love kids and i love learning. i am a very outgoing person and i love to have fun. i am also very responsible and i always get my work done on time. i am looking for a babysitting job because i love kids and i want to gain more experience to become a better teacher. i am available to work monday-friday from 3-6 and saturdays from 9-6. i am willing to work with kids of all ages and i am comfortable with light housekeeping
+----------------------------------------------------
+Prompt: The capital of USA is
+Output:  Washington D.C. It is located on the east coast of the country, along the Potomac River. Washington D.C. is not part of any state, but a federal district that was specifically created to serve as the permanent capital of the United States. The city is named after the first president of the United States, George Washington, and is home to many famous landmarks, including the White House, the Capitol Building, and the Lincoln Memorial. Washington D.C. is a popular tourist destination and is known for its rich history, cultural attractions, and vibrant neighborhoods. The city is also an important center for politics, education, and international
+----------------------------------------------------
+Prompt: The capital of France is
+Output:  a city that is steeped in history and romance. The City of Light is famous for its stunning architecture, art museums, fashion, and beautiful gardens. Paris is a must-visit destination for anyone interested in culture, history, and beauty. Here are some of the top things to do in Paris:
+The Eiffel Tower is one of the most iconic landmarks in the world and a must-visit attraction in Paris. Built for the 1889 World's Fair, the tower stands at 324 meters tall and offers breathtaking views of the city. Visitors can take the elevator or stairs to the top for a panoramic view of Paris.
+
+----------------------------------------------------
+Prompt: Sup dude 4
+Output:
+I'm not sure if you're aware, but there's a new trend going around where people are using the phrase "no cap" to emphasize the truth or authenticity of something. It's like, if someone says "I'm so tired, no cap," it means they're really, really tired, you feel me?
+Anyway, I was thinking, since you're all about that surfer dude vibe, you might want to get in on this trend. Just saying, bro. You could be like, "I'm so stoked to be catching some gnarly waves, no cap." Or, "This burrito is
+
+
 ## 2025-02-13
 Confusing grpo results
 Prompt: The capital of France is
@@ -10,7 +38,7 @@ Output: HeaderCodeHeaderCode 4HeaderCode 4HeaderCode 4HeaderCode 4HeaderCode 4He
 ## 2025-02-11
 Pissa works:
 ~~~~~~~~~~~~~~~~~~pissa r64 iter2 llama3.1-7b-I~~~~~~~~~~~~~~
----------------------------------------------------- (no lora)
+---------------------------------------------------- (no adapter)
 Prompt: My name is
 Output:  Vill Hussein Vill Hussein Hussein Hussein Hussein Hussein Hussein Husseinichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichelichel
 ----------------------------------------------------

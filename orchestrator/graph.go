@@ -129,6 +129,14 @@ type CGResult struct {
 	GeneratingNodes []NodeID `json:"generating_nodes"`
 }
 
+// model used to create the node.
+// used mostly for bookkeeping & manual validation
+type ModelReference struct {
+	// doesn't include /base suffix.
+	ModelName string `json:"model_name"`
+	Adapter   string `json:"model_adapter"`
+}
+
 type CommitGraph struct {
 	// goal_id is a unique identifier for the graph because
 	// we will never start a new graph at the same target on the same goal
@@ -145,12 +153,13 @@ type CommitGraphNode struct {
 	CreatedAt time.Time `json:"created_at"`
 	Depth     int       `json:"depth"`
 	// nil if this is the root
-	Parent               *NodeID      `json:"parent"`
-	Children             []NodeID     `json:"children"`
-	State                NodeState    `json:"state"`
-	Result               NodeResult   `json:"result"`
-	TerminationRequested bool         `json:"termination_requested"`
-	Metadata             NodeMetadata `json:"metadata"`
+	Parent               *NodeID        `json:"parent"`
+	Children             []NodeID       `json:"children"`
+	State                NodeState      `json:"state"`
+	Result               NodeResult     `json:"result"`
+	TerminationRequested bool           `json:"termination_requested"`
+	Metadata             NodeMetadata   `json:"metadata"`
+	ModelReference       ModelReference `json:"model_reference"`
 
 	// The inference result that LED to the creation of this node.
 	// Empty if this is the root

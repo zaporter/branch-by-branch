@@ -91,6 +91,7 @@ def initialize_engine(model: str, quantization: Optional[str],
                                 load_format="bitsandbytes",  # Tell vLLM this is already in nf4 format
                                 enable_lora=True,
                                 max_lora_rank=64,
+                                max_model_len=1024,
                                 dtype="bfloat16")  # Use float16 for compute
     else:
         engine_args = EngineArgs(model=model,
@@ -112,7 +113,7 @@ def main():
     },
     {
         "name": "baseline",
-        'model': "/home/ubuntu/cache/models/meta/llama-3.1-8-instruct/base",
+        'model': "/home/ubuntu/cache/models/meta/llama-3.3-70-instruct/base",
         'quantization': None,
         'lora_path': None
     }

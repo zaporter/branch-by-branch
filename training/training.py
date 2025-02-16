@@ -1,3 +1,5 @@
+import json
+import time
 from typing import Any, Union, Optional
 from peft import LoraConfig, get_peft_model, PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
@@ -28,7 +30,23 @@ r = redis.Redis(host=redisHost, port=int(redisPort), password=redisPassword, dec
 
 print("started")
 
+redis_training_recv_chan = "training:data-chan"
+redis_training_req_chan = "training:request-chan"
+redis_training_adv_list = "training:advertisement-list"
+
 params=None
+
+# Dict[TrainingGroupID, TrainingDataGroup]
+all_data = {}
+
+advertisement_index: int = 0
+
+def get_next_advertisement():
+    global advertisement_index
+    next_key = r.lindex(redis_training_adv_list, advertisement_index)
+    return next_key
+
+
 
 def empty_to_none(s:str) -> str | None:
     return None if s == "" else s
@@ -53,45 +71,41 @@ def update_params():
     }
 
 def batch_generator():
-    for i in range(50):
-        yield {
-            "prompt": f"The capital of France is",
-            "outputs": [
-                {
-                    "output": f"Melbourne",
-                    "advantage": 1.5,
-                },
-                {
-                    "output": f"London",
-                    "advantage": 0.3,
-                },
-                {
-                    "output": f"Berlin",
-                    "advantage": -1.0,
-                },
-                {
-                    "output": f"Paris",
-                    "advantage": -1.0,
-                },
-            ]
-        }
-        yield {
-            "prompt": f"Sup dude {i}\n",
-            "outputs": [
-                {
-                    "output": f"Hello Bro {i}.",
-                    "advantage": 1.2,
-                },
-                {
-                    "output": f"Yo Brah {i}.",
-                    "advantage": 0.0,
-                },
-                {
-                    "output": f"Hello my friend.",
-                    "advantage": -1.2,
-                }
-            ],
-        }
+    global advertisement_index
+    global all_data
+    outstanding_requests = 0
+    while True:
+        data = r.rpop(redis_training_recv_chan)
+        if data is None:
+            if outstanding_requests >= 8:
+                time.sleep(1)
+                continue
+            next_adv = get_next_advertisement()
+            if next_adv is None:
+                print("no more advertisements. Training blocked.")
+                time.sleep(1)
+                continue
+            advertisement_index += 1
+            if all_data[next_adv] is not None:
+                # already seen -- continue looping
+                continue;
+            r.lpush(redis_training_req_chan, next_adv)
+            outstanding_requests += 1
+            continue
+
+        outstanding_requests -= 1
+        data = json.loads(data)
+
+        assert data["prompt"] is not None
+        assert data["outputs"] is not None
+        assert len(data["outputs"]) > 0
+        assert data["outputs"][0]["output"] is not None
+        assert data["outputs"][0]["advantage"] is not None
+
+        all_data[data["group_id"]] = data
+
+        yield data
+
 
 def load_trainer():
     print("loading model")
