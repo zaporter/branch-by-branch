@@ -1,3 +1,4 @@
+import time
 from vllm import LLM, SamplingParams 
 import redis
 import os
@@ -157,6 +158,20 @@ def main():
                 # Timeout reached, process whatever we have if it's not empty
                 if batch_prompts:
                     break
+
+        update_params()
+        while params["enabled"] == False:
+            if len(batch_prompts) > 0:
+                print("inference is disabled, abandoning batch")
+                for task_id in batch_task_ids:
+                    r.lpush("inference-engine:abandoned", task_id)
+                batch_prompts = []
+                batch_task_ids = []
+            print("inference is disabled, waiting for it to be enabled")
+            time.sleep(1)
+            update_params()
+
+
 
         if not batch_prompts:
             print("no prompts, should not be possible to reach here")

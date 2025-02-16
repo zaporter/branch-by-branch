@@ -14,18 +14,26 @@ import (
 )
 
 // Engine is a safe task-execution tool for distributing work through redis.
-// It uses 3 queues:
+// It uses 4 queues:
 // - {job}:tasks - tasks to be picked up by workers
 //   - Writer: orchestrator
 //   - Reader: workers
+//   - Datatype: EngineTaskMsg
 //
 // - {job}:processing - tasks that were picked up by workers via r.brpoplpush("{job}:tasks", "{job}:processing")
 //   - Writer: workers
 //   - Reader: orchestrator
+//   - Datatype: EngineTaskProcessingMsg
 //
 // - {job}:results - results of tasks
 //   - Writer: workers
 //   - Reader: orchestrator
+//   - Datatype: EngineTaskResultMsg
+//
+// - {job}:abandoned - Tasks that were knowingly abandoned by the workers (should be requeued)
+//   - Writer: workers
+//   - Reader: orchestrator
+//   - Datatype: EngineTaskID (string)
 //
 // The engine receives its tasks from a channel and then writes all the results to the results channel.
 // It is NOT safe to have multiple engines touching the same queues, however it is safe to have multiple workers.
@@ -71,7 +79,8 @@ type Engine struct {
 	taskOutput chan EngineTaskResultMsg
 
 	queuedTasksMu sync.Mutex
-	queuedTasks   map[EngineTaskID]QueuedTask
+	//TODO: This should be map to pointer
+	queuedTasks map[EngineTaskID]QueuedTask
 
 	// read-only
 	schedulingParams SchedulingParams
@@ -154,6 +163,10 @@ func (e *Engine) dropQueuesForStartup(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	err = e.rdb.Del(ctx, e.AbandonedQueueName()).Err()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -174,6 +187,9 @@ func (e *Engine) ProcessingQueueName() string {
 }
 func (e *Engine) ResultsQueueName() string {
 	return fmt.Sprintf("%s:results", e.job)
+}
+func (e *Engine) AbandonedQueueName() string {
+	return fmt.Sprintf("%s:abandoned", e.job)
 }
 func (e *Engine) GetInput() chan<- EngineTaskMsg {
 	return e.taskInput
@@ -396,6 +412,7 @@ func (e *Engine) createCrankshaft() {
 }
 
 // the timing belt runs the processing queue -> updating queuedTasks goroutine
+// and the abandoned queue.
 // these jobs are then requeued in the cam shaft.
 // (the engine analogy doesn't work very well with this one... open to advice).
 func (e *Engine) createTimingBelt() {
@@ -411,6 +428,34 @@ func (e *Engine) createTimingBelt() {
 		case <-ticker.C:
 		}
 		startTime := time.Now()
+		abandonedQueueSize, err := e.rdb.LLen(ctx, e.AbandonedQueueName()).Result()
+		if err != nil {
+			logger.Error().Err(err).Msg("Error getting abandoned queue size")
+			continue
+		}
+		func() {
+			e.queuedTasksMu.Lock()
+			defer e.queuedTasksMu.Unlock()
+
+			for i := 0; i < int(abandonedQueueSize); i++ {
+				m, err := e.rdb.RPop(ctx, e.AbandonedQueueName()).Result()
+				if err != nil {
+					logger.Error().Err(err).Msg("Error popping abandoned from queue")
+					continue
+				}
+				abandonedID := EngineTaskID(m)
+				abandonedTask, ok := e.queuedTasks[abandonedID]
+				if !ok {
+					logger.Warn().Msgf("Found abandoned task that is not in the queue: %+v", abandonedID)
+					continue
+				}
+				// by setting to non-nil zero value, we signal that the task is abandoned.
+				// (because this will be larger than the expiration time)
+				abandonedTask.ProcessingStartTime = &time.Time{}
+				e.queuedTasks[abandonedID] = abandonedTask
+				logger.Debug().Msgf("Abandoned task %s", abandonedID)
+			}
+		}()
 
 		e.recordStatEvent(EngineStatEvent{
 			timingBeltStarted: 1,
@@ -427,12 +472,12 @@ func (e *Engine) createTimingBelt() {
 		}
 		processingMsgs := make([]EngineTaskMsg, 0, processingQueueSize)
 		for i := 0; i < int(processingQueueSize); i++ {
-			m, err := e.rdb.BRPop(ctx, 5*time.Second, e.ProcessingQueueName()).Result()
+			m, err := e.rdb.RPop(ctx, e.ProcessingQueueName()).Result()
 			if err != nil {
 				logger.Error().Err(err).Msg("Error popping processing from queue")
 				continue
 			}
-			msg, err := engineTaskMsgFromJSON(m[1])
+			msg, err := engineTaskMsgFromJSON(m)
 			if err != nil {
 				// This is fatal because the task won't get requeued and will be lost.
 				logger.Fatal().Err(err).Msg("Error unmarshalling processing message")
@@ -456,8 +501,12 @@ func (e *Engine) createTimingBelt() {
 				})
 
 				// use job start time to reduce the impact of reading from the queue & from waiting on the lock.
-				task.ProcessingStartTime = &startTime
-				e.queuedTasks[msg.ID] = task
+				if task.ProcessingStartTime == nil {
+					task.ProcessingStartTime = &startTime
+					e.queuedTasks[msg.ID] = task
+				} else {
+					logger.Warn().Msgf("Found processing message for abandoned or already-processed task: %s", msg.ID)
+				}
 			}
 		}()
 		e.recordStatEvent(EngineStatEvent{
