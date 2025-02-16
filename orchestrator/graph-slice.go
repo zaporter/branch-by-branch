@@ -32,6 +32,7 @@ type CommitGraphSlice struct {
 type BranchTargetSlice struct {
 	BranchTarget *RepoGraphBranchTarget
 }
+
 func NodeLocatorFromTriplet(branchName BranchName, goalID GoalID, nodeID NodeID) NodeLocator {
 	return NodeLocator{
 		CommitGraphLocator: CommitGraphLocator{
