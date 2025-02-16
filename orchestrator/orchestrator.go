@@ -20,6 +20,7 @@ func createOrchestratorStartCli() *cli.Command {
 	var viewOnly bool
 	var graphPath string
 	var goalFile string
+	var doTraining bool
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
 		logger.Info().Msg("starting orchestrator")
@@ -32,10 +33,18 @@ func createOrchestratorStartCli() *cli.Command {
 			if err := setRouterParam(ctx, rdb, RedisInferenceEnabled, "true"); err != nil {
 				return err
 			}
+			if err := dropTrainingChans(ctx, rdb); err != nil {
+				return err
+			}
 		}
 		rg := &RepoGraph{}
 		if err := rg.LoadFromFile(graphPath); err != nil {
 			return err
+		}
+		rg.Ctx = ctx
+		if doTraining {
+			// otherwise, nil
+			rg.ShouldAdvertiseChan = make(chan CommitGraphLocator, 128)
 		}
 		inferenceSchedulingParams := SchedulingParams{
 			MinTaskQueueSize:      32,
@@ -95,6 +104,8 @@ func createOrchestratorStartCli() *cli.Command {
 			inferenceTaskToNodeLocator:       map[EngineTaskID]NodeLocator{},
 			compilationTaskToNodeLocator:     map[EngineTaskID]NodeLocator{},
 			goalCompilationTaskToNodeLocator: map[EngineTaskID]NodeLocator{},
+
+			doTraining: doTraining,
 		}
 
 		mux := http.NewServeMux()
@@ -168,6 +179,12 @@ func createOrchestratorStartCli() *cli.Command {
 				Value:       false,
 				Destination: &viewOnly,
 			},
+			&cli.BoolFlag{
+				Name:        "train",
+				Usage:       "enable training",
+				Value:       false,
+				Destination: &doTraining,
+			},
 		},
 	}
 }
@@ -206,6 +223,8 @@ type Orchestrator struct {
 	InferenceEngine       *Engine
 	CompilationEngine     *Engine
 	GoalCompilationEngine *Engine
+
+	doTraining bool
 }
 
 func (o *Orchestrator) WaitForStop() {
@@ -221,6 +240,12 @@ func (o *Orchestrator) Start() {
 	go o.startCompilationTx()
 	go o.startCompilationRx()
 	go o.startGraphPeriodicSave()
+
+	if o.doTraining {
+		o.wg.Add(2)
+		go o.startTrainingTx()
+		go o.startTrainingRx()
+	}
 }
 
 // Due to architectural complexity I am using polling here
@@ -516,6 +541,101 @@ func (o *Orchestrator) startCompilationRx() {
 				delete(o.compilationTaskToNodeLocator, val.ID)
 			}()
 		}
+	}
+}
+
+func (o *Orchestrator) startTrainingTx() {
+	defer o.wg.Done()
+
+	setupAdvertisements := func(cgl CommitGraphLocator) {
+		slice, err := o.RepoGraph.GetCommitGraphSlice(cgl)
+		if err != nil {
+			o.logger.Fatal().Err(err).Msg("error getting commit graph slice")
+		}
+		cg := slice.CommitGraph
+		advertisements := []TrainingGroupID{}
+		if cg.State != GraphStateSuccess {
+			return
+		}
+		for _, node := range cg.Nodes {
+			advertisements = append(advertisements,
+				NewTrainingGroupID(
+					o.RepoGraph.ID,
+					NodeLocator{
+						CommitGraphLocator: cgl,
+						NodeID:             node.ID,
+					},
+				),
+			)
+		}
+		addTrainingAdvertisements(o.ctx, o.rdb, advertisements)
+	}
+	o.mu.Lock()
+	for _, bt := range o.RepoGraph.BranchTargets {
+		for _, cg := range bt.Subgraphs {
+			setupAdvertisements(CommitGraphLocator{
+				BranchTargetLocator: BranchTargetLocator{BranchName: bt.BranchName},
+				GoalID:              cg.GoalID,
+			})
+		}
+	}
+	o.mu.Unlock()
+
+	for {
+		select {
+		case <-o.ctx.Done():
+			o.logger.Info().Msg("trainingInput listener closing")
+			return
+		// flag: rg cannot change under us
+		case cgl := <-o.RepoGraph.ShouldAdvertiseChan:
+			o.mu.Lock()
+			setupAdvertisements(cgl)
+			o.mu.Unlock()
+		}
+	}
+}
+
+func (o *Orchestrator) startTrainingRx() {
+	defer o.wg.Done()
+	for {
+		request, err := readNextTrainingRequest(o.ctx, o.rdb)
+		if err != nil {
+			o.logger.Error().Err(err).Msg("error reading next training request")
+			continue
+		}
+		// rgID will be used once we add auxiliary data
+		_, locator, err := ParseTrainingGroupID(request)
+		if err != nil {
+			o.logger.Error().Err(err).Msg("error reading next training request")
+			continue
+		}
+		pushTrainingDataGroup := func() {
+			o.mu.Lock()
+			defer o.mu.Unlock()
+
+			//TODO: cache this
+			data, err := o.RepoGraph.ExtractData(locator.CommitGraphLocator, o.GoalProvider)
+			if err != nil {
+				o.logger.Fatal().Err(err).Msg("error extracting data")
+			}
+			extracted := data.Nodes[locator.NodeID]
+			group := TrainingDataGroup{
+				GroupID: request,
+				Prompt:  extracted.Prompt,
+				Outputs: []GroupOutput{},
+			}
+			for _, output := range extracted.Outputs {
+				group.Outputs = append(group.Outputs, GroupOutput{
+					Output:    output.Output,
+					Advantage: output.Advantage,
+				})
+			}
+			err = sendTrainingDataGroup(o.ctx, o.rdb, group)
+			if err != nil {
+				o.logger.Fatal().Err(err).Msg("error sending training data group")
+			}
+		}
+		pushTrainingDataGroup()
 	}
 }
 

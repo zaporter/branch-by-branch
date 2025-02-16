@@ -102,16 +102,20 @@ const (
 )
 
 type RepoGraph struct {
-	BranchTargets map[BranchName]*RepoGraphBranchTarget `json:"branch_targets"`
+	ID                  RepoGraphID                           `json:"id"`
+	BranchTargets       map[BranchName]*RepoGraphBranchTarget `json:"branch_targets"`
+	ShouldAdvertiseChan chan CommitGraphLocator               `json:"-"`
+	// TODO: This should be passed through via func params.
+	Ctx context.Context `json:"-"`
 }
 
 type RepoGraphBranchTarget struct {
-	CreatedAt time.Time `json:"created_at"`
+	BranchName BranchName `json:"branch_name"`
+	CreatedAt  time.Time  `json:"created_at"`
 	// nil if this is the root
 	ParentBranchName *BranchName `json:"parent_branch_name,omitempty"`
 	// Goal that was used to create this branch target (nil if this is the root)
 	TraversalGoalID *GoalID                 `json:"traversal_goal_id,omitempty"`
-	BranchName      BranchName              `json:"branch_name"`
 	Subgraphs       map[GoalID]*CommitGraph `json:"subgraphs"`
 }
 
@@ -202,6 +206,7 @@ func NewCommitGraph(goalID GoalID) *CommitGraph {
 
 func NewRepoGraph(rootBranchName BranchName) *RepoGraph {
 	rg := &RepoGraph{
+		ID: NewRepoGraphID(),
 		BranchTargets: map[BranchName]*RepoGraphBranchTarget{
 			rootBranchName: {
 				CreatedAt:        time.Now(),
@@ -211,6 +216,7 @@ func NewRepoGraph(rootBranchName BranchName) *RepoGraph {
 				Subgraphs:        map[GoalID]*CommitGraph{},
 			},
 		},
+		ShouldAdvertiseChan: make(chan CommitGraphLocator, 64),
 	}
 	return rg
 }
@@ -228,7 +234,11 @@ func (rg *RepoGraph) LoadFromFile(path string) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(str, rg)
+	err = json.Unmarshal(str, rg)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 func (rg *RepoGraph) ResetTransientStates() {
 	for _, branchTarget := range rg.BranchTargets {
@@ -422,6 +432,17 @@ func (rg *RepoGraph) tickUpdateCommitGraph(slice CommitGraphSlice) {
 		}
 		if hasSuccess {
 			slice.CommitGraph.State = GraphStateSuccess
+
+			if rg.ShouldAdvertiseChan != nil {
+				select {
+				case rg.ShouldAdvertiseChan <- CommitGraphLocator{
+					BranchTargetLocator: BranchTargetLocator{BranchName: slice.BranchTarget.BranchName},
+					GoalID:              slice.CommitGraph.GoalID,
+				}:
+				case <-rg.Ctx.Done():
+					return
+				}
+			}
 		} else {
 			slice.CommitGraph.State = GraphStateFailed
 		}

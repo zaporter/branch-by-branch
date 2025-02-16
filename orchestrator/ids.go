@@ -52,3 +52,35 @@ func NewNodeID() NodeID {
 	}
 	return NodeID(fmt.Sprintf("node-%s", uuid.String()))
 }
+
+type RepoGraphID string
+
+func NewRepoGraphID() RepoGraphID {
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return RepoGraphID(fmt.Sprintf("repo-graph-%s", uuid.String()))
+}
+
+type TrainingGroupID string
+
+func NewTrainingGroupID(graphName RepoGraphID, locator NodeLocator) TrainingGroupID {
+	return TrainingGroupID(fmt.Sprintf("training-group/%s/%s/%s/%s", graphName, locator.CommitGraphLocator.BranchTargetLocator.BranchName, locator.CommitGraphLocator.GoalID, locator.NodeID))
+}
+
+func ParseTrainingGroupID(id TrainingGroupID) (RepoGraphID, NodeLocator, error) {
+	parts := strings.Split(string(id), "/")
+	if len(parts) != 5 {
+		return "", NodeLocator{}, fmt.Errorf("invalid training group id")
+	}
+	return RepoGraphID(parts[1]), NodeLocator{
+		CommitGraphLocator: CommitGraphLocator{
+			BranchTargetLocator: BranchTargetLocator{
+				BranchName: BranchName(parts[2]),
+			},
+			GoalID: GoalID(parts[3]),
+		},
+		NodeID: NodeID(parts[4]),
+	}, nil
+}

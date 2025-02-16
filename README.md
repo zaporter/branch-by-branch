@@ -1,5 +1,16 @@
 # branch-by-branch
 
+## Startup flow
+[RDB, Gitea] -> [Orchestrator] -> [Compilation engines, Inference engines, Training]
+(where [] indicates a parallelizable group)
+It is especially important to start the orchestrator before the training server.
+
+## Model prep
+Run ./training/run_training.sh init_qpissa.py {args}
+Then push the model & adapter to b2. 
+
+My infra is based around qpissa. You may have to make modifications to get another adapter scheme to work well.
+
 ## Gitea
 
 Git clone command:
