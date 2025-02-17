@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -31,7 +33,8 @@ const RedisTrainingAdvList = "training:advertisement-list"
 func addTrainingAdvertisements(ctx context.Context, rdb *redis.Client, advertisements []TrainingGroupID) error {
 	for _, advertisement := range advertisements {
 		// Lpushed with the expectation that the trainer will scan r(0)->l
-		err := rdb.LPush(ctx, RedisTrainingAdvList, advertisement).Err()
+		fmt.Println("adding advertisement", advertisement)
+		err := rdb.LPush(ctx, RedisTrainingAdvList, string(advertisement)).Err()
 		if err != nil {
 			return err
 		}
@@ -40,14 +43,15 @@ func addTrainingAdvertisements(ctx context.Context, rdb *redis.Client, advertise
 }
 
 func readNextTrainingRequest(ctx context.Context, rdb *redis.Client) (TrainingGroupID, error) {
-	request, err := rdb.RPop(ctx, RedisTrainingRxChan).Result()
+	request, err := rdb.BRPop(ctx, 3*time.Second, RedisTrainingRxChan).Result()
 	if err != nil {
 		return "", err
 	}
-	return TrainingGroupID(request), nil
+	return TrainingGroupID(request[1]), nil
 }
 
 func dropTrainingChans(ctx context.Context, rdb *redis.Client) error {
+	fmt.Println("dropping training chans")
 	err := rdb.Del(ctx, RedisTrainingTxChan).Err()
 	if err != nil {
 		return err

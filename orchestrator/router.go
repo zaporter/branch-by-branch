@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
@@ -16,8 +17,8 @@ type RedisKey string
 
 const (
 	RedisInferenceEnabled              RedisKey = "inference:enabled"
-	RedisInferenceModelDir             RedisKey = "inference:model_dir"
-	RedisInferenceAdapterDir           RedisKey = "inference:adapter_dir"
+	RedisInferenceBaseModel            RedisKey = "inference:base_model"
+	RedisInferenceAdapter              RedisKey = "inference:adapter"
 	RedisInferenceBatchSize            RedisKey = "inference:batch_size"
 	RedisInferenceLoadFormat           RedisKey = "inference:load_format"
 	RedisInferenceMaxModelLen          RedisKey = "inference:max_model_len"
@@ -35,8 +36,8 @@ const (
 
 var AllRouterKeys = []RedisKey{
 	RedisInferenceEnabled,
-	RedisInferenceModelDir,
-	RedisInferenceAdapterDir,
+	RedisInferenceBaseModel,
+	RedisInferenceAdapter,
 	RedisInferenceBatchSize,
 	RedisInferenceLoadFormat,
 	RedisInferenceMaxModelLen,
@@ -99,7 +100,7 @@ func createRouterParamsCli() *cli.Command {
 			for _, key := range AllRouterKeys {
 				val, err := rdb.Get(ctx, string(key)).Result()
 				if err != nil {
-					return err
+					return fmt.Errorf("error getting %s: %w", key, err)
 				}
 				logger.Info().Msgf("%s: %s", key, val)
 			}
@@ -164,8 +165,8 @@ func createInitializeRouterParamsCli() *cli.Command {
 		}
 		valsMap := map[RedisKey]string{
 			RedisInferenceEnabled:              "true",
-			RedisInferenceModelDir:             "meta/llama-3.1-8-instruct",
-			RedisInferenceAdapterDir:           "pissa_init",
+			RedisInferenceBaseModel:            "meta/llama-3.1-8-instruct",
+			RedisInferenceAdapter:              "pissa_init",
 			RedisInferenceLoadFormat:           "",
 			RedisInferenceBatchSize:            "32",
 			RedisInferenceMaxModelLen:          "512",

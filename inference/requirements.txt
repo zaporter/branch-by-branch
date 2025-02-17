@@ -7,3 +7,9 @@ xgrammar>=0.1.10
 torch
 # https://docs.vllm.ai/en/latest/features/quantization/bnb.html
 bitsandbytes>=0.45.1
+
+# needed for ninja?
+transformers==4.48.3
+peft>=0.14.0
+trl @ git+https://github.com/huggingface/trl.git@7347c292c3d18ff9209ad745ede6fce7e3b94155
+Ninja

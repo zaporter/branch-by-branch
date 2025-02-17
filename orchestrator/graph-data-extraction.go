@@ -13,6 +13,7 @@ type WeightedOutputData struct {
 	NodeID           NodeID  `json:"node_id"`
 	Output           string  `json:"output"`
 	Advantage        float64 `json:"advantage"`
+	RawAdvantage     float64 `json:"raw_advantage"`
 	RawReward        float64 `json:"raw_reward"`
 	NormalizedReward float64 `json:"normalized_reward"`
 }
@@ -114,7 +115,7 @@ func (rg *RepoGraph) ExtractData(cgLocator CommitGraphLocator, goalProvider Goal
 				//continue
 			}
 			output.NormalizedReward = (output.RawReward - meanReward) / (rewardStdDev + 0.00001)
-			output.Advantage = output.NormalizedReward
+			output.RawAdvantage = output.NormalizedReward
 		}
 	}
 	numUpdated := 1
@@ -136,16 +137,47 @@ func (rg *RepoGraph) ExtractData(cgLocator CommitGraphLocator, goalProvider Goal
 						// don't backprop until the entire previous layer has been updated
 						continue nextNode
 					}
-					sumOfAdvantages += outputChild.Advantage
+					sumOfAdvantages += outputChild.RawAdvantage
 				}
-				output.Advantage = sumOfAdvantages
+				output.RawAdvantage = sumOfAdvantages
 				seen[output.NodeID] = true
 				numUpdated++
 			}
 		}
 	}
+	for _, node := range nodes {
+		sumOfAdvantages := 0.0
+		for _, output := range node.Outputs {
+			sumOfAdvantages += output.RawAdvantage
+		}
+		meanAdvantage := sumOfAdvantages / float64(len(node.Outputs))
+		advantageVariance := 0.0
+		for _, output := range node.Outputs {
+			advantageVariance += math.Pow(output.RawAdvantage-meanAdvantage, 2)
+		}
+		advantageVariance /= float64(len(node.Outputs))
+		advantageStdDev := math.Sqrt(advantageVariance)
+		for _, output := range node.Outputs {
+			output.Advantage = (output.RawAdvantage - meanAdvantage) / (advantageStdDev + 0.00001)
+		}
+	}
+	// filter out all nodes where all the nodes have 0 advantage
+	filteredNodes := map[NodeID]*CommitGraphNodeData{}
+	for _, node := range nodes {
+		allZero := true
+		for _, output := range node.Outputs {
+			if output.Advantage != 0.0 {
+				allZero = false
+				break
+			}
+		}
+		if allZero {
+			continue
+		}
+		filteredNodes[node.NodeID] = node
+	}
 	return &CommitGraphData{
-		Nodes: nodes,
+		Nodes: filteredNodes,
 	}, nil
 }
 

@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Any, Union, Optional
+from typing import Any, Tuple, Union, Optional
 from peft import LoraConfig, get_peft_model, PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
@@ -12,7 +12,8 @@ import os
 import argparse
 import trl
 from tqdm import tqdm
-
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--pissa_load_and_save", type=bool, required=False, default=False)
@@ -57,6 +58,10 @@ def local_model_dir(name:str):
 def local_adapter_dir(name:str, adapter_name:str):
     return f"{os.getenv('HOME')}/cache/models/{name}/{adapter_name}"
 
+def new_adapter_name() -> str:
+    currentTime = datetime.now(ZoneInfo("America/New_York"))
+    return f"adapter-{currentTime.strftime('%Y-%m-%dT%H:%M:%S')}"
+
 def download_model(model_name:str):
     rclone_cmd = f"../scripts/rclone-model.sh {model_name}"
     out = os.system(rclone_cmd)
@@ -68,6 +73,7 @@ def update_params():
     params = {
         "training_base_model": r.get("training:base_model"),
         "training_adapter": r.get("training:adapter"),
+        "training_do_update_adapter": r.get("training:do_update_adapter") == "true",
     }
 
 def batch_generator():
@@ -85,8 +91,9 @@ def batch_generator():
                 print("no more advertisements. Training blocked.")
                 time.sleep(1)
                 continue
+            print("got advertisement", next_adv)
             advertisement_index += 1
-            if all_data[next_adv] is not None:
+            if next_adv in all_data:
                 # already seen -- continue looping
                 continue;
             r.lpush(redis_training_req_chan, next_adv)
@@ -104,6 +111,8 @@ def batch_generator():
 
         all_data[data["group_id"]] = data
 
+        print("got data", data)
+
         yield data
 
 
@@ -119,7 +128,8 @@ def load_trainer():
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
         low_cpu_mem_usage=True,
-        quantization_config=bnb_config
+        quantization_config=bnb_config,
+        max_position_embeddings=8192
     )
     # load tokenizer to pass it through to the output dir
     tokenizer = AutoTokenizer.from_pretrained(local_model_dir(params["training_base_model"]), padding_side="left")
@@ -268,69 +278,91 @@ class Trainer:
 
         return loss
 
-    def train(self, data_generator, num_epochs=None):
-        if num_epochs is None:
-            num_epochs = args.num_epochs
+    def train(self, data_generator):
+        #self.ref_model = trl.models.modeling_base.create_reference_model(self.model)
+        self.ref_model = self.model
+        total_loss = 0
+        num_batches = 0
+        batch = []
+        
+        
+        # Create progress bar for the epoch
+        pbar = tqdm(data_generator())
+        
+        for item in pbar:
+            batch.append(item)
+            update_params()
             
-        for epoch in range(num_epochs):
-            self.ref_model = trl.models.modeling_base.create_reference_model(self.model)
-            total_loss = 0
-            num_batches = 0
-            batch = []
-            
-            
-            # Create progress bar for the epoch
-            pbar = tqdm(data_generator(), desc=f"Epoch {epoch+1}/{num_epochs}")
-            
-            for item in pbar:
-                batch.append(item)
-                
-                if len(batch) >= args.batch_size:
-                    # Process the batch
-                    loss = self.train_step(batch)
-                    total_loss += loss
-                    num_batches += 1
-                    
-                    # Update progress bar
-                    avg_loss = total_loss / num_batches
-                    pbar.set_postfix({'avg_loss': f'{avg_loss:.4f}'})
-                    
-                    # Reset batch
-                    batch = []
-                    torch.cuda.empty_cache()
-            
-            # Handle any remaining items in the last batch
-            if batch:
+            if len(batch) >= args.batch_size:
+                # Process the batch
                 loss = self.train_step(batch)
                 total_loss += loss
                 num_batches += 1
-            
-            # Print epoch summary
-            avg_loss = total_loss / num_batches if num_batches > 0 else float('inf')
-            print(f"Epoch {epoch+1}/{num_epochs}, Average Loss: {avg_loss:.4f}")
-            
-            # Clean up reference model and clear memory between epochs
-            torch.cuda.empty_cache()
+                
+                # Update progress bar
+                avg_loss = total_loss / num_batches
+                pbar.set_postfix({'avg_loss': f'{avg_loss:.4f}'})
+                
+                # Reset batch
+                batch = []
+                torch.cuda.empty_cache()
+                adapter_name = self.save_and_upload_model()
+                if params["training_do_update_adapter"]:
+                    self.swap_adapter(adapter_name)
+        
+        # Handle any remaining items in the last batch
+        if batch:
+            loss = self.train_step(batch)
+            total_loss += loss
+            num_batches += 1
+        
+        # Print epoch summary
+        avg_loss = total_loss / num_batches if num_batches > 0 else float('inf')
+        print(f"Epoch Average Loss: {avg_loss:.4f}")
+        
+        # Clean up reference model and clear memory between epochs
+        torch.cuda.empty_cache()
         del self.ref_model
     
-    def save_model(self):
-        save_dir = local_adapter_dir(params["training_base_model"], params["training_adapter"])+"bar"
-        self.model.save_pretrained(save_dir)
-        print(f"Model saved to {save_dir}")
+    def save_and_upload_model(self):
+        adapter_name = new_adapter_name()
+        self.model.save_pretrained(local_adapter_dir(params["training_base_model"], adapter_name))
+        self.upload_model(adapter_name)
+        print(f"Model {adapter_name} saved")
+        return adapter_name
+    
+    def upload_model(self, adapter_name: str):
+        rclone_cmd = f"../scripts/rclone-push.sh {params['training_base_model']}/{adapter_name} {local_adapter_dir(params['training_base_model'], adapter_name)}"
+        out = os.system(rclone_cmd)
+        if out != 0:
+            raise Exception(f"Failed to upload model {adapter_name}")
+
+    def swap_adapter(self, adapter_name: str):
+        r.set("inference:adapter", adapter_name)
+        r.set("inference:base_model", params["training_base_model"])
+        r.set("inference:enabled", "true")
+        # update training adapter
+        r.set("training:adapter", adapter_name)
 
 
 def main():
     update_params()
-    download_model(params["training_base_model"])
+    download_model(params["training_base_model"]+"/base")
+    download_model(params["training_base_model"]+"/"+params["training_adapter"])
 
     if not os.path.exists(local_model_dir(params["training_base_model"])):
-        print("model dir does not exist")
+        print("base model dir does not exist")
+        print("you must manually cache it.")
+        exit(1)
+
+    if not os.path.exists(local_adapter_dir(params["training_base_model"], params["training_adapter"])):
+        print("adapter model dir does not exist")
         print("you must manually cache it.")
         exit(1)
 
     trainer = load_trainer()
     trainer.train(batch_generator)
-    trainer.save_model()
+    trainer.save_and_upload_model()
 
 
 if __name__ == "__main__":

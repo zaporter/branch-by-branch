@@ -116,10 +116,10 @@ func playgroundEngineSimpleInferenceTestCli() *cli.Command {
 		if err := setRouterParam(c, rdb, RedisInferenceEnabled, "true"); err != nil {
 			return err
 		}
-		if err := setRouterParam(c, rdb, RedisInferenceModelDir, "meta-llama/Llama-3.1-8B-Instruct"); err != nil {
+		if err := setRouterParam(c, rdb, RedisInferenceBaseModel, "meta-llama/Llama-3.1-8B-Instruct"); err != nil {
 			return err
 		}
-		if err := setRouterParam(c, rdb, RedisInferenceAdapterDir, ""); err != nil {
+		if err := setRouterParam(c, rdb, RedisInferenceAdapter, ""); err != nil {
 			return err
 		}
 		schedulingParams := SchedulingParams{

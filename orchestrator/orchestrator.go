@@ -557,18 +557,27 @@ func (o *Orchestrator) startTrainingTx() {
 		if cg.State != GraphStateSuccess {
 			return
 		}
-		for _, node := range cg.Nodes {
+		data, err := o.RepoGraph.ExtractData(cgl, o.GoalProvider)
+		if err != nil {
+			o.logger.Fatal().Err(err).Msg("error extracting data")
+		}
+		// Extract data will omit many nodes that have no advantage data.
+		// only add the ones that do.
+		for _, node := range data.Nodes {
 			advertisements = append(advertisements,
 				NewTrainingGroupID(
 					o.RepoGraph.ID,
 					NodeLocator{
 						CommitGraphLocator: cgl,
-						NodeID:             node.ID,
+						NodeID:             node.NodeID,
 					},
 				),
 			)
 		}
-		addTrainingAdvertisements(o.ctx, o.rdb, advertisements)
+		err = addTrainingAdvertisements(o.ctx, o.rdb, advertisements)
+		if err != nil {
+			o.logger.Fatal().Err(err).Msg("error adding training advertisements")
+		}
 	}
 	o.mu.Lock()
 	for _, bt := range o.RepoGraph.BranchTargets {
@@ -598,6 +607,12 @@ func (o *Orchestrator) startTrainingTx() {
 func (o *Orchestrator) startTrainingRx() {
 	defer o.wg.Done()
 	for {
+		select {
+		case <-o.ctx.Done():
+			o.logger.Info().Msg("trainingInput listener closing")
+			return
+		default:
+		}
 		request, err := readNextTrainingRequest(o.ctx, o.rdb)
 		if err != nil {
 			o.logger.Error().Err(err).Msg("error reading next training request")
@@ -618,7 +633,10 @@ func (o *Orchestrator) startTrainingRx() {
 			if err != nil {
 				o.logger.Fatal().Err(err).Msg("error extracting data")
 			}
-			extracted := data.Nodes[locator.NodeID]
+			extracted, ok := data.Nodes[locator.NodeID]
+			if !ok {
+				o.logger.Fatal().Str("node_id", string(locator.NodeID)).Msg("error extracting data. node not found (should not be advertised)")
+			}
 			group := TrainingDataGroup{
 				GroupID: request,
 				Prompt:  extracted.Prompt,
