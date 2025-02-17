@@ -139,6 +139,7 @@ def load_trainer():
     model = PeftModel.from_pretrained(
         model=model, 
         model_id=local_adapter_dir(params["training_base_model"], params["training_adapter"]),
+        max_position_embeddings=8192,
         is_trainable=True,
     )
     # https://huggingface.co/docs/peft/en/quicktour
