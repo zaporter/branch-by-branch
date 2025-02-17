@@ -275,6 +275,32 @@ func createStatusCli() *cli.Command {
 		Action: action,
 	}
 }
+func createScrapeAvailabilityCli() *cli.Command {
+	var outfile string
+	var statsfile string
+	action := func(ctx context.Context, _ *cli.Command) error {
+		if statsfile != "" {
+			return printAvailabilityStats(ctx, statsfile)
+		}
+		return scrapeAvailability(ctx, outfile)
+	}
+	return &cli.Command{
+		Name: "scrape",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "out",
+				Destination: &outfile,
+				Value:       "availability.jsonl",
+			},
+			&cli.StringFlag{
+				Name:        "stats",
+				Destination: &statsfile,
+			},
+		},
+		Action: action,
+	}
+
+}
 
 func CreateLambdaCli() *cli.Command {
 	return &cli.Command{
@@ -286,6 +312,7 @@ func CreateLambdaCli() *cli.Command {
 			createTerminateCli(),
 			createStatusCli(),
 			createStartInferenceCli(),
+			createScrapeAvailabilityCli(),
 		},
 	}
 }
