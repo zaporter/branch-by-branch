@@ -21,7 +21,7 @@ parser.add_argument("--pissa_quantize_res", type=bool, required=False, default=F
 parser.add_argument("--new_model_name", type=str, required=False, default=None)
 parser.add_argument("--learning_rate", type=float, default=1e-4)
 parser.add_argument("--num_epochs", type=int, default=3)
-parser.add_argument("--batch_size", type=int, default=4)
+parser.add_argument("--batch_size", type=int, default=2)
 args = parser.parse_args()
 
 redisHost = os.getenv('REDIS_ADDRESS') or 'err no host'
@@ -95,6 +95,7 @@ def batch_generator():
             advertisement_index += 1
             if next_adv in all_data:
                 # already seen -- continue looping
+                print("already seen", next_adv)
                 continue;
             r.lpush(redis_training_req_chan, next_adv)
             outstanding_requests += 1
@@ -121,7 +122,7 @@ def load_trainer():
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16
+        #bnb_4bit_compute_dtype=torch.bfloat16
     )
     model = AutoModelForCausalLM.from_pretrained(
         pretrained_model_name_or_path=local_model_dir(params["training_base_model"]),
@@ -275,6 +276,7 @@ class Trainer:
         advantages = inputs["advantages"]
         per_token_loss = torch.exp(per_token_logps - per_token_logps.detach()) * advantages.unsqueeze(1)
         per_token_loss = -(per_token_loss - self.beta * per_token_kl)
+        #per_token_loss = -(per_token_loss)
         loss = ((per_token_loss * completion_mask).sum(dim=1) / completion_mask.sum(dim=1)).mean()
 
         return loss
@@ -307,9 +309,10 @@ class Trainer:
                 # Reset batch
                 batch = []
                 torch.cuda.empty_cache()
-                adapter_name = self.save_and_upload_model()
-                if params["training_do_update_adapter"]:
-                    self.swap_adapter(adapter_name)
+                if num_batches % 2 == 0:
+                    adapter_name = self.save_and_upload_model()
+                    if params["training_do_update_adapter"]:
+                        self.swap_adapter(adapter_name)
         
         # Handle any remaining items in the last batch
         if batch:

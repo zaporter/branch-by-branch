@@ -130,7 +130,7 @@ func createLaunchCli() *cli.Command {
 		}
 		if startInference {
 			for _, id := range launchResponse.Data.InstanceIDs {
-				err := startInferenceOnLambda(id, 30)
+				err := startInferenceOnLambda(id, 150)
 				if err != nil {
 					return err
 				}
@@ -219,7 +219,7 @@ func createTerminateCli() *cli.Command {
 func createStartInferenceCli() *cli.Command {
 	instanceID := ""
 	action := func(_ context.Context, _ *cli.Command) error {
-		return startInferenceOnLambda(instanceID, 30)
+		return startInferenceOnLambda(instanceID, 150)
 	}
 	return &cli.Command{
 		Name: "start-inference",

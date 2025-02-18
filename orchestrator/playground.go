@@ -323,6 +323,14 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 			OutputChanSize:        8,
 			DisableBackpressure:   true,
 		}
+		err = rdb.Set(c, string(RedisInferenceEnabled), "true", 0).Err()
+		if err != nil {
+			return err
+		}
+		err = dropTrainingChans(c, rdb)
+		if err != nil {
+			return err
+		}
 		inferenceEngine := NewEngine(c, EngineJobNameInference, rdb, inferenceSchedulingParams)
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
@@ -341,7 +349,7 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 		infRx := inferenceEngine.GetOutput()
 		// simple reward function that pushes the model to output 20 characters
 		rewardFn := func(output string) float64 {
-			return 1.0 / (math.Abs(float64(len(output)-20)) + 0.1)
+			return 1.0 / (math.Abs(float64(len(output)-30)) + 0.1)
 		}
 		prompts := []string{
 			"A poem about the number 1",
@@ -349,7 +357,8 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 			"I like to eat pizza",
 			"I like to sleep",
 		}
-		for grpoIter := 0; grpoIter < 10; grpoIter++ {
+		for grpoIter := 0; grpoIter < 12; grpoIter++ {
+			logger.Info().Msgf("GRPO iteration %d", grpoIter)
 			select {
 			case <-sigChan:
 				logger.Info().Msg("stopping")
@@ -387,6 +396,8 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 				totalReward := 0.0
 				for _, retSeq := range output.Output.ReturnSequences {
 					totalReward += rewardFn(retSeq)
+					fmt.Println("reward", rewardFn(retSeq))
+					fmt.Println("retSeq", retSeq)
 				}
 				meanReward := totalReward / float64(len(output.Output.ReturnSequences))
 				rewardVariance := 0.0

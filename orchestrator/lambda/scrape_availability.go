@@ -149,9 +149,17 @@ func printAvailabilityStats(ctx context.Context, outfile string) error {
 			}
 			lastTime = &avail.Time
 		}
+		minAvailTime := time.Duration(math.MaxInt64)
+		maxAvailTime := time.Duration(0)
 		totalAvailTime := time.Duration(0)
 		for _, availRange := range availRanges {
 			totalAvailTime += availRange
+			if availRange < minAvailTime {
+				minAvailTime = availRange
+			}
+			if availRange > maxAvailTime {
+				maxAvailTime = availRange
+			}
 		}
 		avgAvailTime := totalAvailTime / time.Duration(len(availRanges))
 		availPercentage := 100 * float64(totalAvailTime) / float64(totalTimeForScrape)
@@ -182,11 +190,15 @@ func printAvailabilityStats(ctx context.Context, outfile string) error {
 
 		fmt.Print("\n\n")
 		fmt.Printf("------ %s @ %s -------\n", instanceType.InstanceType, instanceType.Region)
+		fmt.Printf("Avail percentage: %f\n", availPercentage)
 		fmt.Printf("Total avail duration: %s\n", totalAvailTime)
 		fmt.Printf("Avg avail duration: %s\n", avgAvailTime)
-		fmt.Printf("Avail percentage: %f\n", availPercentage)
-		fmt.Printf("Avg wait duration: %s\n", avgWaitTime)
+		if len(availRanges) > 0 {
+			fmt.Printf("Min avail duration: %s\n", minAvailTime)
+			fmt.Printf("Max avail duration: %s\n", maxAvailTime)
+		}
 		fmt.Printf("Total unavail duration: %s\n", totalUnavailTime)
+		fmt.Printf("Avg unavail duration: %s\n", avgWaitTime)
 		if len(unavailDurations) > 0 {
 			fmt.Printf("Min unavail duration: %s\n", minUnavailTime)
 			fmt.Printf("Max unavail duration: %s\n", maxUnavailTime)

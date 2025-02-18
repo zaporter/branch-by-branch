@@ -30,7 +30,7 @@ func (ml *MessageList) AddAdvertisement(ctx context.Context, rdb *redis.Client, 
 	if err != nil {
 		return err
 	}
-	return rdb.LPush(ctx, listName, key).Err()
+	return rdb.RPush(ctx, listName, key).Err()
 }
 
 func (ml *MessageList) storeJSON(key string, value any) error {
