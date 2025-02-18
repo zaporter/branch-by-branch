@@ -180,7 +180,7 @@ func printAvailabilityStats(ctx context.Context, outfile string) error {
 			avgWaitTime = totalUnavailTime / time.Duration(len(unavailDurations))
 		}
 
-		fmt.Println("\n")
+		fmt.Print("\n\n")
 		fmt.Printf("------ %s @ %s -------\n", instanceType.InstanceType, instanceType.Region)
 		fmt.Printf("Total avail duration: %s\n", totalAvailTime)
 		fmt.Printf("Avg avail duration: %s\n", avgAvailTime)

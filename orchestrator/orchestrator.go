@@ -89,17 +89,18 @@ func createOrchestratorStartCli() *cli.Command {
 		}
 
 		orchestrator := Orchestrator{
-			logger:                logger,
-			ctx:                   ctx,
-			wg:                    &sync.WaitGroup{},
-			rdb:                   rdb,
-			mu:                    sync.Mutex{},
-			RepoGraph:             rg,
-			GraphPath:             graphPath,
-			GoalProvider:          goalProvider,
-			InferenceEngine:       inferenceEngine,
-			CompilationEngine:     compilationEngine,
-			GoalCompilationEngine: goalCompilationEngine,
+			logger:                  logger,
+			ctx:                     ctx,
+			wg:                      &sync.WaitGroup{},
+			rdb:                     rdb,
+			mu:                      sync.Mutex{},
+			RepoGraph:               rg,
+			GraphPath:               graphPath,
+			GoalProvider:            goalProvider,
+			InferenceEngine:         inferenceEngine,
+			CompilationEngine:       compilationEngine,
+			GoalCompilationEngine:   goalCompilationEngine,
+			trainingDataMessageList: NewMessageList(),
 
 			inferenceTaskToNodeLocator:       map[EngineTaskID]NodeLocator{},
 			compilationTaskToNodeLocator:     map[EngineTaskID]NodeLocator{},
@@ -219,6 +220,7 @@ type Orchestrator struct {
 	inferenceTaskToNodeLocator       map[EngineTaskID]NodeLocator
 	compilationTaskToNodeLocator     map[EngineTaskID]NodeLocator
 	goalCompilationTaskToNodeLocator map[EngineTaskID]NodeLocator
+	trainingDataMessageList          *MessageList
 
 	InferenceEngine       *Engine
 	CompilationEngine     *Engine
@@ -553,7 +555,6 @@ func (o *Orchestrator) startTrainingTx() {
 			o.logger.Fatal().Err(err).Msg("error getting commit graph slice")
 		}
 		cg := slice.CommitGraph
-		advertisements := []TrainingGroupID{}
 		if cg.State != GraphStateSuccess {
 			return
 		}
@@ -564,19 +565,33 @@ func (o *Orchestrator) startTrainingTx() {
 		// Extract data will omit many nodes that have no advantage data.
 		// only add the ones that do.
 		for _, node := range data.Nodes {
-			advertisements = append(advertisements,
-				NewTrainingGroupID(
-					o.RepoGraph.ID,
-					NodeLocator{
-						CommitGraphLocator: cgl,
-						NodeID:             node.NodeID,
-					},
-				),
+			tgid := NewTrainingGroupID(
+				o.RepoGraph.ID,
+				NodeLocator{
+					CommitGraphLocator: cgl,
+					NodeID:             node.NodeID,
+				},
 			)
-		}
-		err = addTrainingAdvertisements(o.ctx, o.rdb, advertisements)
-		if err != nil {
-			o.logger.Fatal().Err(err).Msg("error adding training advertisements")
+			extracted, ok := data.Nodes[node.NodeID]
+			if !ok {
+				o.logger.Fatal().Str("node_id", string(node.NodeID)).Msg("error extracting data. node not found (should not be advertised)")
+			}
+			group := TrainingDataGroup{
+				GroupID: tgid,
+				Prompt:  extracted.Prompt,
+				Outputs: []GroupOutput{},
+			}
+			for _, output := range extracted.Outputs {
+				group.Outputs = append(group.Outputs, GroupOutput{
+					Output:    output.Output,
+					Advantage: output.Advantage,
+				})
+			}
+			err = o.trainingDataMessageList.AddAdvertisement(o.ctx, o.rdb, RedisTrainingAdvList, string(tgid), group)
+			if err != nil {
+				// maybe this shouldn't be fatal
+				o.logger.Fatal().Err(err).Msg("error adding advertisement")
+			}
 		}
 	}
 	o.mu.Lock()
@@ -618,42 +633,15 @@ func (o *Orchestrator) startTrainingRx() {
 			o.logger.Error().Err(err).Msg("error reading next training request")
 			continue
 		}
-		// rgID will be used once we add auxiliary data
-		_, locator, err := ParseTrainingGroupID(request)
-		if err != nil {
-			o.logger.Error().Err(err).Msg("error reading next training request")
+		group, ok := o.trainingDataMessageList.Get(string(request))
+		if !ok {
+			o.logger.Error().Str("request", string(request)).Msg("error getting training data group")
 			continue
 		}
-		pushTrainingDataGroup := func() {
-			o.mu.Lock()
-			defer o.mu.Unlock()
-
-			//TODO: cache this
-			data, err := o.RepoGraph.ExtractData(locator.CommitGraphLocator, o.GoalProvider)
-			if err != nil {
-				o.logger.Fatal().Err(err).Msg("error extracting data")
-			}
-			extracted, ok := data.Nodes[locator.NodeID]
-			if !ok {
-				o.logger.Fatal().Str("node_id", string(locator.NodeID)).Msg("error extracting data. node not found (should not be advertised)")
-			}
-			group := TrainingDataGroup{
-				GroupID: request,
-				Prompt:  extracted.Prompt,
-				Outputs: []GroupOutput{},
-			}
-			for _, output := range extracted.Outputs {
-				group.Outputs = append(group.Outputs, GroupOutput{
-					Output:    output.Output,
-					Advantage: output.Advantage,
-				})
-			}
-			err = sendTrainingDataGroup(o.ctx, o.rdb, group)
-			if err != nil {
-				o.logger.Fatal().Err(err).Msg("error sending training data group")
-			}
+		err = o.rdb.LPush(o.ctx, RedisTrainingTxChan, group).Err()
+		if err != nil {
+			o.logger.Fatal().Err(err).Msg("error sending training data group")
 		}
-		pushTrainingDataGroup()
 	}
 }
 
