@@ -20,7 +20,6 @@ parser.add_argument("--pissa_load_and_save", type=bool, required=False, default=
 parser.add_argument("--pissa_quantize_res", type=bool, required=False, default=False)
 parser.add_argument("--new_model_name", type=str, required=False, default=None)
 parser.add_argument("--learning_rate", type=float, default=1e-4)
-parser.add_argument("--num_epochs", type=int, default=3)
 parser.add_argument("--batch_size", type=int, default=2)
 args = parser.parse_args()
 
@@ -57,6 +56,9 @@ def local_model_dir(name:str):
 
 def local_adapter_dir(name:str, adapter_name:str):
     return f"{os.getenv('HOME')}/cache/models/{name}/{adapter_name}"
+
+def local_adapter_json(name:str, adapter_name:str):
+    return local_adapter_dir(name, adapter_name)+".json"
 
 def new_adapter_name() -> str:
     currentTime = datetime.now(ZoneInfo("America/New_York"))
@@ -126,7 +128,7 @@ def load_trainer():
     )
     model = AutoModelForCausalLM.from_pretrained(
         pretrained_model_name_or_path=local_model_dir(params["training_base_model"]),
-        torch_dtype=torch.bfloat16,
+        torch_dtype=torch.bfloat16, #SUS
         trust_remote_code=True,
         low_cpu_mem_usage=True,
         quantization_config=bnb_config,
@@ -143,6 +145,7 @@ def load_trainer():
         max_position_embeddings=8192,
         is_trainable=True,
     )
+    # TODO: What is my lora alpha? Is it loaded & saved correctly?
     # https://huggingface.co/docs/peft/en/quicktour
     model.print_trainable_parameters()
     trainer = Trainer(model, tokenizer)
@@ -156,7 +159,7 @@ class Trainer:
         self.model.to(self.device)
         self.optimizer = AdamW(self.model.parameters(), lr=args.learning_rate)
         self.beta = 0.1  # KL penalty coefficient
-        self.ref_model = None  # We'll use the same model as reference
+        self.ref_model = None 
         self.max_prompt_length = None  # No prompt length restriction by default
     
     def _get_per_token_logps(self, model, input_ids, attention_mask, logits_to_keep):
@@ -189,18 +192,16 @@ class Trainer:
         inputs = self.tokenizer(
             prompts,
             padding=True,
-            truncation=True,
+            truncation=False,
             return_tensors="pt",
-            max_length=512
         )
         
         # Tokenize responses separately
         response_tokens = self.tokenizer(
             responses,
             padding=True,
-            truncation=True,
+            truncation=False,
             return_tensors="pt",
-            max_length=512
         )
         
         # Move everything to device
@@ -239,18 +240,23 @@ class Trainer:
                 model=self.ref_model,
                 input_ids=input_ids,
                 attention_mask=attention_mask,
+                #todo--does this correctly shift by the input size?
+                logits_to_keep=completion_ids.size(1)
+            )
+            per_token_logps = self._get_per_token_logps(
+                model=self.model, 
+                input_ids=input_ids,
+                attention_mask=attention_mask,
                 logits_to_keep=completion_ids.size(1)
             )
         
         # Compute loss using the provided compute_loss function
-        loss = self.compute_loss(self.model, {
-            "prompt_ids": prompt_ids,
-            "prompt_mask": prompt_mask,
-            "completion_ids": completion_ids,
-            "completion_mask": completion_mask,
-            "ref_per_token_logps": ref_per_token_logps.detach(),  # Ensure reference logprobs are detached
-            "advantages": advantages
-        })
+        loss = self.compute_loss(
+            per_token_logps=per_token_logps,
+            ref_per_token_logps=ref_per_token_logps.detach(),
+            advantages=advantages,
+            completion_mask=completion_mask
+        )
         
         # Backward pass
         self.optimizer.zero_grad()
@@ -259,25 +265,15 @@ class Trainer:
         
         return loss.item()
 
-    def compute_loss(self, model, inputs):
-        prompt_ids, prompt_mask = inputs["prompt_ids"], inputs["prompt_mask"]
-        completion_ids, completion_mask = inputs["completion_ids"], inputs["completion_mask"]
-        input_ids = torch.cat([prompt_ids, completion_ids], dim=1)
-        attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)
-        logits_to_keep = completion_ids.size(1)  # we only need to compute the logits for the completion tokens
-
-        per_token_logps = self._get_per_token_logps(model, input_ids, attention_mask, logits_to_keep)
-
+    def compute_loss(self, per_token_logps, ref_per_token_logps, advantages, completion_mask):
         # Compute the KL divergence between the model and the reference model
-        ref_per_token_logps = inputs["ref_per_token_logps"]
         per_token_kl = torch.exp(ref_per_token_logps - per_token_logps) - (ref_per_token_logps - per_token_logps) - 1
 
         # x - x.detach() allows for preserving gradients from x
-        advantages = inputs["advantages"]
         per_token_loss = torch.exp(per_token_logps - per_token_logps.detach()) * advantages.unsqueeze(1)
         per_token_loss = -(per_token_loss - self.beta * per_token_kl)
-        #per_token_loss = -(per_token_loss)
-        loss = ((per_token_loss * completion_mask).sum(dim=1) / completion_mask.sum(dim=1)).mean()
+        # global normalization https://github.com/huggingface/trl/pull/2881
+        loss = (per_token_loss * completion_mask).sum() / completion_mask.sum()
 
         return loss
 
@@ -316,9 +312,7 @@ class Trainer:
         
         # Handle any remaining items in the last batch
         if batch:
-            loss = self.train_step(batch)
-            total_loss += loss
-            num_batches += 1
+            print("Warn: Discarding extra data in batch due to generator termination")
         
         # Print epoch summary
         avg_loss = total_loss / num_batches if num_batches > 0 else float('inf')
@@ -330,6 +324,11 @@ class Trainer:
     
     def save_and_upload_model(self):
         adapter_name = new_adapter_name()
+        with open(local_adapter_json(params["training_base_model"], adapter_name)) as data_file:
+            # TODO: probably better to save as jsonl. I am just testing.
+            dataToSave = json.dumps(all_data)
+            data_file.write(dataToSave)
+            
         self.model.save_pretrained(local_adapter_dir(params["training_base_model"], adapter_name))
         self.upload_model(adapter_name)
         print(f"Model {adapter_name} saved")
@@ -342,10 +341,9 @@ class Trainer:
             raise Exception(f"Failed to upload model {adapter_name}")
 
     def swap_adapter(self, adapter_name: str):
-        r.set("inference:adapter", adapter_name)
         r.set("inference:base_model", params["training_base_model"])
+        r.set("inference:adapter", adapter_name)
         r.set("inference:enabled", "true")
-        # update training adapter
         r.set("training:adapter", adapter_name)
 
 
