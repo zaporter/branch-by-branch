@@ -83,9 +83,15 @@ func createOrchestratorStartCli() *cli.Command {
 		if !viewOnly {
 			// preserve transient states so I can debug crashes
 			rg.ResetTransientStates()
-			inferenceEngine.Start(ctx)
-			compilationEngine.Start(ctx)
-			goalCompilationEngine.Start(ctx)
+			if err := inferenceEngine.Start(ctx); err != nil {
+				return err
+			}
+			if err := compilationEngine.Start(ctx); err != nil {
+				return err
+			}
+			if err := goalCompilationEngine.Start(ctx); err != nil {
+				return err
+			}
 		}
 
 		orchestrator := Orchestrator{

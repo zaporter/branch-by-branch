@@ -114,6 +114,9 @@ type SchedulingParams struct {
 	InputChanSize int
 	// Even for large numbers, this will still block reading from the input if the consumer is not reading fast enough.
 	OutputChanSize int
+
+	// If true, the engine will not block reading from the input channel.
+	DisableBackpressure bool
 }
 
 func NewEngine(ctx context.Context, job EngineJobName, rdb *redis.Client, schedulingParams SchedulingParams) *Engine {
@@ -262,7 +265,7 @@ func (e *Engine) createCamshaft() {
 			// Don't do anything if we have enough tasks.
 			continue
 		}
-		if len(e.taskOutput) > 0 {
+		if len(e.taskOutput) > 0 && !e.schedulingParams.DisableBackpressure {
 			// Don't do anything if the consumer is still catching up.
 			// This is a back-pressure mechanism.
 			logger.Debug().Msg("Camshaft skipping adding tasks because the consumer is still catching up")

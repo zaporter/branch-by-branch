@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
 )
@@ -297,6 +299,178 @@ func playgroundEngineSimpleCompilationTestCli() *cli.Command {
 	}
 }
 
+// Very advanced playground test.
+// This stands up an inference engine & training message handlers along with weighting & reward logic.
+// This allows me to test GRPO training.
+func playgroundGRPOLoopTestCli() *cli.Command {
+	action := func(c context.Context, _ *cli.Command) error {
+		logger := zerolog.Ctx(c)
+		logger.Info().Msg("GRPO loop test")
+
+		rdb, err := connectToRedis(c)
+		if err != nil {
+			return err
+		}
+		inferenceSchedulingParams := SchedulingParams{
+			MinTaskQueueSize:      4,
+			MaxTaskQueueSize:      8,
+			TaskProcessingTimeout: 3 * time.Minute,
+			CamShaftInterval:      1 * time.Second,
+			CrankShaftInterval:    1 * time.Second,
+			TimingBeltInterval:    2 * time.Second,
+			ODBInterval:           10 * time.Second,
+			InputChanSize:         8,
+			OutputChanSize:        8,
+			DisableBackpressure:   true,
+		}
+		inferenceEngine := NewEngine(c, EngineJobNameInference, rdb, inferenceSchedulingParams)
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			<-sigChan
+			close(sigChan)
+			// main thread should wait for stop
+			inferenceEngine.TriggerStop()
+		}()
+		err = inferenceEngine.Start(c)
+		if err != nil {
+			return err
+		}
+		messageList := NewMessageList()
+		infTx := inferenceEngine.GetInput()
+		infRx := inferenceEngine.GetOutput()
+		// simple reward function that pushes the model to output 20 characters
+		rewardFn := func(output string) float64 {
+			return 1.0 / (math.Abs(float64(len(output)-20)) + 0.1)
+		}
+		prompts := []string{
+			"A poem about the number 1",
+			"My favorite color is blue",
+			"I like to eat pizza",
+			"I like to sleep",
+		}
+		for grpoIter := 0; grpoIter < 10; grpoIter++ {
+			select {
+			case <-sigChan:
+				logger.Info().Msg("stopping")
+				return nil
+			default:
+			}
+			taskIDToPrompt := map[EngineTaskID]string{}
+			for _, prompt := range prompts {
+				select {
+				case <-sigChan:
+					logger.Info().Msg("stopping")
+					return nil
+				default:
+				}
+				taskID := NewEngineTaskID()
+				taskIDToPrompt[taskID] = prompt
+				infTx <- EngineTaskMsg{ID: taskID, Task: InferenceTask{Prompt: prompt}.ToJSON()}
+			}
+			type output struct {
+				TaskID EngineTaskID
+				Output *InferenceTaskResponse
+			}
+			outputs := []*output{}
+			for i := 0; i < len(prompts); i++ {
+				select {
+				case <-sigChan:
+					logger.Info().Msg("stopping")
+					return nil
+				case msg := <-infRx:
+					outputs = append(outputs, &output{TaskID: msg.ID, Output: InferenceTaskResponseFromJSON(msg.Result)})
+				}
+			}
+			fmt.Println("outputs", outputs)
+			for _, output := range outputs {
+				totalReward := 0.0
+				for _, retSeq := range output.Output.ReturnSequences {
+					totalReward += rewardFn(retSeq)
+				}
+				meanReward := totalReward / float64(len(output.Output.ReturnSequences))
+				rewardVariance := 0.0
+				for _, retSeq := range output.Output.ReturnSequences {
+					rewardVariance += math.Pow(rewardFn(retSeq)-meanReward, 2)
+				}
+				rewardVariance /= float64(len(output.Output.ReturnSequences))
+				rewardStdDev := math.Sqrt(rewardVariance)
+
+				uuid, err := uuid.NewV4()
+				if err != nil {
+					return err
+				}
+				groupID := TrainingGroupID(uuid.String())
+				data := TrainingDataGroup{
+					GroupID: groupID,
+					Prompt:  taskIDToPrompt[output.TaskID],
+				}
+				for _, retSeq := range output.Output.ReturnSequences {
+					data.Outputs = append(data.Outputs, GroupOutput{
+						Output:    retSeq,
+						Advantage: (rewardFn(retSeq) - meanReward) / rewardStdDev,
+					})
+				}
+				fmt.Println("training data", data)
+				err = messageList.AddAdvertisement(c, rdb, RedisTrainingAdvList, string(groupID), data)
+				if err != nil {
+					return err
+				}
+			}
+			err = rdb.Set(c, string(RedisInferenceEnabled), "false", 0).Err()
+			if err != nil {
+				return err
+			}
+			for i := 0; i < len(prompts); i++ {
+				select {
+				case <-sigChan:
+					logger.Info().Msg("stopping")
+					return nil
+				default:
+				}
+				request, err := readNextTrainingRequest(c, rdb)
+				if err != nil {
+					return err
+				}
+				fmt.Println("request", request)
+				group, ok := messageList.Get(string(request))
+				if !ok {
+					return fmt.Errorf("group not found")
+				}
+				fmt.Println("group", group)
+				err = rdb.LPush(c, RedisTrainingTxChan, group).Err()
+				if err != nil {
+					return err
+				}
+			}
+			// wait until inference is reenabled (️🚩 len(prompts) must equal batch size)
+			for {
+				select {
+				case <-sigChan:
+					logger.Info().Msg("stopping")
+					return nil
+				default:
+				}
+				enabled, err := rdb.Get(c, string(RedisInferenceEnabled)).Result()
+				if err != nil {
+					return err
+				}
+				if enabled == "true" {
+					break
+				}
+			}
+		}
+
+		inferenceEngine.WaitForStop()
+		return nil
+	}
+	return &cli.Command{
+		Name:   "grpo-loop-test",
+		Usage:  "GRPO loop test",
+		Action: action,
+	}
+}
+
 func createPlaygroundCli() *cli.Command {
 	return &cli.Command{
 		Name:  "playground",
@@ -307,6 +481,7 @@ func createPlaygroundCli() *cli.Command {
 			playgroundEngineStartupTestCli(),
 			playgroundEngineSimpleInferenceTestCli(),
 			playgroundEngineSimpleCompilationTestCli(),
+			playgroundGRPOLoopTestCli(),
 		},
 	}
 }
