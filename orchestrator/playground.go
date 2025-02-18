@@ -411,7 +411,7 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 						Advantage: (rewardFn(retSeq) - meanReward) / rewardStdDev,
 					})
 				}
-				fmt.Println("training data", data)
+				logger.Info().Msgf("training data: %+v", data)
 				err = messageList.AddAdvertisement(c, rdb, RedisTrainingAdvList, string(groupID), data)
 				if err != nil {
 					return err
@@ -421,7 +421,8 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 			if err != nil {
 				return err
 			}
-			for i := 0; i < len(prompts); i++ {
+			numRequestsServed := 0
+			for numRequestsServed < len(prompts) {
 				select {
 				case <-sigChan:
 					logger.Info().Msg("stopping")
@@ -430,20 +431,24 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 				}
 				request, err := readNextTrainingRequest(c, rdb)
 				if err != nil {
-					return err
+					logger.Warn().Err(err).Msg("error reading next training request")
+					continue
 				}
-				fmt.Println("request", request)
+				logger.Info().Msgf("request: %s", request)
 				group, ok := messageList.Get(string(request))
 				if !ok {
 					return fmt.Errorf("group not found")
 				}
-				fmt.Println("group", group)
+				logger.Info().Msgf("group: %+v", group)
 				err = rdb.LPush(c, RedisTrainingTxChan, group).Err()
 				if err != nil {
 					return err
 				}
+				numRequestsServed++
 			}
 			// wait until inference is reenabled (️🚩 len(prompts) must equal batch size)
+			// TODO: do something more clever here
+			logger.Info().Msg("waiting for inference to be reenabled")
 			for {
 				select {
 				case <-sigChan:
@@ -458,7 +463,9 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 				if enabled == "true" {
 					break
 				}
+				time.Sleep(2 * time.Second)
 			}
+			logger.Info().Msg("inference enabled. Starting next iteration")
 		}
 
 		inferenceEngine.WaitForStop()
