@@ -327,6 +327,14 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 		if err != nil {
 			return err
 		}
+		err = rdb.Set(c, string(RedisTrainingAdapter), "pissa_init", 0).Err()
+		if err != nil {
+			return err
+		}
+		err = rdb.Set(c, string(RedisInferenceAdapter), "pissa_init", 0).Err()
+		if err != nil {
+			return err
+		}
 		err = dropTrainingChans(c, rdb)
 		if err != nil {
 			return err
@@ -349,15 +357,15 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 		infRx := inferenceEngine.GetOutput()
 		// simple reward function that pushes the model to output 20 characters
 		rewardFn := func(output string) float64 {
-			return 1.0 / (math.Abs(float64(len(output)-30)) + 0.1)
+			return 1.0 / (math.Sqrt(math.Abs(float64(len(output)-30))) + 0.1)
 		}
 		prompts := []string{
 			"A poem about the number 1",
 			"My favorite color is blue",
-			"I like to eat pizza",
-			"I like to sleep",
+			"I like to eat pizza because",
+			"I like to sleep and it is",
 		}
-		for grpoIter := 0; grpoIter < 12; grpoIter++ {
+		for grpoIter := 0; grpoIter < 120; grpoIter++ {
 			logger.Info().Msgf("GRPO iteration %d", grpoIter)
 			select {
 			case <-sigChan:
@@ -393,6 +401,16 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 			}
 			fmt.Println("outputs", outputs)
 			for _, output := range outputs {
+                allSame := true
+                firstSeq := rewardFn(output.Output.ReturnSequences[0])
+                for _, seq := range output.Output.ReturnSequences {
+                    if rewardFn(seq) != firstSeq {
+                        allSame = false
+                    }
+                }
+                if allSame {
+                    output.Output.ReturnSequences[0] = " and"+output.Output.ReturnSequences[0]
+                }
 				totalReward := 0.0
 				for _, retSeq := range output.Output.ReturnSequences {
 					totalReward += rewardFn(retSeq)
@@ -416,10 +434,11 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 					GroupID: groupID,
 					Prompt:  taskIDToPrompt[output.TaskID],
 				}
+                logger.Warn().Msgf("MEAN REWARD: %+v, %+v", meanReward, math.Sqrt(meanReward))
 				for _, retSeq := range output.Output.ReturnSequences {
 					data.Outputs = append(data.Outputs, GroupOutput{
 						Output:    retSeq,
-						Advantage: (rewardFn(retSeq) - meanReward) / rewardStdDev,
+						Advantage: math.Sqrt(rewardFn(retSeq))+((rewardFn(retSeq) - meanReward) / rewardStdDev),
 					})
 				}
 				logger.Info().Msgf("training data: %+v", data)
@@ -474,7 +493,7 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 				if enabled == "true" {
 					break
 				}
-				time.Sleep(2 * time.Second)
+				time.Sleep(1 * time.Second)
 			}
 			logger.Info().Msg("inference enabled. Starting next iteration")
 		}

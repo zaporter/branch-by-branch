@@ -88,7 +88,7 @@ func createLaunchCli() *cli.Command {
 	instanceType := ""
 	instanceRegion := ""
 	instanceQuantity := int64(1)
-	startInference := false
+    var noSetup bool
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
 		filesystemNames := []string{}
@@ -128,7 +128,7 @@ func createLaunchCli() *cli.Command {
 		for _, id := range launchResponse.Data.InstanceIDs {
 			fmt.Println(id)
 		}
-		if startInference {
+		if !noSetup {
 			for _, id := range launchResponse.Data.InstanceIDs {
 				err := startInferenceOnLambda(id, 150)
 				if err != nil {
@@ -158,10 +158,10 @@ func createLaunchCli() *cli.Command {
 				Destination: &instanceQuantity,
 			},
 			&cli.BoolFlag{
-				Name:        "start-inference",
-				Usage:       "start inference on the launched instances",
-				Value:       startInference,
-				Destination: &startInference,
+				Name:        "no-setup",
+				Usage:       "disable setup on instance",
+				Value:       false,
+				Destination: &noSetup,
 			},
 		},
 		Action: action,

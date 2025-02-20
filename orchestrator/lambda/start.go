@@ -99,13 +99,14 @@ func startLambdaInference(ip string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to execute command: %w", err)
 	}
+    return out1, nil
 
-	runCmd := "/home/ubuntu/branch-by-branch/scripts/lambda-start-inference.sh"
-	out2, err := execOnInstance(ip, runCmd)
-	if err != nil {
-		return "", fmt.Errorf("failed to execute command: %w", err)
-	}
-	return out1 + out2, nil
+// 	runCmd := "/home/ubuntu/branch-by-branch/scripts/lambda-start-inference.sh"
+// 	out2, err := execOnInstance(ip, runCmd)
+// 	if err != nil {
+// 		return "", fmt.Errorf("failed to execute command: %w", err)
+// 	}
+// 	return out1 + out2, nil
 }
 
 func execOnInstance(ip, command string) (string, error) {

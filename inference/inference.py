@@ -58,7 +58,10 @@ def local_model_dir(name:str):
 def local_adapter_dir(name:str, adapter_name:str):
     return f"{os.getenv('HOME')}/cache/models/{name}/{adapter_name}"
 
+bid = 0
 def process_batch(model, batch_prompts, batch_task_ids):
+    global bid
+    bid += 1
     global params
     update_params()
     if not os.path.exists(local_adapter_dir(params["base_model"], params["adapter"])):
@@ -78,7 +81,7 @@ def process_batch(model, batch_prompts, batch_task_ids):
         top_p=0.9,
         stop=["</actions>","."]
     )
-    lora_request = LoRARequest(params["adapter"], 1, local_adapter_dir(params["base_model"], params["adapter"]))
+    lora_request = LoRARequest(params["adapter"], bid, local_adapter_dir(params["base_model"], params["adapter"]))
 
     with torch.no_grad():
         generated = model.generate(batch_prompts, sampling_params, lora_request=lora_request)

@@ -1,3 +1,127 @@
+## 2025-02-18
+
+rsync -e "ssh -i ./secrets/lambda-ssh.pem" --info=progress2 -rtvpl ubuntu@xxx:/home/ubuntu/cache/models/zap/llama-3.1-8-r64/pissa_init .
+
+
+It seems to converge & then explode.
+The GRPO based approach pushes it really close to the correct value, then when it gets it, a minor deviation is over-corrected-for and then the model explodes. Ahh... this is what Dkl is for. Maybe. 
+
+Also:
+reward 0.660408825313113
+retSeq  and it is yummy, and I like it.
+reward 0.660408825313113
+retSeq  it is yummy, and I like it.
+reward 0.660408825313113
+retSeq  it is yummy, and I like it.
+reward 0.660408825313113
+retSeq  it is yummy, and I like it.
+reward 0.660408825313113
+retSeq  it is yummy, and I like it.
+reward 0.660408825313113
+retSeq  it is yummy, and I like it.
+
+With history optimization & global reward (instead of just group relative):
+at iter 12!
+-----output 0
+:// It's the beginning of all things.
+-----output 0
+:// It's the beginning of all things.
+-----output 0
+:// It's the beginning of all things.
+-----output 0
+:// It's the beginning of all things.
+-----output 0
+:// It's the beginning of all things.
+-----output 0
+:// It's the beginning of all things.
+-----output 1
+:// I love to wear it.
+-----output 1
+:// I love to wear it.
+-----output 1
+:// I love to wear it.
+-----output 1
+:// I love to wear it.
+-----output 1
+:// I love to wear it.
+-----output 1
+:// I love to wear it.
+-----output 2
+ it's convenient and delicious.
+-----output 2
+ it's convenient and delicious.
+-----output 2
+ it's convenient and delicious.
+-----output 2
+ it's convenient and delicious.
+-----output 2
+ it's convenient and delicious.
+-----output 2
+ it's convenient and delicious.
+-----output 3
+ not something that I do lightly.
+-----output 3
+ not something that I do lightly.
+-----output 3
+ not something that I do lightly.
+-----output 3
+ not something that I do lightly.
+-----output 3
+ not something that I do lightly.
+-----output 3
+ not something that I do lightly.
+
+GRPO working (pushing ret sequences to 30 chars):
+lr=1e-5 r=alpha=64 model=3.1-7b
+-----output 0
+ song on Billboard's Hot 100 chart.
+-----output 0
+ song on Billboard's Hot 100 chart.
+-----output 0
+ song on Billboard's Hot 100 chart.
+-----output 0
+ song on Billboard's Hot 100 chart.
+-----output 0
+ song on Billboard's Hot 100 chart.
+-----output 0
+ song on Billboard's Hot 100 chart.
+-----output 1
+.
+-----output 1
+, and I love wearing blue shirts.
+-----output 1
+.
+-----output 1
+.
+-----output 1
+.
+-----output 1
+.
+-----output 2
+ I'm lazy and it.
+-----output 2
+ it's convenient and delicious.
+-----output 2
+ I'm busy and convenient.
+-----output 2
+ it's convenient and delicious.
+-----output 2
+ it's convenient and delicious.
+-----output 2
+ I'm busy and convenient.
+-----output 3
+ not a priority for me.
+-----output 3
+ not a priority for me.
+-----output 3
+ hesitant to get out of bed.
+-----output 3
+ sedentary.
+-----output 3
+ lazy, but I.
+-----output 3
+ not a priority for me.
+
 ## 2025-02-16
 
 

@@ -14,13 +14,14 @@ import trl
 from tqdm import tqdm
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import random
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--pissa_load_and_save", type=bool, required=False, default=False)
 parser.add_argument("--pissa_quantize_res", type=bool, required=False, default=False)
 parser.add_argument("--new_model_name", type=str, required=False, default=None)
-parser.add_argument("--learning_rate", type=float, default=1e-4)
-parser.add_argument("--batch_size", type=int, default=2)
+parser.add_argument("--learning_rate", type=float, default=6e-5)
+parser.add_argument("--batch_size", type=int, default=4)
 args = parser.parse_args()
 
 redisHost = os.getenv('REDIS_ADDRESS') or 'err no host'
@@ -124,11 +125,11 @@ def load_trainer():
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
-        #bnb_4bit_compute_dtype=torch.bfloat16
+        bnb_4bit_compute_dtype=torch.float16
     )
     model = AutoModelForCausalLM.from_pretrained(
         pretrained_model_name_or_path=local_model_dir(params["training_base_model"]),
-        torch_dtype=torch.bfloat16, #SUS
+        #torch_dtype=torch.bfloat16, #SUS
         trust_remote_code=True,
         low_cpu_mem_usage=True,
         quantization_config=bnb_config,
@@ -138,10 +139,19 @@ def load_trainer():
     tokenizer = AutoTokenizer.from_pretrained(local_model_dir(params["training_base_model"]), padding_side="left")
     tokenizer.pad_token_id = tokenizer.eos_token_id
     print("loaded model preparing for lora")
+    target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+    lora_config = LoraConfig(
+        r=64,
+        lora_alpha=64,
+        target_modules=target_modules,
+        task_type="CAUSAL_LM",
+    )
 
     model = PeftModel.from_pretrained(
         model=model, 
         model_id=local_adapter_dir(params["training_base_model"], params["training_adapter"]),
+        config=lora_config,
         max_position_embeddings=8192,
         is_trainable=True,
     )
@@ -219,7 +229,7 @@ class Trainer:
             "group_indices": group_indices
         }
 
-    def train_step(self, batch):
+    def train_step(self, batch, scale=1.0):
         self.model.train()
         inputs = self._prepare_batch(batch)
         
@@ -243,12 +253,12 @@ class Trainer:
                 #todo--does this correctly shift by the input size?
                 logits_to_keep=completion_ids.size(1)
             )
-            per_token_logps = self._get_per_token_logps(
-                model=self.model, 
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                logits_to_keep=completion_ids.size(1)
-            )
+        per_token_logps = self._get_per_token_logps(
+            model=self.model, 
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            logits_to_keep=completion_ids.size(1)
+        )
         
         # Compute loss using the provided compute_loss function
         loss = self.compute_loss(
@@ -257,13 +267,15 @@ class Trainer:
             advantages=advantages,
             completion_mask=completion_mask
         )
-        
-        # Backward pass
-        self.optimizer.zero_grad()
+        loss = loss*scale
         loss.backward()
-        self.optimizer.step()
-        
+
         return loss.item()
+        
+    def step(self):
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+
 
     def compute_loss(self, per_token_logps, ref_per_token_logps, advantages, completion_mask):
         # Compute the KL divergence between the model and the reference model
@@ -274,10 +286,12 @@ class Trainer:
         per_token_loss = -(per_token_loss - self.beta * per_token_kl)
         # global normalization https://github.com/huggingface/trl/pull/2881
         loss = (per_token_loss * completion_mask).sum() / completion_mask.sum()
+        print("loss", loss.item())
 
         return loss
 
     def train(self, data_generator):
+        global all_data
         #self.ref_model = trl.models.modeling_base.create_reference_model(self.model)
         self.ref_model = self.model
         total_loss = 0
@@ -293,9 +307,17 @@ class Trainer:
             update_params()
             
             if len(batch) >= args.batch_size:
-                # Process the batch
-                loss = self.train_step(batch)
-                total_loss += loss
+                sloss = 0
+                for item in batch:
+                    loss = self.train_step([item], scale=1/6)
+                    sloss += loss
+                for _ in range(args.batch_size):
+                    item = random.choice(list(all_data.values()))
+                    loss = self.train_step([item], scale=1/8)
+                    sloss += loss
+                self.step()
+                print("Z: loss", sloss)
+                total_loss += sloss
                 num_batches += 1
                 
                 # Update progress bar
@@ -305,10 +327,9 @@ class Trainer:
                 # Reset batch
                 batch = []
                 torch.cuda.empty_cache()
-                if num_batches % 2 == 0:
-                    adapter_name = self.save_and_upload_model()
-                    if params["training_do_update_adapter"]:
-                        self.swap_adapter(adapter_name)
+                adapter_name = self.save_and_upload_model()
+                if params["training_do_update_adapter"]:
+                    self.swap_adapter(adapter_name)
         
         # Handle any remaining items in the last batch
         if batch:
@@ -324,7 +345,7 @@ class Trainer:
     
     def save_and_upload_model(self):
         adapter_name = new_adapter_name()
-        with open(local_adapter_json(params["training_base_model"], adapter_name)) as data_file:
+        with open(local_adapter_json(params["training_base_model"], adapter_name), "w+") as data_file:
             # TODO: probably better to save as jsonl. I am just testing.
             dataToSave = json.dumps(all_data)
             data_file.write(dataToSave)
