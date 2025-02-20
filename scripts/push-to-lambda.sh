@@ -10,7 +10,7 @@ IP="$1"
 
 rsync -zrv \
     --info=progress2 \
-    -e "ssh -i $LAMBDA_KEY_PATH" \
+    -e "ssh -i $LAMBDA_KEY_PATH -o StrictHostKeyChecking=no" \
     --delete \
     --exclude=.git \
     --exclude=inference/env \
