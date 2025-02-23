@@ -1,3 +1,4 @@
+import gc
 import json
 import time
 from typing import Any, Tuple, Union, Optional
@@ -229,6 +230,45 @@ class Trainer:
             "group_indices": group_indices
         }
 
+    def train_step_microbatch(self, batch, scale=1.0):
+        total_loss = []
+        groupScale = scale/len(batch)
+        for group in batch:
+            token_budget = 712
+            # auto group by num tokens greedily filling up groups of token_budget tokens
+            autoGroups = []
+            nextGroup = []
+            prompt_token_count = self.tokenizer(group["prompt"], add_special_tokens=False, return_length=True).length
+            print("Z: prompt_token_count", prompt_token_count)
+            # token_budget -= prompt_token_count[0]
+            if token_budget < prompt_token_count[0]:
+                raise Exception("token budget exceeded for group prompt "+group["prompt"])
+            original_token_budget = token_budget
+
+            for item in group["outputs"]:
+                token_count = self.tokenizer(item["output"], add_special_tokens=False, return_length=True).length
+                print("Z: token_count", token_count)
+                # TODO: Does this belong here?
+                token_budget -= prompt_token_count[0]
+                token_budget -= token_count[0]
+                if token_budget < 0:
+                    autoGroups.append({"prompt": group["prompt"], "outputs": nextGroup})
+                    nextGroup = []
+                    token_budget = original_token_budget
+                nextGroup.append(item)
+            autoGroups.append({"prompt": group["prompt"], "outputs": nextGroup})
+            print("Z: autoGroups", len(autoGroups))
+            print("Z: autoGroups sublengths", [len(autogroup["outputs"]) for autogroup in autoGroups])
+            print("Z: orggroups", len(group["outputs"]))
+
+            for autoGroup in autoGroups:
+                loss = self.train_step([autoGroup], scale=(len(autoGroup)*groupScale/len(group["outputs"])))
+                total_loss += [loss]
+                # Try to reduce vram usage.
+                gc.collect()
+                torch.cuda.empty_cache()
+        return total_loss
+
     def train_step(self, batch, scale=1.0):
         self.model.train()
         inputs = self._prepare_batch(batch)
@@ -307,17 +347,13 @@ class Trainer:
             update_params()
             
             if len(batch) >= args.batch_size:
-                sloss = 0
-                for item in batch:
-                    loss = self.train_step([item], scale=1/6)
-                    sloss += loss
-                for _ in range(args.batch_size):
-                    item = random.choice(list(all_data.values()))
-                    loss = self.train_step([item], scale=1/8)
-                    sloss += loss
+
+                batchLosses = self.train_step_microbatch(batch, scale=2/3)
+                historyBatch = random.sample(list(all_data.values()), k=args.batch_size)
+                historyLosses = self.train_step_microbatch(historyBatch, scale=1/3)
                 self.step()
-                print("Z: loss", sloss)
-                total_loss += sloss
+                print("Z: loss items", batchLosses, historyLosses)
+                total_loss += sum(batchLosses) + sum(historyLosses)
                 num_batches += 1
                 
                 # Update progress bar
@@ -327,6 +363,7 @@ class Trainer:
                 # Reset batch
                 batch = []
                 torch.cuda.empty_cache()
+                
                 adapter_name = self.save_and_upload_model()
                 if params["training_do_update_adapter"]:
                     self.swap_adapter(adapter_name)

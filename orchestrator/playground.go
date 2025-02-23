@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"os"
 	"os/signal"
 	"syscall"
@@ -355,9 +356,12 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 		messageList := NewMessageList()
 		infTx := inferenceEngine.GetInput()
 		infRx := inferenceEngine.GetOutput()
-		// simple reward function that pushes the model to output 20 characters
+		// rewardFn := func(output string) float64 {
+            // numWords := strings.Split(strings.TrimSpace(output), " ")
+            // return 1.0 / (math.Sqrt(math.Abs(float64(len(numWords)-10))) + 0.01 + rand.Float64()*0.001)
+		// }
 		rewardFn := func(output string) float64 {
-			return 1.0 / (math.Sqrt(math.Abs(float64(len(output)-30))) + 0.1)
+			return 1.0 / (math.Sqrt(math.Abs(float64(len(output)-30))) + 0.1 + rand.Float64()*0.01)
 		}
 		prompts := []string{
 			"A poem about the number 1",
@@ -401,16 +405,16 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 			}
 			fmt.Println("outputs", outputs)
 			for _, output := range outputs {
-                allSame := true
-                firstSeq := rewardFn(output.Output.ReturnSequences[0])
-                for _, seq := range output.Output.ReturnSequences {
-                    if rewardFn(seq) != firstSeq {
-                        allSame = false
-                    }
-                }
-                if allSame {
-                    output.Output.ReturnSequences[0] = " and"+output.Output.ReturnSequences[0]
-                }
+				allSame := true
+				firstSeq := rewardFn(output.Output.ReturnSequences[0])
+				for _, seq := range output.Output.ReturnSequences {
+					if rewardFn(seq) != firstSeq {
+						allSame = false
+					}
+				}
+				if allSame {
+					output.Output.ReturnSequences[0] = " and" + output.Output.ReturnSequences[0]
+				}
 				totalReward := 0.0
 				for _, retSeq := range output.Output.ReturnSequences {
 					totalReward += rewardFn(retSeq)
@@ -434,11 +438,11 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 					GroupID: groupID,
 					Prompt:  taskIDToPrompt[output.TaskID],
 				}
-                logger.Warn().Msgf("MEAN REWARD: %+v, %+v", meanReward, math.Sqrt(meanReward))
+				logger.Warn().Msgf("MEAN REWARD: %+v, %+v", meanReward, math.Sqrt(meanReward))
 				for _, retSeq := range output.Output.ReturnSequences {
 					data.Outputs = append(data.Outputs, GroupOutput{
 						Output:    retSeq,
-						Advantage: math.Sqrt(rewardFn(retSeq))+((rewardFn(retSeq) - meanReward) / rewardStdDev),
+						Advantage: math.Sqrt(rewardFn(retSeq)) + ((rewardFn(retSeq) - meanReward) / rewardStdDev),
 					})
 				}
 				logger.Info().Msgf("training data: %+v", data)
