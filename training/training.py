@@ -67,6 +67,7 @@ def new_adapter_name() -> str:
     return f"adapter-{currentTime.strftime('%Y-%m-%dT%H:%M:%S')}"
 
 def download_model(model_name:str):
+    print("downloading model", model_name)
     rclone_cmd = f"../scripts/rclone-model.sh {model_name}"
     out = os.system(rclone_cmd)
     if out != 0:
@@ -78,6 +79,7 @@ def update_params():
         "training_base_model": r.get("training:base_model"),
         "training_adapter": r.get("training:adapter"),
         "training_do_update_adapter": r.get("training:do_update_adapter") == "true",
+        "training_autogroup_tokens": int(r.get("training:autogroup_tokens")),
     }
 
 def batch_generator():
@@ -116,7 +118,7 @@ def batch_generator():
 
         all_data[data["group_id"]] = data
 
-        print("got data", data)
+        #print("got data", data)
 
         yield data
 
@@ -156,6 +158,12 @@ def load_trainer():
         max_position_embeddings=8192,
         is_trainable=True,
     )
+    
+    # Enable multi-GPU training if available
+    if torch.cuda.device_count() > 1:
+        print(f"Using {torch.cuda.device_count()} GPUs!")
+        model = torch.nn.DataParallel(model)
+    
     # TODO: What is my lora alpha? Is it loaded & saved correctly?
     # https://huggingface.co/docs/peft/en/quicktour
     model.print_trainable_parameters()
@@ -166,8 +174,16 @@ class Trainer:
     def __init__(self, model, tokenizer):
         self.model = model
         self.tokenizer = tokenizer
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model.to(self.device)
+        
+        # Set up multi-GPU training
+        self.num_gpus = torch.cuda.device_count()
+        if self.num_gpus > 1:
+            self.device = torch.device("cuda")
+            self.model = model  # model is already wrapped in DataParallel
+        else:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self.model.to(self.device)
+            
         self.optimizer = AdamW(self.model.parameters(), lr=args.learning_rate)
         self.beta = 0.1  # KL penalty coefficient
         self.ref_model = None 
@@ -234,7 +250,7 @@ class Trainer:
         total_loss = []
         groupScale = scale/len(batch)
         for group in batch:
-            token_budget = 712
+            token_budget = params["training_autogroup_tokens"]
             # auto group by num tokens greedily filling up groups of token_budget tokens
             autoGroups = []
             nextGroup = []

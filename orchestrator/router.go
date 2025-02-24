@@ -30,6 +30,7 @@ const (
 	RedisTrainingBaseModel       RedisKey = "training:base_model"
 	RedisTrainingAdapter         RedisKey = "training:adapter"
 	RedisTrainingDoUpdateAdapter RedisKey = "training:do_update_adapter"
+	RedisTrainingAutogroupTokens RedisKey = "training:autogroup_tokens"
 
 	RedisExecutionRepoUrl RedisKey = "execution:repo_url"
 )
@@ -49,6 +50,7 @@ var AllRouterKeys = []RedisKey{
 	RedisTrainingBaseModel,
 	RedisTrainingAdapter,
 	RedisTrainingDoUpdateAdapter,
+	RedisTrainingAutogroupTokens,
 
 	RedisExecutionRepoUrl,
 }
@@ -178,6 +180,7 @@ func createInitializeRouterParamsCli() *cli.Command {
 			RedisTrainingBaseModel:       "meta/llama-3.1-8-instruct",
 			RedisTrainingAdapter:         "pissa_init",
 			RedisTrainingDoUpdateAdapter: "true",
+			RedisTrainingAutogroupTokens: "700",
 
 			RedisExecutionRepoUrl: os.Getenv("HOSTED_GIT_CONNECTION_STRING") + "zaporter/byb-v1.git",
 		}
