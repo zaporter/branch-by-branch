@@ -79,7 +79,7 @@ def process_batch(model, batch_prompts, batch_task_ids):
         #guided_decoding=guided_decoding_params,
         temperature=0.5,
         top_p=0.9,
-        stop=["</actions>","."]
+        stop=["</actions>"]
     )
     lora_request = LoRARequest(params["adapter"], bid, local_adapter_dir(params["base_model"], params["adapter"]))
 

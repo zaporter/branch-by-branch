@@ -69,9 +69,11 @@ def new_adapter_name() -> str:
 def download_model(model_name:str):
     print("downloading model", model_name)
     rclone_cmd = f"../scripts/rclone-model.sh {model_name}"
+    print("running rclone", rclone_cmd)
     out = os.system(rclone_cmd)
     if out != 0:
         raise Exception(f"Failed to download model {model_name}")
+    print("downloaded model", model_name)
 
 def update_params():
     global params
@@ -132,13 +134,17 @@ def load_trainer():
     )
     model = AutoModelForCausalLM.from_pretrained(
         pretrained_model_name_or_path=local_model_dir(params["training_base_model"]),
-        #torch_dtype=torch.bfloat16, #SUS
         trust_remote_code=True,
         low_cpu_mem_usage=True,
         quantization_config=bnb_config,
-        max_position_embeddings=8192
+        max_position_embeddings=8192,
+        device_map="auto",
+        use_cache=False  # Disable KV cache during training
     )
-    # load tokenizer to pass it through to the output dir
+    
+    # Enable gradient checkpointing for memory efficiency
+    model.gradient_checkpointing_enable()
+    
     tokenizer = AutoTokenizer.from_pretrained(local_model_dir(params["training_base_model"]), padding_side="left")
     tokenizer.pad_token_id = tokenizer.eos_token_id
     print("loaded model preparing for lora")
@@ -151,6 +157,10 @@ def load_trainer():
         task_type="CAUSAL_LM",
     )
 
+    # Prepare model for k-bit training
+    for param in model.parameters():
+        param.requires_grad = False  # Freeze the entire model
+
     model = PeftModel.from_pretrained(
         model=model, 
         model_id=local_adapter_dir(params["training_base_model"], params["training_adapter"]),
@@ -159,14 +169,18 @@ def load_trainer():
         is_trainable=True,
     )
     
-    # Enable multi-GPU training if available
+    # Enable gradient checkpointing after PEFT model creation
+    if hasattr(model, "enable_input_require_grads"):
+        model.enable_input_require_grads()
+    
+    model.print_trainable_parameters()
+    
+    # Move model to device
     if torch.cuda.device_count() > 1:
         print(f"Using {torch.cuda.device_count()} GPUs!")
-        model = torch.nn.DataParallel(model)
+        #model = torch.nn.DataParallel(model)
+    #model = model.cuda()
     
-    # TODO: What is my lora alpha? Is it loaded & saved correctly?
-    # https://huggingface.co/docs/peft/en/quicktour
-    model.print_trainable_parameters()
     trainer = Trainer(model, tokenizer)
     return trainer
 
@@ -175,21 +189,18 @@ class Trainer:
         self.model = model
         self.tokenizer = tokenizer
         
-        # Set up multi-GPU training
-        self.num_gpus = torch.cuda.device_count()
-        if self.num_gpus > 1:
-            self.device = torch.device("cuda")
-            self.model = model  # model is already wrapped in DataParallel
-        else:
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            self.model.to(self.device)
-            
+        # Set up device handling
+        self.device = next(model.parameters()).device
         self.optimizer = AdamW(self.model.parameters(), lr=args.learning_rate)
         self.beta = 0.1  # KL penalty coefficient
         self.ref_model = None 
         self.max_prompt_length = None  # No prompt length restriction by default
     
     def _get_per_token_logps(self, model, input_ids, attention_mask, logits_to_keep):
+        # Ensure inputs are on the same device as model
+        input_ids = input_ids.to(self.device)
+        attention_mask = attention_mask.to(self.device)
+        
         # We add 1 to `logits_to_keep` because the last logits of the sequence is later excluded
         logits = model(input_ids=input_ids, attention_mask=attention_mask, logits_to_keep=logits_to_keep + 1).logits
         logits = logits[:, :-1, :]  # (B, L-1, V), exclude the last logit: it corresponds to the next token pred
@@ -198,7 +209,7 @@ class Trainer:
         # For transformers<=4.48, logits_to_keep argument isn't supported, so here we drop logits ourselves.
         # See https://github.com/huggingface/trl/issues/2770
         logits = logits[:, -logits_to_keep:]
-        return trl.trainer.utils.selective_log_softmax(logits, input_ids)  #  compute logprobs for the input tokens
+        return trl.trainer.utils.selective_log_softmax(logits, input_ids)
 
     def _prepare_batch(self, batch):
         # Prepare prompts and responses with advantages
@@ -231,7 +242,7 @@ class Trainer:
             return_tensors="pt",
         )
         
-        # Move everything to device
+        # Move everything to the same device as the model
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
         response_tokens = {k: v.to(self.device) for k, v in response_tokens.items()}
         advantages = torch.tensor(advantages, device=self.device)
@@ -249,6 +260,7 @@ class Trainer:
     def train_step_microbatch(self, batch, scale=1.0):
         total_loss = []
         groupScale = scale/len(batch)
+        
         for group in batch:
             token_budget = params["training_autogroup_tokens"]
             # auto group by num tokens greedily filling up groups of token_budget tokens
@@ -283,6 +295,7 @@ class Trainer:
                 # Try to reduce vram usage.
                 gc.collect()
                 torch.cuda.empty_cache()
+                
         return total_loss
 
     def train_step(self, batch, scale=1.0):
