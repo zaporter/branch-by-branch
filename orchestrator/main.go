@@ -28,6 +28,7 @@ func main() {
 			createGraphCreateCli(),
 			createGoalFileCli(),
 			createGraphDataExportCli(),
+			CreateQuickfuncCli(),
 		},
 	}
 	if err := cmd.Run(ctx, os.Args); err != nil {

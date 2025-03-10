@@ -12,6 +12,52 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+func PushAndExecOnLambdaInstance(instance string, numTries int, cmd string) error {
+	t := time.NewTicker(8 * time.Second)
+	for i := range numTries {
+		fmt.Printf("attempt %v to start inference on lambda\n", i)
+		status, err := ListInstances()
+		if err != nil {
+			// dont kill because this is likely a rate limit error
+			// (and we don't care)
+			fmt.Println(err)
+			goto eol
+		}
+
+		for _, c := range status.Data {
+			if c.ID == instance {
+				if c.IP == nil {
+					fmt.Println("Instance still has nil IP")
+				} else if c.Status != "active" {
+					fmt.Println("Instance not active (status: ", c.Status, ")")
+				} else {
+					pushOut, err := pushFilesToLambda(*c.IP)
+					if err != nil {
+						return err
+					}
+					fmt.Println(pushOut)
+
+					out, err := execOnInstance(*c.IP, cmd)
+					if err != nil && i+1 == numTries {
+						return err
+					} else if err != nil {
+						// dont kill because we will try again
+						fmt.Println(err)
+						goto eol
+					} else {
+						fmt.Println(out)
+						return nil
+					}
+				}
+			}
+		}
+	eol:
+		<-t.C
+	}
+	return errors.New("Failed to start inference on lambda instance")
+}
+
+// todo: swap to PushAndExecOnLambdaInstance
 func startInferenceOnLambda(instance string, numTries int) error {
 	t := time.NewTicker(8 * time.Second)
 	for i := range numTries {
@@ -99,14 +145,16 @@ func startLambdaInference(ip string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to execute command: %w", err)
 	}
-    return out1, nil
+	return out1, nil
 
-// 	runCmd := "/home/ubuntu/branch-by-branch/scripts/lambda-start-inference.sh"
-// 	out2, err := execOnInstance(ip, runCmd)
-// 	if err != nil {
-// 		return "", fmt.Errorf("failed to execute command: %w", err)
-// 	}
-// 	return out1 + out2, nil
+	// runCmd := "/home/ubuntu/branch-by-branch/scripts/lambda-start-inference.sh"
+	// out2, err := execOnInstance(ip, runCmd)
+	//
+	//	if err != nil {
+	//		return "", fmt.Errorf("failed to execute command: %w", err)
+	//	}
+	//
+	// return out1 + out2, nil
 }
 
 func execOnInstance(ip, command string) (string, error) {

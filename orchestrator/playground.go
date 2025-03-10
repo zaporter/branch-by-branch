@@ -312,6 +312,10 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 		if err != nil {
 			return err
 		}
+		rdb.Del(c, RedisTrainingAdvList)
+		rdb.Set(c, string(RedisInferenceAdapter), "pissa_init", 0)
+		rdb.Set(c, string(RedisInferenceEnabled), "true", 0)
+		rdb.Set(c, string(RedisTrainingAdapter), "pissa_init", 0)
 		inferenceSchedulingParams := SchedulingParams{
 			MinTaskQueueSize:      4,
 			MaxTaskQueueSize:      8,
@@ -357,8 +361,8 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 		infTx := inferenceEngine.GetInput()
 		infRx := inferenceEngine.GetOutput()
 		// rewardFn := func(output string) float64 {
-            // numWords := strings.Split(strings.TrimSpace(output), " ")
-            // return 1.0 / (math.Sqrt(math.Abs(float64(len(numWords)-10))) + 0.01 + rand.Float64()*0.001)
+		// numWords := strings.Split(strings.TrimSpace(output), " ")
+		// return 1.0 / (math.Sqrt(math.Abs(float64(len(numWords)-10))) + 0.01 + rand.Float64()*0.001)
 		// }
 		rewardFn := func(output string) float64 {
 			return 1.0 / (math.Sqrt(math.Abs(float64(len(output)-30))) + 0.1 + rand.Float64()*0.01)

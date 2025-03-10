@@ -88,7 +88,7 @@ func createLaunchCli() *cli.Command {
 	instanceType := ""
 	instanceRegion := ""
 	instanceQuantity := int64(1)
-    var noSetup bool
+	var noSetup bool
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
 		filesystemNames := []string{}
@@ -304,7 +304,8 @@ func createScrapeAvailabilityCli() *cli.Command {
 
 func CreateLambdaCli() *cli.Command {
 	return &cli.Command{
-		Name: "lambda",
+		Name:    "lambda",
+		Aliases: []string{"l"},
 		Commands: []*cli.Command{
 			createInstanceTypesCli(),
 			createListInstancesCli(),

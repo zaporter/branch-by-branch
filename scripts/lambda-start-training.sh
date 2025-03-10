@@ -26,7 +26,7 @@ fi
 
 script_dir="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
-tmux new-session -d -s "byb" "bash $script_dir/lambda-setup.sh && $script_dir/../inference/run_inference.sh; bash"
+tmux new-session -d -s "byb" "bash $script_dir/lambda-setup.sh && $script_dir/../training/run_training.sh training.py; bash"
 
 sleep 0.1
 
