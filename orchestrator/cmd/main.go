@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
 	"github.com/zaporter/branch-by-branch/orchestrator"
+	"github.com/zaporter/branch-by-branch/orchestrator/experiment"
 	"github.com/zaporter/branch-by-branch/orchestrator/lambda"
 )
 
@@ -30,6 +31,7 @@ func main() {
 			orchestrator.CreateGoalFileCli(),
 			orchestrator.CreateGraphDataExportCli(),
 			orchestrator.CreateQuickfuncCli(),
+			experiment.CreateExperimentCli(),
 		},
 	}
 	if err := cmd.Run(ctx, os.Args); err != nil {
