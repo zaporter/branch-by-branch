@@ -26,6 +26,7 @@ const (
 	RedisInferenceMaxNewTokens         RedisKey = "inference:max_new_tokens"
 	RedisInferenceNumReturnSequences   RedisKey = "inference:num_return_sequences"
 	RedisInferenceNumBeams             RedisKey = "inference:num_beams"
+	RedisInferenceStopString           RedisKey = "inference:stop_string"
 
 	RedisTrainingBaseModel       RedisKey = "training:base_model"
 	RedisTrainingAdapter         RedisKey = "training:adapter"
@@ -46,6 +47,7 @@ var AllRouterKeys = []RedisKey{
 	RedisInferenceMaxNewTokens,
 	RedisInferenceNumReturnSequences,
 	RedisInferenceNumBeams,
+	RedisInferenceStopString,
 
 	RedisTrainingBaseModel,
 	RedisTrainingAdapter,
@@ -66,7 +68,7 @@ func createRouterParamsCli() *cli.Command {
 	valToSet := ""
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
-		rdb, err := connectToRedis(ctx)
+		rdb, err := ConnectToRedis(ctx)
 		if err != nil {
 			return err
 		}
@@ -161,7 +163,7 @@ func createInitializeRouterParamsCli() *cli.Command {
 			return nil
 		}
 		logger := zerolog.Ctx(ctx)
-		rdb, err := connectToRedis(ctx)
+		rdb, err := ConnectToRedis(ctx)
 		if err != nil {
 			return err
 		}
@@ -176,6 +178,7 @@ func createInitializeRouterParamsCli() *cli.Command {
 			RedisInferenceMaxNewTokens:         "128",
 			RedisInferenceNumReturnSequences:   "3",
 			RedisInferenceNumBeams:             "3",
+			RedisInferenceStopString:           "</actions>",
 
 			RedisTrainingBaseModel:       "meta/llama-3.1-8-instruct",
 			RedisTrainingAdapter:         "pissa_init",

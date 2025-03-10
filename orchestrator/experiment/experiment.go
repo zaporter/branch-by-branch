@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
 )
 
@@ -29,7 +31,7 @@ Within each experiment folder, there are two known files:
 func CreateExperimentCli() *cli.Command {
 	return &cli.Command{
 		Name:    "experiment",
-		Aliases: []string{"e"},
+		Aliases: []string{"ex"},
 		Usage:   "experiment for branch-by-branch",
 		Commands: []*cli.Command{
 			createExperimentRunCli(),
@@ -39,7 +41,8 @@ func CreateExperimentCli() *cli.Command {
 }
 
 var executors = map[string]ExperimentExecutor{
-	"noop": &NoopExecutor{},
+	"noop":      &NoopExecutor{},
+	"grpo_loop": &GrpoLoopExecutor{},
 }
 
 func createExperimentRunCli() *cli.Command {
@@ -47,13 +50,28 @@ func createExperimentRunCli() *cli.Command {
 		experimentsFolder string
 		experimentGroup   string
 		experiment        string
+		noReserve         bool
+		noSetParams       bool
 	)
 	action := func(ctx context.Context, _ *cli.Command) error {
+		logger := zerolog.Ctx(ctx)
 		config := &experimentConfig{
 			ExperimentsFolder: experimentsFolder,
 			GroupFolder:       experimentGroup,
 			ExperimentName:    experiment,
 			FullPath:          filepath.Join(experimentsFolder, experimentGroup, experiment),
+		}
+		fullConfig, err := readExperimentConfig[map[string]any](config)
+		if err != nil {
+			return err
+		}
+		logger.Info().Msgf("running experiment %s with config %v", config.FullPath, fullConfig)
+		result := &executionResult{
+			StartTime: time.Now(),
+			Config:    fullConfig,
+		}
+		if err := result.WriteTo(config); err != nil {
+			return err
 		}
 		experimentConfig, err := readExperimentConfig[BaseExperimentConfig](config)
 		if err != nil {
@@ -63,7 +81,32 @@ func createExperimentRunCli() *cli.Command {
 		if !ok {
 			return fmt.Errorf("executor %s not found", experimentConfig.Executor)
 		}
-		return executor.Execute(ctx, config)
+
+		if !noSetParams && experimentConfig.RedisParams != nil {
+			if err := setParams(ctx, experimentConfig.RedisParams); err != nil {
+				return err
+			}
+		}
+
+		if !noReserve && experimentConfig.InstanceRequests != nil {
+			if err := reserveInstances(ctx, experimentConfig.InstanceRequests); err != nil {
+				return err
+			}
+		}
+
+		if !noSetParams && experimentConfig.RedisParams != nil {
+			if err := setParams(ctx, experimentConfig.RedisParams); err != nil {
+				return err
+			}
+		}
+
+		err = executor.Execute(ctx, config)
+		if err != nil {
+			return err
+		}
+		result.EndTime = time.Now()
+		logger.Info().Msgf("experiment %s finished in %s", config.FullPath, time.Since(result.StartTime))
+		return result.WriteTo(config)
 	}
 	return &cli.Command{
 		Name:    "run",
@@ -89,6 +132,18 @@ func createExperimentRunCli() *cli.Command {
 				Usage:       "the experiment to run. Set to 'all' to run all experiments in the group",
 				Destination: &experiment,
 				Required:    true,
+			},
+			&cli.BoolFlag{
+				Name:        "no-reserve",
+				Usage:       "don't reserve instances",
+				Destination: &noReserve,
+				Value:       false,
+			},
+			&cli.BoolFlag{
+				Name:        "no-set-params",
+				Usage:       "don't set params in redis",
+				Destination: &noSetParams,
+				Value:       false,
 			},
 		},
 		Action: action,
@@ -152,6 +207,21 @@ func createExperimentStatsCli() *cli.Command {
 	}
 }
 
+type executionResult struct {
+	StartTime time.Time      `json:"start_time"`
+	EndTime   time.Time      `json:"end_time"`
+	Config    map[string]any `json:"config"`
+}
+
+func (e *executionResult) WriteTo(config *experimentConfig) error {
+	outputPath := filepath.Join(config.FullPath, "result.json")
+	bytes, err := json.MarshalIndent(e, "", "\t")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(outputPath, bytes, 0644)
+}
+
 type experimentConfig struct {
 	ExperimentsFolder string
 	GroupFolder       string
@@ -165,13 +235,16 @@ type ExperimentExecutor interface {
 }
 
 type BaseExperimentConfig struct {
-	Executor string `json:"executor"`
+	Executor         string                            `json:"executor"`
+	RedisParams      map[string]any                    `json:"redis_params"`
+	InstanceRequests map[string]instanceReservationReq `json:"instance_requests"`
 }
 
 func readExperimentConfig[T any](config *experimentConfig) (T, error) {
 	var emptyT T
 	mainExperimentConfigPath := filepath.Join(config.ExperimentsFolder, config.GroupFolder, "experiment.json")
 	experimentOverridePath := filepath.Join(config.ExperimentsFolder, config.GroupFolder, config.ExperimentName, "override.json")
+
 	mainExperimentConfigBytes, err := os.ReadFile(mainExperimentConfigPath)
 	if err != nil {
 		return emptyT, err
@@ -180,12 +253,46 @@ func readExperimentConfig[T any](config *experimentConfig) (T, error) {
 	if err != nil {
 		return emptyT, err
 	}
+
+	var baseConfig map[string]any
+	if err := json.Unmarshal(mainExperimentConfigBytes, &baseConfig); err != nil {
+		return emptyT, err
+	}
+
+	var overrideConfig map[string]any
+	if err := json.Unmarshal(experimentOverrideBytes, &overrideConfig); err != nil {
+		return emptyT, err
+	}
+
+	// Merge the override into the base config
+	mergeMap(baseConfig, overrideConfig)
+
+	mergedBytes, err := json.Marshal(baseConfig)
+	if err != nil {
+		return emptyT, err
+	}
+
 	var experimentConfig T
-	if err := json.Unmarshal(mainExperimentConfigBytes, &experimentConfig); err != nil {
+	if err := json.Unmarshal(mergedBytes, &experimentConfig); err != nil {
 		return emptyT, err
 	}
-	if err := json.Unmarshal(experimentOverrideBytes, &experimentConfig); err != nil {
-		return emptyT, err
-	}
+
 	return experimentConfig, nil
+}
+
+// mergeMap recursively merges override into base
+func mergeMap(base, override map[string]any) {
+	for key, overrideVal := range override {
+		if baseVal, ok := base[key]; ok {
+			// If both values are maps, merge them recursively
+			if baseMap, isBaseMap := baseVal.(map[string]any); isBaseMap {
+				if overrideMap, isOverrideMap := overrideVal.(map[string]any); isOverrideMap {
+					mergeMap(baseMap, overrideMap)
+					continue
+				}
+			}
+		}
+		// For all other cases, override the value
+		base[key] = overrideVal
+	}
 }

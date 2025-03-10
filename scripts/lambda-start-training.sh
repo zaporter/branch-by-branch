@@ -21,7 +21,8 @@ SETUP_FILE="/home/ubuntu/did_setup.txt"
 if [ -f "$SETUP_FILE" ]; then
     echo "Setup already finished. Skipping"
     tmux ls
-    exit 0
+    # kill the tmux session
+    tmux kill-session -t byb
 fi
 
 script_dir="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"

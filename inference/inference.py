@@ -41,6 +41,7 @@ def update_params():
     params = {
         "enabled": r.get("inference:enabled") == "true",
         "base_model": r.get("inference:base_model"),
+        "stop_string": r.get("inference:stop_string"),
         "adapter": r.get("inference:adapter"),
         "load_format": empty_to_none(r.get("inference:load_format")), # ex: bitsandbytes or ""
         "batch_size": int(r.get("inference:batch_size")),
@@ -79,8 +80,7 @@ def process_batch(model, batch_prompts, batch_task_ids):
         #guided_decoding=guided_decoding_params,
         temperature=0.5,
         top_p=0.9,
-        stop=["</actions>"],
- #       stop_token_ids=[model.get_tokenizer().eos_token_id]
+        stop=[params["stop_string"]],
     )
     lora_request = LoRARequest(params["adapter"], bid, local_adapter_dir(params["base_model"], params["adapter"]))
 

@@ -72,7 +72,7 @@ func playgroundEngineStartupTestCli() *cli.Command {
 	action := func(c context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(c)
 		logger.Info().Msg("simple engine test")
-		rdb, err := connectToRedis(c)
+		rdb, err := ConnectToRedis(c)
 		if err != nil {
 			return err
 		}
@@ -112,7 +112,7 @@ func playgroundEngineSimpleInferenceTestCli() *cli.Command {
 	action := func(c context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(c)
 		logger.Info().Msg("simple inference engine test")
-		rdb, err := connectToRedis(c)
+		rdb, err := ConnectToRedis(c)
 		if err != nil {
 			return err
 		}
@@ -201,7 +201,7 @@ func playgroundEngineSimpleCompilationTestCli() *cli.Command {
 	action := func(c context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(c)
 		logger.Info().Msg("simple compilation engine test")
-		rdb, err := connectToRedis(c)
+		rdb, err := ConnectToRedis(c)
 		if err != nil {
 			return err
 		}
@@ -308,7 +308,7 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 		logger := zerolog.Ctx(c)
 		logger.Info().Msg("GRPO loop test")
 
-		rdb, err := connectToRedis(c)
+		rdb, err := ConnectToRedis(c)
 		if err != nil {
 			return err
 		}
@@ -340,7 +340,7 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 		if err != nil {
 			return err
 		}
-		err = dropTrainingChans(c, rdb)
+		err = DropTrainingChans(c, rdb)
 		if err != nil {
 			return err
 		}
@@ -467,7 +467,7 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 					return nil
 				default:
 				}
-				request, err := readNextTrainingRequest(c, rdb)
+				request, err := ReadNextTrainingRequest(c, rdb)
 				if err != nil {
 					logger.Warn().Err(err).Msg("error reading next training request")
 					continue

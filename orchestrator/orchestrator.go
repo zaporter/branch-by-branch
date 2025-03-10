@@ -24,7 +24,7 @@ func createOrchestratorStartCli() *cli.Command {
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
 		logger.Info().Msg("starting orchestrator")
-		rdb, err := connectToRedis(ctx)
+		rdb, err := ConnectToRedis(ctx)
 		if err != nil {
 			return err
 		}
@@ -33,7 +33,7 @@ func createOrchestratorStartCli() *cli.Command {
 			if err := setRouterParam(ctx, rdb, RedisInferenceEnabled, "true"); err != nil {
 				return err
 			}
-			if err := dropTrainingChans(ctx, rdb); err != nil {
+			if err := DropTrainingChans(ctx, rdb); err != nil {
 				return err
 			}
 		}
@@ -634,7 +634,7 @@ func (o *Orchestrator) startTrainingRx() {
 			return
 		default:
 		}
-		request, err := readNextTrainingRequest(o.ctx, o.rdb)
+		request, err := ReadNextTrainingRequest(o.ctx, o.rdb)
 		if err != nil {
 			o.logger.Error().Err(err).Msg("error reading next training request")
 			continue

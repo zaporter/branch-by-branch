@@ -9,7 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func connectToRedis(ctx context.Context) (*redis.Client, error) {
+func ConnectToRedis(ctx context.Context) (*redis.Client, error) {
 	host := os.Getenv("REDIS_ADDRESS")
 	port := os.Getenv("REDIS_PORT")
 	addr := fmt.Sprintf("%s:%s", host, port)
