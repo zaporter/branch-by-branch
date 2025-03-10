@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"context"
@@ -196,7 +196,7 @@ func createOrchestratorStartCli() *cli.Command {
 	}
 }
 
-func createOrchestratorCli() *cli.Command {
+func CreateOrchestratorCli() *cli.Command {
 	return &cli.Command{
 		Name:    "orchestrator",
 		Aliases: []string{"or"},

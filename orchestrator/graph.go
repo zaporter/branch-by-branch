@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"context"
@@ -809,7 +809,7 @@ func (rg *RepoGraph) FindNewBranchTargetForGoal(goalID GoalID) *RepoGraphBranchT
 	return chooser.Pick()
 }
 
-func createGraphCreateCli() *cli.Command {
+func CreateGraphCreateCli() *cli.Command {
 	var rootBranchName string
 	var path string
 	action := func(ctx context.Context, _ *cli.Command) error {

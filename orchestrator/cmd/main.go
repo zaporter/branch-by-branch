@@ -8,6 +8,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
+	"github.com/zaporter/branch-by-branch/orchestrator"
 	"github.com/zaporter/branch-by-branch/orchestrator/lambda"
 )
 
@@ -21,14 +22,14 @@ func main() {
 		Name:  "o",
 		Usage: "orchestrator for branch-by-branch",
 		Commands: []*cli.Command{
-			createPlaygroundCli(),
-			createRouterCli(),
+			orchestrator.CreatePlaygroundCli(),
+			orchestrator.CreateRouterCli(),
 			lambda.CreateLambdaCli(),
-			createOrchestratorCli(),
-			createGraphCreateCli(),
-			createGoalFileCli(),
-			createGraphDataExportCli(),
-			CreateQuickfuncCli(),
+			orchestrator.CreateOrchestratorCli(),
+			orchestrator.CreateGraphCreateCli(),
+			orchestrator.CreateGoalFileCli(),
+			orchestrator.CreateGraphDataExportCli(),
+			orchestrator.CreateQuickfuncCli(),
 		},
 	}
 	if err := cmd.Run(ctx, os.Args); err != nil {

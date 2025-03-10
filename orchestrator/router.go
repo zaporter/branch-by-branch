@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"bufio"
@@ -200,7 +200,7 @@ func createInitializeRouterParamsCli() *cli.Command {
 	}
 }
 
-func createRouterCli() *cli.Command {
+func CreateRouterCli() *cli.Command {
 	return &cli.Command{
 		Name:    "router",
 		Usage:   "router",

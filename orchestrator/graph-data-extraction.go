@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"context"
@@ -181,7 +181,7 @@ func (rg *RepoGraph) ExtractData(cgLocator CommitGraphLocator, goalProvider Goal
 	}, nil
 }
 
-func createGraphDataExportCli() *cli.Command {
+func CreateGraphDataExportCli() *cli.Command {
 	graphFile := ""
 	goalFile := ""
 	outFile := ""

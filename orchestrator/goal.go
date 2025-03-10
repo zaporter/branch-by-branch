@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"context"
@@ -211,7 +211,7 @@ func StaticGoalProviderFromFile(path string) GoalProvider {
 	}
 }
 
-func createGoalFileCli() *cli.Command {
+func CreateGoalFileCli() *cli.Command {
 	var leanSrcPath string
 	var path string
 	action := func(ctx context.Context, _ *cli.Command) error {

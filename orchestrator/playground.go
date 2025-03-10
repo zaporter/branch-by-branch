@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"context"
@@ -516,7 +516,7 @@ func playgroundGRPOLoopTestCli() *cli.Command {
 	}
 }
 
-func createPlaygroundCli() *cli.Command {
+func CreatePlaygroundCli() *cli.Command {
 	return &cli.Command{
 		Name:  "playground",
 		Usage: "playground",
