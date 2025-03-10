@@ -12,7 +12,8 @@ in
       gnumake
       cmake
       elan
-            uv
+      uv
+            unstable.claude-code
       # for lean
       unstable.stdenv.cc.cc.lib
 
