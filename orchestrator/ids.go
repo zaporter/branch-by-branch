@@ -84,3 +84,9 @@ func ParseTrainingGroupID(id TrainingGroupID) (RepoGraphID, NodeLocator, error) 
 		NodeID: NodeID(parts[4]),
 	}, nil
 }
+
+type ModelTreeNodeID string
+
+func NewModelTreeNodeID(modelName string, adapterName string) ModelTreeNodeID {
+	return ModelTreeNodeID(fmt.Sprintf("model-tree-node-%s-%s", modelName, adapterName))
+}
