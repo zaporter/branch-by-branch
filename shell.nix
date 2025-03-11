@@ -13,7 +13,7 @@ in
       cmake
       elan
       uv
-            unstable.claude-code
+      unstable.claude-code
       # for lean
       unstable.stdenv.cc.cc.lib
 

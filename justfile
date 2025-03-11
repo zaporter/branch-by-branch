@@ -7,3 +7,6 @@ fmt:
 dl-model model:
     mkdir -p ./models/{{model}}
     huggingface-cli download {{model}} --local-dir ./models/{{model}}
+
+jupyter:
+    ./etc/jupyter/run.sh

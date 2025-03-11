@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -157,25 +158,69 @@ func createExperimentStatsCli() *cli.Command {
 		experiment        string
 	)
 	action := func(ctx context.Context, _ *cli.Command) error {
-		config := &experimentConfig{
-			ExperimentsFolder: experimentsFolder,
-			GroupFolder:       experimentGroup,
-			ExperimentName:    experiment,
-			FullPath:          filepath.Join(experimentsFolder, experimentGroup, experiment),
+		logger := zerolog.Ctx(ctx)
+		getStats := func(experimentName string) (map[string]any, error) {
+			config := &experimentConfig{
+				ExperimentsFolder: experimentsFolder,
+				GroupFolder:       experimentGroup,
+				ExperimentName:    experimentName,
+				FullPath:          filepath.Join(experimentsFolder, experimentGroup, experimentName),
+			}
+			experimentConfig, err := readExperimentConfig[BaseExperimentConfig](config)
+			if err != nil {
+				return nil, err
+			}
+			executor, ok := executors[experimentConfig.Executor]
+			if !ok {
+				return nil, fmt.Errorf("executor %s not found", experimentConfig.Executor)
+			}
+			stats, err := executor.GetStats(ctx, config)
+			if err != nil {
+				return nil, err
+			}
+			return stats, nil
 		}
-		experimentConfig, err := readExperimentConfig[BaseExperimentConfig](config)
-		if err != nil {
-			return err
+		if experiment == "" {
+			// Get stats for all experiments in the group
+			experiments, err := os.ReadDir(filepath.Join(experimentsFolder, experimentGroup))
+			if err != nil {
+				return err
+			}
+			statsMap := make(map[string]any)
+			for _, experiment := range experiments {
+				if experiment.IsDir() && !strings.HasPrefix(experiment.Name(), ".") {
+					// if the experiment has no result.json, it hasn't been run yet
+					if _, err := os.Stat(filepath.Join(experimentsFolder, experimentGroup, experiment.Name(), "result.json")); os.IsNotExist(err) {
+						logger.Warn().Msgf("experiment %s has no result.json, skipping", experiment.Name())
+						continue
+					}
+					stats, err := getStats(experiment.Name())
+					if err != nil {
+						return err
+					}
+					statsMap[experiment.Name()] = stats
+				}
+			}
+			logger.Info().Msgf("got stats for %d experiments. Writing to stats.json", len(statsMap))
+			outputPath := filepath.Join(experimentsFolder, experimentGroup, "stats.json")
+			bytes, err := json.Marshal(statsMap)
+			if err != nil {
+				return err
+			}
+			err = os.WriteFile(outputPath, bytes, 0644)
+			if err != nil {
+				return err
+			}
+			logger.Info().Msgf("wrote stats to %s", outputPath)
+			logger.Info().Msgf("stats: %v", statsMap)
+			return nil
+		} else {
+			stats, err := getStats(experiment)
+			if err != nil {
+				return err
+			}
+			return json.NewEncoder(os.Stdout).Encode(stats)
 		}
-		executor, ok := executors[experimentConfig.Executor]
-		if !ok {
-			return fmt.Errorf("executor %s not found", experimentConfig.Executor)
-		}
-		stats, err := executor.GetStats(ctx, config)
-		if err != nil {
-			return err
-		}
-		return json.NewEncoder(os.Stdout).Encode(stats)
 	}
 	return &cli.Command{
 		Name:    "stats",
@@ -198,9 +243,8 @@ func createExperimentStatsCli() *cli.Command {
 			&cli.StringFlag{
 				Name:        "experiment",
 				Aliases:     []string{"e"},
-				Usage:       "the experiment to run. Set to 'all' to run all experiments in the group",
+				Usage:       "the experiment to run. Do not set this if you want to get stats for all experiments in the group",
 				Destination: &experiment,
-				Required:    true,
 			},
 		},
 		Action: action,
