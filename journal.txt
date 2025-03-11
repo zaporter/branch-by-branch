@@ -1,3 +1,7 @@
+## 2025-03-11
+
+Added experiment support in experiments folder. Now able to quickly get started and produce replicable results.
+
 ## 2025-02-18
 
 rsync -e "ssh -i ./secrets/lambda-ssh.pem" --info=progress2 -rtvpl ubuntu@xxx:/home/ubuntu/cache/models/zap/llama-3.1-8-r64/pissa_init .
