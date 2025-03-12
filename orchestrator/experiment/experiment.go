@@ -45,6 +45,7 @@ var executors = map[string]ExperimentExecutor{
 	"noop":         &NoopExecutor{},
 	"grpo_loop":    &GrpoLoopExecutor{},
 	"orchestrator": &OrchestratorExecutor{},
+	"compilation":  &CompilationExecutor{},
 }
 
 func createExperimentRunCli() *cli.Command {
@@ -54,6 +55,7 @@ func createExperimentRunCli() *cli.Command {
 		experiment        string
 		noReserve         bool
 		noSetParams       bool
+		printStats        bool
 	)
 	action := func(ctx context.Context, _ *cli.Command) error {
 		logger := zerolog.Ctx(ctx)
@@ -108,6 +110,17 @@ func createExperimentRunCli() *cli.Command {
 		}
 		result.EndTime = time.Now()
 		logger.Info().Msgf("experiment %s finished in %s", config.FullPath, time.Since(result.StartTime))
+		if printStats {
+			stats, err := executor.GetStats(ctx, config)
+			if err != nil {
+				return err
+			}
+			formatted, err := json.MarshalIndent(stats, "", "\t")
+			if err != nil {
+				return err
+			}
+			fmt.Println(string(formatted))
+		}
 		return result.WriteTo(config)
 	}
 	return &cli.Command{
@@ -145,6 +158,13 @@ func createExperimentRunCli() *cli.Command {
 				Name:        "no-set-params",
 				Usage:       "don't set params in redis",
 				Destination: &noSetParams,
+				Value:       false,
+			},
+			&cli.BoolFlag{
+				Name:        "print-stats",
+				Aliases:     []string{"p"},
+				Usage:       "print stats to stdout",
+				Destination: &printStats,
 				Value:       false,
 			},
 		},
