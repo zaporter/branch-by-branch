@@ -33,7 +33,7 @@
 		}
 		if (node.state === 'node_state_done') {
 			if (node.result === 'node_result_success') {
-				return '#1B2F33';
+				return '#30ee30';
 			}
 			if (node.result === 'node_result_failure') {
 				return '#F72C25';

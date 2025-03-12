@@ -1,3 +1,18 @@
+## 2025-03-12
+
+The model found my weak spot
+```
+              "inference_output": "<think> I need to get rid of the uncommitted changes. I will invoke the equivalent of git reset --hard. </think>\n<actions>\n\t<mkdir>.git</mkdir>\n\t<mkdir>.git/index.lock</mkdir>\n\t<mkdir>.git/objects</mkdir>\n\t<mkdir>.git/objects/00</mkdir>\n\t<mkdir>.git/objects/00/00</mkdir>\n\t<mkdir>.git/refs</mkdir>\n\t<mkdir>.git/refs/heads</mkdir>\n\t<mkdir>.git/refs/heads/origin</mkdir>\n\t<mkdir>.git/refs/heads/origin/branch-e51dc6c7-9706-48e3-9ac5-e0cda0b6c779</mkdir>\n\t<mkdir>.git/refs/heads/origin/branch-e51dc6c7-9706-48e3-9ac5-e0cda0b6c779/HEAD</mkdir>\n</actions>",
+```
+
+Love that. This crashed all my compilation workers.
+
+
+Also, the model edited Test.lean. Nice.
+
+
+Also, I still have no way to back-trace which model created which output. Nice
+
 ## 2025-03-11
 
 Added experiment support in experiments folder. Now able to quickly get started and produce replicable results.

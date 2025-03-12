@@ -94,26 +94,17 @@ func createOrchestratorStartCli() *cli.Command {
 			}
 		}
 
-		orchestrator := Orchestrator{
-			logger:                  logger,
-			ctx:                     ctx,
-			wg:                      &sync.WaitGroup{},
-			rdb:                     rdb,
-			mu:                      sync.Mutex{},
-			RepoGraph:               rg,
-			GraphPath:               graphPath,
-			GoalProvider:            goalProvider,
-			InferenceEngine:         inferenceEngine,
-			CompilationEngine:       compilationEngine,
-			GoalCompilationEngine:   goalCompilationEngine,
-			trainingDataMessageList: NewMessageList(),
-
-			inferenceTaskToNodeLocator:       map[EngineTaskID]NodeLocator{},
-			compilationTaskToNodeLocator:     map[EngineTaskID]NodeLocator{},
-			goalCompilationTaskToNodeLocator: map[EngineTaskID]NodeLocator{},
-
-			doTraining: doTraining,
+		orchestratorParams := OrchestratorParams{
+			Rdb:                   rdb,
+			RepoGraph:             rg,
+			GraphPath:             graphPath,
+			GoalProvider:          goalProvider,
+			InferenceEngine:       inferenceEngine,
+			CompilationEngine:     compilationEngine,
+			GoalCompilationEngine: goalCompilationEngine,
+			DoTraining:            doTraining,
 		}
+		orchestrator := NewOrchestrator(ctx, logger, orchestratorParams)
 
 		mux := http.NewServeMux()
 		server := &http.Server{
@@ -213,26 +204,40 @@ const (
 )
 
 type Orchestrator struct {
+	OrchestratorParams
 	logger *zerolog.Logger
 	ctx    context.Context
 	wg     *sync.WaitGroup
 
-	rdb *redis.Client
-
 	mu                               sync.Mutex
-	RepoGraph                        *RepoGraph
-	GraphPath                        string
-	GoalProvider                     GoalProvider
 	inferenceTaskToNodeLocator       map[EngineTaskID]NodeLocator
 	compilationTaskToNodeLocator     map[EngineTaskID]NodeLocator
 	goalCompilationTaskToNodeLocator map[EngineTaskID]NodeLocator
 	trainingDataMessageList          *MessageList
-
+}
+type OrchestratorParams struct {
+	Rdb                   *redis.Client
+	RepoGraph             *RepoGraph
+	GraphPath             string
+	GoalProvider          GoalProvider
 	InferenceEngine       *Engine
 	CompilationEngine     *Engine
 	GoalCompilationEngine *Engine
+	DoTraining            bool
+}
 
-	doTraining bool
+func NewOrchestrator(ctx context.Context, logger *zerolog.Logger, params OrchestratorParams) *Orchestrator {
+	return &Orchestrator{
+		OrchestratorParams:               params,
+		logger:                           logger,
+		ctx:                              ctx,
+		wg:                               &sync.WaitGroup{},
+		mu:                               sync.Mutex{},
+		trainingDataMessageList:          NewMessageList(),
+		inferenceTaskToNodeLocator:       map[EngineTaskID]NodeLocator{},
+		compilationTaskToNodeLocator:     map[EngineTaskID]NodeLocator{},
+		goalCompilationTaskToNodeLocator: map[EngineTaskID]NodeLocator{},
+	}
 }
 
 func (o *Orchestrator) WaitForStop() {
@@ -249,7 +254,7 @@ func (o *Orchestrator) Start() {
 	go o.startCompilationRx()
 	go o.startGraphPeriodicSave()
 
-	if o.doTraining {
+	if o.DoTraining {
 		o.wg.Add(2)
 		go o.startTrainingTx()
 		go o.startTrainingRx()
@@ -593,7 +598,7 @@ func (o *Orchestrator) startTrainingTx() {
 					Advantage: output.Advantage,
 				})
 			}
-			err = o.trainingDataMessageList.AddAdvertisement(o.ctx, o.rdb, RedisTrainingAdvList, string(tgid), group)
+			err = o.trainingDataMessageList.AddAdvertisement(o.ctx, o.Rdb, RedisTrainingAdvList, string(tgid), group)
 			if err != nil {
 				// maybe this shouldn't be fatal
 				o.logger.Fatal().Err(err).Msg("error adding advertisement")
@@ -634,7 +639,7 @@ func (o *Orchestrator) startTrainingRx() {
 			return
 		default:
 		}
-		request, err := ReadNextTrainingRequest(o.ctx, o.rdb)
+		request, err := ReadNextTrainingRequest(o.ctx, o.Rdb)
 		if err != nil {
 			o.logger.Error().Err(err).Msg("error reading next training request")
 			continue
@@ -644,7 +649,7 @@ func (o *Orchestrator) startTrainingRx() {
 			o.logger.Error().Str("request", string(request)).Msg("error getting training data group")
 			continue
 		}
-		err = o.rdb.LPush(o.ctx, RedisTrainingTxChan, group).Err()
+		err = o.Rdb.LPush(o.ctx, RedisTrainingTxChan, group).Err()
 		if err != nil {
 			o.logger.Fatal().Err(err).Msg("error sending training data group")
 		}

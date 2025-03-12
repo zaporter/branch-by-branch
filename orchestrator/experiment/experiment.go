@@ -42,8 +42,9 @@ func CreateExperimentCli() *cli.Command {
 }
 
 var executors = map[string]ExperimentExecutor{
-	"noop":      &NoopExecutor{},
-	"grpo_loop": &GrpoLoopExecutor{},
+	"noop":         &NoopExecutor{},
+	"grpo_loop":    &GrpoLoopExecutor{},
+	"orchestrator": &OrchestratorExecutor{},
 }
 
 func createExperimentRunCli() *cli.Command {
