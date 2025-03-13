@@ -14,7 +14,7 @@ r = redis.Redis(host=redisHost, port=int(redisPort), password=redisPassword, dec
 dockerClient = docker.from_env()
 container: Optional[docker.models.containers.Container] = None
 
-image_name = "branch-by-branch-execution-1"
+image_name = "branch-by-branch-execution-6"
 
 repo_dir = os.getenv("REPO_DIR") or "repo"
 job = os.getenv("JOB")
@@ -88,17 +88,6 @@ def startup():
 
     volumes={
         repo_dir: {"bind": "/home/ubuntu/repo", "mode": "rw"},
-        # Problem engine needs to write new tests
-        repo_dir+"/Test.lean": {
-            "bind": "/home/ubuntu/repo/Test.lean",
-            "mode": "rw" if job == "goal-compilation-engine" else "ro"
-        },
-        # Hardcoded read only sub-dirs 
-        repo_dir+"/lake-manifest.json": {"bind": "/home/ubuntu/repo/lake-manifest.json", "mode": "ro"},
-        repo_dir+"/lakefile.toml": {"bind": "/home/ubuntu/repo/lakefile.toml", "mode": "ro"},
-        repo_dir+"/lean-toolchain": {"bind": "/home/ubuntu/repo/lean-toolchain", "mode": "ro"},
-        repo_dir+"/.gitignore": {"bind": "/home/ubuntu/repo/.gitignore", "mode": "ro"},
-        repo_dir+"/mk_all.lean": {"bind": "/home/ubuntu/repo/mk_all.lean", "mode": "ro"},
     }
     print(f"Volumes: {volumes}")
 
@@ -118,6 +107,51 @@ def shutdown():
         container.stop(timeout=1)
         container = None
 
+original_permissions_map = {}
+# Traverses the repo and sets all files to read only, excluding anything in Corelib
+def lockdown_permissions(allow_test_lean: bool=False):
+    global original_permissions_map
+    original_permissions_map = {}
+
+    # if .lake doesnt exist, create it. (important because we are about to make the repo dir read-only)
+    if not os.path.exists(os.path.join(repo_dir, ".lake")):
+        os.makedirs(os.path.join(repo_dir, ".lake"))
+
+    # Make repo dir read-only
+    original_permissions_map[repo_dir] = os.stat(repo_dir).st_mode
+    os.chmod(repo_dir, 0o555)
+
+
+    # Walk through all files in repo directory
+    for root, dirs, files in os.walk(repo_dir):
+        # Skip Corelib directory
+        if "Corelib" in root or ".lake" in root:
+            continue
+            
+        # Make all dirs read-only
+        for dir in dirs:
+            if "Corelib" in dir or ".lake" in dir:
+                continue
+            dir_path = os.path.join(root, dir)
+            original_permissions_map[dir_path] = os.stat(dir_path).st_mode
+            os.chmod(dir_path, 0o555)
+
+        # Make all files read-only
+        for file in files:
+            if "Corelib" in file or ".lake" in file:
+                continue
+            if allow_test_lean and file == "Test.lean":
+                continue
+            file_path = os.path.join(root, file)
+            # Remove write permissions for all users
+            original_permissions_map[file_path] = os.stat(file_path).st_mode
+            os.chmod(file_path, 0o444)
+
+def restore_permissions():
+    global original_permissions_map
+    for file_path, mode in original_permissions_map.items():
+        os.chmod(file_path, mode)
+
 def execute(task: dict) -> dict:
     global container
     if not container:
@@ -126,6 +160,9 @@ def execute(task: dict) -> dict:
     print("Executing task")
     print(task)
     results = []
+
+
+    lockdown_permissions(allow_test_lean=job == "goal-compilation-engine")
 
     # Execute each pre-command
     hasFailed = False
@@ -162,10 +199,15 @@ def execute(task: dict) -> dict:
     compilation_result = None
     if not hasFailed:
         print(f"Executing compilation script: {task['compilation_script']}")
-        exit_code, output = container.exec_run(
-            cmd=f"/bin/bash -c '{task['compilation_script']}'",
-            workdir="/home/ubuntu/repo"
-        )
+        try:
+            exit_code, output = container.exec_run(
+                cmd=f"/bin/bash -c '{task['compilation_script']}'",
+                workdir="/home/ubuntu/repo"
+            )
+        except Exception as e:
+            print(f"Compilation script failed with error: {e}")
+            exit_code = 1
+            output = "error: " + str(e)
         compilation_result = {
             "action_name": "compilation",
             "out": output.decode('utf-8'),
@@ -179,6 +221,8 @@ def execute(task: dict) -> dict:
             "out": "error: skipped due to previous failure",
             "exit_code": 1
         }
+
+    restore_permissions()
 
     return {
         "pre_commands_results": results,

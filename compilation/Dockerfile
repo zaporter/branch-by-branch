@@ -12,7 +12,7 @@ RUN elan toolchain install ${LEAN_TOOLCHAIN_VERSION}
 RUN elan default ${LEAN_TOOLCHAIN_VERSION}
 
 # Create working directory
-WORKDIR /home/lean/lean4-execution
+WORKDIR /home/ubuntu
 
 # Keep container running
 CMD ["tail", "-f", "/dev/null"]
