@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"time"
 )
 
 func setupHeader(w *http.ResponseWriter, isJson bool) {
@@ -358,6 +359,48 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 			return
 		}
 		slice.CommitGraphNode.Metadata = request.Metadata
+		w.Write([]byte("{}"))
+	})
+	mux.HandleFunc("/api/graph/save-golden-sample", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		type Request struct {
+			NodeLocator NodeLocator `json:"node_locator"`
+		}
+		var request Request
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		slice, err := o.RepoGraph.GetNodeSlice(request.NodeLocator)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		prompt_task, err := o.RepoGraph.BuildInferenceTaskForNode(request.NodeLocator, o.GoalProvider)
+		var prompt string
+		if err != nil {
+			prompt = fmt.Sprintf("Error building prompt: %s", err.Error())
+		} else {
+			prompt = prompt_task.Prompt
+		}
+		goldenSample := GoldenSample{
+			ID:          NewGoldenSampleID(),
+			RepoID:      o.RepoGraph.ID,
+			NodeLocator: request.NodeLocator,
+			Type:        GoldenSampleTypeProofGeneration,
+			Timestamp:   time.Now(),
+			Prompt:      prompt,
+			Completion:  slice.CommitGraphNode.InferenceOutput,
+		}
+		if err := goldenSample.Write(); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		slice.CommitGraphNode.Metadata.IsGoldenSample = true
 		w.Write([]byte("{}"))
 	})
 }

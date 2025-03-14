@@ -43,6 +43,7 @@ export const createBranchTargetGraphQuery = () => {
 export const nodeMetadataSchema = z.object({
     was_manually_created: z.boolean().optional(),
     is_favorite: z.boolean().optional(),
+    is_golden_sample: z.boolean().optional(),
     label: z.string().optional(),
 }).strict() // ensure this is kept up to date with the backend
 
@@ -250,5 +251,21 @@ export const createSetNodeMetadataMutation = () => {
             body: JSON.stringify(request),
         })
             .then(res => res.text()),
+    });
+}
+
+// @api /api/graph/save-golden-sample
+export const saveGoldenSampleRequestSchema = z.object({
+    node_locator: nodeLocatorSchema,
+})
+export type SaveGoldenSampleRequest = z.infer<typeof saveGoldenSampleRequestSchema>;
+
+export const createSaveGoldenSampleMutation = () => {
+    return createMutation({
+        mutationFn: (request: SaveGoldenSampleRequest) => fetch(`${beHost}/api/graph/save-golden-sample`, {
+            method: 'POST',
+            body: JSON.stringify(request),
+        })
+            .then(res => res.json()),
     });
 }

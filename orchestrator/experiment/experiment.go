@@ -303,6 +303,8 @@ type BaseExperimentConfig struct {
 	Executor         string                            `json:"executor"`
 	RedisParams      map[string]any                    `json:"redis_params"`
 	InstanceRequests map[string]instanceReservationReq `json:"instance_requests"`
+	// Array of . indexed keys to unset in the base config pre-merge. Ex: ["redis_params.a", "instance_requests.b"]
+	UnsetParams []string `json:"unset"`
 }
 
 func readExperimentConfig[T any](config *experimentConfig) (T, error) {
@@ -329,6 +331,15 @@ func readExperimentConfig[T any](config *experimentConfig) (T, error) {
 		return emptyT, err
 	}
 
+	// Unset keys in the base config before merging
+	if unset, ok := overrideConfig["unset"]; ok {
+		var keys []string
+		for _, key := range unset.([]any) {
+			keys = append(keys, key.(string))
+		}
+		unsetKeys(baseConfig, keys)
+	}
+
 	// Merge the override into the base config
 	mergeMap(baseConfig, overrideConfig)
 
@@ -343,6 +354,19 @@ func readExperimentConfig[T any](config *experimentConfig) (T, error) {
 	}
 
 	return experimentConfig, nil
+}
+
+// TODO: Add some tests. This is brittle.
+func unsetKeys(base map[string]any, keys []string) {
+	for _, key := range keys {
+		keys := strings.Split(key, ".")
+		// end the recursion
+		if len(keys) == 1 {
+			delete(base, key)
+		} else {
+			unsetKeys(base[keys[0]].(map[string]any), keys[1:])
+		}
+	}
 }
 
 // mergeMap recursively merges override into base

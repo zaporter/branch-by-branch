@@ -181,6 +181,7 @@ type CommitGraphNode struct {
 type NodeMetadata struct {
 	WasManuallyCreated bool   `json:"was_manually_created,omitempty"`
 	IsFavorite         bool   `json:"is_favorite,omitempty"`
+	IsGoldenSample     bool   `json:"is_golden_sample,omitempty"`
 	Label              string `json:"label,omitempty"`
 }
 

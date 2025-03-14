@@ -11,3 +11,4 @@ goals
 test.json
 scrape_data
 experiments
+golden_samples.jsonl

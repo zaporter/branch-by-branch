@@ -90,3 +90,13 @@ type ModelTreeNodeID string
 func NewModelTreeNodeID(modelName string, adapterName string) ModelTreeNodeID {
 	return ModelTreeNodeID(fmt.Sprintf("model-tree-node-%s-%s", modelName, adapterName))
 }
+
+type GoldenSampleID string
+
+func NewGoldenSampleID() GoldenSampleID {
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return GoldenSampleID(fmt.Sprintf("golden-sample-%s", uuid.String()))
+}

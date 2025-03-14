@@ -3,6 +3,7 @@
 		createNodeStatsQuery,
 		createRequestNodeTerminationMutation,
 		createDeleteNodeMutation,
+		createSaveGoldenSampleMutation,
 		type NodeLocator,
 		createCreateNodeMutation,
 		createSetNodeMetadataMutation
@@ -26,6 +27,7 @@
 	const deleteNodeMutation = $derived(createDeleteNodeMutation(props.locator));
 	const createNodeMutation = $derived(createCreateNodeMutation());
 	const setNodeMetadataMutation = $derived(createSetNodeMetadataMutation());
+	const saveGoldenSampleMutation = $derived(createSaveGoldenSampleMutation());
 	const queryClient = useQueryClient();
 
 	const terminateNode = $derived(async () => {
@@ -46,6 +48,13 @@
 			inference_output: text
 		});
 		props.selectNode(res.node_locator);
+	});
+	let saveGoldenSampleDialogOpen = $state(false);
+	const saveGoldenSample = $derived(async () => {
+		await $saveGoldenSampleMutation.mutateAsync({
+			node_locator: props.locator
+		});
+		saveGoldenSampleDialogOpen = false;
 	});
 	const toggleFavorite = $derived(async () => {
 		if (!$query.data) return;
@@ -68,7 +77,6 @@
 		});
 		await $query.refetch();
 	});
-
 </script>
 
 {#if $query.isLoading}
@@ -77,7 +85,7 @@
 	<p>Error: {$query.error.message}</p>
 {:else if $query.data}
 	{@const data = $query.data}
-	<div class="flex justify-end gap-2">
+	<div class="grid grid-cols-2 gap-2">
 		<Button onclick={toggleFavorite}>
 			{data.metadata.is_favorite ? '⭐️' : '☆'}
 		</Button>
@@ -87,6 +95,26 @@
 			prompt={data.prompt ?? 'no prompt'}
 			onCreateNode={createNode}
 		/>
+		<AlertDialog.Root
+			open={saveGoldenSampleDialogOpen}
+			onOpenChange={(open) => {
+				saveGoldenSampleDialogOpen = open;
+			}}
+		>
+			<AlertDialog.Trigger class={buttonVariants({ variant: 'outline' })}>
+				Save Golden Sample
+			</AlertDialog.Trigger>
+			<AlertDialog.Content>
+				<AlertDialog.Header>
+					<AlertDialog.Title>Save Golden Sample</AlertDialog.Title>
+					<AlertDialog.Description>Save this node as a golden sample.</AlertDialog.Description>
+				</AlertDialog.Header>
+				<AlertDialog.Footer>
+					<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+					<AlertDialog.Action onclick={saveGoldenSample}>Do it</AlertDialog.Action>
+				</AlertDialog.Footer>
+			</AlertDialog.Content>
+		</AlertDialog.Root>
 		<AlertDialog.Root>
 			<AlertDialog.Trigger class={buttonVariants({ variant: 'destructive' })}>
 				Delete Node

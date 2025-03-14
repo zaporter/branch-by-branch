@@ -43,11 +43,10 @@ func (o *OrchestratorExecutor) Execute(ctx context.Context, config *experimentCo
 		return err
 	}
 	rg := &orchestrator.RepoGraph{}
-	graphPath := parsedConfig.GraphFile
+	graphPath := filepath.Join(config.FullPath, parsedConfig.GraphFile)
 	if parsedConfig.CloneGraph {
 		newFile := filepath.Join(config.FullPath, "cloned_graph.json")
-		resolvedGraphFile := filepath.Join(config.FullPath, parsedConfig.GraphFile)
-		if err := orchestrator.CopyFile(resolvedGraphFile, newFile); err != nil {
+		if err := orchestrator.CopyFile(graphPath, newFile); err != nil {
 			return err
 		}
 		graphPath = newFile
@@ -58,15 +57,15 @@ func (o *OrchestratorExecutor) Execute(ctx context.Context, config *experimentCo
 	rg.Ctx = ctx
 	rg.ShouldAdvertiseChan = make(chan orchestrator.CommitGraphLocator, 128)
 	inferenceSchedulingParams := orchestrator.SchedulingParams{
-		MinTaskQueueSize:      32,
-		MaxTaskQueueSize:      64,
+		MinTaskQueueSize:      16,
+		MaxTaskQueueSize:      32,
 		TaskProcessingTimeout: 5 * time.Minute,
 		CamShaftInterval:      1 * time.Second,
 		CrankShaftInterval:    1 * time.Second,
 		TimingBeltInterval:    2 * time.Second,
 		ODBInterval:           10 * time.Second,
-		InputChanSize:         32,
-		OutputChanSize:        32,
+		InputChanSize:         8,
+		OutputChanSize:        8,
 	}
 	compilationSchedulingParams := orchestrator.SchedulingParams{
 		MinTaskQueueSize:      32,
