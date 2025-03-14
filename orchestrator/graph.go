@@ -312,6 +312,13 @@ func (rg *RepoGraph) HandleSetupCompilationOutput(logger *zerolog.Logger, locato
 		return nil
 	}
 
+	for _, res := range result.PreCommandsResults {
+		slice.CommitGraphNode.ActionOutputs = append(slice.CommitGraphNode.ActionOutputs, ActionOutput{
+			ActionName: res.ActionName,
+			Text:       res.Out,
+			ExitCode:   res.ExitCode,
+		})
+	}
 	// goal compilation result is expected to be fed into the root node
 	slice.CommitGraphNode.CompilationResult = &result.CompilationResult
 	slice.CommitGraphNode.State = NodeStateAwaitingInference
@@ -528,6 +535,7 @@ func (cg *CommitGraph) AllNodesInState(state NodeState) []*CommitGraphNode {
 }
 
 func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProvider GoalProvider) (InferenceTask, error) {
+	logger := zerolog.Ctx(rg.Ctx)
 	slice, err := rg.GetNodeSlice(nodeLocator)
 	if err != nil {
 		return InferenceTask{}, err
@@ -574,14 +582,28 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 		parents = append(parents, *slice.CommitGraph.Nodes[*currentNode.Parent])
 		currentNode = slice.CommitGraph.Nodes[*currentNode.Parent]
 	}
+	stripEndNewline := func(s string) string {
+		return strings.TrimRight(s, "\n")
+	}
+	if len(parents) > 0 {
+		root := parents[len(parents)-1]
+		var rootGitStatusOutput string
+		for _, output := range root.ActionOutputs {
+			if output.ActionName == "git-status" {
+				rootGitStatusOutput = output.Text
+			}
+		}
+		if rootGitStatusOutput != "" {
+			sb.WriteString(fmt.Sprintf("<original-git-status>\n%s\n</original-git-status>\n", stripEndNewline(rootGitStatusOutput)))
+		} else {
+			logger.Error().Msgf("root node %v has no git-status output. Check the name of the action in goal.go.", root.ID)
+		}
+	}
 	leanOutputParams := StripParams{
 		stripErrors:   false,
 		stripInfos:    true,
 		stripTraces:   true,
 		stripWarnings: false,
-	}
-	stripEndNewline := func(s string) string {
-		return strings.TrimRight(s, "\n")
 	}
 	if len(parents) > 1 {
 		sb.WriteString("<previous-steps>\n")

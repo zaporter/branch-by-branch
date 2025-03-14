@@ -92,8 +92,12 @@ func (g *GoalAddExample) SetupOnBranch(src BranchName, target BranchName) Compil
 		NewBranchName: target,
 		PreCommands: []CompilationPreCommand{
 			{
-				Name:   "add-example",
+				Name:   "add-example-hidden",
 				Script: fmt.Sprintf("cat << 'EOF' >> Test.lean\n%s\nEOF", g.Example),
+			},
+			{
+				Name:   "git-status",
+				Script: fmt.Sprintf("git diff origin/%s", src),
 			},
 			{
 				// Shouldn't be needed... but just in case
