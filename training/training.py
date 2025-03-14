@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--pissa_load_and_save", type=bool, required=False, default=False)
 parser.add_argument("--pissa_quantize_res", type=bool, required=False, default=False)
 parser.add_argument("--new_model_name", type=str, required=False, default=None)
-parser.add_argument("--learning_rate", type=float, default=6e-5)
+parser.add_argument("--learning_rate", type=float, default=6e-6)
 parser.add_argument("--batch_size", type=int, default=4)
 args = parser.parse_args()
 
@@ -269,21 +269,24 @@ class Trainer:
             prompt_token_count = self.tokenizer(group["prompt"], add_special_tokens=False, return_length=True).length
             print("Z: prompt_token_count", prompt_token_count)
             # token_budget -= prompt_token_count[0]
-            if token_budget < prompt_token_count[0]:
-                raise Exception("token budget exceeded for group prompt "+group["prompt"])
+            #if token_budget < prompt_token_count[0]:
+            #   raise Exception("token budget exceeded for group prompt "+group["prompt"])
             original_token_budget = token_budget
 
+            i = 0
             for item in group["outputs"]:
                 token_count = self.tokenizer(item["output"], add_special_tokens=False, return_length=True).length
                 print("Z: token_count", token_count)
                 # TODO: Does this belong here?
                 token_budget -= prompt_token_count[0]
                 token_budget -= token_count[0]
-                if token_budget < 0:
+                # fuck 
+                if token_budget < 0 and i > 0:
                     autoGroups.append({"prompt": group["prompt"], "outputs": nextGroup})
                     nextGroup = []
                     token_budget = original_token_budget
                 nextGroup.append(item)
+                i += 1
             autoGroups.append({"prompt": group["prompt"], "outputs": nextGroup})
             print("Z: autoGroups", len(autoGroups))
             print("Z: autoGroups sublengths", [len(autogroup["outputs"]) for autogroup in autoGroups])
