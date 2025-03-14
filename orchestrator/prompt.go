@@ -43,7 +43,7 @@ func (a XMLActionLs) GetType() string {
 }
 
 func (a XMLActionLs) GetCompilationTask() string {
-	return fmt.Sprintf("ls %s", a.Path)
+	return fmt.Sprintf("ls %q", a.Path)
 }
 
 func (a XMLActionLs) Validate() error {
@@ -52,6 +52,26 @@ func (a XMLActionLs) Validate() error {
 	}
 	if !filepath.IsLocal(a.Path) {
 		return errors.New("path must be relative to the current directory")
+	}
+	return nil
+}
+
+type XMLActionGrep struct {
+	XMLName xml.Name `xml:"grep"`
+	Pattern string   `xml:",chardata"`
+}
+
+func (a XMLActionGrep) GetType() string {
+	return "grep"
+}
+
+func (a XMLActionGrep) GetCompilationTask() string {
+	return fmt.Sprintf("grep --exclude-dir=.git --exclude-dir=.lake -n --perl -R %q", a.Pattern)
+}
+
+func (a XMLActionGrep) Validate() error {
+	if a.Pattern == "" {
+		return errors.New("pattern is required")
 	}
 	return nil
 }
@@ -66,7 +86,7 @@ func (a XMLActionCat) GetType() string {
 }
 
 func (a XMLActionCat) GetCompilationTask() string {
-	return fmt.Sprintf("cat --number %s", a.Filename)
+	return fmt.Sprintf("cat --number %q", a.Filename)
 }
 
 func (a XMLActionCat) Validate() error {
@@ -89,7 +109,7 @@ func (a XMLActionMkdir) GetType() string {
 }
 
 func (a XMLActionMkdir) GetCompilationTask() string {
-	return fmt.Sprintf("mkdir -p %s", a.Path)
+	return fmt.Sprintf("mkdir -p %q", a.Path)
 }
 
 func (a XMLActionMkdir) Validate() error {
@@ -201,6 +221,12 @@ func (a *XMLActions) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 				a.Items = append(a.Items, item)
 			case "ed":
 				var item XMLActionEd
+				if err := d.DecodeElement(&item, &start); err != nil {
+					return err
+				}
+				a.Items = append(a.Items, item)
+			case "grep":
+				var item XMLActionGrep
 				if err := d.DecodeElement(&item, &start); err != nil {
 					return err
 				}
