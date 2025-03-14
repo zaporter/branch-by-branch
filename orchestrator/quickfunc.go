@@ -11,13 +11,13 @@ import (
 
 func qfStart() *cli.Command {
 	instanceRequests := map[string]*lambda.InstanceRequest{
-		"inf": {
-			Type:        regexp.MustCompile("^gpu_1x_h100.*$"),
-			Count:       1,
-			RegionMatch: regexp.MustCompile("us-.*"),
-			SetupCmd:    "/home/ubuntu/branch-by-branch/scripts/lambda-start-inference.sh",
-		},
-		"trn": {
+		// "infer": {
+		// 	Type:        regexp.MustCompile("^gpu_1x_h100.*$"),
+		// 	Count:       1,
+		// 	RegionMatch: regexp.MustCompile("us-.*"),
+		// 	SetupCmd:    "/home/ubuntu/branch-by-branch/scripts/lambda-start-inference.sh",
+		// },
+		"train": {
 			Type:        regexp.MustCompile("^gpu_1x_h100.*$"),
 			Count:       1,
 			RegionMatch: regexp.MustCompile("us-.*"),

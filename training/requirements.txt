@@ -5,3 +5,4 @@ peft>=0.14.0
 bitsandbytes>=0.45.1
 vllm==0.6.6.post1
 trl @ git+https://github.com/huggingface/trl.git@7347c292c3d18ff9209ad745ede6fce7e3b94155
+datasets==3

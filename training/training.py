@@ -376,6 +376,7 @@ class Trainer:
             update_params()
             
             if len(batch) >= args.batch_size:
+                r.set("inference:enabled", "false")
 
                 batchLosses = self.train_step_microbatch(batch, scale=2/3)
                 historyBatch = random.sample(list(all_data.values()), k=args.batch_size)

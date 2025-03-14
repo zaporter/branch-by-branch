@@ -35,6 +35,12 @@ def create_test_prompts(
                         prompt_logprobs=1,
                         max_tokens=128),
          LoRARequest("lora-test-1", 1, lora_path) if lora_path else None),
+        ("clear message",
+         SamplingParams(temperature=0.0,
+                        logprobs=1,
+                        prompt_logprobs=1,
+                        max_tokens=128),
+         LoRARequest("lora-test-1", 1, lora_path) if lora_path else None),
         ("The capital of USA is",
          SamplingParams(temperature=0.0,
                         logprobs=1,
@@ -113,7 +119,7 @@ def main():
     },
     {
         "name": "baseline",
-        'model': "/home/ubuntu/cache/models/meta/llama-3.3-70-instruct/base",
+        'model': "/home/ubuntu/cache/models/zap.../base",
         'quantization': None,
         'lora_path': None
     }
