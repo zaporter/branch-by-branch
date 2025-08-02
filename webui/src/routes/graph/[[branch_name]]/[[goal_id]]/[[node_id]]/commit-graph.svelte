@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		graphStateSchema,
 		isNodeLocator,
 		locatorFromString,
 		locatorToJSON,
@@ -21,6 +22,11 @@
 		onSelectNode: (locator: NodeLocator) => void;
 	}
 	const props: Props = $props();
+
+	let numNodes = $derived(props.graph.nodes.length);
+	let numSuccessNodes = $derived(
+		props.graph.nodes.filter((n) => n.result === 'node_result_success').length
+	);
 
 	let renderer: Sigma | undefined;
 	let container: HTMLElement;
@@ -113,26 +119,116 @@
 		// Add/update subgraph nodes and edges
 		const existingEdges = new Set(graphObject.edges());
 
+		// Build parent-child mapping for intelligent placement
+		const parentToChildren = new Map<string, string[]>();
+		const childToParent = new Map<string, string>();
+
+		for (const node of graph.nodes) {
+			const nodeId = locatorToJSON(node.locator);
+			for (const childLocator of node.children) {
+				const childId = locatorToJSON(childLocator);
+				if (!parentToChildren.has(nodeId)) {
+					parentToChildren.set(nodeId, []);
+				}
+				parentToChildren.get(nodeId)!.push(childId);
+				childToParent.set(childId, nodeId);
+			}
+		}
+
+		// Find root nodes (nodes with no parents)
+		const rootNodes = graph.nodes.filter((node) => !childToParent.has(locatorToJSON(node.locator)));
+
+		// Helper function to calculate intelligent position
+		const calculatePosition = (node: CommitGraphLocatorsNode): { x: number; y: number } => {
+			const nodeId = locatorToJSON(node.locator);
+			const parentId = childToParent.get(nodeId);
+
+			if (!parentId || !graphObject.hasNode(parentId)) {
+				// Root node - place at origin or in a small cluster if multiple roots
+				if (rootNodes.length === 1) {
+					return { x: 0, y: 0 };
+				} else {
+					const rootIndex = rootNodes.findIndex((n) => locatorToJSON(n.locator) === nodeId);
+					const angle = (rootIndex / rootNodes.length) * 2 * Math.PI;
+					const radius = 60;
+					return {
+						x: radius * Math.cos(angle),
+						y: radius * Math.sin(angle)
+					};
+				}
+			}
+
+			// Child node - place near parent with better spacing
+			const parentAttrs = graphObject.getNodeAttributes(parentId);
+			const parentX = parentAttrs.x || 0;
+			const parentY = parentAttrs.y || 0;
+
+			// Calculate offset based on depth and sibling index
+			const siblings = parentToChildren.get(parentId) || [];
+			const siblingIndex = siblings.indexOf(nodeId);
+			const numSiblings = siblings.length;
+
+			// More sophisticated distance calculation
+			// Deeper nodes get progressively closer to parents to reduce layout work
+			const depthFactor = Math.max(0.3, 1 - node.depth * 0.15);
+			const baseDistance = (40 + node.depth * 4) * depthFactor;
+
+			// Better sibling arrangement - use golden angle for better distribution
+			const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5 degrees
+			let siblingAngle;
+
+			if (numSiblings === 1) {
+				// Single child - place directly below parent
+				siblingAngle = Math.PI / 2;
+			} else if (numSiblings <= 6) {
+				// Few siblings - arrange in circle
+				const angleStep = (2 * Math.PI) / numSiblings;
+				siblingAngle = siblingIndex * angleStep;
+			} else {
+				// Many siblings - use golden angle spiral for better distribution
+				siblingAngle = siblingIndex * goldenAngle;
+			}
+
+			// Reduce randomness significantly for faster convergence
+			const randomnessFactor = Math.max(0.05, 0.3 - node.depth * 0.05);
+			const randomAngle = (Math.random() - 0.5) * Math.PI * 0.1 * randomnessFactor;
+			const randomDistance = (Math.random() - 0.5) * baseDistance * 0.1 * randomnessFactor;
+
+			const finalAngle = siblingAngle + randomAngle;
+			const finalDistance = baseDistance + randomDistance;
+
+			return {
+				x: parentX + finalDistance * Math.cos(finalAngle),
+				y: parentY + finalDistance * Math.sin(finalAngle)
+			};
+		};
+
 		// Add/update branch target nodes
 		let maxDepth = 0;
 		for (const node of graph.nodes) {
 			maxDepth = Math.max(maxDepth, node.depth);
 		}
-		for (const node of graph.nodes) {
+
+		// Sort nodes by depth to ensure parents are placed before children
+		const sortedNodes = [...graph.nodes].sort((a, b) => a.depth - b.depth);
+
+		for (const node of sortedNodes) {
 			const nodeId = locatorToJSON(node.locator);
 			const isSelected =
 				(selectedNode && locatorToJSON(node.locator) === locatorToJSON(selectedNode)) ?? false;
 			const objSize =
 				((maxDepth - Math.pow(node.depth, 0.8) + 1) * Math.max(10, 1)) /
-				Math.pow(graph.nodes.length, 0.45);
+					Math.pow(graph.nodes.length, 0.45) +
+				(isSelected ? 3 : 0);
 			if (graphObject.hasNode(nodeId)) {
 				graphObject.setNodeAttribute(nodeId, 'color', colorForNode(node, isSelected));
 				graphObject.setNodeAttribute(nodeId, 'label', labelForNode(node));
 				graphObject.setNodeAttribute(nodeId, 'size', objSize);
 			} else {
+				const position = calculatePosition(node);
 				graphObject.addNode(nodeId, {
-					x: Math.random() * 100,
-					y: Math.random() * 100,
+					x: position.x,
+					y: position.y,
 					size: objSize,
 					color: colorForNode(node, isSelected),
 					label: labelForNode(node)
@@ -160,7 +256,7 @@
 			}
 		}
 		if (firstTime) {
-			circular.assign(graphObject);
+			//circular.assign(graphObject);
 			firstTime = false;
 		}
 
@@ -234,4 +330,6 @@
 			</Button>
 		{/each}
 	</div>
+	<p>Num nodes: {numNodes}</p>
+	<p>Num success nodes: {numSuccessNodes}</p>
 </div>
