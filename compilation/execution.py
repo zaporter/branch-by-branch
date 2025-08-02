@@ -66,7 +66,7 @@ def git_checkout(branch_name: str):
     execGit(f"git pull origin {branch_name} --ff-only", repo_dir)
 
 def git_push(branch_name: str):
-    execGit(f"git push origin {branch_name}", repo_dir)
+    execGit(f"git push origin {branch_name} --force", repo_dir)
 
 def git_commit(commit_msg: str):
     execGit(f"git add . && git commit -m {commit_msg} --allow-empty", repo_dir)
@@ -177,8 +177,13 @@ def execute(task: dict) -> dict:
         print(f"Executing command {cmd['name']}")
         print(f"Command script: {cmd['script']}")
         try:
+            script = cmd['script']
+            # replace /dev/stdin with /dev/zero
+            # This is a temp hack. The model tried to read from /dev/stdin which caused this to hang.
+            # TODO: Solve this properly.
+            script = script.replace("/dev/stdin", "/dev/zero")
             exit_code, output = container.exec_run(
-                cmd=f"/bin/bash -c '{cmd['script']}'",
+                cmd=f"/bin/bash -c '{script}'",
                 workdir="/home/ubuntu/repo"
             )
         except Exception as e:  

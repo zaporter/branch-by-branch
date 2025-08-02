@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"os"
 	"strings"
@@ -386,7 +387,7 @@ func (rg *RepoGraph) AddNodeToCommitGraph(parentLocator NodeLocator, inferenceOu
 	return NodeLocatorFromTriplet(parentSlice.BranchTarget.BranchName, parentSlice.CommitGraph.GoalID, newNode.ID), nil
 }
 
-func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *CompilationTaskResponse, maxDepth int) error {
+func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *CompilationTaskResponse, maxDepth int, goalProvider GoalProvider) error {
 	slice, err := rg.GetNodeSlice(locator)
 	if err != nil {
 		return err
@@ -430,6 +431,15 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 	} else {
 		// After compiling the output, we are able to produce a new prompt
 		node.State = NodeStateAwaitingInference
+		newTask, err := rg.BuildInferenceTaskForNode(locator, goalProvider)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if len(newTask.Prompt) > 80000 {
+			log.Default().Printf("Marking node %v done due to context exhaustion failure\n", node.ID)
+			node.State = NodeStateDone
+			node.Result = NodeResultContextExhaustionFailure
+		}
 	}
 
 	rg.tickUpdateCommitGraph(slice.AsCommitGraphSlice())
@@ -553,7 +563,7 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	sb.WriteString("<ls>directory-name</ls>\n\tList all files in $directory-name. Supports \".\" to mean the root of the repository\n")
 	sb.WriteString("<cat>filename</cat>\n\tPrints the contents of $filename (including line numbers)\n")
 	sb.WriteString("<mkdir>new-directory</mkdir>\n\tInvokes the equivalent of mkdir -p $new-directory\n")
-	sb.WriteString("<ed>script</ed>\n\tEdit existing files & creating new ones. $script can be multiple lines and will be executed with the text-editor ed (without a default open file).\n")
+	sb.WriteString("<ed>script</ed>\n\tEdit existing files & creating new ones. $script can be multiple lines and will be executed with the text-editor ed (without a default open file. YOU MUST EXPLICITLY WRITE TO THE DESIRED FILE). If there is a syntax error, ed will just respond with the ? character.\n")
 	sb.WriteString("<grep>pattern</grep>\n\tSearch for $pattern in all files in the repo. (Supports perl-compatible regex)\n")
 	sb.WriteString("<git-status/>\n\tSee all uncommitted changes.\n")
 	sb.WriteString("<git-commit/>\n\tFinish your work on the repo. Assistant's work will be run though CI and reviewed. Assistant will no longer be able to perform any steps or actions. This should only be executed once the repo is in a working state, is formatted well, and is ready to show to others. It is a syntax-error to put any actions after the commit action.\n")
@@ -656,7 +666,6 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	}
 
 	sb.WriteString("Assistant's next step:\n")
-
 	return InferenceTask{
 		Prompt: sb.String(),
 	}, nil

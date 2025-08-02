@@ -43,7 +43,7 @@ func (a XMLActionLs) GetType() string {
 }
 
 func (a XMLActionLs) GetCompilationTask() string {
-	return fmt.Sprintf("ls %q", a.Path)
+	return fmt.Sprintf("ls --classify %q", a.Path)
 }
 
 func (a XMLActionLs) Validate() error {

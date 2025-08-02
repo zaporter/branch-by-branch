@@ -547,7 +547,7 @@ func (o *Orchestrator) startCompilationRx() {
 					o.logger.Fatal().Msg("compilation output reader is missing locator for task ID")
 				}
 				response := CompilationTaskResponseFromJSON(val.Result)
-				err := o.RepoGraph.HandleCompilationOutput(locator, &response, MaxCommitGraphDepth)
+				err := o.RepoGraph.HandleCompilationOutput(locator, &response, MaxCommitGraphDepth, o.GoalProvider)
 				if err != nil {
 					o.logger.Fatal().Err(err).Msg("error handling compilation output")
 				}

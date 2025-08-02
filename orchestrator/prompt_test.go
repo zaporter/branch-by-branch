@@ -22,7 +22,7 @@ func TestMarshal(t *testing.T) {
 
 	// Verify the marshalled XML
 	expected := `<actions>
-	<ls>./test.txt</ls>
+	<ls>.</ls>
 	<cat>./test.txt</cat>
 	<git-status/>
 </actions>`
