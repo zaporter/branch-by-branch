@@ -200,7 +200,7 @@ func CreateOrchestratorCli() *cli.Command {
 
 const (
 	MaxCommitGraphDepth   = 6
-	MaxSimultaneousGraphs = 1
+	MaxSimultaneousGraphs = 2
 )
 
 type Orchestrator struct {

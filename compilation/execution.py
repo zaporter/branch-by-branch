@@ -182,6 +182,8 @@ def execute(task: dict) -> dict:
             # This is a temp hack. The model tried to read from /dev/stdin which caused this to hang.
             # TODO: Solve this properly.
             script = script.replace("/dev/stdin", "/dev/zero")
+            # Escape single quotes in the script to prevent quote issues
+            script = script.replace("'", "'\"'\"'")
             exit_code, output = container.exec_run(
                 cmd=f"/bin/bash -c '{script}'",
                 workdir="/home/ubuntu/repo"
@@ -205,8 +207,10 @@ def execute(task: dict) -> dict:
     if not hasFailed:
         print(f"Executing compilation script: {task['compilation_script']}")
         try:
+            # Escape single quotes in the compilation script to prevent quote issues
+            compilation_script = task['compilation_script'].replace("'", "'\"'\"'")
             exit_code, output = container.exec_run(
-                cmd=f"/bin/bash -c '{task['compilation_script']}'",
+                cmd=f"/bin/bash -c '{compilation_script}'",
                 workdir="/home/ubuntu/repo"
             )
         except Exception as e:
