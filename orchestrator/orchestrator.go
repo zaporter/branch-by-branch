@@ -199,7 +199,7 @@ func CreateOrchestratorCli() *cli.Command {
 }
 
 const (
-	MaxCommitGraphDepth   = 6
+	MaxCommitGraphDepth   = 8
 	MaxSimultaneousGraphs = 1
 )
 

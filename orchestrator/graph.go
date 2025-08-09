@@ -88,6 +88,8 @@ const (
 	NodeResultContextExhaustionFailure NodeResult = "node_result_context_exhaustion"
 	// was in a non-terminal state but had been requested to be terminated
 	NodeResultTerminated NodeResult = "node_result_terminated"
+	// was aborted by the model
+	NodeResultAborted NodeResult = "node_result_aborted"
 )
 
 type GraphState string
@@ -404,6 +406,7 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 	node := slice.CommitGraphNode
 
 	gitCommitDiffPatch := ""
+	didAbort := false
 	for _, res := range result.PreCommandsResults {
 		node.ActionOutputs = append(node.ActionOutputs, ActionOutput{
 			ActionName: res.ActionName,
@@ -413,10 +416,16 @@ func (rg *RepoGraph) HandleCompilationOutput(locator NodeLocator, result *Compil
 		if res.ActionName == "git-commit" && res.ExitCode == 0 {
 			gitCommitDiffPatch = res.Out
 		}
+		if res.ActionName == "abort" {
+			didAbort = true
+		}
 	}
 	node.CompilationResult = &result.CompilationResult
 
-	if gitCommitDiffPatch != "" {
+	if didAbort {
+		node.State = NodeStateDone
+		node.Result = NodeResultAborted
+	} else if gitCommitDiffPatch != "" {
 		node.State = NodeStateDone
 		if node.CompilationResult.ExitCode == 0 {
 			node.Result = NodeResultSuccess
@@ -567,17 +576,13 @@ func (rg *RepoGraph) BuildInferenceTaskForNode(nodeLocator NodeLocator, goalProv
 	sb.WriteString("<grep>pattern</grep>\n\tSearch for $pattern in all files in the repo. (Supports perl-compatible regex)\n")
 	sb.WriteString("<git-status/>\n\tSee all uncommitted changes.\n")
 	sb.WriteString("<git-commit/>\n\tFinish your work on the repo. Assistant's work will be run though CI and reviewed. Assistant will no longer be able to perform any steps or actions. This should only be executed once the repo is in a working state, is formatted well, and is ready to show to others. It is a syntax-error to put any actions after the commit action.\n")
+	sb.WriteString("<abort/>\n\tAbort the current task. This should be used sparingly. This should be used when Assistant has gone off the rails and is no longer likely to succeed. If present, no other actions are allowed.\n")
 	sb.WriteString("\n")
 	sb.WriteString("The reasoning process and actions are enclosed within <think> </think> and ")
 	sb.WriteString("<actions> </actions> tags, respectively. For example a valid response from Assistant would be:\n")
 	sb.WriteString("<think> reasoning process here </think>\n ")
 	sb.WriteString("<actions> <ls>.</ls> <git-status/> ... </actions>\n")
 	sb.WriteString("\n")
-	// sb.WriteString("IMPORTANT HINTS:\n")
-	// sb.WriteString("\tTest.lean is READ ONLY. ASSISTANT CANNOT WRITE TO IT. The proof must be added to the Corelib directory.\n")
-	// sb.WriteString("\tWhen you finish editing a file, you must end your script with 'w filetowrite.lean' otherwise ed won't know which file to write to.\n")
-	// sb.WriteString("\tI recommend reading and editing Corelib/Data/Nat/Basic.lean and/or Corelib/Data/Nat/Defs.lean. That will help you solve the problem.\n")
-	// sb.WriteString("\n")
 	sb.WriteString("Assistant will get the ability to perform multiple steps so it is expected that they will use the first few steps to gather information\n\n")
 
 	goal := goalProvider.GetGoal(slice.CommitGraph.GoalID)

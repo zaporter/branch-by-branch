@@ -66,6 +66,7 @@ export const nodeResultSchema = z.enum([
     'node_result_depth_exhaustion',
     'node_result_context_exhaustion',
     'node_result_terminated',
+    'node_result_aborted',
 ]);
 export type NodeResult = z.infer<typeof nodeResultSchema>;
 export const graphStateSchema = z.enum([

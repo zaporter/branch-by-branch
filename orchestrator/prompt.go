@@ -185,6 +185,21 @@ func (a XMLActionGitCommit) Validate() error {
 	return nil
 }
 
+type XMLActionAbort struct {
+	XMLName xml.Name `xml:"abort"`
+}
+
+func (a XMLActionAbort) GetType() string {
+	return "abort"
+}
+
+func (a XMLActionAbort) GetCompilationTask() string {
+	return "echo ABORTED"
+}
+func (a XMLActionAbort) Validate() error {
+	return nil
+}
+
 // UnmarshalXML implements custom unmarshalling to preserve order
 func (a *XMLActions) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	a.Items = []XMLAction{}
@@ -243,6 +258,12 @@ func (a *XMLActions) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 					return err
 				}
 				a.Items = append(a.Items, item)
+			case "abort":
+				var item XMLActionAbort
+				if err := d.DecodeElement(&item, &start); err != nil {
+					return err
+				}
+				a.Items = append(a.Items, item)
 			}
 		}
 	}
@@ -276,6 +297,7 @@ func (a XMLActions) ToXML() (string, error) {
 	// https://github.com/golang/go/issues/21399
 	asString = strings.ReplaceAll(asString, "<git-status></git-status>", "<git-status/>")
 	asString = strings.ReplaceAll(asString, "<git-commit></git-commit>", "<git-commit/>")
+	asString = strings.ReplaceAll(asString, "<abort></abort>", "<abort/>")
 	// hackery to ensure Marshal(Unmarshal(input)) == input (mostly)
 	// (got around this by using ,innerxml, however, this may not always work)
 	/*
@@ -299,8 +321,14 @@ func ActionsFromXML(input string) (XMLActions, error) {
 }
 
 // Validate ensures that if git-commit is present, then it is the last action
+// and that abort is the only action if present.
 func (actions *XMLActions) Validate() error {
 	for i, action := range actions.Items {
+		if action.GetType() == "abort" {
+			if len(actions.Items) != 1 {
+				return errors.New("abort must be the only action if present")
+			}
+		}
 		if action.GetType() == "git-commit" {
 			if i != len(actions.Items)-1 {
 				return errors.New("git-commit must be the last action")

@@ -15,7 +15,7 @@
 	const setCommitGraphState = $derived(async (state: GraphState) => {
 		await $setCommitGraphStateMutation.mutateAsync({
 			commit_graph_locator: props.locator,
-			state: state
+			state
 		});
 		await $query.refetch();
 	});
