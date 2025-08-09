@@ -213,6 +213,23 @@ export const createDeleteNodeMutation = (locator: NodeLocator) => {
     });
 }
 
+// @api /api/graph/set-commit-graph-state
+export const setCommitGraphStateRequestSchema = z.object({
+    commit_graph_locator: commitGraphLocatorSchema,
+    state: graphStateSchema,
+})
+export type SetCommitGraphStateRequest = z.infer<typeof setCommitGraphStateRequestSchema>;
+
+export const createSetCommitGraphStateMutation = () => {
+    return createMutation({
+        mutationFn: (request: SetCommitGraphStateRequest) => fetch(`${beHost}/api/graph/set-commit-graph-state`, {
+            method: 'POST',
+            body: JSON.stringify(request),
+        })
+            .then(res => res.text()),
+    });
+}
+
 // @api /api/graph/create-node
 export const createNodeRequestSchema = z.object({
     parent_node_locator: nodeLocatorSchema,

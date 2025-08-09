@@ -98,6 +98,7 @@
 		<AlertDialog.Root
 			open={saveGoldenSampleDialogOpen}
 			onOpenChange={(open) => {
+				
 				saveGoldenSampleDialogOpen = open;
 			}}
 		>

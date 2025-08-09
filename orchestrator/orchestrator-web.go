@@ -210,6 +210,30 @@ func (o *Orchestrator) RegisterHandlers(mux *http.ServeMux) {
 		json.NewEncoder(w).Encode(response)
 	})
 
+	mux.HandleFunc("/api/graph/set-commit-graph-state", func(w http.ResponseWriter, r *http.Request) {
+		setupHeader(&w, true)
+		type Request struct {
+			CommitGraphLocator CommitGraphLocator `json:"commit_graph_locator"`
+			State              GraphState         `json:"state"`
+		}
+		var request Request
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		slice, err := o.RepoGraph.GetCommitGraphSlice(request.CommitGraphLocator)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		o.logger.Info().Msgf("setting commit graph state to %s from %s", request.State, slice.CommitGraph.State)
+		slice.CommitGraph.State = request.State
+		w.Write([]byte("{}"))
+	})
+
 	mux.HandleFunc("/api/graph/node-stats", func(w http.ResponseWriter, r *http.Request) {
 		setupHeader(&w, true)
 		var request NodeLocator

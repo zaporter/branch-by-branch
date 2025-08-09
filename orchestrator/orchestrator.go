@@ -200,7 +200,7 @@ func CreateOrchestratorCli() *cli.Command {
 
 const (
 	MaxCommitGraphDepth   = 6
-	MaxSimultaneousGraphs = 2
+	MaxSimultaneousGraphs = 1
 )
 
 type Orchestrator struct {
@@ -335,7 +335,6 @@ func (o *Orchestrator) startGoalCompilationTx() {
 				case goalCompilationInput <- *toAdd:
 					numAdded += 1
 				}
-
 			}
 		}
 
