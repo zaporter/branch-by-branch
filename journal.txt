@@ -1,3 +1,13 @@
+## 2025-08-09
+
+It has been a while.
+
+I've been working on graph-natmany.json which should hopefully allow me to test the training loop on a few example golden graphs (where the solution is already there and it can compete against my answers).
+
+Notes: 
+- I hate the way we do XML escaping. Doing =&gt; is very silly instead of =>.
+- There is a bug in the way that we do goal spawining on a BT. It is respawning problems that have already been solved along an edge and it also spawns problems that were solved by a sibling.
+
 ## 2025-03-14
 
 ./training/run_training.sh finetune.py --model "zap/llama-3.1-8-r64" --adapter pissa_init --new_adapter_name test --train_data `pwd`/golden_samples.jsonl
