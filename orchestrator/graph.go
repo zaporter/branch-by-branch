@@ -380,6 +380,10 @@ func (rg *RepoGraph) AddNodeToCommitGraph(parentLocator NodeLocator, inferenceOu
 	// (easier here before pulling this off to queue)
 	parsed, err := ParseModelResponse(inferenceOutput)
 	if err != nil || parsed.Actions.Validate() != nil {
+		newNode.CompilationResult = &CompilationResult{
+			ExitCode: 1,
+			Out:      "Syntax error in inference output: " + err.Error(),
+		}
 		newNode.State = NodeStateDone
 		newNode.Result = NodeResultSyntaxFailure
 	}
@@ -694,6 +698,9 @@ func (rg *RepoGraph) BuildCompilationTasksForNode(nodeLocator NodeLocator) (Comp
 	for _, action := range parsedAction.Actions.Items {
 		task := action.GetCompilationTask()
 		if task != "" {
+			// We unescape the XML here because the model is expected to escape it
+			// but we need to unescape it before it is executed.
+			task = UnescapeXML(task)
 			preCommands = append(preCommands, CompilationPreCommand{
 				Name:   action.GetType(),
 				Script: task,

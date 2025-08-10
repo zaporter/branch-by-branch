@@ -406,6 +406,15 @@ func (r ParsedModelResponse) ToXML() (string, error) {
 	return fmt.Sprintf("<response>\n%s\n%s\n</response>", thoughtXML, actionsXML), nil
 }
 
+func UnescapeXML(input string) string {
+	unescaped := strings.ReplaceAll(input, "&lt;", "<")
+	unescaped = strings.ReplaceAll(unescaped, "&gt;", ">")
+	unescaped = strings.ReplaceAll(unescaped, "&amp;", "&")
+	unescaped = strings.ReplaceAll(unescaped, "&quot;", "\"")
+	unescaped = strings.ReplaceAll(unescaped, "&apos;", "'")
+	return unescaped
+}
+
 type PreviousStep struct {
 	CompilationOutput string
 	ModelResponse     ParsedModelResponse
