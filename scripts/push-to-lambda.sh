@@ -23,4 +23,4 @@ rsync -zrv \
     --exclude=webui \
     --exclude=lean_corelib/.lake \
     . \
-    ubuntu@$IP:/home/ubuntu/branch-by-branch
+    "$IP":/home/ubuntu/branch-by-branch
