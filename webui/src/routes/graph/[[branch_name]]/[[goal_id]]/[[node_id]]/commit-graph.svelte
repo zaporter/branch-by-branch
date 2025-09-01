@@ -85,6 +85,14 @@
 	let firstTime = true;
 
 	function updateGraph({ graph, selectedNode, onSelectNode }: Props) {
+		let maxRenderDepth = 5;
+		graph.nodes = graph.nodes.filter((node) => node.depth <= maxRenderDepth);
+		// For each node, remove all children if maxRenderDepth == node.depth
+		graph.nodes.forEach((node) => {
+			if (node.depth === maxRenderDepth) {
+				node.children = [];
+			}
+		});
 		if (!container) return;
 
 		// Create graph object only if it doesn't exist

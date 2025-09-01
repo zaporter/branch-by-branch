@@ -106,11 +106,17 @@
 			{:else if $commitGraphQuery.isError}
 				<p>Error: {$commitGraphQuery.error.message}</p>
 			{:else if $commitGraphQuery.data}
-				<CommitGraph
-					graph={$commitGraphQuery.data}
-					selectedNode={currentNodeLocator}
-					{onSelectNode}
-				/>
+				{#if $commitGraphQuery.data.nodes.length < 100000}
+					<CommitGraph
+						graph={$commitGraphQuery.data}
+						selectedNode={currentNodeLocator}
+						{onSelectNode}
+					/>
+				{:else}
+					<p>
+						Too many nodes to render in this browser. Nodes: {$commitGraphQuery.data.nodes.length}
+					</p>
+				{/if}
 			{/if}
 		{/if}
 	</div>
