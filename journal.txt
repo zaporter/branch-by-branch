@@ -70,6 +70,8 @@ I am going to up the batch size to 32+32 and see if that improves things.
 
 graph-natmany4:
 
+Failure. Need to improve my training loop resiliency. It keeps crashing on some bad samples. I blame my libraries.
+
 
 
 ## 2025-08-10
