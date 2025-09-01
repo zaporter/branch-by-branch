@@ -1,3 +1,92 @@
+## Training loop
+
+graph-natmany1:
+Date: 2025-08-10
+Stats: TODO
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:enabled: false
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:base_model: zap/llama-70-pissa-r64-i2
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:adapter: pissa_init
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:batch_size: 8
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:load_format: bitsandbytes
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:max_model_len: 40000
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:gpu_memory_utilization: 0.95
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:max_new_tokens: 512
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:num_return_sequences: 4
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:num_beams: 6
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > inference:stop_string: </actions>
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > training:base_model: zap/llama-70-pissa-r64-i2
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > training:adapter: pissa_init
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > training:do_update_adapter: true
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > training:autogroup_tokens: 399
+2025-08-11T00:44:12-04:00 INF orchestrator/router.go:109 > execution:repo_url: ssh://root@178.156.147.226:2222/zaporter/byb-v1.git
+
+
+graph-natmany2:
+Date: 2025-08-11
+Stats: TODO
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:enabled: true
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:base_model: zap/llama-70-pissa-r64-i2
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:adapter: adapter-2025-08-11T04:18:21
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:batch_size: 8
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:load_format: bitsandbytes
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:max_model_len: 40000
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:gpu_memory_utilization: 0.95
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:max_new_tokens: 512
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:num_return_sequences: 4
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:num_beams: 6
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > inference:stop_string: </actions>
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > training:base_model: zap/llama-70-pissa-r64-i2
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > training:adapter: adapter-2025-08-11T04:18:21
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > training:do_update_adapter: true
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > training:autogroup_tokens: 30000
+2025-08-11T22:56:46-04:00 INF orchestrator/router.go:109 > execution:repo_url: ssh://root@178.156.147.226:2222/zaporter/byb-v1.git
+Notes: This was only trained for a few hours -- it ran out of VRAM during the training. 
+Notable performance improvement over graph-natmany1.
+
+
+graph-natmany3:
+Date: 2025-08-12
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:enabled: false
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:base_model: zap/llama-70-pissa-r64-i2
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:adapter: adapter-2025-08-12T09:29:32
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:batch_size: 8
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:load_format: bitsandbytes
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:max_model_len: 40000
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:gpu_memory_utilization: 0.95
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:max_new_tokens: 512
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:num_return_sequences: 4
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:num_beams: 6
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > inference:stop_string: </actions>
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > training:base_model: zap/llama-70-pissa-r64-i2
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > training:adapter: adapter-2025-08-12T09:29:32
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > training:do_update_adapter: true
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > training:autogroup_tokens: 25000
+2025-08-12T09:30:35-04:00 INF orchestrator/router.go:109 > execution:repo_url: ssh://root@178.156.147.226:2222/zaporter/byb-v1.git
+Notes: Also only trained for a few hours. Bug in a transitive dep. Unsure how to fix. Continued training after failure for a few steps.
+
+TERRIBLE. Complete model collapse. Didn't understand the &gt; and &lt; and so it started just repeating those characters forever.
+
+I am going to up the batch size to 32+32 and see if that improves things. 
+
+graph-natmany4:
+
+
+
+## 2025-08-10
+
+Today I ran the first big run from graph-natmany.json with the goal of generating enough data that PISSA will actually help instead of hurt. 
+
+Observations:
+- Max depth = 8 produces a lot of children. 4^8 = 65k. I didn't run succ_pos_two to completion. Ended around 14k nodes. It had 36 successful children at that point!. 
+- Two_pos produced 14 unique BTs. That is going to be a bigger problem than I expected. I am not sure what to do about that just yet.
+- Gitea is pinning all 4 cores on the hetzner machine
+- <abort/> is naturally occuring (but it is quite rare)
+- My inference queue sizes were terrible (50 minute latency)
+- The training setup sucks at visibility
+- out of 50k? 40k? samples, we got 2630 data points (pretty good! (most of them are correcting syntax))
+
+
+
 ## 2025-08-09
 
 It has been a while.
