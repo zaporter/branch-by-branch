@@ -46,27 +46,30 @@ func createOrchestratorStartCli() *cli.Command {
 			// otherwise, nil
 			rg.ShouldAdvertiseChan = make(chan CommitGraphLocator, 128)
 		}
+		// Avg processing time per task is 36 seconds (with 8 gpus).
+		// At with a queue size of 24+4 with each task taking 36 seconds,
+		// we end up at 16.8 minutes of latency.
 		inferenceSchedulingParams := SchedulingParams{
-			MinTaskQueueSize:      32,
-			MaxTaskQueueSize:      64,
+			MinTaskQueueSize:      16, // bs = 8, nodes = 2
+			MaxTaskQueueSize:      24,
 			TaskProcessingTimeout: 5 * time.Minute,
 			CamShaftInterval:      1 * time.Second,
 			CrankShaftInterval:    1 * time.Second,
 			TimingBeltInterval:    2 * time.Second,
 			ODBInterval:           10 * time.Second,
-			InputChanSize:         32,
-			OutputChanSize:        32,
+			InputChanSize:         4,
+			OutputChanSize:        8,
 		}
 		compilationSchedulingParams := SchedulingParams{
-			MinTaskQueueSize:      32,
-			MaxTaskQueueSize:      64,
+			MinTaskQueueSize:      16,
+			MaxTaskQueueSize:      24,
 			TaskProcessingTimeout: 2 * time.Minute,
 			CamShaftInterval:      1 * time.Second,
 			CrankShaftInterval:    1 * time.Second,
 			TimingBeltInterval:    2 * time.Second,
 			ODBInterval:           10 * time.Second,
-			InputChanSize:         32,
-			OutputChanSize:        32,
+			InputChanSize:         4,
+			OutputChanSize:        8,
 		}
 		inferenceEngine := NewEngine(ctx, EngineJobNameInference, rdb, inferenceSchedulingParams)
 		compilationEngine := NewEngine(ctx, EngineJobNameCompilation, rdb, compilationSchedulingParams)

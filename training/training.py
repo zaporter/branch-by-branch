@@ -21,8 +21,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--pissa_load_and_save", type=bool, required=False, default=False)
 parser.add_argument("--pissa_quantize_res", type=bool, required=False, default=False)
 parser.add_argument("--new_model_name", type=str, required=False, default=None)
-parser.add_argument("--learning_rate", type=float, default=6e-6)
-parser.add_argument("--batch_size", type=int, default=4)
+parser.add_argument("--learning_rate", type=float, default=3e-6)
+parser.add_argument("--batch_size", type=int, default=8)
 args = parser.parse_args()
 
 redisHost = os.getenv('REDIS_ADDRESS') or 'err no host'
@@ -137,7 +137,7 @@ def load_trainer():
         trust_remote_code=True,
         low_cpu_mem_usage=True,
         quantization_config=bnb_config,
-        max_position_embeddings=8192,
+        max_position_embeddings=65536,
         device_map="auto",
         use_cache=False  # Disable KV cache during training
     )
@@ -165,7 +165,7 @@ def load_trainer():
         model=model, 
         model_id=local_adapter_dir(params["training_base_model"], params["training_adapter"]),
         config=lora_config,
-        max_position_embeddings=8192,
+        max_position_embeddings=65536,
         is_trainable=True,
     )
     
@@ -280,7 +280,7 @@ class Trainer:
                 # TODO: Does this belong here?
                 token_budget -= prompt_token_count[0]
                 token_budget -= token_count[0]
-                # fuck 
+                # fuck (this refers to the ugly i>0 statement because if the prompt is too long, we will hit this on i=0)
                 if token_budget < 0 and i > 0:
                     autoGroups.append({"prompt": group["prompt"], "outputs": nextGroup})
                     nextGroup = []

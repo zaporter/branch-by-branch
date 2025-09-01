@@ -10,12 +10,13 @@ import (
 )
 
 type WeightedOutputData struct {
-	NodeID           NodeID  `json:"node_id"`
-	Output           string  `json:"output"`
-	Advantage        float64 `json:"advantage"`
-	RawAdvantage     float64 `json:"raw_advantage"`
-	RawReward        float64 `json:"raw_reward"`
-	NormalizedReward float64 `json:"normalized_reward"`
+	NodeID           NodeID     `json:"node_id"`
+	Output           string     `json:"output"`
+	Result           NodeResult `json:"result"`
+	Advantage        float64    `json:"advantage"`
+	RawAdvantage     float64    `json:"raw_advantage"`
+	RawReward        float64    `json:"raw_reward"`
+	NormalizedReward float64    `json:"normalized_reward"`
 }
 
 type CommitGraphNodeData struct {
@@ -69,6 +70,7 @@ func (rg *RepoGraph) ExtractData(cgLocator CommitGraphLocator, goalProvider Goal
 			outputs = append(outputs, &WeightedOutputData{
 				NodeID:           childId,
 				Output:           child.InferenceOutput,
+				Result:           child.Result,
 				Advantage:        0.0,
 				RawReward:        reward,
 				NormalizedReward: 0.0,
@@ -139,12 +141,39 @@ func (rg *RepoGraph) ExtractData(cgLocator CommitGraphLocator, goalProvider Goal
 					}
 					sumOfAdvantages += outputChild.RawAdvantage
 				}
-				output.RawAdvantage = sumOfAdvantages
+				// adv normalized with number of children
+				output.RawAdvantage = sumOfAdvantages / math.Max(1.0, float64(len(outputChild.Outputs)))
 				seen[output.NodeID] = true
 				numUpdated++
 			}
 		}
 	}
+	// Apply aborting aware reward
+	for _, node := range nodes {
+		sumOfRawAdvantages := 0.0
+		for _, output := range node.Outputs {
+			sumOfRawAdvantages += output.RawAdvantage
+		}
+		for _, output := range node.Outputs {
+			// If the node is aborted and the sum of advantages is greater than 0.01,
+			// then we should not have aborted and we should penalize it.
+			// Else, the raw advantage is 0, meaning the siblings failed, so aborting was the correct action.
+			if output.Result == NodeResultAborted && sumOfRawAdvantages > 0.01 {
+				output.RawAdvantage = -1.0
+			} else if output.Result == NodeResultAborted && sumOfRawAdvantages < 0.01 {
+				output.RawAdvantage = 1.0
+			}
+		}
+	}
+	// Apply syntax error penalty
+	for _, node := range nodes {
+		for _, output := range node.Outputs {
+			if output.Result == NodeResultSyntaxFailure {
+				output.RawAdvantage -= 0.5
+			}
+		}
+	}
+	// Apply advantage normalization
 	for _, node := range nodes {
 		sumOfAdvantages := 0.0
 		for _, output := range node.Outputs {

@@ -382,7 +382,7 @@ func (rg *RepoGraph) AddNodeToCommitGraph(parentLocator NodeLocator, inferenceOu
 	if err != nil || parsed.Actions.Validate() != nil {
 		newNode.CompilationResult = &CompilationResult{
 			ExitCode: 1,
-			Out:      "Syntax error in inference output: " + err.Error(),
+			Out:      fmt.Sprintf("Syntax error in inference output: %v", err),
 		}
 		newNode.State = NodeStateDone
 		newNode.Result = NodeResultSyntaxFailure
