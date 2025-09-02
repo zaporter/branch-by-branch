@@ -6,6 +6,8 @@ https://github.com/huggingface/accelerate/blob/main/examples/nlp_example.py
 Fine-tune a BERT model with DeepSpeed ZeRO-3 and Ray Train and Ray Data
 """
 
+import random
+import string
 from tempfile import TemporaryDirectory
 
 import deepspeed
@@ -132,8 +134,8 @@ if __name__ == "__main__":
             },
         },
         "scheduler": {"type": "WarmupLR", "params": {"warmup_num_steps": 100}},
-        "fp16": {"enabled": True},
-        "bf16": {"enabled": False},  # Turn this on if using AMPERE GPUs.
+        "fp16": {"enabled": False},
+        "bf16": {"enabled": True},
         "zero_optimization": {
             "stage": 3,
             "offload_optimizer": {
@@ -152,18 +154,32 @@ if __name__ == "__main__":
 
     training_config = {
         "seed": 42,
-        "num_epochs": 3,
-        "train_batch_size": 16,
-        "eval_batch_size": 32,
+        "num_epochs": 5,
+        "train_batch_size": "auto",
+        "eval_batch_size": "auto",
         "deepspeed_config": deepspeed_config,
     }
 
     # Prepare Ray Datasets
-    hf_datasets = load_dataset("glue", "mrpc")
+    # Our dataset is a list of 10000 strings and their reverse 
+    # train_dataset = []
+    # validation_dataset = []
+    # for i in range(10000):
+    #     random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    #     train_dataset.append({"sentence1": random_string, "sentence2": random_string[::-1]})
+    #     validation_dataset.append({"sentence1": random_string, "sentence2": random_string[::-1]})
+    # print("train_dataset[0]:", train_dataset[0])
+    # print("validation_dataset[0]:", validation_dataset[0])
     ray_datasets = {
-        "train": ray.data.from_huggingface(hf_datasets["train"]),
-        "validation": ray.data.from_huggingface(hf_datasets["validation"]),
+        "train": ray.data.from_items(train_dataset),
+        "validation": ray.data.from_items(validation_dataset),
     }
+
+    # hf_datasets = load_dataset("glue", "mrpc")
+    # ray_datasets = {
+    #     "train": ray.data.from_huggingface(hf_datasets["train"]),
+    #     "validation": ray.data.from_huggingface(hf_datasets["validation"]),
+    # }
 
     trainer = TorchTrainer(
         train_func,
@@ -174,12 +190,10 @@ if __name__ == "__main__":
         # If running in a multi-node cluster, this is where you
         # should configure the run's persistent storage that is accessible
         # across all worker nodes.
-        # run_config=ray.train.RunConfig(storage_path="s3://..."),
+        run_config=ray.train.RunConfig(storage_path="/data/zaporter/ray"),
     )
 
     result = trainer.fit()
 
     # Retrieve the best checkponints from results
     _ = result.best_checkpoints
-
-# __deepspeed_torch_basic_example_end__

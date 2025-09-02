@@ -5,11 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "datasets>=4.0.0",
+    "accelerate>=1.10.1",
+    # Required for ray_data's call to datasets.init_dynamic_modules
+    "datasets==2.14.5",
     "deepspeed>=0.17.5",
+    "evaluate>=0.4.5",
     "pandas",
-    "pyarrow",
+    # Required for some ray nonsense within datasets
+    "pyarrow==20.0.0",
     "ray[default]==2.49.0",
+    "scikit-learn>=1.7.1",
     "torchmetrics>=1.8.1",
+    "transformers>=4.56.0",
     "vllm==0.10.0",
 ]
