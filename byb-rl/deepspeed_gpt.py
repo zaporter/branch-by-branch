@@ -6,7 +6,7 @@ import ray
 from datasets import load_dataset
 model_name = "EleutherAI/gpt-j-6B"
 use_gpu = True
-num_workers = 4
+num_workers = 12
 cpus_per_worker = 8
 
 # ray.init()
@@ -80,12 +80,41 @@ from ray.train.huggingface.transformers import prepare_trainer, RayTrainReportCa
 
 
 def train_func(config):
+    import sys
+    import time
+    
+    print("Starting train_func...")
+    sys.stdout.flush()
+    
+    # Get Ray Train context safely
+    try:
+        context = train.get_context()
+        rank = context.get_world_rank()
+        world_size = context.get_world_size()
+        local_rank = context.get_local_rank()
+        print(f"[Rank {rank}/{world_size}] Ray context initialized - local_rank={local_rank}")
+    except Exception as e:
+        print(f"Error getting Ray context: {e}")
+        rank = 0
+        world_size = 1
+        local_rank = 0
+    
+    sys.stdout.flush()
+    
     # Use the actual number of CPUs assigned by Ray
-    os.environ["OMP_NUM_THREADS"] = str(
-        train.get_context().get_trial_resources().bundles[-1].get("CPU", 1)
-    )
+    try:
+        cpu_count = train.get_context().get_trial_resources().bundles[-1].get("CPU", 1)
+        os.environ["OMP_NUM_THREADS"] = str(cpu_count)
+        print(f"[Rank {rank}] Set OMP_NUM_THREADS to {cpu_count}")
+    except Exception as e:
+        print(f"[Rank {rank}] Error setting OMP_NUM_THREADS: {e}")
+        os.environ["OMP_NUM_THREADS"] = "1"
+    
     # Enable tf32 for better performance
     torch.backends.cuda.matmul.allow_tf32 = True
+    
+    print(f"[Rank {rank}] Environment setup complete")
+    sys.stdout.flush()
 
     batch_size = config.get("batch_size", 4)
     epochs = config.get("epochs", 2)
@@ -111,7 +140,7 @@ def train_func(config):
             },
         },
         "zero_optimization": {
-            "stage": 3,
+            "stage": 2,
             "offload_optimizer": {
                 "device": "none",
             },
@@ -156,25 +185,36 @@ def train_func(config):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     tokenizer.pad_token = tokenizer.eos_token
 
-    print("Loading model")
+    print(f"[Rank {rank}] Loading model: {model_name}")
+    sys.stdout.flush()
 
     model = GPTJForCausalLM.from_pretrained(model_name, use_cache=False)
     model.resize_token_embeddings(len(tokenizer))
 
-    print("Model loaded")
+    print(f"[Rank {rank}] Model loaded, resized embeddings to {len(tokenizer)}")
+    sys.stdout.flush()
 
     enable_progress_bar()
 
     metric = evaluate.load("accuracy")
 
+    print(f"[Rank {rank}] Getting dataset shards...")
+    sys.stdout.flush()
+    
     train_ds = train.get_dataset_shard("train")
     eval_ds = train.get_dataset_shard("validation")
 
+    print(f"[Rank {rank}] Creating dataset iterables...")
+    sys.stdout.flush()
+    
     train_ds_iterable = train_ds.iter_torch_batches(
         batch_size=batch_size,
         local_shuffle_buffer_size=train.get_context().get_world_size() * batch_size,
     )
     eval_ds_iterable = eval_ds.iter_torch_batches(batch_size=batch_size)
+    
+    print(f"[Rank {rank}] Dataset iterables created")
+    sys.stdout.flush()
 
     def compute_metrics(eval_pred):
         logits, labels = eval_pred
@@ -197,7 +237,7 @@ def train_func(config):
     trainer.train()
 # %%
 storage_path = "/data/zaporter/ray"
-batch_size = 16
+batch_size = 64
 train_ds_size = processed_datasets["train"].count()
 steps_per_epoch = train_ds_size // (batch_size * num_workers)
 from ray.train.torch import TorchTrainer
@@ -213,7 +253,7 @@ trainer = TorchTrainer(
     scaling_config=ScalingConfig(
         num_workers=num_workers,
         use_gpu=use_gpu,
-        resources_per_worker={"GPU": 2, "CPU": cpus_per_worker},
+        resources_per_worker={"GPU": 1, "CPU": cpus_per_worker},
     ),
     datasets=processed_datasets,
     run_config=RunConfig(storage_path=storage_path),
