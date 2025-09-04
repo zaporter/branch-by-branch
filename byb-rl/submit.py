@@ -2,7 +2,7 @@ from ray.job_submission import JobSubmissionClient
 client = JobSubmissionClient("https://anvil.werewolf-banded.ts.net/cluster/zack/test/")
 
 job_id = client.submit_job(
-    entrypoint="uv run deepspeed_torch_basic.py",
+    entrypoint="uv run deepspeed_gpt.py",
     runtime_env={
         "working_dir": ".",
         "env_vars": {

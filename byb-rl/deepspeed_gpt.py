@@ -6,10 +6,10 @@ import ray
 from datasets import load_dataset
 model_name = "EleutherAI/gpt-j-6B"
 use_gpu = True
-num_workers = 1
+num_workers = 4
 cpus_per_worker = 8
 
-ray.init()
+# ray.init()
 
 # %%
 print("Loading tiny_shakespeare dataset")
@@ -113,8 +113,7 @@ def train_func(config):
         "zero_optimization": {
             "stage": 3,
             "offload_optimizer": {
-                "device": "cpu",
-                "pin_memory": True,
+                "device": "none",
             },
             "overlap_comm": True,
             "contiguous_gradients": True,
@@ -214,7 +213,7 @@ trainer = TorchTrainer(
     scaling_config=ScalingConfig(
         num_workers=num_workers,
         use_gpu=use_gpu,
-        resources_per_worker={"GPU": 1, "CPU": cpus_per_worker},
+        resources_per_worker={"GPU": 2, "CPU": cpus_per_worker},
     ),
     datasets=processed_datasets,
     run_config=RunConfig(storage_path=storage_path),
