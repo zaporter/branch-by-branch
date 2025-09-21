@@ -19,7 +19,7 @@ in
 
       viddy # fancy watch
       redis
-      python310Packages.huggingface-hub
+      python313Packages.huggingface-hub
       # backblaze
       rclone
     ];
